@@ -10,8 +10,9 @@ from centrack import sharp_planes, image_8bit_contrast
 
 
 # Create directory variables
-path_root = Path('/Volumes/work/datasets/')
 dataset_name = 'RPE1wt_CEP63+CETN2+PCNT_1'
+
+path_root = Path('/Volumes/work/datasets/')
 path_raw = path_root / dataset_name / 'raw'
 
 path_projections = path_root / dataset_name / 'projected'
@@ -31,11 +32,25 @@ reshaped = np.expand_dims(fov, 0)
 
 assert reshaped.shape == target_dims, f"Not the same dimensions {fov.shape}; target={target_dims}"
 
-markers = dataset_name.split('_')[-2].split('+')
-if 'DAPI' not in markers:
-    markers = ['DAPI'] + markers
-markers_map = list(zip(range(len(markers)), markers))
-print(f"{dataset_name} => {markers_map}")
+
+def markers_from(dataset_name, marker_sep='+'):
+    """
+    Extract the markers' name from the dataset string.
+    The string must follows the structure `<genotype>_marker1+marker2`
+    It append the DAPI at the beginning of the list.
+
+    :param marker_sep:
+    :param dataset_name:
+    :return: a dictionary of markers
+    """
+
+    markers = dataset_name.split('_')[-2].split(marker_sep)
+
+    if 'DAPI' not in markers:
+        markers = ['DAPI'] + markers
+
+    return list(zip(range(len(markers)), markers))
+
 
 channels_n = reshaped.shape[0]
 depth_n = reshaped.shape[1]
