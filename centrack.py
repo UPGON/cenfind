@@ -135,6 +135,8 @@ def main(args):
     distance_min = args['distance']
     threshold_foci = args['threshold_foci']
     nucleus_area_min = args['nucleus_area_min']
+    kernel_size = args['kernel_size']
+    channel_id = args['channel']
 
     # Collect the ome.tiff files
     files = sorted(tuple(file for file in path_projections.iterdir()
@@ -153,20 +155,20 @@ def main(args):
     # nuclei_annotated = cv2.drawContours(nuclei_8bit_bgr, nuclei_contours, -1, (0, 255, 0), cv2.FILLED)
     # cv2.imwrite(str(path_out / f'{dataset_name}_1_nuclei.png'), nuclei_annotated)
 
-    centrioles = data[args['channel'], :, :]
+    centrioles = data[channel_id, :, :]
     centrioles_8bit = image_8bit_contrast(centrioles)
     cv2.imwrite(str(path_out / f'{dataset_name}_2_centrioles.png'),
-                cv2.bitwise_not(centrioles_8bit))
+                centrioles_8bit)
 
-    foci_coords = centrioles_detect(centrioles, threshold_foci, distance_min, kernel_size=3)
+    foci_coords = centrioles_detect(centrioles, threshold_foci, distance_min, kernel_size=kernel_size)
 
     for i, (r, c) in enumerate(foci_coords):
         cv2.drawMarker(centrioles_8bit, (c, r), 255, cv2.MARKER_CROSS, 10)
         cv2.putText(img=centrioles_8bit, text=str(i), org=(c + 10, r + 10),
-                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=.5, thickness=2, color=128)
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2, color=255)
 
-    cv2.imwrite(str(path_out / f'{dataset_name}_2_centrioles_peaks_T{threshold_foci}.png'),
-                cv2.bitwise_not(centrioles_8bit))
+    cv2.imwrite(str(path_out / f'{dataset_name}_map_C{channel_id}_T{threshold_foci}_K{kernel_size}.png'),
+                centrioles_8bit)
 
 
 if __name__ == '__main__':
