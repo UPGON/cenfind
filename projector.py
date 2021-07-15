@@ -1,88 +1,63 @@
+import argparse
 from pathlib import Path
 
+import cv2
 from matplotlib import pyplot as plt
-
 import tifffile as tf
 import numpy as np
-import cv2
 
-from centrack import sharp_planes, image_8bit_contrast
-
-
-# Create directory variables
-dataset_name = 'RPE1wt_CEP63+CETN2+PCNT_1'
-
-path_root = Path('/Volumes/work/datasets/')
-path_raw = path_root / dataset_name / 'raw'
-
-path_projections = path_root / dataset_name / 'projected'
-path_projections.mkdir(exist_ok=True)
-
-# Collect the ome.tiff files
-files = sorted(tuple(file for file in path_raw.iterdir()
-                     if file.name.endswith('.tif')
-                     if not file.name.startswith('.')))
-
-path_master_file = files[0]
-fov = tf.imread(path_master_file)
-
-target_dims = (4, 67, 2048, 2048)
-
-reshaped = np.expand_dims(fov, 0)
-
-assert reshaped.shape == target_dims, f"Not the same dimensions {fov.shape}; target={target_dims}"
+from centrack import sharp_planes
+from utils import fov_read, channels_combine
 
 
-def markers_from(dataset_name, marker_sep='+'):
-    """
-    Extract the markers' name from the dataset string.
-    The string must follows the structure `<genotype>_marker1+marker2`
-    It append the DAPI at the beginning of the list.
+def args_parse():
+    parser = argparse.ArgumentParser(description='Image processing pipeline')
 
-    :param marker_sep:
-    :param dataset_name:
-    :return: a dictionary of markers
-    """
-
-    markers = dataset_name.split('_')[-2].split(marker_sep)
-
-    if 'DAPI' not in markers:
-        markers = ['DAPI'] + markers
-
-    return list(zip(range(len(markers)), markers))
+    parser.add_argument('-d', '--name', required=True,
+                        help='Name of the dataset')
+    parser.add_argument('-p', '--path', required=True,
+                        help='Path to the dataset location')
+    parser.add_argument('-1', '--first', action='store_true',
+                        help='Flag to process only the first field of view')
+    parser.add_argument('-c', '--color', action='store_true',
+                        help='Flag to write RGB images with the centriole markers')
+    return vars(parser.parse_args())
 
 
-channels_n = reshaped.shape[0]
-depth_n = reshaped.shape[1]
-fig, axs = plt.subplots(ncols=len(markers), figsize=(20, 5))
+def main(args):
+    dataset_name = args['name']
 
-for i, name in markers_map:
-    ax = axs[i]
-    profile, projected = sharp_planes(reshaped,
-                                      shape=target_dims,
-                                      reference_channel=i,
-                                      threshold=0)
-    ax.plot(profile, 'k')
-    ax.hlines(profile.mean(), 0, depth_n, colors='k')
-    ax.set_title(f"{name}; {int(profile.mean())}")
+    path_root = Path(args['path'])
+    path_raw = path_root / dataset_name / 'raw'
 
+    path_projections = path_root / dataset_name / 'projected'
+    path_projections.mkdir(exist_ok=True)
 
-channel_id = int(input("Please enter the channel"))
-threshold = int(input("Please enter the threshold"))
+    path_rgb = path_root / dataset_name / 'color'
+    path_rgb.mkdir(exist_ok=True)
 
-for f, file in enumerate(files):
-    print(f"Loading {file.name}")
-    fov = tf.imread(path_raw / file.name)
-    reshaped = np.expand_dims(fov, 0)
-#     reshaped = np.moveaxis(fov, 0, 1)
-#     reshaped = fov.flatten().reshape(target_dims)
-#     profile, projected = sharp_planes(reshaped,
-#                                       shape=target_dims,
-#                                       reference_channel=channel_id,
-#                                       threshold=threshold)
-    projected = reshaped.max(1)
-    tf.imwrite(path_projections / file.name, projected)
+    files = sorted(tuple(file for file in path_raw.iterdir()
+                         if file.name.endswith('.tif')
+                         if not file.name.startswith('.')))
+
+    if args['first']:
+        files = [files[0]]
+
+    for f, file in enumerate(files):
+        print(f"Loading {file.name}")
+        reshaped = fov_read(path_raw / file.name)
+        profile, projected = sharp_planes(reshaped, reference_channel=1, threshold=30)
+
+        if args['color']:
+            projected_rgb = channels_combine(projected)
+
+            tf.imwrite(path_rgb / file.name, projected_rgb)
+
+        tf.imwrite(path_projections / file.name, projected)
+        if (path_projections / file.name).exists():
+            print(f"OK ({file.name})")
 
 
 if __name__ == '__main__':
-    main()
+    args_test = args_parse()
+    main(args_test)
