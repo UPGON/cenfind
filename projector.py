@@ -1,12 +1,16 @@
 import argparse
+import sys
 from pathlib import Path
 
 import cv2
+import traceback
+
+import pdb
 from matplotlib import pyplot as plt
 import tifffile as tf
 import numpy as np
 
-from centrack import sharp_planes
+from utils import sharp_planes
 from utils import fov_read, channels_combine
 
 
@@ -45,17 +49,23 @@ def main(args):
 
     for f, file in enumerate(files):
         print(f"Loading {file.name}")
+
+        # if file.name == 'RPE1wt_CEP63+CETN2+PCNT_1_001_000.ome.tif':
+        #     pdb.set_trace()
+
         reshaped = fov_read(path_raw / file.name)
+
         profile, projected = sharp_planes(reshaped, reference_channel=1, threshold=30)
 
-        if args['color']:
-            projected_rgb = channels_combine(projected)
+        file_name_rgb = file.name.split('.')[0] + '.jpg'
+        # if args['color']:
+        #     projected_rgb = channels_combine(projected)
+        #     pdb.set_trace()
+        #     cv2.imwrite(str(path_rgb / file_name_rgb), projected_rgb)
 
-            tf.imwrite(path_rgb / file.name, projected_rgb)
-
-        tf.imwrite(path_projections / file.name, projected)
-        if (path_projections / file.name).exists():
-            print(f"OK ({file.name})")
+        tf.imwrite(path_projections / file_name_rgb, projected)
+        if (path_projections / file_name_rgb).exists():
+            print(f"OK ({file_name_rgb})")
 
 
 if __name__ == '__main__':

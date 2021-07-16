@@ -1,9 +1,13 @@
+import sys
 from pathlib import Path
 
+import traceback
 from matplotlib import pyplot as plt
 import cv2
 import tifffile as tf
 import numpy as np
+
+import pdb
 
 
 def sharp_planes(array, reference_channel, threshold):
@@ -19,9 +23,14 @@ def sharp_planes(array, reference_channel, threshold):
     ------
     array (3D): the stack containing the max-projection of each channel
     """
-
+    # pdb.set_trace()
     profile = array[reference_channel, :, :, :].std(axis=(1, 2))
-    projected = array[:, profile > threshold, :, :].max(axis=1)
+
+    if any(plane > threshold for plane in profile):
+        projected = array[:, profile > threshold, :, :].max(axis=1)
+    else:
+        projected = array.max(axis=1)
+
     print(profile.shape, projected.shape)
 
     return profile, projected
@@ -85,19 +94,19 @@ def fov_read(path):
 
 
 def channels_combine(stack):
-    projected_rgb = stack[1:, :, :]
-    projected_rgb = np.swapaxes(projected_rgb, 0, -1).flatten().reshape((2048, 2048, 3))
-    return cv2.convertScaleAbs(projected_rgb, alpha=255 / projected_rgb.max())
+    stack = stack[1:, :, :]
+    stack = np.swapaxes(stack, 0, -1).flatten().reshape((2048, 2048, 3))
+    return cv2.convertScaleAbs(stack, alpha=255 / stack.max())
 
 
 if __name__ == '__main__':
-
     dataset_name = 'RPE1wt_CEP152+GTU88+PCNT_1'
 
     path_root = Path('/Volumes/work/datasets')
     path_raw = path_root / dataset_name / 'raw'
 
-    file = Path('/Volumes/work/datasets/RPE1wt_CEP152+GTU88+PCNT_1/raw/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_001.ome.tif')
+    file = Path(
+        '/Volumes/work/datasets/RPE1wt_CEP152+GTU88+PCNT_1/raw/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_001.ome.tif')
 
     reshaped = fov_read(path_raw / file.name)
     profile, projected = sharp_planes(reshaped, 1, 0)
