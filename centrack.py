@@ -48,10 +48,8 @@ def centrioles_detect(image, threshold_foci, distance_min, kernel_size=None):
     :param kernel_size:
     :return:
     """
+    image = cv2.medianBlur(image, 3)
     image[image < threshold_foci] = 0
-
-    if kernel_size:
-        image = cv2.GaussianBlur(image, (kernel_size, kernel_size), 0)
 
     centrioles_float = img_as_float(image.copy())
     foci_coords = peak_local_max(centrioles_float, min_distance=distance_min)
@@ -156,6 +154,7 @@ def main(args):
     # cv2.imwrite(str(path_out / f'{dataset_name}_1_nuclei.png'), nuclei_annotated)
 
     centrioles = data[channel_id, :, :]
+
     centrioles_8bit = image_8bit_contrast(centrioles)
     cv2.imwrite(str(path_out / f'{dataset_name}_2_centrioles.png'),
                 centrioles_8bit)
@@ -166,14 +165,15 @@ def main(args):
     labels = labelbox_annotation_load(path_dataset / 'annotation.json', file.stem + '.png')
 
     for i, (r, c) in enumerate(foci_coords):
-        cv2.drawMarker(centrioles_8bit, (c, r), 255, cv2.MARKER_CROSS, 10)
-        cv2.putText(img=centrioles_8bit, text=str(i), org=(c + 10, r + 10),
-                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2, color=255)
+        cv2.drawMarker(centrioles_8bit, (c, r), 255, cv2.MARKER_CROSS, 10, 2)
 
-    for label in labels:
+    for i, label in enumerate(labels):
         x, y = label_coordinates(label)
         x, y = int(x), int(y)
-        cv2.circle(centrioles_8bit, (x, y), 10, 200, 2)
+        cv2.circle(centrioles_8bit, (x, y), 10, 150, 2)
+        cv2.putText(img=centrioles_8bit, text=str(i), org=(x + 10, y + 10),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2, color=150)
+
 
     cv2.imwrite(str(path_out / f'{dataset_name}_map_C{channel_id}_T{threshold_foci}_K{kernel_size}.png'),
                 centrioles_8bit)
