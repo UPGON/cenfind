@@ -1,8 +1,9 @@
 import cv2
 import tifffile as tf
 from pathlib import Path
+import numpy as np
 
-from utils import channels_combine
+from utils import image_8bit_contrast, channels_combine
 
 
 def main():
@@ -19,12 +20,14 @@ def main():
                          if not file.name.startswith('.')))
 
     for file in files:
-        print(f"Loading {file.name}")
-        projected = tf.imread(file)
-        projected_rgb = channels_combine(projected)
-        file_name_rgb = file.name.split('.')[0] + '.jpg'
+        print(f"Loading {file}")
+
+        # noinspection PyTypeChecker
+        projected = tf.imread(file, key=range(4))
+        file_name_rgb = file.name.split('.')[0] + '.png'
         print(f'Saving {str(path_rgb / file_name_rgb)}')
-        cv2.imwrite(str(path_rgb / file_name_rgb), projected_rgb)
+        final = channels_combine(projected)
+        cv2.imwrite(str(path_rgb / file_name_rgb), final)
 
 
 if __name__ == '__main__':

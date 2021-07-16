@@ -11,7 +11,7 @@ from skimage import img_as_float
 
 import pdb
 
-from utils import image_8bit_contrast
+from utils import image_8bit_contrast, labelbox_annotation_load, label_coordinates
 
 
 def nuclei_extract(nuclei, nucleus_area_min=1000):
@@ -144,7 +144,7 @@ def main(args):
                          if not file.name.startswith('.')))
     file = files[0]
     print('Loading')
-    data = tf.imread(file)
+    data = tf.imread(file, key=range(4))
 
     # Extract the DAPI channel
     # nuclei = data[0, :, :]
@@ -162,10 +162,18 @@ def main(args):
 
     foci_coords = centrioles_detect(centrioles, threshold_foci, distance_min, kernel_size=kernel_size)
 
+    # pdb.set_trace()
+    labels = labelbox_annotation_load(path_dataset / 'annotation.json', file.stem + '.png')
+
     for i, (r, c) in enumerate(foci_coords):
         cv2.drawMarker(centrioles_8bit, (c, r), 255, cv2.MARKER_CROSS, 10)
         cv2.putText(img=centrioles_8bit, text=str(i), org=(c + 10, r + 10),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2, color=255)
+
+    for label in labels:
+        x, y = label_coordinates(label)
+        x, y = int(x), int(y)
+        cv2.circle(centrioles_8bit, (x, y), 10, 200, 2)
 
     cv2.imwrite(str(path_out / f'{dataset_name}_map_C{channel_id}_T{threshold_foci}_K{kernel_size}.png'),
                 centrioles_8bit)

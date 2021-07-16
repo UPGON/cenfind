@@ -1,7 +1,5 @@
-import sys
 from pathlib import Path
-
-import traceback
+import json
 from matplotlib import pyplot as plt
 import cv2
 import tifffile as tf
@@ -93,23 +91,40 @@ def fov_read(path):
     return fov
 
 
-def channels_combine(stack):
-    stack = stack[1:, :, :]
-    stack = np.swapaxes(stack, 0, -1).flatten().reshape((2048, 2048, 3))
+def channels_combine(stack, channels=(1, 2, 3)):
+
+    if stack.shape != (4, 2048, 2048):
+        raise ValueError(f'stack.shape')
+
+    stack = stack[channels, :, :]
+    stack = np.transpose(stack, (1, 2, 0))
+
     return cv2.convertScaleAbs(stack, alpha=255 / stack.max())
 
 
+def labelbox_annotation_load(path_annotation, image_name):
+    with open(path_annotation, 'r') as file:
+        annotation = json.load(file)
+    image_labels = [image for image in annotation if image['External ID'] == image_name]
+
+    return image_labels[0]['Label']['objects']
+
+
+def label_coordinates(label):
+    return label['point'].values()
+
+
 if __name__ == '__main__':
-    dataset_name = 'RPE1wt_CEP152+GTU88+PCNT_1'
 
-    path_root = Path('/Volumes/work/datasets')
-    path_raw = path_root / dataset_name / 'raw'
+    path_root = Path('/Volumes/work/datasets/RPE1wt_CEP63+CETN2+PCNT_1')
+    path_raw = path_root / 'raw'
 
-    file = Path(
-        '/Volumes/work/datasets/RPE1wt_CEP152+GTU88+PCNT_1/raw/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_001.ome.tif')
+    file = path_root / 'projected/RPE1wt_CEP63+CETN2+PCNT_1_000_000.png'
+    labels = labelbox_annotation_load(path_root / 'annotation.json', file.name)
+    print(0)
 
-    reshaped = fov_read(path_raw / file.name)
-    profile, projected = sharp_planes(reshaped, 1, 0)
-    projected_rgb = channels_combine(projected)
-    tf.imwrite('/Users/leoburgy/Desktop/test.png', projected[0, :, :])
+    # reshaped = fov_read(path_raw / file.name)
+    # profile, projected = sharp_planes(reshaped, 1, 0)
+    # projected_rgb = channels_combine(projected)
+    # tf.imwrite('/Users/leoburgy/Desktop/test.png', projected[0, :, :])
     print(0)
