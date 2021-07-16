@@ -119,6 +119,8 @@ def args_parse():
                         help='Minimal distance between two foci')
     parser.add_argument('--kernel-size', type=int,
                         help='Kernel size to smooth the centriole channel')
+    parser.add_argument('--multi-channel', action='store_true',
+                        help='Flag to max project all centriole channels')
 
     return vars(parser.parse_args())
 
@@ -153,7 +155,10 @@ def main(args):
     # nuclei_annotated = cv2.drawContours(nuclei_8bit_bgr, nuclei_contours, -1, (0, 255, 0), cv2.FILLED)
     # cv2.imwrite(str(path_out / f'{dataset_name}_1_nuclei.png'), nuclei_annotated)
 
-    centrioles = data[channel_id, :, :]
+    if args['multi_channel']:
+        centrioles = data[1:, :, :].max(0)
+    else:
+        centrioles = data[channel_id, :, :]
 
     centrioles_8bit = image_8bit_contrast(centrioles)
     cv2.imwrite(str(path_out / f'{dataset_name}_2_centrioles.png'),
@@ -173,7 +178,6 @@ def main(args):
         cv2.circle(centrioles_8bit, (x, y), 10, 150, 2)
         cv2.putText(img=centrioles_8bit, text=str(i), org=(x + 10, y + 10),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2, color=150)
-
 
     cv2.imwrite(str(path_out / f'{dataset_name}_map_C{channel_id}_T{threshold_foci}_K{kernel_size}.png'),
                 centrioles_8bit)
