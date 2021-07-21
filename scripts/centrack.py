@@ -1,18 +1,12 @@
-import operator
 from pathlib import Path
 import argparse
 
 import cv2
 import tifffile as tf
-import numpy as np
-import matplotlib.pyplot as plt
-from skimage.feature import peak_local_max
-from skimage import img_as_float
-
-import pdb
 
 from utils import image_8bit_contrast, labelbox_annotation_load, label_coordinates
-from centrioles import centrioles_detect, centriole_assign
+from centrioles import centrioles_detect
+
 
 def nuclei_extract(nuclei, nucleus_area_min=1000):
     """
