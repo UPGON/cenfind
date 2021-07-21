@@ -157,27 +157,28 @@ def main():
     # data = file_read(path_fov)
     projected = tf.imread(path_projected, key=range(4))
 
+    nuclei = channel_extract(projected, 0)
+
     centrioles = channel_extract(projected, 1)
     centrioles = cv2.GaussianBlur(centrioles, (3, 3), sigmaX=0)
     centrioles = cv2.medianBlur(centrioles, 3)
-    nuclei = channel_extract(projected, 0)
 
     ret1, thresh = cv2.threshold(centrioles, 0, 65536, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     cv2.imwrite('out/centriole_thresh.png', thresh)
     foci_coords = centrioles_detect(centrioles, threshold_foci=500, distance_min=2)
-    # foci_mask = coords2mask(foci_coords, centrioles.shape)
+
     image = np.zeros((2048, 2048, 3), np.uint8)
     image[:, :, 0] = image_8bit_contrast(nuclei)
     image[:, :, 1] = image_8bit_contrast(centrioles)
 
     for x, y in foci_coords:
         cv2.circle(image, (y, x), 20, (255, 255, 255), 1)
-        # cv2.drawMarker(image, (y, x), (255, 255, 255), markerType=cv2.MARKER_CROSS, markerSize=10, thickness=2,
-        #                line_type=1)
+        # cv2.drawMarker(image, (y, x), (255, 255, 255), markerType=cv2.MARKER_CROSS, markerSize=10, thickness=2, line_type=1)
 
     cv2.imwrite('out/artefact.png', image)
 
     cells_contours = cell_segment(nuclei)
+    # foci_mask = coords2mask(foci_coords, centrioles.shape)
     # centrosomes_contours = centrosomes_segment(foci_coords)
 
     results = []
