@@ -39,16 +39,15 @@ def nuclei_extract(nuclei, nucleus_area_min=1000):
     return nuclei_thresh, nuclei_contours
 
 
-def centrioles_detect(image, threshold_foci, distance_min, kernel_size=None):
+def centrioles_detect(image, threshold_foci, distance_min):
     """
     Detect the foci above a defined threshold and a minimal inter-peak distance.
     :param image:
     :param threshold_foci:
     :param distance_min:
-    :param kernel_size:
     :return:
     """
-    image = cv2.medianBlur(image, 3)
+
     image[image < threshold_foci] = 0
 
     centrioles_float = img_as_float(image.copy())
@@ -111,7 +110,7 @@ def args_parse():
                         help='the path to the dataset folder')
     parser.add_argument('--nucleus-area-min', type=int,
                         help='the maximal area in pixel for a nucleus')
-    parser.add_argument('--channel', type=int,
+    parser.add_argument('--channels', type=int, nargs='*',
                         help='Set the channel reference to use [0-4]')
     parser.add_argument('--threshold-foci', type=int,
                         help='Threshold for focus brightness (16bit depth)')
@@ -119,8 +118,6 @@ def args_parse():
                         help='Minimal distance between two foci')
     parser.add_argument('--kernel-size', type=int,
                         help='Kernel size to smooth the centriole channel')
-    parser.add_argument('--multi-channel', action='store_true',
-                        help='Flag to max project all centriole channels')
 
     return vars(parser.parse_args())
 
@@ -136,7 +133,9 @@ def main(args):
     threshold_foci = args['threshold_foci']
     nucleus_area_min = args['nucleus_area_min']
     kernel_size = args['kernel_size']
-    channel_id = args['channel']
+    channels = args['channels']
+
+    channels_string = "".join([str(i) for i in channels])
 
     # Collect the ome.tiff files
     files = sorted(tuple(file for file in path_projections.iterdir()
@@ -155,13 +154,12 @@ def main(args):
     # nuclei_annotated = cv2.drawContours(nuclei_8bit_bgr, nuclei_contours, -1, (0, 255, 0), cv2.FILLED)
     # cv2.imwrite(str(path_out / f'{dataset_name}_1_nuclei.png'), nuclei_annotated)
 
-    if args['multi_channel']:
-        centrioles = data[1:, :, :].max(0)
-    else:
-        centrioles = data[channel_id, :, :]
+    centrioles = data[channels, :, :].max(0)
+
+    centrioles = cv2.medianBlur(centrioles, 3)
 
     centrioles_8bit = image_8bit_contrast(centrioles)
-    cv2.imwrite(str(path_out / f'{dataset_name}_2_centrioles.png'),
+    cv2.imwrite(str(path_out / f'{dataset_name}_C{channels_string}.png'),
                 centrioles_8bit)
 
     foci_coords = centrioles_detect(centrioles, threshold_foci, distance_min, kernel_size=kernel_size)
@@ -178,8 +176,8 @@ def main(args):
         cv2.circle(centrioles_8bit, (x, y), 10, 150, 2)
         cv2.putText(img=centrioles_8bit, text=str(i), org=(x + 10, y + 10),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2, color=150)
-
-    cv2.imwrite(str(path_out / f'{dataset_name}_map_C{channel_id}_T{threshold_foci}_K{kernel_size}.png'),
+    # pdb.set_trace()
+    cv2.imwrite(str(path_out / f'{dataset_name}_map_C{channels_string}_T{threshold_foci}_K{kernel_size}.png'),
                 centrioles_8bit)
 
 

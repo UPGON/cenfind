@@ -8,7 +8,7 @@ def main():
     path_home = Path('/Volumes/work/datasets')
     dataset_name = 'RPE1wt_CEP63+CETN2+PCNT_1'
 
-    channels = 'DAPI GFP RFP Cy5 '.split()
+    channels = 'DAPI GFP RFP Cy5'.split()
 
     for i in range(5):
         for j in range(5):
