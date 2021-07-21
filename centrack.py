@@ -62,17 +62,14 @@ def channel_extract(stack, channel_id):
     return stack[channel_id, :, :]
 
 
-def centrioles_detect(image, threshold_foci, distance_min):
+def centrioles_detect(image, mask, distance_min):
     """
     Detect the foci above a defined threshold and a minimal inter-peak distance.
     :param image:
-    :param threshold_foci:
     :param distance_min:
     :return:
     """
-
-    image[image < threshold_foci] = 0
-
+    image = cv2.bitwise_and(image, mask)
     centrioles_float = img_as_float(image.copy())
     foci_coords = peak_local_max(centrioles_float, min_distance=distance_min)
 
@@ -149,31 +146,40 @@ def cnt_centre(contour):
 def main():
     path_root = Path('/Volumes/work/datasets')
     dataset_name = 'RPE1wt_CEP63+CETN2+PCNT_1'
-    fov_name = f'{dataset_name}_001_000.tif'
+    fov_name = f'{dataset_name}_000_000.tif'
 
     path_fov = path_root / dataset_name / 'raw' / fov_name
     path_projected = path_root / dataset_name / 'projected' / fov_name
 
-    # data = file_read(path_fov)
     projected = tf.imread(path_projected, key=range(4))
-
     nuclei = channel_extract(projected, 0)
 
-    centrioles = channel_extract(projected, 1)
+    centrioles_raw = channel_extract(projected, 1)
+    centrioles = cv2.medianBlur(centrioles_raw, 3)
     centrioles = cv2.GaussianBlur(centrioles, (3, 3), sigmaX=0)
-    centrioles = cv2.medianBlur(centrioles, 3)
 
-    ret1, thresh = cv2.threshold(centrioles, 0, 65536, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    cv2.imwrite('out/centriole_thresh.png', thresh)
-    foci_coords = centrioles_detect(centrioles, threshold_foci=500, distance_min=2)
+
+    centrioles = image_8bit_contrast(centrioles)
+    cv2.imwrite('out/centrioles.png', centrioles)
+    ret1, thresh = cv2.threshold(centrioles, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    cv2.imwrite('out/masked.png', thresh)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    centrosomes = cv2.morphologyEx(thresh, op=cv2.MORPH_DILATE, kernel=kernel, iterations=5)
+    centrosomes_contours, hierarchy = cv2.findContours(centrosomes, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.imwrite('out/centrosomes.png', centrosomes)
+
+    masked = cv2.bitwise_and(centrioles_raw, centrioles_raw, mask=thresh)
+
+    centrioles_float = img_as_float(masked.copy())
+    foci_coords = peak_local_max(centrioles_float, min_distance=2)
 
     image = np.zeros((2048, 2048, 3), np.uint8)
     image[:, :, 0] = image_8bit_contrast(nuclei)
     image[:, :, 1] = image_8bit_contrast(centrioles)
 
     for x, y in foci_coords:
-        cv2.circle(image, (y, x), 20, (255, 255, 255), 1)
-        # cv2.drawMarker(image, (y, x), (255, 255, 255), markerType=cv2.MARKER_CROSS, markerSize=10, thickness=2, line_type=1)
+        cv2.circle(image, (y, x), 10, (255, 255, 255), 1)
 
     cv2.imwrite('out/artefact.png', image)
 
