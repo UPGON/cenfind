@@ -230,7 +230,7 @@ def main():
                     fontScale=.5, thickness=1, color=(255, 255, 255))
 
     # pdb.set_trace()
-    labels = labelbox_annotation_load(path_root / dataset_name / 'annotation.json', fov_name.split(".")[0] + '.png')
+    labels = labelbox_annotation_load('data/annotation.json', 'RPE1wt_CEP63+CETN2+PCNT_1_C1_000_000.png')
 
     for i, label in enumerate(labels):
         x, y = label_coordinates(label)

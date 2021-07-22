@@ -1,0 +1,1418 @@
+[
+  {
+    "ID": "ckrejbzmq1l6t0y9297l3buu7",
+    "DataRow ID": "ckrej3tia371f0yti9quqhfug",
+    "Labeled Data": "https://storage.labelbox.com/ckomtlj8gbga90y5q6i7vcnd0%2F52d6bc5d-8b1e-d80d-e885-5ef333d0a4ce-RPE1wt_CEP63%2BCETN2%2BPCNT_1_C1_000_000.png?Expires=1628145587218&KeyName=labelbox-assets-key-3&Signature=UrGFc9lspycEWqsbHR_PCogf6jE",
+    "Label": {
+      "objects": [
+        {
+          "featureId": "ckrejd9tq00013h69hdwgyf39",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 172.785,
+            "y": 291.917
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejd9tq00013h69hdwgyf39?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejdd3200033h69poekk0y4",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 177.952,
+            "y": 296.584
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejdd3200033h69poekk0y4?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejdl3y00053h69lq9yht2u",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 724.285,
+            "y": 55.917
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejdl3y00053h69lq9yht2u?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejdnrr00073h69semut3e7",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 721.285,
+            "y": 43.584
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejdnrr00073h69semut3e7?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejdq5900093h69lrt3yfhp",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 931.952,
+            "y": 162.917
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejdq5900093h69lrt3yfhp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejdsvy000b3h69hnruuo4v",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1300.285,
+            "y": 66.917
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejdsvy000b3h69hnruuo4v?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejdtqj000d3h690hjrsyna",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1294.285,
+            "y": 56.251
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejdtqj000d3h690hjrsyna?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejdwwi000f3h69rbidyxua",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1982.952,
+            "y": 317.251
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejdwwi000f3h69rbidyxua?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejdxss000h3h697ssy3nrz",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1976.202,
+            "y": 325.501
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejdxss000h3h697ssy3nrz?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejdzqf000j3h69a3gnnbca",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1810.952,
+            "y": 416.751
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejdzqf000j3h69a3gnnbca?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckreje17l000l3h69q33ak4tm",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1808.452,
+            "y": 410.751
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckreje17l000l3h69q33ak4tm?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckreje40j000n3h69awvh1lw4",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1439.202,
+            "y": 431.501
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckreje40j000n3h69awvh1lw4?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckreje5kp000p3h69gavquyvh",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1435.952,
+            "y": 437.001
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckreje5kp000p3h69gavquyvh?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckreje8d2000r3h695j19saz3",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1061.202,
+            "y": 434.001
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckreje8d2000r3h695j19saz3?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckreje9iz000t3h69e2jegn5t",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1060.702,
+            "y": 439.001
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckreje9iz000t3h69e2jegn5t?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejehq2000x3h69jh4ffiwb",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 626.535,
+            "y": 499.917
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejehq2000x3h69jh4ffiwb?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejejrl000z3h69w8eh7nc8",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 632.202,
+            "y": 499.584
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejejrl000z3h69w8eh7nc8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejeofy00113h69cnu7l1wb",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 267.369,
+            "y": 943.084
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejeofy00113h69cnu7l1wb?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejepiu00133h69e8kqz4as",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 267.702,
+            "y": 950.417
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejepiu00133h69e8kqz4as?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejerzc00153h69h1fqc4d6",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 546.702,
+            "y": 992.751
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejerzc00153h69h1fqc4d6?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejeszm00173h69v1jbznfu",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 547.702,
+            "y": 998.751
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejeszm00173h69v1jbznfu?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejexmq00193h6961m89yxv",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1031.619,
+            "y": 849.834
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejexmq00193h6961m89yxv?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejez6p001b3h6921nn3t7a",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1071.869,
+            "y": 920.334
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejez6p001b3h6921nn3t7a?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejf3e0001d3h69qfobk42u",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1339.869,
+            "y": 1031.584
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejf3e0001d3h69qfobk42u?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejf53y001f3h695xa32dml",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1376.535,
+            "y": 926.584
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejf53y001f3h695xa32dml?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejf8fm001h3h69oceks4lc",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1654.535,
+            "y": 923.584
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejf8fm001h3h69oceks4lc?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejfciu001j3h691ygm5uf6",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1770.035,
+            "y": 819.084
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejfciu001j3h691ygm5uf6?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejfgvx001l3h69hxsqq7a6",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1955.702,
+            "y": 1298.084
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejfgvx001l3h69hxsqq7a6?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejfiec001n3h69lai9dniz",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1950.452,
+            "y": 1300.084
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejfiec001n3h69lai9dniz?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejfoke001p3h694t6c5u9w",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1554.452,
+            "y": 1273.334
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejfoke001p3h694t6c5u9w?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejfs74001r3h69vs1i04mj",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1647.202,
+            "y": 1550.084
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejfs74001r3h69vs1i04mj?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejftwf001t3h69nnopkgk5",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1646.535,
+            "y": 1544.584
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejftwf001t3h69nnopkgk5?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejfxgq001v3h69j6ooeisn",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1392.369,
+            "y": 1483.709
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejfxgq001v3h69j6ooeisn?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejfyna001x3h69uyy96ts5",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1387.494,
+            "y": 1482.709
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejfyna001x3h69uyy96ts5?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejg2d8001z3h6944l68yat",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1082.035,
+            "y": 1597.959
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejg2d8001z3h6944l68yat?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejg6lp00213h698w64p80o",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1086.369,
+            "y": 1852.626
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejg6lp00213h698w64p80o?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejg8en00233h69b2xebtyi",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1083.619,
+            "y": 1847.876
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejg8en00233h69b2xebtyi?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejgd0400253h69hsgtcfkf",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 825.369,
+            "y": 1795.876
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejgd0400253h69hsgtcfkf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejgfz900273h69qh2t7hzs",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 848.202,
+            "y": 1954.334
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejgfz900273h69qh2t7hzs?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejgi0j00293h69tchih7xf",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 850.702,
+            "y": 1950.334
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejgi0j00293h69tchih7xf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejgm2h002b3h69efhrszls",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1240.494,
+            "y": 2011.501
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejgm2h002b3h69efhrszls?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejgp0q002d3h69k1syr7i1",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1511.077,
+            "y": 1883.334
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejgp0q002d3h69k1syr7i1?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejgrdb002g3h69xg86jl1o",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1504.577,
+            "y": 1883.459
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejgrdb002g3h69xg86jl1o?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejgva0002i3h69rixoi9ig",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1893.452,
+            "y": 1791.542
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejgva0002i3h69rixoi9ig?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejgxcf002k3h69aornu3ra",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1892.035,
+            "y": 1786.376
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejgxcf002k3h69aornu3ra?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejh3zf002m3h692p5pkh1l",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 395.452,
+            "y": 1639.876
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejh3zf002m3h692p5pkh1l?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejh5f9002o3h69wpgnljti",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 390.119,
+            "y": 1639.876
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejh5f9002o3h69wpgnljti?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejh9rp002q3h6978099h9s",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 128.577,
+            "y": 1875.959
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejh9rp002q3h6978099h9s?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejhb12002s3h69ap8a1y13",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 132.16,
+            "y": 1893.042
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejhb12002s3h69ap8a1y13?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejhhsv002u3h690qjrh91w",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 612.494,
+            "y": 1430.709
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejhhsv002u3h690qjrh91w?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejhixv002w3h69epyjlv8x",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 616.869,
+            "y": 1431.084
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejhixv002w3h69epyjlv8x?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejhmk2002y3h69gpetjt6b",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1078.452,
+            "y": 1378.542
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejhmk2002y3h69gpetjt6b?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejhppj00303h69rhbw1hf8",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1084.702,
+            "y": 1380.709
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejhppj00303h69rhbw1hf8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        }
+      ],
+      "classifications": []
+    },
+    "Created By": "leo.burgy@epfl.ch",
+    "Project Name": "RPE1wt_CEP63+CETN2+PCNT_1 (single channels)",
+    "Created At": "2021-07-22T06:30:36.000Z",
+    "Updated At": "2021-07-22T06:34:32.411Z",
+    "Seconds to Label": 235.754,
+    "External ID": "RPE1wt_CEP63+CETN2+PCNT_1_C1_000_000.png",
+    "Agreement": -1,
+    "Benchmark Agreement": -1,
+    "Benchmark ID": null,
+    "Dataset Name": "RPE1wt_CEP63+CETN2+PCNT_1 (0:0; single channels)",
+    "Reviews": [],
+    "View Label": "https://editor.labelbox.com?project=ckrejapod2xm90y7p9so7fqzr&label=ckrejbzmq1l6t0y9297l3buu7",
+    "Has Open Issues": 0,
+    "Skipped": false
+  },
+  {
+    "ID": "ckrejc0u45ff60yao5bkncuvk",
+    "DataRow ID": "ckrej3tia371k0yti255q80f4",
+    "Labeled Data": "https://storage.labelbox.com/ckomtlj8gbga90y5q6i7vcnd0%2F83ca8d5f-318b-8d42-1710-0e6dca5ac71a-RPE1wt_CEP63%2BCETN2%2BPCNT_1_C2_000_000.png?Expires=1628145587219&KeyName=labelbox-assets-key-3&Signature=RC5u6TSVk53Yb7kgKlIDyIigyHc",
+    "Label": {
+      "objects": [
+        {
+          "featureId": "ckrejidib00323h694gp2hbzb",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 174.826,
+            "y": 292.994
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejidib00323h694gp2hbzb?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejieod00343h69406q0esh",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 177.076,
+            "y": 298.494
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejieod00343h69406q0esh?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejihv700363h69uckmw3wi",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 722.409,
+            "y": 57.369
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejihv700363h69uckmw3wi?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejijmr00383h69spisel4f",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 718.159,
+            "y": 43.494
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejijmr00383h69spisel4f?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejimsh003a3h699jo28ha9",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 938.076,
+            "y": 164.786
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejimsh003a3h699jo28ha9?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejinf6003c3h69idm1kha4",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 931.576,
+            "y": 164.619
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejinf6003c3h69idm1kha4?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejir04003e3h694naby4wi",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1293.076,
+            "y": 58.119
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejir04003e3h694naby4wi?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejis5t003g3h69gzti6if7",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1299.076,
+            "y": 69.453
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejis5t003g3h69gzti6if7?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejiwgz003i3h69txe5gr15",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1981.826,
+            "y": 318.036
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejiwgz003i3h69txe5gr15?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejixb6003k3h69o17w6hmb",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1975.701,
+            "y": 326.411
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejixb6003k3h69o17w6hmb?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejj0qn003m3h6955e1bfse",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1808.284,
+            "y": 411.828
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejj0qn003m3h6955e1bfse?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejj1x3003o3h69duhvqckg",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1804.784,
+            "y": 414.328
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejj1x3003o3h69duhvqckg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejj3wd003q3h69lgxq3q71",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1810.284,
+            "y": 419.161
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejj3wd003q3h69lgxq3q71?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejj7vm003s3h6949k9h6l7",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1437.951,
+            "y": 431.494
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejj7vm003s3h6949k9h6l7?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejj931003u3h69om47cvns",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1435.618,
+            "y": 439.828
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejj931003u3h69om47cvns?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjc8i003w3h699rqjeftc",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1063.618,
+            "y": 435.494
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjc8i003w3h699rqjeftc?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjea7003y3h69pemgymn9",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1058.618,
+            "y": 440.494
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjea7003y3h69pemgymn9?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjhu900403h69fcx82wei",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 630.618,
+            "y": 497.078
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjhu900403h69fcx82wei?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjj7200423h69uj6ln0wj",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 626.618,
+            "y": 500.411
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjj7200423h69uj6ln0wj?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjobc00443h69t753kxj5",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 268.034,
+            "y": 942.578
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjobc00443h69t753kxj5?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjq1x00463h69x76z6twz",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 263.409,
+            "y": 940.328
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjq1x00463h69x76z6twz?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjr1f00483h69vv05pv91",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 269.284,
+            "y": 951.078
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjr1f00483h69vv05pv91?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjsm2004a3h69ptxbl1aq",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 263.784,
+            "y": 951.703
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjsm2004a3h69ptxbl1aq?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjwsx004c3h69h0uqhapr",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 546.659,
+            "y": 990.578
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjwsx004c3h69h0uqhapr?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejjy5z004e3h69zbp5fjxq",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 548.659,
+            "y": 1000.078
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejjy5z004e3h69zbp5fjxq?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejk2mm004g3h69d0sas5m1",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1033.368,
+            "y": 849.786
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejk2mm004g3h69d0sas5m1?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejk3tl004i3h69fcmhu5zk",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1027.701,
+            "y": 855.453
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejk3tl004i3h69fcmhu5zk?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejk5a0004k3h69inz3r3jk",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1070.368,
+            "y": 920.286
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejk5a0004k3h69inz3r3jk?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejka29004m3h69rtqy86xc",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1768.618,
+            "y": 819.953
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejka29004m3h69rtqy86xc?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejkbwl004o3h695xgftvz9",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1772.618,
+            "y": 815.703
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejkbwl004o3h695xgftvz9?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejkfuv004q3h69p35d5yqp",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1654.618,
+            "y": 925.703
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejkfuv004q3h69p35d5yqp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejkkeo004s3h690c0epl1v",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1955.534,
+            "y": 1295.953
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejkkeo004s3h690c0epl1v?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejklb8004u3h69xgi59v2h",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1948.701,
+            "y": 1301.453
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejklb8004u3h69xgi59v2h?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejkpfn004w3h69v2zr31b6",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1648.201,
+            "y": 1551.953
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejkpfn004w3h69v2zr31b6?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejkqm1004y3h696ju42x7y",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1643.451,
+            "y": 1544.953
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejkqm1004y3h696ju42x7y?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejkvyo00503h69tsp99xdd",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1629.784,
+            "y": 1522.036
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejkvyo00503h69tsp99xdd?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejkzja00523h696jc1mg68",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1553.243,
+            "y": 1275.036
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejkzja00523h696jc1mg68?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejl0lj00543h69z2gg8agn",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1553.243,
+            "y": 1270.286
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejl0lj00543h69z2gg8agn?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejl4k500563h694ev335fg",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1393.076,
+            "y": 1484.536
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejl4k500563h694ev335fg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejl5lt00583h69bgwzz74c",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1387.451,
+            "y": 1480.161
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejl5lt00583h69bgwzz74c?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejla34005a3h69uok1qkel",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1083.451,
+            "y": 1597.703
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejla34005a3h69uok1qkel?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejlb6d005c3h6946o4garm",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1077.534,
+            "y": 1594.119
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejlb6d005c3h6946o4garm?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejlekh005e3h69kh6hl4kn",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1085.618,
+            "y": 1380.869
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejlekh005e3h69kh6hl4kn?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejlg0t005g3h69j3rdvxa2",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1079.784,
+            "y": 1378.036
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejlg0t005g3h69j3rdvxa2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejll2i005j3h69hmrjiro5",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 614.784,
+            "y": 1431.369
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejll2i005j3h69hmrjiro5?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejlqbh005l3h69ehpmi00j",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 395.534,
+            "y": 1638.994
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejlqbh005l3h69ehpmi00j?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejlrkz005n3h69s7icviga",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 388.784,
+            "y": 1640.494
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejlrkz005n3h69s7icviga?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejlwrp005p3h696f4h3r6r",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 129.368,
+            "y": 1877.828
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejlwrp005p3h696f4h3r6r?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejly2s005r3h69ieyszwsw",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 133.534,
+            "y": 1894.828
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejly2s005r3h69ieyszwsw?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejm2f7005t3h69men55cmh",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 848.868,
+            "y": 1948.328
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejm2f7005t3h69men55cmh?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejm4h1005v3h690gprfa2v",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 847.701,
+            "y": 1956.161
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejm4h1005v3h690gprfa2v?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejm763005x3h69kwczn6o5",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 825.534,
+            "y": 1796.661
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejm763005x3h69kwczn6o5?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejmb79005z3h69hblejqsz",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1085.034,
+            "y": 1852.161
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejmb79005z3h69hblejqsz?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejmcbv00613h69eahlan5f",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1081.368,
+            "y": 1847.328
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejmcbv00613h69eahlan5f?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejmfir00633h69yo75yp3b",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1239.868,
+            "y": 2012.161
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejmfir00633h69yo75yp3b?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejmm2600653h698q08lf0q",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1510.41,
+            "y": 1880.976
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejmm2600653h698q08lf0q?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejmmwi00673h694bnls8eg",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1505.035,
+            "y": 1884.226
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejmmwi00673h694bnls8eg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejmrcb00693h69s0yxzqip",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1890.327,
+            "y": 1785.101
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejmrcb00693h69s0yxzqip?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejmsnl006b3h69wqel7o9k",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1890.577,
+            "y": 1792.351
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejmsnl006b3h69wqel7o9k?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejn00q006d3h69lwg099ti",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1377.327,
+            "y": 925.892
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejn00q006d3h69lwg099ti?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        },
+        {
+          "featureId": "ckrejn1tt006f3h69immkrx5v",
+          "schemaId": "ckrejb6gx5dce0y83a6fcbl1d",
+          "color": "#1CE6FF",
+          "title": "centriole",
+          "value": "centriole",
+          "point": {
+            "x": 1340.577,
+            "y": 1030.142
+          },
+          "instanceURI": "https://api.labelbox.com/masks/feature/ckrejn1tt006f3h69immkrx5v?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJja29tdGxqOHJiZ2FhMHk1cWhqb2hhOHM2Iiwib3JnYW5pemF0aW9uSWQiOiJja29tdGxqOGdiZ2E5MHk1cTZpN3ZjbmQwIiwiaWF0IjoxNjI2OTM1OTg3LCJleHAiOjE2Mjk1Mjc5ODd9.q82e5kVrz_zvUul_83ZYCKTKRFKCJT5lN7mCbwbQcjg"
+        }
+      ],
+      "classifications": []
+    },
+    "Created By": "leo.burgy@epfl.ch",
+    "Project Name": "RPE1wt_CEP63+CETN2+PCNT_1 (single channels)",
+    "Created At": "2021-07-22T06:30:44.000Z",
+    "Updated At": "2021-07-22T06:38:48.324Z",
+    "Seconds to Label": 236.238,
+    "External ID": "RPE1wt_CEP63+CETN2+PCNT_1_C2_000_000.png",
+    "Agreement": -1,
+    "Benchmark Agreement": -1,
+    "Benchmark ID": null,
+    "Dataset Name": "RPE1wt_CEP63+CETN2+PCNT_1 (0:0; single channels)",
+    "Reviews": [],
+    "View Label": "https://editor.labelbox.com?project=ckrejapod2xm90y7p9so7fqzr&label=ckrejc0u45ff60yao5bkncuvk",
+    "Has Open Issues": 0,
+    "Skipped": false
+  }
+]
