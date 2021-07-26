@@ -8,7 +8,7 @@ dataset_name = 'RPE1p53_Cnone_CEP63+CETN2+PCNT_1'
 path_raw = path_root / dataset_name / 'raw'
 
 path_main = path_raw / 'RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_000.ome.tif'
-path_companion = path_raw / 'RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_000.ome.tif'
+path_companion = path_raw / 'RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_001.ome.tif'
 
 
 def test_markers_from():
@@ -21,8 +21,13 @@ def test_markers_from():
 
     assert theoretical == actual
 
-# def test_file_read():
-#     data_main = file_read(path_main)
-#     data_companion = file_read(path_companion)
-#
-#     assert data_main.shape == data_companion.shape, 'Shape not identical'
+
+def test_file_read():
+    shape = (4, 67, 2048, 2048)
+    data_main = file_read(path_main)
+    data_companion = file_read(path_companion)
+
+    assert data_main.shape == shape
+    assert data_companion.shape == shape
+
+    assert data_main.shape == data_companion.shape, 'Shape not identical'

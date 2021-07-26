@@ -92,7 +92,7 @@ def coords2mask(foci_coords, shape):
 #     return A, B
 
 
-def nuclei_segment(nuclei, dev_flag=False, otsu=False, threshold=None):
+def nuclei_segment(nuclei, dev_flag=False, threshold=None):
     """
     Extract the nuclei into contours.
     :param nuclei:
@@ -168,8 +168,8 @@ def foci_detect(centrioles_raw, dev_flag=False):
     :return: list of foci coordinates
     """
 
-    centrioles = cv2.medianBlur(centrioles_raw, 3)
-    centrioles = cv2.GaussianBlur(centrioles, (3, 3), sigmaX=0)
+    centrioles = cv2.medianBlur(centrioles_raw, 5)
+    # centrioles = cv2.GaussianBlur(centrioles, (3, 3), sigmaX=0)
     centrioles = image_8bit_contrast(centrioles)
     ret1, centrioles_thresh = cv2.threshold(centrioles, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
@@ -195,10 +195,10 @@ def centrosomes_box(centrioles_threshold, dev_flag=False):
 
 
 def main():
-    dev_flag = False
+    dev_flag = True
     path_root = Path('/Volumes/work/datasets')
-    dataset_name = 'RPE1wt_CEP63+CETN2+PCNT_1'
-    fov_name = f'{dataset_name}_000_000.tif'
+    dataset_name = 'RPE1wt_CEP152+GTU88+PCNT_1'
+    fov_name = f'{dataset_name}_MMStack_1-Pos_000_000.ome.tif'
 
     path_fov = path_root / dataset_name / 'raw' / fov_name
     path_projected = path_root / dataset_name / 'projected' / fov_name
@@ -210,26 +210,26 @@ def main():
     nuclei_raw = channel_extract(projected, 0)
     nuclei_8bit = image_8bit_contrast(nuclei_raw)
 
-    nuclei_contours = nuclei_segment(nuclei_8bit)
+    nuclei_contours = nuclei_segment(nuclei_8bit, dev_flag, threshold=150)
 
     image = cv2.cvtColor(nuclei_8bit, cv2.COLOR_GRAY2BGR)
     for n_id, cnt in enumerate(nuclei_contours):
-        cv2.drawContours(image, [cnt], 0, (255, 0, 0))
+        cv2.drawContours(image, [cnt], 0, (255, 0, 0), thickness=7)
         cv2.putText(image, f'N{n_id}', org=cnt_centre(cnt), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale=1, thickness=2, color=(255, 255, 255))
 
     # Detect foci
     centrioles_raw = channel_extract(projected, 1)
     centrioles_8bit = image_8bit_contrast(centrioles_raw)
-    centrioles_threshold = foci_detect(centrioles_raw)
+    centrioles_threshold = foci_detect(centrioles_raw, dev_flag)
     masked = cv2.bitwise_and(centrioles_raw, centrioles_raw, mask=centrioles_threshold)
     centrioles_float = img_as_float(masked)
-    foci_coords = peak_local_max(centrioles_float, min_distance=2)
+    foci_coords = peak_local_max(centrioles_float, min_distance=5)
 
     image[:, :, 1] = centrioles_8bit
 
     for f_id, (x, y) in enumerate(foci_coords):
-        cv2.drawMarker(image, (y, x), (255, 255, 255), markerType=cv2.MARKER_CROSS, markerSize=10)
+        cv2.drawMarker(image, (y, x), (255, 255, 255), markerType=cv2.MARKER_CROSS, markerSize=5)
 
     # Segment centrosomes
     centrosomes_bboxes = centrosomes_box(centrioles_threshold)
@@ -241,11 +241,12 @@ def main():
                     fontScale=.5, thickness=1, color=(255, 255, 255))
 
     # Add the ground truth if available
-    labels = labelbox_annotation_load('data/annotation.json', 'RPE1wt_CEP63+CETN2+PCNT_1_C1_000_000.png')
-    for i, label in enumerate(labels):
-        x, y = label_coordinates(label)
-        x, y = int(x), int(y)
-        cv2.circle(image, (x, y), 10, (200, 200, 200), 2)
+    # labels = labelbox_annotation_load('data/annotation.json', 'RPE1wt_CEP63+CETN2+PCNT_1_C1_000_000.png')
+    # for i, label in enumerate(labels):
+    #     x, y = label_coordinates(label)
+    #     x, y = int(x), int(y)
+    #     cv2.circle(image, (x, y), 10, (200, 200, 200), 2)
+
     cv2.imwrite(f'out/{fov_name.split(".")[0]}_annot.png', image)
     print(0)
 
