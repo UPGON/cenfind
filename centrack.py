@@ -92,7 +92,7 @@ def coords2mask(foci_coords, shape):
 #     return A, B
 
 
-def nuclei_segment(nuclei, dev_flag=False, threshold=None):
+def nuclei_segment(nuclei, dest=None, threshold=None):
     """
     Extract the nuclei into contours.
     :param nuclei:
@@ -102,7 +102,9 @@ def nuclei_segment(nuclei, dev_flag=False, threshold=None):
 
     # Define a large blurring kernel (1/16 of the image width)
     image_w, image_h = nuclei.shape[-2:]
-    kernel_size = image_w // 32 + 1
+    kernel_size = image_w // 32
+    if kernel_size % 2 == 0:
+        kernel_size += 1
 
     nuclei_blurred = cv2.medianBlur(nuclei, kernel_size)
     nuclei_blurred = cv2.medianBlur(nuclei_blurred, kernel_size)
@@ -115,10 +117,9 @@ def nuclei_segment(nuclei, dev_flag=False, threshold=None):
 
     nuclei_contours, hierarchy = cv2.findContours(nuclei_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    if dev_flag:
-        cv2.imwrite('out/nuclei_blurred.png', nuclei_blurred)
-    if dev_flag:
-        cv2.imwrite('out/nuclei_thresh.png', nuclei_thresh)
+    if dest:
+        cv2.imwrite(str(dest / 'nuclei_blurred.png'), nuclei_blurred)
+        cv2.imwrite(str(dest / 'nuclei_thresh.png'), nuclei_thresh)
 
     return nuclei_contours
 
@@ -162,25 +163,26 @@ def cnt_centre(contour):
     return c_x, c_y
 
 
-def foci_detect(centrioles_raw, dev_flag=False):
+def foci_detect(centrioles_raw, dest=None):
     """
     Apply median, gaussian blur and otsu thresholding.
     :return: list of foci coordinates
     """
 
-    centrioles = cv2.medianBlur(centrioles_raw, 5)
+    centrioles_blur = cv2.medianBlur(centrioles_raw, 5)
     # centrioles = cv2.GaussianBlur(centrioles, (3, 3), sigmaX=0)
-    centrioles = image_8bit_contrast(centrioles)
-    ret1, centrioles_thresh = cv2.threshold(centrioles, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    centrioles_8bit = image_8bit_contrast(centrioles_blur)
+    ret1, centrioles_thresh = cv2.threshold(centrioles_8bit, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-    if dev_flag:
-        cv2.imwrite('out/centrioles.png', centrioles)
-        cv2.imwrite('out/centrioles_thresh.png', centrioles_thresh)
+    if dest:
+        # cv2.imwrite(str(dest / 'centrioles.png'), centrioles_raw)
+        cv2.imwrite(str(dest / 'centrioles_blur.png'), image_8bit_contrast(centrioles_blur))
+        cv2.imwrite(str(dest / 'centrioles_thresh.png'), centrioles_thresh)
 
     return centrioles_thresh
 
 
-def centrosomes_box(centrioles_threshold, dev_flag=False):
+def centrosomes_box(centrioles_threshold, dest=None):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
     centrosomes = cv2.morphologyEx(centrioles_threshold, op=cv2.MORPH_DILATE, kernel=kernel, iterations=5)
     centrosomes_contours, hierarchy = cv2.findContours(centrosomes, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -189,19 +191,23 @@ def centrosomes_box(centrioles_threshold, dev_flag=False):
         rect = cv2.minAreaRect(cnt)
         box = cv2.boxPoints(rect)
         centrosomes_bboxes.append(np.int0(box))
-    if dev_flag:
-        cv2.imwrite('out/centrosomes.png', centrosomes)
+    if dest:
+        cv2.imwrite(str(dest / 'centrosomes.png'), centrosomes)
     return centrosomes_bboxes
 
 
 def main():
     dev_flag = True
-    path_root = Path('/Volumes/work/datasets')
-    dataset_name = 'RPE1wt_CEP152+GTU88+PCNT_1'
-    fov_name = f'{dataset_name}_MMStack_1-Pos_000_000.ome.tif'
+    # path_root = Path('/Volumes/work/datasets')
+    path_root = Path('/Volumes/work/20210709_SecondPlateCheck')
+    dataset_name = '20210709_RPE1_deltS6_Lentis_HA-DM4_B3_pCW571_48hDOX_rCep63_mHA_gCPAP_1'
+    fov_name = f'{dataset_name}_MMStack_Default_max.ome.tif'
 
-    path_fov = path_root / dataset_name / 'raw' / fov_name
-    path_projected = path_root / dataset_name / 'projected' / fov_name
+    # path_fov = path_root / dataset_name / 'raw' / fov_name
+    path_projected = path_root / 'projections' / fov_name
+
+    path_out = path_root / 'out'
+    path_out.mkdir(exist_ok=True)
 
     # Data loading
     projected = tf.imread(path_projected, key=range(4))
@@ -210,7 +216,7 @@ def main():
     nuclei_raw = channel_extract(projected, 0)
     nuclei_8bit = image_8bit_contrast(nuclei_raw)
 
-    nuclei_contours = nuclei_segment(nuclei_8bit, dev_flag, threshold=150)
+    nuclei_contours = nuclei_segment(nuclei_8bit, dest=path_out, threshold=150)
 
     image = cv2.cvtColor(nuclei_8bit, cv2.COLOR_GRAY2BGR)
     for n_id, cnt in enumerate(nuclei_contours):
@@ -221,7 +227,7 @@ def main():
     # Detect foci
     centrioles_raw = channel_extract(projected, 1)
     centrioles_8bit = image_8bit_contrast(centrioles_raw)
-    centrioles_threshold = foci_detect(centrioles_raw, dev_flag)
+    centrioles_threshold = foci_detect(centrioles_raw, dest=path_out)
     masked = cv2.bitwise_and(centrioles_raw, centrioles_raw, mask=centrioles_threshold)
     centrioles_float = img_as_float(masked)
     foci_coords = peak_local_max(centrioles_float, min_distance=5)
