@@ -1,4 +1,5 @@
 import json
+from operator import itemgetter
 from pathlib import Path
 
 import cv2
@@ -163,19 +164,22 @@ def cnt_centre(contour):
     return c_x, c_y
 
 
-def foci_detect(centrioles_raw, dest=None):
+def foci_detect(centrioles_raw, dest=None, factor=4):
     """
-    Apply median, gaussian blur and otsu thresholding.
+    Apply median, gaussian blur and relative thresholding.
     :return: list of foci coordinates
     """
 
-    centrioles_blur = cv2.medianBlur(centrioles_raw, 5)
-    # centrioles = cv2.GaussianBlur(centrioles, (3, 3), sigmaX=0)
+    # centrioles_blur = cv2.medianBlur(centrioles_raw, 3)
+    centrioles_blur = cv2.GaussianBlur(centrioles_raw, (3, 3), sigmaX=0)
     centrioles_8bit = image_8bit_contrast(centrioles_blur)
-    ret1, centrioles_thresh = cv2.threshold(centrioles_8bit, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    mean = centrioles_8bit.mean()
+    threshold = factor * mean
+    ret1, centrioles_thresh = cv2.threshold(centrioles_8bit, threshold, 255, cv2.THRESH_BINARY)
+    kernel = np.ones((3, 3), np.uint8)
+    centrioles_thresh = cv2.morphologyEx(centrioles_thresh, cv2.MORPH_OPEN, kernel)
 
     if dest:
-        # cv2.imwrite(str(dest / 'centrioles.png'), centrioles_raw)
         cv2.imwrite(str(dest / 'centrioles_blur.png'), image_8bit_contrast(centrioles_blur))
         cv2.imwrite(str(dest / 'centrioles_thresh.png'), centrioles_thresh)
 
@@ -197,21 +201,22 @@ def centrosomes_box(centrioles_threshold, dest=None):
 
 
 def main():
-    dev_flag = True
-    # path_root = Path('/Volumes/work/datasets')
-    path_root = Path('/Volumes/work/20210709_SecondPlateCheck')
-    dataset_name = '20210709_RPE1_deltS6_Lentis_HA-DM4_B3_pCW571_48hDOX_rCep63_mHA_gCPAP_1'
-    fov_name = f'{dataset_name}_MMStack_Default_max.ome.tif'
+    path_root = Path('/Volumes/work/datasets')
 
-    # path_fov = path_root / dataset_name / 'raw' / fov_name
-    path_projected = path_root / 'projections' / fov_name
+    # dataset_name = '20210709_RPE1_deltS6_Lentis_HA-DM4_B3_pCW571_48hDOX_rCep63_mHA_gCPAP_1'
+    # fov_name = f'{dataset_name}_MMStack_Default_max.ome.tif'
 
-    path_out = path_root / 'out'
+    dataset_name = 'RPE1wt_CEP63+CETN2+PCNT_1'
+    fov_name = f'{dataset_name}_000_000_max.ome.tif'
+
+    path_projected = path_root / f'{dataset_name}' / 'projections' / fov_name
+
+    path_out = path_root / dataset_name / 'out'
     path_out.mkdir(exist_ok=True)
 
     # Data loading
     projected = tf.imread(path_projected, key=range(4))
-
+    c, w, h = projected.shape
     # Segment nuclei
     nuclei_raw = channel_extract(projected, 0)
     nuclei_8bit = image_8bit_contrast(nuclei_raw)
@@ -226,45 +231,68 @@ def main():
 
     # Detect foci
     centrioles_raw = channel_extract(projected, 1)
+    # centrioles_blur = cv2.medianBlur(centrioles_raw, 3)
     centrioles_8bit = image_8bit_contrast(centrioles_raw)
     centrioles_threshold = foci_detect(centrioles_raw, dest=path_out)
     masked = cv2.bitwise_and(centrioles_raw, centrioles_raw, mask=centrioles_threshold)
     centrioles_float = img_as_float(masked)
-    foci_coords = peak_local_max(centrioles_float, min_distance=5)
+    foci_coords = np.fliplr(peak_local_max(centrioles_float, min_distance=5))
 
     image[:, :, 1] = centrioles_8bit
 
-    for f_id, (x, y) in enumerate(foci_coords):
-        cv2.drawMarker(image, (y, x), (255, 255, 255), markerType=cv2.MARKER_CROSS, markerSize=5)
+    # Add the ground truth if available
+    try:
+        labels = labelbox_annotation_load('data/annotation.json', f'{dataset_name}_C1_000_000.png')
+        for i, label in enumerate(labels):
+            x, y = label_coordinates(label)
+            x, y = int(x), int(y)
+            cv2.circle(image, (x, y), 10, (200, 200, 200), 2)
+    except IndexError:
+        pass
+
+    for f_id, (r, c) in enumerate(foci_coords):
+        cv2.drawMarker(image, (r, c), (255, 255, 255), markerType=cv2.MARKER_CROSS, markerSize=5)
 
     # Segment centrosomes
     centrosomes_bboxes = centrosomes_box(centrioles_threshold)
     cv2.drawContours(image, centrosomes_bboxes, -1, (0, 255, 0))
+
+    # Label the centrosomes
+    centrosomes_mask = np.zeros((w, h), dtype=np.uint8)
+    cv2.drawContours(centrosomes_mask, centrosomes_bboxes, -1, 255, -1)
+    _, centrosomes_labels = cv2.connectedComponents(centrosomes_mask)
+    labels_vis = 255 * (centrosomes_labels/centrosomes_labels.max())
+    cv2.imwrite(str(path_out / 'centrosomes_labels.png'), labels_vis)
+
+    # Label the nuclei
+    nuclei_mask = np.zeros((w, h), dtype=np.uint8)
+    cv2.drawContours(nuclei_mask, nuclei_contours, -1, 255, -1)
+    _, nuclei_labels = cv2.connectedComponents(nuclei_mask)
+    labels_vis = 255 * (nuclei_labels/nuclei_labels.max())
+    cv2.imwrite(str(path_out / 'nuclei_labels.png'), labels_vis)
+
+    cent2foci = []
+    for f_id, (r, c) in enumerate(foci_coords):
+        cent2foci.append((int(centrosomes_labels[r, c]), f_id))
+
+    nuclei2cent = []
+    for cent_id, cnt in enumerate(centrosomes_bboxes):
+        r, c = cnt_centre(cnt)
+        distances = [(n_id, cv2.pointPolygonTest(nucleus, (r, c), measureDist=True))
+                     for n_id, nucleus in enumerate(nuclei_contours)]
+        closest = max(distances, key=itemgetter(1))[0]
+        nuclei2cent.append(closest)
 
     for c_id, cnt in enumerate(centrosomes_bboxes):
         r, c = cnt_centre(cnt)
         cv2.putText(image, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale=.5, thickness=1, color=(255, 255, 255))
 
-    # Add the ground truth if available
-    # labels = labelbox_annotation_load('data/annotation.json', 'RPE1wt_CEP63+CETN2+PCNT_1_C1_000_000.png')
-    # for i, label in enumerate(labels):
-    #     x, y = label_coordinates(label)
-    #     x, y = int(x), int(y)
-    #     cv2.circle(image, (x, y), 10, (200, 200, 200), 2)
 
-    cv2.imwrite(f'out/{fov_name.split(".")[0]}_annot.png', image)
+
+    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_annot.png'), image)
+
     print(0)
-
-    # results = []
-    #
-    # for n, cnt_cell in enumerate(cells_contours):
-    #     for c, cnt_cm in enumerate(centrosomes_contours):
-    #         centre = cnt_centre(cnt_cm)
-    #         if cv2.pointPolygonTest(cnt_cell, centre, measureDist=False) < 0:
-    #             for f, focus in enumerate(foci_coords):
-    #                 if cv2.pointPolygonTest(cnt_cm, focus, measureDist=False) < 0:
-    #                     results.append((n, c, f))
 
 
 if __name__ == '__main__':
