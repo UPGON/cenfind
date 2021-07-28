@@ -18,6 +18,30 @@ def channels_combine(stack, channels=(1, 2, 3)):
     return cv2.convertScaleAbs(stack, alpha=255 / stack.max())
 
 
+def label_mask_write(dest, labels):
+    """
+    Write a visualisation of the labels.
+    :param dest:
+    :param labels:
+    :return:
+    """
+    labels_vis = 255 * (labels / labels.max())
+    cv2.imwrite(str(dest), labels_vis)
+
+
+def mask_create_from_contours(mask, contours):
+    """
+    Label each blob using connectedComponents.
+    :param mask: the black image to draw the contours
+    :param contours: the list of contours
+    :return: the mask with each contour labelled with different numbers.
+    """
+    cv2.drawContours(mask, contours, -1, 255, -1)
+    _, labels = cv2.connectedComponents(mask)
+    return labels
+
+
+
 def labelbox_annotation_load(path_annotation, image_name):
     with open(path_annotation, 'r') as file:
         annotation = json.load(file)
