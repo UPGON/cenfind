@@ -1,132 +1,54 @@
-import json
 from operator import itemgetter
 from pathlib import Path
 
 import cv2
 import numpy as np
 import tifffile as tf
-from skimage import img_as_float
-from skimage.feature import peak_local_max
 
-from utils import labelbox_annotation_load, label_coordinates, image_8bit_contrast, channel_extract, \
-    mask_create_from_contours, label_mask_write
+from utils import (
+    labelbox_annotation_load,
+    label_coordinates,
+    image_8bit_contrast,
+    channel_extract,
+    mask_create_from_contours,
+    label_mask_write,
+    cnt_centre,
+)
 
-from matplotlib import pyplot as plt
-
-
-def nuclei_segment(nuclei, dest=None, threshold=None):
-    """
-    Extract the nuclei into contours.
-    :param nuclei:
-    :param nucleus_area_min:
-    :return:
-    """
-
-    # Define a large blurring kernel (1/16 of the image width)
-    image_w, image_h = nuclei.shape[-2:]
-    kernel_size = image_w // 32
-    if kernel_size % 2 == 0:
-        kernel_size += 1
-
-    nuclei_blurred = cv2.medianBlur(nuclei, kernel_size)
-    nuclei_blurred = cv2.medianBlur(nuclei_blurred, kernel_size)
-
-    if threshold:
-        threshold_mode = cv2.THRESH_BINARY + cv2.THRESH_OTSU
-        ret, nuclei_thresh = cv2.threshold(nuclei_blurred, 0, 255, threshold_mode)
-    else:
-        ret, nuclei_thresh = cv2.threshold(nuclei_blurred, threshold, 255, cv2.THRESH_BINARY)
-
-    nuclei_contours, hierarchy = cv2.findContours(nuclei_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    if dest:
-        cv2.imwrite(str(dest / 'nuclei_blurred.png'), nuclei_blurred)
-        cv2.imwrite(str(dest / 'nuclei_thresh.png'), nuclei_thresh)
-
-    return nuclei_contours
+from vision import (
+    nuclei_segment,
+    foci_process,
+    centrosomes_box,
+)
 
 
-def cell_segment(image):
-    """
-    Segment the cell based on the nuclei
-    :param image:
-    :return: a pixel-wise classification
-    """
-    # ret1, thresh = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    kernel = np.ones((3, 3), np.uint8)
-    opening = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=2)
-    sure_bg = cv2.dilate(opening, kernel, iterations=10)
-    dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
-    ret2, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
-    sure_fg = np.uint8(sure_fg)
-    unknown = cv2.subtract(sure_bg, sure_fg)
-    ret3, markers = cv2.connectedComponents(sure_fg)
-    markers = markers + 1
-    markers[unknown == 255] = 0
-    image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-    markers = markers.astype('int32')
-    markers = cv2.watershed(image, markers)
-    image[markers == -1] = [0, 255, 0]
-
-    return image
+def color_scale(color):
+    color = np.array(color, dtype=float)
+    return color / 255
 
 
-def cnt_centre(contour):
-    """
-    Compute the centre of a contour
-    :param contour:
-    :return: the coordinates of the contour
-    """
-    moments = cv2.moments(contour)
+# Foci
+RED_BGR = (44, 36, 187)
+RED_BGR_SCALED = color_scale(RED_BGR)
 
-    c_x = int(moments['m10'] / moments['m00'])
-    c_y = int(moments['m01'] / moments['m00'])
+# Foci label
+VIOLET_BGR = (251, 112, 154)
+VIOLET_BGR_SCALED = color_scale(VIOLET_BGR)
 
-    return c_x, c_y
+# Nuclei
+BLUE_BGR = (251, 139, 94)
+BLUE_BGR_SCALED = color_scale(BLUE_BGR)
 
+# Annotation
+WHITE = (255, 255, 255)
 
-def foci_detect(centrioles, dest=None, factor=4):
-    """
-    Apply median, gaussian blur and relative thresholding.
-    :return: list of foci coordinates
-    """
+ANNOTATED = True
+LEGEND = False
+GROUND_TRUTH = True
 
-    centrioles_8bit = image_8bit_contrast(centrioles)
-    mean = centrioles_8bit.mean()
-    threshold = factor * mean
-    ret1, centrioles_thresh = cv2.threshold(centrioles_8bit, threshold, 255, cv2.THRESH_BINARY)
-    kernel = np.ones((5, 5), np.uint8)
-    centrioles_thresh = cv2.morphologyEx(centrioles_thresh, cv2.MORPH_OPEN, kernel)
-
-    if dest:
-        cv2.imwrite(str(dest / 'centrioles_thresh.png'), centrioles_thresh)
-
-    return centrioles_thresh
-
-
-def foci_process(image, channel=1, ks=3):
-    centrioles_raw = channel_extract(image, 1)
-    centrioles_blur = cv2.GaussianBlur(centrioles_raw, (ks, ks), sigmaX=0)
-    centrioles_threshold = foci_detect(centrioles_blur)
-    masked = cv2.bitwise_and(centrioles_raw, centrioles_raw, mask=centrioles_threshold)
-    masked = image_8bit_contrast(masked)
-    masked = cv2.equalizeHist(masked)
-    centrioles_float = img_as_float(masked)
-    foci_coords = np.fliplr(peak_local_max(centrioles_float, min_distance=5))
-    return masked, foci_coords
-
-def centrosomes_box(centrioles_threshold, dest=None):
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    centrosomes = cv2.morphologyEx(centrioles_threshold, op=cv2.MORPH_DILATE, kernel=kernel, iterations=5)
-    centrosomes_contours, hierarchy = cv2.findContours(centrosomes, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    centrosomes_bboxes = []
-    for c_id, cnt in enumerate(centrosomes_contours):
-        rect = cv2.minAreaRect(cnt)
-        box = cv2.boxPoints(rect)
-        centrosomes_bboxes.append(np.int0(box))
-    if dest:
-        cv2.imwrite(str(dest / 'centrosomes.png'), centrosomes)
-    return centrosomes_bboxes
+ADD_FOCI = True
+ADD_CENT = False
+ADD_NUCLEI = False
 
 
 def main():
@@ -141,7 +63,7 @@ def main():
         'RPE1wt_CEP152+GTU88+PCNT_1',
     ]
 
-    dataset_name = datasets_test[2]
+    dataset_name = datasets_test[0]
     fov_name = f'{dataset_name}_000_000_max.ome.tif'
     path_projected = path_root / f'{dataset_name}' / 'projections' / fov_name
     path_out = path_root / dataset_name / 'out'
@@ -152,20 +74,21 @@ def main():
     c, w, h = projected.shape
 
     # SEMANTIC ANNOTATION
-
     # Segment nuclei
     nuclei_raw = channel_extract(projected, 0)
     nuclei_8bit = image_8bit_contrast(nuclei_raw)
     nuclei_contours = nuclei_segment(nuclei_8bit, dest=path_out, threshold=150)
 
     # Detect foci
-    centrioles_masked, foci_coords = foci_process(projected)
+    centrioles_raw = channel_extract(projected, channel_id=1)
+    foci_masked, foci_coords = foci_process(centrioles_raw, ks=3, dist_foci=2, factor=3, blur_type='gaussian')
+    centrioles_8bit = image_8bit_contrast(centrioles_raw)
+    centrioles_clahe = cv2.equalizeHist(centrioles_8bit)
 
     # Infer centrosomes
-    centrosomes_bboxes = centrosomes_box(centrioles_masked)
+    centrosomes_bboxes = centrosomes_box(foci_masked)
 
     # ONTOLOGY
-
     # Label the centrosomes
     centrosomes_mask = np.zeros((w, h), dtype=np.uint8)
     centrosomes_labels = mask_create_from_contours(centrosomes_mask, centrosomes_bboxes)
@@ -189,38 +112,61 @@ def main():
         nuclei2cent.append(closest)
 
     # VISUALISATION
+    annotation = np.zeros((w, h, 3), dtype=np.uint8)
+    composite = np.zeros((w, h, 3), dtype=np.uint8)
+    legend = np.zeros((w, h, 3), dtype=np.uint8)
 
-    image = cv2.cvtColor(nuclei_8bit, cv2.COLOR_GRAY2BGR)
-    cv2.drawContours(image, centrosomes_bboxes, -1, (0, 255, 0))
-    image[:, :, 1] = image_8bit_contrast(centrioles_masked)
+    alpha = 1
+    beta = 1
 
-    for n_id, cnt in enumerate(nuclei_contours):
-        cv2.drawContours(image, [cnt], 0, (255, 0, 0), thickness=7)
-        cv2.putText(image, f'N{n_id}', org=cnt_centre(cnt), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=1, thickness=2, color=(255, 255, 255))
+    # Add nuclei
+    nuclei = cv2.cvtColor(nuclei_8bit, cv2.COLOR_GRAY2BGR)
+    composite = cv2.addWeighted(composite, alpha, (nuclei * BLUE_BGR_SCALED).astype(np.uint8), beta, 0.0)
 
-    try:
-        labels = labelbox_annotation_load('data/annotation.json', f'{dataset_name}_C1_000_000.png')
-        for i, label in enumerate(labels):
-            x, y = label_coordinates(label)
-            x, y = int(x), int(y)
-            cv2.circle(image, (x, y), 10, (200, 200, 200), 2)
-    except IndexError:
-        pass
+    if ANNOTATED and ADD_NUCLEI:
+        # Draw nuclei contours
+        for n_id, cnt in enumerate(nuclei_contours):
+            cv2.drawContours(annotation, [cnt], 0, WHITE, thickness=2)
+            if LEGEND:
+                cv2.putText(legend, f'N{n_id}', org=cnt_centre(cnt), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                            fontScale=.8, thickness=2, color=WHITE)
 
+    # Draw foci coords
     for f_id, (r, c) in enumerate(foci_coords):
-        cv2.drawMarker(image, (r, c), (8, 8, 8), markerType=cv2.MARKER_CROSS, markerSize=5)
+        cv2.drawMarker(annotation, position=(r, c), color=WHITE,
+                       markerType=cv2.MARKER_CROSS, markerSize=5)
+    if ADD_FOCI:
+        # Add foci
+        foci = cv2.cvtColor(foci_masked, cv2.COLOR_GRAY2BGR)
+        centrioles_contrast = cv2.cvtColor(centrioles_8bit, cv2.COLOR_GRAY2BGR)
+        composite = cv2.addWeighted(composite, alpha, (foci * RED_BGR_SCALED).astype(np.uint8), beta, 0.0)
+        composite = cv2.addWeighted(composite, alpha, (centrioles_contrast * RED_BGR_SCALED).astype(np.uint8), beta, 0.0)
 
-    for c_id, cnt in enumerate(centrosomes_bboxes):
-        r, c = cnt_centre(cnt)
-        cv2.putText(image, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=.5, thickness=1, color=(255, 255, 255))
+        # Draw ground truth
+        if GROUND_TRUTH:
+            try:
+                labels = labelbox_annotation_load('data/annotation.json', f'{dataset_name}_C1_000_000.png')
+                for i, label in enumerate(labels):
+                    x, y = label_coordinates(label)
+                    x, y = int(x), int(y)
+                    cv2.circle(annotation, (x, y), 8, WHITE, 1)
+            except IndexError:
+                pass
 
-    label_mask_write(path_out / 'centrosomes_labels.png', centrosomes_labels)
-    label_mask_write(path_out / 'nuclei_labels.png', nuclei_labels)
-    cv2.imwrite(str(path_out / 'clahe.png'), centrioles_masked)
-    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_annot.png'), image)
+    if ADD_CENT and ANNOTATED:
+        # Draw centrosome boxes
+        cv2.drawContours(annotation, centrosomes_bboxes, -1, WHITE)
 
+    if LEGEND:
+        for c_id, cnt in enumerate(centrosomes_bboxes):
+            r, c = cnt_centre(cnt)
+            cv2.putText(legend, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale=.8, thickness=2, color=WHITE)
+
+    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_composite.png'), composite)
+    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_annotated.png'), annotation)
+
+    print(len(foci_coords))
     print(0)
 
 

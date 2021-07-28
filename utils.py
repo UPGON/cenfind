@@ -18,6 +18,20 @@ def channels_combine(stack, channels=(1, 2, 3)):
     return cv2.convertScaleAbs(stack, alpha=255 / stack.max())
 
 
+def cnt_centre(contour):
+    """
+    Compute the centre of a contour
+    :param contour:
+    :return: the coordinates of the contour
+    """
+    moments = cv2.moments(contour)
+
+    c_x = int(moments['m10'] / moments['m00'])
+    c_y = int(moments['m01'] / moments['m00'])
+
+    return c_x, c_y
+
+
 def label_mask_write(dest, labels):
     """
     Write a visualisation of the labels.
