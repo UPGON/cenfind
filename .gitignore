@@ -4,3 +4,4 @@ out/
 .idea/
 docs/
 __pycache__/
+.DS_Store
