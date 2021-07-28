@@ -31,20 +31,6 @@ def markers_from(dataset_name, marker_sep='+'):
     return list(zip(range(len(markers)), markers))
 
 
-def fov_read(path):
-    fov = tf.imread(path)
-
-    dimensions = fov.shape
-
-    if dimensions[0] > dimensions[1]:
-        _target_dims = list(dimensions)
-        _target_dims[0], _target_dims[1] = _target_dims[1], _target_dims[0]
-        target_dims = tuple(_target_dims)
-        fov = fov.flatten().reshape(target_dims)
-
-    return fov
-
-
 def channels_combine(stack, channels=(1, 2, 3)):
     if stack.shape != (4, 2048, 2048):
         raise ValueError(f'stack.shape')

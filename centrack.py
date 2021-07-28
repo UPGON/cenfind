@@ -17,26 +17,6 @@ def image_8bit_contrast(image):
     return cv2.convertScaleAbs(image, alpha=255 / image.max())
 
 
-def file_read(path):
-    """
-    Read an ome tiff file.
-    :param path:
-    :return: Numpy array
-    """
-    print('Reading the raw ome tiff file')
-    fov = tf.imread(path)
-
-    dimensions = fov.shape
-
-    if dimensions[0] > dimensions[1]:
-        _target_dims = list(dimensions)
-        _target_dims[0], _target_dims[1] = _target_dims[1], _target_dims[0]
-        target_dims = tuple(_target_dims)
-        fov = fov.flatten().reshape(target_dims)
-
-    return fov
-
-
 def markers_from(dataset_name, marker_sep='+'):
     """
     Extract the markers' name from the dataset string.
@@ -71,26 +51,6 @@ def coords2mask(foci_coords, shape):
         mask[r, c] = 255
 
     return mask
-
-
-# def centrosomes_segment(foci_mask):
-#     """
-#     Compute the contours of neighbouring foci.
-#     :param foci_coords:
-#     :return: list of contours
-#     """
-#     # convert to np.float32
-#     mask = np.float32(foci_mask)
-#
-#     # define criteria and apply kmeans()
-#     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-#     ret, label, center = cv2.kmeans(mask, 2, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
-#
-#     # Now separate the data, Note the flatten()
-#     A = mask[label.ravel() == 0]
-#     B = mask[label.ravel() == 1]
-#
-#     return A, B
 
 
 def nuclei_segment(nuclei, dest=None, threshold=None):
@@ -289,8 +249,6 @@ def main():
         r, c = cnt_centre(cnt)
         cv2.putText(image, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale=.5, thickness=1, color=(255, 255, 255))
-
-
 
     cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_annot.png'), image)
 
