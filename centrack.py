@@ -164,23 +164,20 @@ def cnt_centre(contour):
     return c_x, c_y
 
 
-def foci_detect(centrioles_raw, dest=None, factor=4):
+def foci_detect(centrioles, dest=None, factor=4):
     """
     Apply median, gaussian blur and relative thresholding.
     :return: list of foci coordinates
     """
 
-    # centrioles_blur = cv2.medianBlur(centrioles_raw, 3)
-    centrioles_blur = cv2.GaussianBlur(centrioles_raw, (3, 3), sigmaX=0)
-    centrioles_8bit = image_8bit_contrast(centrioles_blur)
+    centrioles_8bit = image_8bit_contrast(centrioles)
     mean = centrioles_8bit.mean()
     threshold = factor * mean
     ret1, centrioles_thresh = cv2.threshold(centrioles_8bit, threshold, 255, cv2.THRESH_BINARY)
-    kernel = np.ones((3, 3), np.uint8)
+    kernel = np.ones((5, 5), np.uint8)
     centrioles_thresh = cv2.morphologyEx(centrioles_thresh, cv2.MORPH_OPEN, kernel)
 
     if dest:
-        cv2.imwrite(str(dest / 'centrioles_blur.png'), image_8bit_contrast(centrioles_blur))
         cv2.imwrite(str(dest / 'centrioles_thresh.png'), centrioles_thresh)
 
     return centrioles_thresh
@@ -205,8 +202,11 @@ def main():
 
     # dataset_name = '20210709_RPE1_deltS6_Lentis_HA-DM4_B3_pCW571_48hDOX_rCep63_mHA_gCPAP_1'
     # fov_name = f'{dataset_name}_MMStack_Default_max.ome.tif'
-
+    # U2OS_CEP63+SAS6+PCNT_1
+    # RPE1wt_CEP152+GTU88+PCNT_1
+    # RPE1wt_CEP63+CETN2+PCNT_1
     dataset_name = 'RPE1wt_CEP63+CETN2+PCNT_1'
+    # fov_name = f'{dataset_name}_000_000_max.ome.tif'
     fov_name = f'{dataset_name}_000_000_max.ome.tif'
 
     path_projected = path_root / f'{dataset_name}' / 'projections' / fov_name
@@ -231,14 +231,16 @@ def main():
 
     # Detect foci
     centrioles_raw = channel_extract(projected, 1)
-    # centrioles_blur = cv2.medianBlur(centrioles_raw, 3)
-    centrioles_8bit = image_8bit_contrast(centrioles_raw)
-    centrioles_threshold = foci_detect(centrioles_raw, dest=path_out)
+    centrioles_blur = cv2.GaussianBlur(centrioles_raw, (3, 3), sigmaX=0)
+    centrioles_threshold = foci_detect(centrioles_blur, dest=path_out)
     masked = cv2.bitwise_and(centrioles_raw, centrioles_raw, mask=centrioles_threshold)
+    masked = image_8bit_contrast(masked)
+    masked = cv2.equalizeHist(masked)
+    cv2.imwrite(str(path_out / 'clahe.png'), masked)
     centrioles_float = img_as_float(masked)
     foci_coords = np.fliplr(peak_local_max(centrioles_float, min_distance=5))
 
-    image[:, :, 1] = centrioles_8bit
+    image[:, :, 1] = image_8bit_contrast(masked)
 
     # Add the ground truth if available
     try:
@@ -251,7 +253,7 @@ def main():
         pass
 
     for f_id, (r, c) in enumerate(foci_coords):
-        cv2.drawMarker(image, (r, c), (255, 255, 255), markerType=cv2.MARKER_CROSS, markerSize=5)
+        cv2.drawMarker(image, (r, c), (8, 8, 8), markerType=cv2.MARKER_CROSS, markerSize=5)
 
     # Segment centrosomes
     centrosomes_bboxes = centrosomes_box(centrioles_threshold)
@@ -268,7 +270,7 @@ def main():
     nuclei_mask = np.zeros((w, h), dtype=np.uint8)
     cv2.drawContours(nuclei_mask, nuclei_contours, -1, 255, -1)
     _, nuclei_labels = cv2.connectedComponents(nuclei_mask)
-    labels_vis = 255 * (nuclei_labels/nuclei_labels.max())
+    labels_vis = 255 * (nuclei_labels / nuclei_labels.max())
     cv2.imwrite(str(path_out / 'nuclei_labels.png'), labels_vis)
 
     cent2foci = []
