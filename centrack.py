@@ -11,8 +11,7 @@ from utils import (
     image_8bit_contrast,
     channel_extract,
     mask_create_from_contours,
-    label_mask_write,
-    cnt_centre,
+    cnt_centre, image_tint,
 )
 
 from vision import (
@@ -43,12 +42,12 @@ BLUE_BGR_SCALED = color_scale(BLUE_BGR)
 WHITE = (255, 255, 255)
 
 ANNOTATED = True
-LEGEND = False
+LEGEND = True
 GROUND_TRUTH = True
 
 ADD_FOCI = True
-ADD_CENT = False
-ADD_NUCLEI = False
+ADD_CENT = True
+ADD_NUCLEI = True
 
 
 def main():
@@ -81,9 +80,9 @@ def main():
 
     # Detect foci
     centrioles_raw = channel_extract(projected, channel_id=1)
-    foci_masked, foci_coords = foci_process(centrioles_raw, ks=3, dist_foci=2, factor=3, blur_type='gaussian')
+    foci_masked, foci_coords = foci_process(centrioles_raw, ks=3, dist_foci=2,
+                                            factor=3, blur_type='gaussian')
     centrioles_8bit = image_8bit_contrast(centrioles_raw)
-    centrioles_clahe = cv2.equalizeHist(centrioles_8bit)
 
     # Infer centrosomes
     centrosomes_bboxes = centrosomes_box(foci_masked)
@@ -92,10 +91,6 @@ def main():
     # Label the centrosomes
     centrosomes_mask = np.zeros((w, h), dtype=np.uint8)
     centrosomes_labels = mask_create_from_contours(centrosomes_mask, centrosomes_bboxes)
-
-    # Label the nuclei
-    nuclei_mask = np.zeros((w, h), dtype=np.uint8)
-    nuclei_labels = mask_create_from_contours(nuclei_mask, nuclei_contours)
 
     # Group foci into centrosomes
     cent2foci = []
@@ -121,7 +116,7 @@ def main():
 
     # Add nuclei
     nuclei = cv2.cvtColor(nuclei_8bit, cv2.COLOR_GRAY2BGR)
-    composite = cv2.addWeighted(composite, alpha, (nuclei * BLUE_BGR_SCALED).astype(np.uint8), beta, 0.0)
+    composite = cv2.addWeighted(composite, alpha, image_tint(nuclei, BLUE_BGR_SCALED), beta, 0.0)
 
     if ANNOTATED and ADD_NUCLEI:
         # Draw nuclei contours
@@ -139,8 +134,9 @@ def main():
         # Add foci
         foci = cv2.cvtColor(foci_masked, cv2.COLOR_GRAY2BGR)
         centrioles_contrast = cv2.cvtColor(centrioles_8bit, cv2.COLOR_GRAY2BGR)
-        composite = cv2.addWeighted(composite, alpha, (foci * RED_BGR_SCALED).astype(np.uint8), beta, 0.0)
-        composite = cv2.addWeighted(composite, alpha, (centrioles_contrast * RED_BGR_SCALED).astype(np.uint8), beta, 0.0)
+
+        composite = cv2.addWeighted(composite, alpha, image_tint(foci, RED_BGR_SCALED), beta, 0.0)
+        composite = cv2.addWeighted(composite, alpha, image_tint(centrioles_contrast, RED_BGR_SCALED), beta, 0.0)
 
         # Draw ground truth
         if GROUND_TRUTH:
@@ -160,7 +156,7 @@ def main():
     if LEGEND:
         for c_id, cnt in enumerate(centrosomes_bboxes):
             r, c = cnt_centre(cnt)
-            cv2.putText(legend, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            cv2.putText(annotation, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.8, thickness=2, color=WHITE)
 
     cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_composite.png'), composite)

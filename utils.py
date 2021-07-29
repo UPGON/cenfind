@@ -1,11 +1,13 @@
+import re
 from pathlib import Path
 import json
-from matplotlib import pyplot as plt
-import cv2
-import tifffile as tf
-import numpy as np
-
+import re
 import pdb
+
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+import tifffile as tf
 
 
 def channels_combine(stack, channels=(1, 2, 3)):
@@ -16,6 +18,22 @@ def channels_combine(stack, channels=(1, 2, 3)):
     stack = np.transpose(stack, (1, 2, 0))
 
     return cv2.convertScaleAbs(stack, alpha=255 / stack.max())
+
+
+def filename_split(file_name):
+    """
+    Extract the info in the filename string
+    e.g., RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.ome.tif
+    or RPE1wt_CEP152+GTU88+PCNT_1_000_000_max.ome.tif
+    :param file_name:
+    :return:
+    """
+    if file_name.rfind('_max'):
+        pattern = re.compile(r'([\w\d^_]+)_([A-Z0-9\+]+)_(\d+)_(\d+)_(\d+)_max.ome.tif')
+    else:
+        pattern = re.compile(r'([\w\d\+]+)_([\w\d\+]+)_MMStack_\d+-Pos_(\d+)_(\d+).ome.tif')
+
+    return re.match(pattern, file_name)
 
 
 def cnt_centre(contour):
@@ -30,6 +48,16 @@ def cnt_centre(contour):
     c_y = int(moments['m01'] / moments['m00'])
 
     return c_x, c_y
+
+
+def image_tint(image, tint):
+    """
+    Tint a gray-scale image with the given tint tuple
+    :param image:
+    :param tint:
+    :return:
+    """
+    return (image * tint).astype(np.uint8)
 
 
 def label_mask_write(dest, labels):
@@ -53,7 +81,6 @@ def mask_create_from_contours(mask, contours):
     cv2.drawContours(mask, contours, -1, 255, -1)
     _, labels = cv2.connectedComponents(mask)
     return labels
-
 
 
 def labelbox_annotation_load(path_annotation, image_name):

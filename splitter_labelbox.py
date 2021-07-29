@@ -1,33 +1,46 @@
 import tifffile as tf
 import cv2
-from utils import image_8bit_contrast
+from utils import image_8bit_contrast, filename_split
 from pathlib import Path
 from tqdm import tqdm
 
 
-def tif_split(path):
+def tif_split(path_file, path_dst):
     """
     Write 8bit version for each channel of the ome.tif
     :param path:
     :return:
     """
-    path_dataset = path.parent
-    file_name = path.name
+
+    file_name = path_file.name
     file_stem = file_name.split('.')[0]
 
-    data = tf.imread(path, key=range(4))
-    for plane in range(4):
+    info_tuple = filename_split(file_name)
+    genotype, markers, replicate, posx, posy = info_tuple.groups()
+    markers_list = markers.split('+')
+    markers_list.insert(0, 'DAPI')
+
+    data = tf.imread(path_file, key=range(4))
+    c, y, x = data.shape
+    for plane in range(c):
         array = image_8bit_contrast(data[plane, :, :])
-        cv2.imwrite(str(path_dataset / f'{file_stem}_C{plane}.png'), array)
+        cv2.putText(array, f'Genotype: {genotype} Markers: {"+".join(markers_list)} FOV: {posx} / {posy} Plane: {markers_list[0]}',
+                    org=(100, 100), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                    fontScale=.8, thickness=2, color=255)
+        cv2.imwrite(str(path_dst / f'{file_stem}_C{plane}.png'), array)
 
 
 def main():
-    path_root = Path('data/20210709_RPE1_deltS6_Lentis_HA-SAS6_FL')
+    path_root = Path('data/datasets/experimentX')
+    path_channels = path_root / 'channels'
+    path_channels.mkdir(exist_ok=True)
+
     files = tuple((file for file in path_root.rglob('*.ome.tif')))
     pbar = tqdm(files)
+
     for file in pbar:
         pbar.set_description(desc=f'Splitting {file.name}')
-        tif_split(file)
+        tif_split(file, path_channels)
 
 
 if __name__ == '__main__':

@@ -43,31 +43,6 @@ def nuclei_segment(nuclei, dest=None, threshold=None):
     return nuclei_contours
 
 
-def cell_segment(image):
-    """
-    Segment the cell based on the nuclei
-    :param image:
-    :return: a pixel-wise classification
-    """
-    # ret1, thresh = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    kernel = np.ones((3, 3), np.uint8)
-    opening = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=2)
-    sure_bg = cv2.dilate(opening, kernel, iterations=10)
-    dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
-    ret2, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
-    sure_fg = np.uint8(sure_fg)
-    unknown = cv2.subtract(sure_bg, sure_fg)
-    ret3, markers = cv2.connectedComponents(sure_fg)
-    markers = markers + 1
-    markers[unknown == 255] = 0
-    image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-    markers = markers.astype('int32')
-    markers = cv2.watershed(image, markers)
-    image[markers == -1] = [0, 255, 0]
-
-    return image
-
-
 def foci_process(image, ks, dist_foci, factor, blur_type=None):
     """
     Preproces the centriole marker and find local peaks
