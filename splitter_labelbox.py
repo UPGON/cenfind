@@ -1,3 +1,5 @@
+import sys
+
 import tifffile as tf
 import cv2
 from utils import image_8bit_contrast, filename_split
@@ -22,20 +24,22 @@ def tif_split(path_file, path_dst):
 
     data = tf.imread(path_file, key=range(4))
     c, y, x = data.shape
-    for plane in range(c):
-        array = image_8bit_contrast(data[plane, :, :])
-        cv2.putText(array, f'Genotype: {genotype} Markers: {"+".join(markers_list)} FOV: {posx} / {posy} Plane: {markers_list[0]}',
+    for channel in range(c):
+        array = image_8bit_contrast(data[channel, :, :])
+        cv2.putText(array, f'Genotype: {genotype} Markers: {"+".join(markers_list)} FOV: {posx} / {posy} Plane: {markers_list[channel]}',
                     org=(100, 100), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale=.8, thickness=2, color=255)
-        cv2.imwrite(str(path_dst / f'{file_stem}_C{plane}.png'), array)
+        cv2.imwrite(str(path_dst / f'{file_stem}_C{channel}.png'), array)
 
 
 def main():
-    path_root = Path('data/datasets/experimentX')
-    path_channels = path_root / 'channels'
+    path_dataset = Path(input('Specify the absolute dataset path: '))
+    if not path_dataset.exists():
+        sys.exit(f'Invalid path {path_dataset}')
+    path_channels = path_dataset / 'channels'
     path_channels.mkdir(exist_ok=True)
 
-    files = tuple((file for file in path_root.rglob('*.ome.tif')))
+    files = tuple((file for file in path_dataset.rglob('*_max.ome.tif')))
     pbar = tqdm(files)
 
     for file in pbar:

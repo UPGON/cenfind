@@ -63,7 +63,9 @@ def main():
     ]
 
     dataset_name = datasets_test[0]
-    fov_name = f'{dataset_name}_000_000_max.ome.tif'
+    channel_id = 2
+    x, y = 0, 4
+    fov_name = f'{dataset_name}_{x:03}_{y:03}_max.ome.tif'
     path_projected = path_root / f'{dataset_name}' / 'projections' / fov_name
     path_out = path_root / dataset_name / 'out'
     path_out.mkdir(exist_ok=True)
@@ -79,7 +81,7 @@ def main():
     nuclei_contours = nuclei_segment(nuclei_8bit, dest=path_out, threshold=150)
 
     # Detect foci
-    centrioles_raw = channel_extract(projected, channel_id=1)
+    centrioles_raw = channel_extract(projected, channel_id=channel_id)
     foci_masked, foci_coords = foci_process(centrioles_raw, ks=3, dist_foci=2,
                                             factor=3, blur_type='gaussian')
     centrioles_8bit = image_8bit_contrast(centrioles_raw)
@@ -141,7 +143,7 @@ def main():
         # Draw ground truth
         if GROUND_TRUTH:
             try:
-                labels = labelbox_annotation_load('data/annotation.json', f'{dataset_name}_C1_000_000.png')
+                labels = labelbox_annotation_load(path_root / dataset_name / 'annotation.json', f'{dataset_name}_{x:03}_{y:03}_max_C{channel_id}.png')
                 for i, label in enumerate(labels):
                     x, y = label_coordinates(label)
                     x, y = int(x), int(y)
@@ -159,8 +161,8 @@ def main():
             cv2.putText(annotation, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.8, thickness=2, color=WHITE)
 
-    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_composite.png'), composite)
-    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_annotated.png'), annotation)
+    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_composite.png'), composite)
+    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_annotated.png'), annotation)
 
     print(len(foci_coords))
     print(0)
