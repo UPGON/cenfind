@@ -41,8 +41,8 @@ BLUE_BGR_SCALED = color_scale(BLUE_BGR)
 # Annotation
 WHITE = (255, 255, 255)
 
-ANNOTATED = True
-LEGEND = True
+ANNOTATED = False
+LEGEND = False
 GROUND_TRUTH = True
 
 ADD_FOCI = True
@@ -63,8 +63,8 @@ def main():
     ]
 
     dataset_name = datasets_test[0]
-    channel_id = 2
-    x, y = 0, 4
+    channel_id = 1
+    x, y = 0, 0
     fov_name = f'{dataset_name}_{x:03}_{y:03}_max.ome.tif'
     path_projected = path_root / f'{dataset_name}' / 'projections' / fov_name
     path_out = path_root / dataset_name / 'out'
@@ -131,7 +131,7 @@ def main():
     # Draw foci coords
     for f_id, (r, c) in enumerate(foci_coords):
         cv2.drawMarker(annotation, position=(r, c), color=WHITE,
-                       markerType=cv2.MARKER_CROSS, markerSize=5)
+                       markerType=cv2.MARKER_DIAMOND, markerSize=20)
     if ADD_FOCI:
         # Add foci
         foci = cv2.cvtColor(foci_masked, cv2.COLOR_GRAY2BGR)
@@ -143,11 +143,13 @@ def main():
         # Draw ground truth
         if GROUND_TRUTH:
             try:
-                labels = labelbox_annotation_load(path_root / dataset_name / 'annotation.json', f'{dataset_name}_{x:03}_{y:03}_max_C{channel_id}.png')
+                labels = labelbox_annotation_load(path_root / dataset_name / 'annotation.json',
+                                                  f'{dataset_name}_{x:03}_{y:03}_max_C{channel_id}.png')
                 for i, label in enumerate(labels):
                     x, y = label_coordinates(label)
                     x, y = int(x), int(y)
-                    cv2.circle(annotation, (x, y), 8, WHITE, 1)
+                    cv2.drawMarker(annotation, position=(x, y), color=WHITE,
+                                   markerType=cv2.MARKER_SQUARE, markerSize=20)
             except IndexError:
                 pass
 
@@ -160,6 +162,36 @@ def main():
             r, c = cnt_centre(cnt)
             cv2.putText(annotation, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.8, thickness=2, color=WHITE)
+
+    path_crop = path_root / dataset_name / 'crops'
+
+    path_crop.mkdir(exist_ok=True)
+
+    # foci_for_crops = cv2.cvtColor(image_8bit_contrast(centrioles_raw), cv2.COLOR_GRAY2BGR)
+
+    for cent_id, cent_cnt in enumerate(centrosomes_bboxes):
+        c, r = cnt_centre(cent_cnt)
+        width = 32
+
+        if r <= width:
+            r = width
+        if c <= width:
+            c = width
+
+        r_start = r - width
+        r_stop = r + width
+        c_start = c - width
+        c_stop = c + width
+
+        crop_composite = foci_masked[r_start:r_stop, c_start:c_stop]
+        crop_composite = image_8bit_contrast(crop_composite)
+        crop_composite = cv2.cvtColor(crop_composite, cv2.COLOR_GRAY2BGR)
+        crop_annotation = annotation[r_start:r_stop, c_start:c_stop]
+
+        crop = cv2.addWeighted(image_tint(crop_composite, RED_BGR_SCALED), 1,
+                               image_tint(crop_annotation,BLUE_BGR_SCALED), 1, 0.0)
+        print(cent_id, crop)
+        cv2.imwrite(str(path_crop / f'{fov_name.split(".")[0]}_C{channel_id}_{cent_id:03}.png'), crop)
 
     cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_composite.png'), composite)
     cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_annotated.png'), annotation)
