@@ -7,7 +7,7 @@ from utils import image_8bit_contrast, channels_combine
 
 
 def main():
-    path_root = Path('/Volumes/work/datasets/RPE1wt_CEP63+CETN2+PCNT_1')
+    path_root = Path('/Volumes/work/datasets/RPE1wt_CEP63+Cyclin-PCNA+PCNT_1')
 
     path_projections = path_root / 'projected'
     path_projections.mkdir(exist_ok=True)

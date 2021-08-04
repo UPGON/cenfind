@@ -127,10 +127,10 @@ def channel_extract(stack, channel_id):
     return stack[channel_id, :, :]
 
 
-def coords2mask(foci_coords, shape):
+def coords2mask(foci_coords, shape, radius):
     mask = np.zeros(shape, np.uint8)
     for r, c in foci_coords:
-        mask[r, c] = 255
+        cv2.circle(mask, (r, c), radius, 255, thickness=-1)
 
     return mask
 

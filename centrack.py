@@ -1,9 +1,11 @@
 from operator import itemgetter
 from pathlib import Path
+from datetime import datetime as dt
 
 import cv2
 import numpy as np
 import tifffile as tf
+import pytomlpp
 
 from utils import (
     labelbox_annotation_load,
@@ -12,6 +14,7 @@ from utils import (
     channel_extract,
     mask_create_from_contours,
     cnt_centre, image_tint,
+    coords2mask,
 )
 
 from vision import (
@@ -51,20 +54,17 @@ ADD_NUCLEI = True
 
 
 def main():
-    path_root = Path('/Volumes/work/datasets')
+    config = pytomlpp.load('configs/config.toml')
 
-    # dataset_name = '20210709_RPE1_deltS6_Lentis_HA-DM4_B3_pCW571_48hDOX_rCep63_mHA_gCPAP_1'
-    # fov_name = f'{dataset_name}_MMStack_Default_max.ome.tif'
+    config_dataset = config['dataset']
+    path_root = Path(config_dataset['root'])
+    dataset_name = config_dataset['name']
+    fov_name = f'{dataset_name}_MMStack_Default_max.ome.tif'
 
-    datasets_test = [
-        'RPE1wt_CEP63+CETN2+PCNT_1',
-        'U2OS_CEP63+SAS6+PCNT_1',
-        'RPE1wt_CEP152+GTU88+PCNT_1',
-    ]
+    config_data = config['data']
+    channel_id = config_data['channel']
+    x, y = config_data['position']
 
-    dataset_name = datasets_test[0]
-    channel_id = 1
-    x, y = 0, 0
     fov_name = f'{dataset_name}_{x:03}_{y:03}_max.ome.tif'
     path_projected = path_root / f'{dataset_name}' / 'projections' / fov_name
     path_out = path_root / dataset_name / 'out'
@@ -78,12 +78,16 @@ def main():
     # Segment nuclei
     nuclei_raw = channel_extract(projected, 0)
     nuclei_8bit = image_8bit_contrast(nuclei_raw)
-    nuclei_contours = nuclei_segment(nuclei_8bit, dest=path_out, threshold=150)
+    nuclei_contours = nuclei_segment(nuclei_8bit, dest=path_out, threshold=config['structures'])
 
     # Detect foci
     centrioles_raw = channel_extract(projected, channel_id=channel_id)
-    foci_masked, foci_coords = foci_process(centrioles_raw, ks=3, dist_foci=2,
-                                            factor=3, blur_type='gaussian')
+    config_foci = config['structures']['foci']
+    foci_masked, foci_coords = foci_process(centrioles_raw,
+                                            ks=config_foci['ks'],
+                                            dist_foci=config_foci['dist_foci'],
+                                            factor=config_foci['factor'],
+                                            blur=config_foci['blur'])
     centrioles_8bit = image_8bit_contrast(centrioles_raw)
 
     # Infer centrosomes
@@ -128,6 +132,7 @@ def main():
                 cv2.putText(legend, f'N{n_id}', org=cnt_centre(cnt), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                             fontScale=.8, thickness=2, color=WHITE)
 
+    targets = []
     # Draw foci coords
     for f_id, (r, c) in enumerate(foci_coords):
         cv2.drawMarker(annotation, position=(r, c), color=WHITE,
@@ -146,9 +151,10 @@ def main():
                 labels = labelbox_annotation_load(path_root / dataset_name / 'annotation.json',
                                                   f'{dataset_name}_{x:03}_{y:03}_max_C{channel_id}.png')
                 for i, label in enumerate(labels):
-                    x, y = label_coordinates(label)
-                    x, y = int(x), int(y)
-                    cv2.drawMarker(annotation, position=(x, y), color=WHITE,
+                    r, c = label_coordinates(label)
+                    r, c = int(r), int(c)
+                    targets.append(np.array((r, c)))
+                    cv2.drawMarker(annotation, position=(r, c), color=WHITE,
                                    markerType=cv2.MARKER_SQUARE, markerSize=20)
             except IndexError:
                 pass
@@ -189,15 +195,33 @@ def main():
         crop_annotation = annotation[r_start:r_stop, c_start:c_stop]
 
         crop = cv2.addWeighted(image_tint(crop_composite, RED_BGR_SCALED), 1,
-                               image_tint(crop_annotation,BLUE_BGR_SCALED), 1, 0.0)
-        print(cent_id, crop)
+                               image_tint(crop_annotation, BLUE_BGR_SCALED), 1, 0.0)
         cv2.imwrite(str(path_crop / f'{fov_name.split(".")[0]}_C{channel_id}_{cent_id:03}.png'), crop)
 
     cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_composite.png'), composite)
     cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_annotated.png'), annotation)
 
+    mask_targets = coords2mask(targets, (w, h), radius=config_foci['mask_radius'])
+    mask_outputs = coords2mask(foci_coords, (w, h), radius=config_foci['mask_radius'])
+
+    comparison = np.zeros((w, h, 3), dtype=np.uint8)
+    comparison[:, :, 0] = mask_targets
+    comparison[:, :, 1] = mask_outputs
+
+    mask_and = np.logical_and(mask_outputs, mask_targets)
+    mask_or = np.logical_or(mask_outputs, mask_targets)
+    iou = ((mask_and.sum() + 1e-5) / (mask_or.sum() + 1e-5)).round(3)
+
+    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_iou.png'), comparison)
+
     print(len(foci_coords))
-    print(0)
+    print(f'IoU is {iou}')
+
+    config['metrics'] = {}
+    config['metrics']['foci_detected'] = len(foci_coords)
+    config['metrics']['iou'] = iou
+    timestamp = dt.now()
+    pytomlpp.dump(config, path_root / dataset_name / f'config_out_{timestamp}.toml')
 
 
 if __name__ == '__main__':

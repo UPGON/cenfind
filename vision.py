@@ -43,20 +43,20 @@ def nuclei_segment(nuclei, dest=None, threshold=None):
     return nuclei_contours
 
 
-def foci_process(image, ks, dist_foci, factor, blur_type=None):
+def foci_process(image, ks, dist_foci, factor, blur=None):
     """
     Preproces the centriole marker and find local peaks
     :param image:
     :param ks:
     :param dist_foci:
     :param factor:
-    :param blur_type:
+    :param blur:
     :return:
     """
     image_raw = image.copy()
-    if blur_type == 'median':
+    if blur == 'median':
         image = cv2.medianBlur(image, ks)
-    if blur_type == 'gaussian':
+    if blur == 'gaussian':
         image = cv2.GaussianBlur(image, (ks, ks), sigmaX=0)
 
     # image = image_8bit_contrast(image)
