@@ -1,6 +1,7 @@
 from operator import itemgetter
 from pathlib import Path
 from datetime import datetime as dt
+from pprint import pprint
 
 import cv2
 import numpy as np
@@ -59,7 +60,6 @@ def main():
     config_dataset = config['dataset']
     path_root = Path(config_dataset['root'])
     dataset_name = config_dataset['name']
-    fov_name = f'{dataset_name}_MMStack_Default_max.ome.tif'
 
     config_data = config['data']
     channel_id = config_data['channel']
@@ -113,7 +113,7 @@ def main():
         nuclei2cent.append(closest)
 
     # VISUALISATION
-    annotation = np.zeros((w, h, 3), dtype=np.uint8)
+    composite = np.zeros((w, h, 3), dtype=np.uint8)
     composite = np.zeros((w, h, 3), dtype=np.uint8)
     legend = np.zeros((w, h, 3), dtype=np.uint8)
 
@@ -127,7 +127,7 @@ def main():
     if ANNOTATED and ADD_NUCLEI:
         # Draw nuclei contours
         for n_id, cnt in enumerate(nuclei_contours):
-            cv2.drawContours(annotation, [cnt], 0, WHITE, thickness=2)
+            cv2.drawContours(composite, [cnt], 0, WHITE, thickness=2)
             if LEGEND:
                 cv2.putText(legend, f'N{n_id}', org=cnt_centre(cnt), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                             fontScale=.8, thickness=2, color=WHITE)
@@ -135,7 +135,7 @@ def main():
     targets = []
     # Draw foci coords
     for f_id, (r, c) in enumerate(foci_coords):
-        cv2.drawMarker(annotation, position=(r, c), color=WHITE,
+        cv2.drawMarker(composite, position=(r, c), color=WHITE,
                        markerType=cv2.MARKER_DIAMOND, markerSize=20)
     if ADD_FOCI:
         # Add foci
@@ -154,19 +154,19 @@ def main():
                     r, c = label_coordinates(label)
                     r, c = int(r), int(c)
                     targets.append(np.array((r, c)))
-                    cv2.drawMarker(annotation, position=(r, c), color=WHITE,
+                    cv2.drawMarker(composite, position=(r, c), color=WHITE,
                                    markerType=cv2.MARKER_SQUARE, markerSize=20)
             except IndexError:
                 pass
 
     if ADD_CENT and ANNOTATED:
         # Draw centrosome boxes
-        cv2.drawContours(annotation, centrosomes_bboxes, -1, WHITE)
+        cv2.drawContours(composite, centrosomes_bboxes, -1, WHITE)
 
     if LEGEND:
         for c_id, cnt in enumerate(centrosomes_bboxes):
             r, c = cnt_centre(cnt)
-            cv2.putText(annotation, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            cv2.putText(composite, f'C{c_id}', org=(r + 10, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.8, thickness=2, color=WHITE)
 
     path_crop = path_root / dataset_name / 'crops'
@@ -189,17 +189,13 @@ def main():
         c_start = c - width
         c_stop = c + width
 
-        crop_composite = foci_masked[r_start:r_stop, c_start:c_stop]
-        crop_composite = image_8bit_contrast(crop_composite)
-        crop_composite = cv2.cvtColor(crop_composite, cv2.COLOR_GRAY2BGR)
-        crop_annotation = annotation[r_start:r_stop, c_start:c_stop]
+        crop = composite[r_start:r_stop, c_start:c_stop]
+        # crop_composite = image_8bit_contrast(crop_composite)
+        # crop_composite = cv2.cvtColor(crop_composite, cv2.COLOR_GRAY2BGR)
 
-        crop = cv2.addWeighted(image_tint(crop_composite, RED_BGR_SCALED), 1,
-                               image_tint(crop_annotation, BLUE_BGR_SCALED), 1, 0.0)
         cv2.imwrite(str(path_crop / f'{fov_name.split(".")[0]}_C{channel_id}_{cent_id:03}.png'), crop)
 
     cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_composite.png'), composite)
-    cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_annotated.png'), annotation)
 
     mask_targets = coords2mask(targets, (w, h), radius=config_foci['mask_radius'])
     mask_outputs = coords2mask(foci_coords, (w, h), radius=config_foci['mask_radius'])
@@ -214,8 +210,7 @@ def main():
 
     cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_iou.png'), comparison)
 
-    print(len(foci_coords))
-    print(f'IoU is {iou}')
+    print(f'Threshold: ? Foci detected: {len(foci_coords)} IoU: {iou:>.03}')
 
     config['metrics'] = {}
     config['metrics']['foci_detected'] = len(foci_coords)

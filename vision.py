@@ -6,8 +6,6 @@ from skimage.feature import peak_local_max
 
 from utils import (
     image_8bit_contrast,
-    channel_extract,
-
 )
 
 
@@ -15,8 +13,9 @@ def nuclei_segment(nuclei, dest=None, threshold=None):
     """
     Extract the nuclei into contours.
     :param nuclei:
-    :param nucleus_area_min:
-    :return:
+    :param dest: if specified, write the results to the file
+    :param threshold: if specified, use it instead of the derived.
+    :return: the list of contours detected
     """
 
     # Define a large blurring kernel (1/16 of the image width)
@@ -34,7 +33,8 @@ def nuclei_segment(nuclei, dest=None, threshold=None):
     else:
         ret, nuclei_thresh = cv2.threshold(nuclei_blurred, threshold, 255, cv2.THRESH_BINARY)
 
-    nuclei_contours, hierarchy = cv2.findContours(nuclei_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    nuclei_contours, hierarchy = cv2.findContours(nuclei_thresh, cv2.RETR_TREE,
+                                                  cv2.CHAIN_APPROX_SIMPLE)
 
     if dest:
         cv2.imwrite(str(dest / 'nuclei_blurred.png'), nuclei_blurred)
@@ -45,13 +45,13 @@ def nuclei_segment(nuclei, dest=None, threshold=None):
 
 def foci_process(image, ks, dist_foci, factor, blur=None):
     """
-    Preproces the centriole marker and find local peaks
+    Preprocess the centriole marker and find local peaks
     :param image:
     :param ks:
     :param dist_foci:
     :param factor:
     :param blur:
-    :return:
+    :return: Binary image of the foci and the list of their coordinates
     """
     image_raw = image.copy()
     if blur == 'median':
@@ -59,9 +59,7 @@ def foci_process(image, ks, dist_foci, factor, blur=None):
     if blur == 'gaussian':
         image = cv2.GaussianBlur(image, (ks, ks), sigmaX=0)
 
-    # image = image_8bit_contrast(image)
     image_median = np.median(image)
-    print(image_median)
     threshold = factor * image_median
     ret1, centrioles_threshold = cv2.threshold(image.astype(float), threshold, 255, cv2.THRESH_BINARY)
     centrioles_threshold = centrioles_threshold.astype(np.uint8)
@@ -69,7 +67,6 @@ def foci_process(image, ks, dist_foci, factor, blur=None):
     centrioles_threshold = cv2.morphologyEx(centrioles_threshold, cv2.MORPH_ERODE, kernel)
 
     masked = cv2.bitwise_and(image_raw, image_raw, mask=centrioles_threshold)
-    # masked = cv2.equalizeHist(masked)
     centrioles_float = img_as_float(masked)
     foci_coords = np.fliplr(peak_local_max(centrioles_float, min_distance=dist_foci))
 
@@ -78,10 +75,20 @@ def foci_process(image, ks, dist_foci, factor, blur=None):
     return masked, foci_coords
 
 
-def centrosomes_box(centrioles_threshold, dest=None):
+def centrosomes_box(centrioles_threshold, dest=None, iterations=5):
+    """
+    Derive the centrosome bounding boxes by dilating the foci.
+    :param iterations: the number of iterations of dilations
+    :param centrioles_threshold:
+    :param dest: if specified, write the mask of dilated foci
+    :return: List of box coordinates
+    """
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    centrosomes = cv2.morphologyEx(centrioles_threshold, op=cv2.MORPH_DILATE, kernel=kernel, iterations=5)
-    centrosomes_contours, hierarchy = cv2.findContours(centrosomes, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    centrosomes = cv2.morphologyEx(centrioles_threshold, op=cv2.MORPH_DILATE,
+                                   kernel=kernel, iterations=iterations)
+    centrosomes_contours, hierarchy = cv2.findContours(centrosomes, cv2.RETR_EXTERNAL,
+                                                       cv2.CHAIN_APPROX_SIMPLE)
+
     centrosomes_bboxes = []
     for c_id, cnt in enumerate(centrosomes_contours):
         rect = cv2.minAreaRect(cnt)
