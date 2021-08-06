@@ -45,17 +45,17 @@ BLUE_BGR_SCALED = color_scale(BLUE_BGR)
 # Annotation
 WHITE = (255, 255, 255)
 
-ANNOTATED = False
-LEGEND = False
-GROUND_TRUTH = True
-
-ADD_FOCI = True
-ADD_CENT = True
-ADD_NUCLEI = True
-
 
 def main():
     config = pytomlpp.load('configs/config.toml')
+
+    ANNOTATED = config['options']['ANNOTATED']
+    LEGEND = config['options']['LEGEND']
+    GROUND_TRUTH = config['options']['GROUND_TRUTH']
+
+    ADD_FOCI = config['options']['ADD_FOCI']
+    ADD_CENT = config['options']['ADD_CENT']
+    ADD_NUCLEI = config['options']['ADD_NUCLEI']
 
     config_dataset = config['dataset']
     path_root = Path(config_dataset['root'])

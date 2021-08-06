@@ -26,3 +26,12 @@ mask_radius = 3
 
 [structures.nuclei]
 threshold = 150
+
+[options]
+ANNOTATED = false
+LEGEND = false
+GROUND_TRUTH = true
+
+ADD_FOCI = true
+ADD_CENT = true
+ADD_NUCLEI = true
