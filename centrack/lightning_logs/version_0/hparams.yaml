@@ -1,0 +1,10 @@
+backbone: resnet18_fpn
+head: mask_rcnn
+learning_rate: 0.0005
+num_classes: 38
+optimizer: !!python/name:torch.optim.adam.Adam ''
+optimizer_kwargs: null
+pretrained: true
+scheduler: null
+scheduler_kwargs: null
+serializer: null
