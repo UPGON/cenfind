@@ -56,7 +56,7 @@ def main():
                  .blur_median(3)
                  .maximum_filter(size=5)
                  .contrast()
-                 .threshold(threshold=50)
+                 .threshold(threshold=20)
                  )
 
     cv2.imwrite(str(path_out / f"{fov_core}_mask.png"), foci_mask.data)
@@ -67,31 +67,19 @@ def main():
     annotation_map = cv2.cvtColor(fov.data, cv2.COLOR_GRAY2BGR)
     annotation_map = contrast(annotation_map)
 
+    path_crop = path_root / dataset_name / 'crops'
+    path_crop.mkdir(exist_ok=True)
+
     for roi in rois:
         roi.draw(annotation_map, color=RED_BGR)
 
+    for roi in rois:
+        crop = roi.extract(annotation_map)
+        roi_id = roi.idx
+        cv2.imwrite(str(path_crop / f'{fov_name.split(".")[0]}_C{channel_id}_{roi_id}.png'), crop)
+
     cv2.imwrite(str(path_out / f"{fov_core}_annot_foci.png"), annotation_map)
 
-    # labels = labelbox_annotation_load(path_root / dataset_name / 'annotation.json',
-    #                                   f'{dataset_name}_{x:03}_{y:03}_max_C{channel_id}.png')
-    #
-    # # Draw ground truth
-    # try:
-    #
-    #     for i, label in enumerate(labels):
-    #         r, col = label_coordinates(label)
-    #         r, col = int(r), int(col)
-    #         targets.append(np.array((r, col)))
-    #         cv2.drawMarker(composite, position=(r, col), color=WHITE,
-    #                        markerType=cv2.MARKER_SQUARE, markerSize=20)
-    # except IndexError:
-    #     pass
-    #
-    # path_crop = path_root / dataset_name / 'crops'
-    # path_crop.mkdir(exist_ok=True)
-    #
-    # cv2.imwrite(str(path_crop / f'{fov_name.split(".")[0]}_C{channel_id}_{cent_id:03}.png'), crop)
-    #
     # cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_iou.png'), comparison)
     #
     # print(f'Threshold: ? Foci detected: {len(foci_coords)} IoU: {iou:>.03}')

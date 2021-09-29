@@ -14,7 +14,7 @@ name = "RPE1wt_CEP63+CETN2+PCNT_1"
 
 [data]
 channel = 2
-position = [0, 0]
+position = [0, 1]
 
 [structures.foci]
 ks = 3

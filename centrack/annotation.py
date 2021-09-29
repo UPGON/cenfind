@@ -89,35 +89,25 @@ class Centre(ROI):
 
     @property
     def bbox(self):
-        return BBox(self.centre, self.centre, self.idx, self.label, self.confidence)
+        top_left = self.row - 32, self.col - 32
+        bottom_right = self.row + 32, self.col + 32
+        return BBox(top_left, bottom_right, self.idx, self.label, self.confidence)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, marker_type=cv2.MARKER_SQUARE, marker_size=8):
         r, c = self.centre
         offset_col = int(.01 * image.shape[1])
 
+        x, y = c, r
         if annotation:
-            cv2.putText(image, f'C{self.idx}', org=(r, c + offset_col), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            cv2.putText(image, f'C{self.idx}', org=(x, y + offset_col), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.4, thickness=1, color=color)
 
-        return cv2.drawMarker(image, (r, c), color, markerType=marker_type,
+        return cv2.drawMarker(image, (x, y), color, markerType=marker_type,
                               markerSize=marker_size)
 
     def extract(self, plane):
-        if prod(*self.dims) > prod(*plane.data.dims):
-            raise ValueError(f"{self} larger than {plane}")
-
-        start_row, start_col = self.centre
-
-        if start_row + self.height >= plane.height:
-            overflow = start_row + self.height - plane.height
-            start_row = start_row - overflow
-
-        if start_col + self.width >= plane.width:
-            overflow = start_col + self.width - plane.width
-            start_col = start_col - overflow
-
-        return Plane(data=plane.data[start_row:start_row + self.height, start_col:start_col + self.width],
-                     field=plane.field)
+        # return plane[self.row - 32:self.col - 32, self.row + 32:self.col + 32]
+        return self.bbox.extract(plane)
 
 
 class BBox(ROI):
@@ -158,24 +148,23 @@ class BBox(ROI):
         return Centre((r_centre, c_centre), self.idx, self.label, self.confidence)
 
     @property
-    @abstractmethod
     def bbox(self):
         return self
 
     def draw(self, image, color=(0, 255, 0), annotation=True, **kwargs):
         """Draw bounding box on an image."""
         offset = int(.01 * image.width)
-        r, c = self.centre
+        r, c = self.centre.centre
         cv2.rectangle(image, self.top_left, self.bottom_right, color, thickness=kwargs['thickness'])
         if annotation:
             cv2.putText(image, f'BB{self.idx}', org=(r + offset, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.5, thickness=1, color=color)
         return image
 
-    def extract(self, plane):
+    def extract(self, image):
         start_row, start_col = self.top_left
         stop_row, stop_col = self.bottom_right
-        return plane[start_row:stop_row, start_col:stop_col]
+        return image[start_row:stop_row, start_col:stop_col]
 
 
 class Contour(ROI):

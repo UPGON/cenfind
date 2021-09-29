@@ -39,6 +39,6 @@ class FocusDetector(Detector):
         masked = cv2.bitwise_and(image, image, mask=mask)
 
         centrioles_float = img_as_float(masked)
-        foci_coords = np.fliplr(peak_local_max(centrioles_float, min_distance=interpeak_min))
+        foci_coords = peak_local_max(centrioles_float, min_distance=interpeak_min)
 
         return [Centre(f, f_id, self.organelle, confidence=-1) for f_id, f in enumerate(foci_coords)]
