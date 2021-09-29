@@ -13,7 +13,7 @@ root = "/Volumes/work/datasets"
 name = "RPE1wt_CEP63+CETN2+PCNT_1"
 
 [data]
-channel = 1
+channel = 2
 position = [0, 0]
 
 [structures.foci]
