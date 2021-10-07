@@ -51,6 +51,8 @@ def main():
     data = field.get_image_data('ZYX', C=channel_id).max(axis=0).squeeze()
     fov = Plane(data, field)
 
+    cv2.imwrite(str(path_out / f"{fov_core}_raw.png"), fov.contrast().data)
+
     # SEMANTIC ANNOTATION
     foci_mask = (fov
                  .blur_median(3)

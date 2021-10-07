@@ -7,3 +7,4 @@ __pycache__/
 .DS_Store
 data/
 *.pt
+configs/labelbox_api_key.txt
