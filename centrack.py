@@ -82,16 +82,6 @@ def main():
 
     cv2.imwrite(str(path_out / f"{fov_core}_annot_foci.png"), annotation_map)
 
-    # cv2.imwrite(str(path_out / f'{fov_name.split(".")[0]}_C{channel_id}_iou.png'), comparison)
-    #
-    # print(f'Threshold: ? Foci detected: {len(foci_coords)} IoU: {iou:>.03}')
-    #
-    # config['metrics'] = {}
-    # config['metrics']['foci_detected'] = len(foci_detector)
-    # config['metrics']['iou'] = iou
-    # timestamp = dt.now()
-    # pytomlpp.dump(config, path_root / dataset_name / f'config_out_{timestamp}.toml')
-
 
 if __name__ == '__main__':
     main()
