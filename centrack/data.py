@@ -64,8 +64,8 @@ class DataSet:
         return Path(self.path) / 'projections'
 
     @property
-    def fields(self, image_type=None):
-        return [AICSImage(p) for p in (self.path / image_type).glob('*/*.ome.tif') if not p.name.startswith('.')]
+    def fields(self):
+        return [p for p in (self.path / 'raw').glob('*.ome.tif') if not p.name.startswith('.')]
 
     def markers(self, marker_sep='+'):
         """
