@@ -1,16 +1,22 @@
 # Z-max projection
 
+from pathlib import Path
+import re
+
 import numpy as np
 import tifffile as tf
 from tqdm import tqdm
-from aicsimageio import AICSImage
 
 from centrack.data import DataSet, Field
 
 
 if __name__ == '__main__':
+    dataset_input = input('Enter the full path to the dataset folder: ')
+    dataset_input = Path(dataset_input)
+    if not dataset_input.exists():
+        raise FileExistsError
 
-    dataset = DataSet('/Volumes/work/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1')
+    dataset = DataSet(dataset_input)
     dataset.projections.mkdir(exist_ok=True)
 
     files = dataset.fields
@@ -33,8 +39,12 @@ if __name__ == '__main__':
 
         projected = data.max(axis=2)
 
-        file_name_core = file.name.removesuffix(''.join(file.suffixes))
+        file_name = file.name
+        file_name = file_name.removesuffix(''.join(file.suffixes))
+        file_name = file_name.replace('', '')
+        file_name = file_name.sub(r'_(Default|MMStack)_\d-Pos', '', file_name)
+        file_name = file_name.replace('', '')
 
-        dest_name = f'{file_name_core}_max.ome.tif'
+        dest_name = f'{file_name}_max.ome.tif'
         path_projected = dataset.projections / dest_name
-        AICSImage(projected).save(path_projected)
+        tf.imwrite(path_projected, projected, photometric='minisblack')
