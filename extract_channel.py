@@ -2,22 +2,18 @@ from pathlib import Path
 
 import tifffile as tf
 import cv2
-from aicsimageio import AICSImage
 
 from centrack.data import contrast
 
-dataset_name = 'RPE1wt_CEP152+GTU88+PCNT_1'
-# channel_id = [1, 2, 3]
+dataset_name = 'RPE1wt_CP110+GTU88+PCNT_2'
 
 condition, markers, replicate = dataset_name.split('_')
 markers_list = markers.split('+')
 markers_list.insert(0, 'DAPI')
-# marker = markers_list[channel_id]
 
 path_root = Path('/Volumes/work/epfl/datasets')
 path_dataset = path_root / dataset_name
 path_projections = path_dataset / 'projections'
-
 
 if __name__ == '__main__':
 
@@ -26,18 +22,18 @@ if __name__ == '__main__':
             continue
 
         name_core = field.name.rstrip('.ome.tif')
-        data = AICSImage(field)
+        data = tf.imread(field)
 
-        for c in range(data.dims.C):
+        for c in range(data.shape[0]):
             channel = markers_list[c]
-            print(f'Process {field.name} {channel}.')
-            plane = data.get_image_data('YX', C=c)
 
             path_projections_channel = path_dataset / 'projections_channel' / channel
-            path_projections_channel.mkdir(exist_ok=True, parents=True)
 
+            path_projections_channel.mkdir(exist_ok=True, parents=True)
             (path_projections_channel / 'tif').mkdir(exist_ok=True)
             (path_projections_channel / 'png').mkdir(exist_ok=True)
+
+            plane = data[c, :, :]
             tf.imwrite(path_projections_channel / 'tif' / f"{name_core}_C{c}.tif", plane)
 
             contrasted = contrast(plane)
