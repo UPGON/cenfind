@@ -30,6 +30,12 @@ def field_combine(path_field_src, shape, dyes):
     return stack
 
 
+def save_field(path_dst, stack):
+    tf.imwrite(path_dst, stack, photometric='minisblack',
+               shape=stack.shape, metadata={'axes': 'TCZYX'})
+    logging.info(f'Saved: {path_dst}')
+
+
 def main():
     path_root = Path('/Volumes/work/epfl/datasets/')
     dataset_name = 'RPE1wt_CEP63+CETN2+PCNT_1'
@@ -41,15 +47,13 @@ def main():
 
     fields = path_channel.iterdir()
 
+    shape = (1, 5, 67, 2048, 2048)
+
     for field in fields:
+        stack = field_combine(field, dyes, shape)
         _, r, c = field.name.split('_')
         path_field_dst = path_raw / f"{dataset_name}_{r}_{c}.ome.tif"
-
-        shape = (1, 5, 67, 2048, 2048)
-        stack = field_combine(field, dyes, shape)
-
-        tf.imwrite(path_field_dst, stack, photometric='minisblack', shape=shape, metadata={'axes': 'TCZYX'})
-        logging.info(f'Saved: {path_field_dst}')
+        save_field(path_field_dst, stack)
 
 
 if __name__ == '__main__':
