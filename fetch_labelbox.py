@@ -16,9 +16,19 @@ def main():
     channels_id = [1, 2, 3]
 
     for label_id, label in enumerate(labels):
-        for channel_id in channels_id:
+        for c_id, channel_id in enumerate(channels_id):
             image_name = label['External ID']
-            condition, markers, replicate, ds_row, ds_col, _, channel_code = image_name.split('.')[0].split('_')
+            print(label_id, c_id, image_name)
+            image_name = image_name.split('/')[-1]
+
+            if image_name.startswith('.'):
+                print(f"{image_name} skipped")
+                continue
+
+            image_name = image_name.split('.')[0]
+            print(image_name)
+
+            condition, markers, replicate, ds_row, ds_col, _, channel_code = image_name.split('_')
             markers = markers.split('+')
             markers.insert(0, 'DAPI')
             marker = markers[channel_id]

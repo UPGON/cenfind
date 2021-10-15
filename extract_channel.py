@@ -5,7 +5,7 @@ import cv2
 
 from centrack.data import contrast
 
-dataset_name = 'RPE1wt_CP110+GTU88+PCNT_2'
+dataset_name = 'RPE1wt_CEP63+CETN2+PCNT_1'
 
 condition, markers, replicate = dataset_name.split('_')
 markers_list = markers.split('+')
