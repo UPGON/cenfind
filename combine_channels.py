@@ -24,7 +24,7 @@ def field_combine(path_field_src, shape, dyes):
         for plane_id in range(z):
             logging.info(f'Processing {path_field_src} {channel} {plane_id}')
             data = tf.imread(
-                path_field_src.name / f'img_000000000_{channel_id:02} - {channel}_{plane_id:03}.tif')
+                path_field_src / f'img_000000000_{channel_id:02} - {channel}_{plane_id:03}.tif')
             stack[:, channel_inc, plane_id, :, :] = data
         channel_inc += 1
     return stack
@@ -50,7 +50,7 @@ def main():
     shape = (1, 5, 67, 2048, 2048)
 
     for field in fields:
-        stack = field_combine(field, dyes, shape)
+        stack = field_combine(field, shape, dyes)
         _, r, c = field.name.split('_')
         path_field_dst = path_raw / f"{dataset_name}_{r}_{c}.ome.tif"
         save_field(path_field_dst, stack)
