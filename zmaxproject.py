@@ -30,10 +30,6 @@ if __name__ == '__main__':
             order = field.series[0].axes
             data = field.asarray()
 
-        # if order == 'ZCYX':
-        #     z, c, y, x = data.shape
-        #     data = data.reshape((c, z, y, x))
-
         if len(data.shape) < 5:
             data = np.expand_dims(data, 0)
 
