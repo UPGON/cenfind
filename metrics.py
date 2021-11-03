@@ -11,10 +11,12 @@ rng = default_rng(1993)
 def main():
     height, width = 2048, 2048
     object_number = 50
+    preds_random = False
     has_daughter = .8
-    false_rate = 0
-    false_positives_n = int(false_rate * object_number)
-    false_negatives_n = int(false_rate * object_number)
+    false_positives_rate = 0.2
+    false_negative_rate = 0.8
+    false_positives_n = int(false_positives_rate * object_number)
+    false_negatives_n = int(false_negative_rate * object_number)
 
     # Generate ground truth objects (true positives)
     object_positions_actual = rng.integers(0, height, size=(object_number, 2))
@@ -29,15 +31,16 @@ def main():
     object_positions_preds = rng.choice(object_positions_preds, object_number - false_negatives_n, replace=False)
 
     # Add some false positives to the predictions
-    false_positives = rng.integers(0, height, size=(false_positives_n, 2))
-    object_positions_preds = np.concatenate([object_positions_preds, false_positives], axis=0)
-    # object_positions_preds = object_positions_preds + rng.normal(scale=10, size=(object_number, 2)).astype(int)
+    if preds_random:
+        object_positions_preds = rng.integers(0, height, size=(50, 2))
+    else:
+        false_positives = rng.integers(0, height, size=(false_positives_n, 2))
+        object_positions_preds = np.concatenate([object_positions_preds, false_positives], axis=0)
 
     # Assign the predictions to the ground truth using the Hungarian algorithm.
     cost_matrix = cdist(object_positions_actual, object_positions_preds)
     mapping = linear_sum_assignment(cost_matrix, maximize=False)
     agents, tasks = mapping
-    cost_overall = cost_matrix[agents, tasks].sum()
 
     image = np.zeros((height, width, 3), dtype=np.uint8)
 
@@ -49,12 +52,6 @@ def main():
     image = cv2.GaussianBlur(image, (3, 3), 0)
 
     # Draw the matched predictions
-    for pred in object_positions_preds:
-        cv2.drawMarker(image, position=pred, color=(255, 255, 255), markerSize=10,
-                       markerType=cv2.MARKER_SQUARE)
-
-    # Draw the matched predictions
-    error = 0
     for agents_ind, tasks_ind in zip(agents, tasks):
         object_actual = object_positions_actual[agents_ind]
         object_pred = object_positions_preds[tasks_ind]
@@ -62,14 +59,15 @@ def main():
         distance = euclidean(object_pred, object_actual)
 
         print(f"{agents_ind:<4} -> {tasks_ind:>4}: dist = {int(distance):>5}")
-        if distance < 5:
-            cv2.arrowedLine(image, object_positions_preds[tasks_ind], object_positions_actual[agents_ind],
-                            color=(0, 255, 0),
-                            thickness=2,
-                            tipLength=.1)
+        if distance > 5:
+            color = (255, 0, 0)
         else:
-            error += 1
-    print(error)
+            color = (0, 255, 0)
+        cv2.drawMarker(image, position=object_pred, color=color, markerSize=10,
+                       markerType=cv2.MARKER_SQUARE)
+
+    tp = (cost_matrix[agents, tasks] < 3).sum()
+    print(tp)
 
     # Write the image
     tf.imwrite('out/synthetic.png', image)
