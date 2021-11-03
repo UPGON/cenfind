@@ -11,7 +11,7 @@ rng = default_rng(1993)
 def main():
     height, width = 2048, 2048
     object_number = 20
-    has_daughter = .3
+    has_daughter = .7
     noise_gaussian_scale = 1
     false_positives_n = int(.1 * object_number)
     false_negatives_n = int(.1 * object_number)
@@ -38,13 +38,21 @@ def main():
     row_inds, col_inds = linear_sum_assignment(cost_matrix, maximize=False)
     cost_overall = cost_matrix[row_inds, col_inds].sum()
 
-    image = np.zeros((height, width), dtype=np.uint8)
+    image = np.zeros((height, width, 3), dtype=np.uint8)
 
+    # Generate the ground truth image
     for focus in object_positions_actual:
         r, c = focus
-        cv2.circle(image, radius=2, center=(r, c), color=255, thickness=-1)
+        cv2.circle(image, radius=2, center=(r, c), color=(255, 255, 255), thickness=-1)
 
     image = cv2.GaussianBlur(image, (3, 3), 0)
+
+    # Draw the predictions
+    for focus in object_positions_preds:
+        r, c = focus
+        cv2.drawMarker(image, position=(r, c), color=(0, 255, 255), markerSize=10, markerType=cv2.MARKER_TILTED_CROSS)
+
+    # Write the image
     tf.imwrite('out/synthetic.png', image)
 
 
