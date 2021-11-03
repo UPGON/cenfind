@@ -12,14 +12,14 @@ def main():
     height, width = 2048, 2048
     object_number = 50
     has_daughter = .8
-    false_rate = 0.1
+    false_rate = 0
     false_positives_n = int(false_rate * object_number)
     false_negatives_n = int(false_rate * object_number)
 
     # Generate ground truth objects (true positives)
     object_positions_actual = rng.integers(0, height, size=(object_number, 2))
     procentrioles = rng.choice(object_positions_actual, int(has_daughter * object_number),
-                               replace=False) + rng.integers(2, 8)
+                               replace=False) + rng.integers(-4, 4, size=(int(has_daughter * object_number), 2))
     object_positions_actual = np.concatenate([object_positions_actual, procentrioles])
 
     object_number, _ = object_positions_actual.shape
@@ -31,7 +31,7 @@ def main():
     # Add some false positives to the predictions
     false_positives = rng.integers(0, height, size=(false_positives_n, 2))
     object_positions_preds = np.concatenate([object_positions_preds, false_positives], axis=0)
-    object_positions_preds = object_positions_actual + rng.normal(scale=1, size=(object_number, 2)).astype(int)
+    # object_positions_preds = object_positions_preds + rng.normal(scale=10, size=(object_number, 2)).astype(int)
 
     # Assign the predictions to the ground truth using the Hungarian algorithm.
     cost_matrix = cdist(object_positions_actual, object_positions_preds)
