@@ -1,19 +1,27 @@
-import numpy as np
-from numpy.random import default_rng, SeedSequence
-from scipy.spatial.distance import cdist, euclidean
-from scipy.optimize import linear_sum_assignment
-import tifffile as tf
+import logging
+
 import cv2
+import numpy as np
+import tifffile as tf
+from numpy.random import default_rng
+from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cdist, euclidean
+
+logging.basicConfig(level=logging.INFO)
 
 rng = default_rng(1993)
 
+CYAN_RGB = (0, 255, 255)
+RED_RGB = (255, 0, 0)
+WHITE_RGB = (255, 255, 255)
+
 
 def main():
-    height, width = 2048, 2048
+    height, width = 512, 512
     object_number = 50
     preds_random = False
     has_daughter = .8
-    false_positives_rate = 0.2
+    false_positives_rate = 0.1
     false_negative_rate = 0.8
     false_positives_n = int(false_positives_rate * object_number)
     false_negatives_n = int(false_negative_rate * object_number)
@@ -39,38 +47,55 @@ def main():
 
     # Assign the predictions to the ground truth using the Hungarian algorithm.
     cost_matrix = cdist(object_positions_actual, object_positions_preds)
-    mapping = linear_sum_assignment(cost_matrix, maximize=False)
-    agents, tasks = mapping
+    agents, tasks = linear_sum_assignment(cost_matrix, maximize=False)
 
     image = np.zeros((height, width, 3), dtype=np.uint8)
 
     # Generate the ground truth image
     for focus in object_positions_actual:
         r, c = focus
-        cv2.circle(image, radius=2, center=(r, c), color=(255, 255, 255), thickness=-1)
+        cv2.circle(image, radius=2, center=(r, c), color=WHITE_RGB, thickness=-1)
 
     image = cv2.GaussianBlur(image, (3, 3), 0)
 
+    annotation = np.zeros_like(image)
+
     # Draw the matched predictions
-    for agents_ind, tasks_ind in zip(agents, tasks):
-        object_actual = object_positions_actual[agents_ind]
-        object_pred = object_positions_preds[tasks_ind]
+    false_negatives = []
+    true_positives = []
+    false_positives = []
+    for agent, task in zip(agents, tasks):
+        actual = object_positions_actual[agent]
+        pred = object_positions_preds[task]
 
-        distance = euclidean(object_pred, object_actual)
+        distance = euclidean(actual, pred)
 
-        print(f"{agents_ind:<4} -> {tasks_ind:>4}: dist = {int(distance):>5}")
-        if distance > 5:
-            color = (255, 0, 0)
+        logging.info('distance %s', distance)
+
+        if distance < 2:
+            true_positives.append(agent)
         else:
-            color = (0, 255, 0)
-        cv2.drawMarker(image, position=object_pred, color=color, markerSize=10,
-                       markerType=cv2.MARKER_SQUARE)
+            false_positives.append(task)
 
-    tp = (cost_matrix[agents, tasks] < 3).sum()
-    print(tp)
+    # false_positives = set(range(len(object_positions_preds))).difference(set(tasks))
+
+    for idx in false_positives:
+        r, c = object_positions_preds[idx]
+        cv2.drawMarker(annotation, position=(r, c), color=RED_RGB, thickness=1,
+                       markerSize=10, markerType=cv2.MARKER_TILTED_CROSS)
+
+    for idx in true_positives:
+        r, c = object_positions_actual[idx]
+        cv2.drawMarker(annotation, position=(r, c), color=CYAN_RGB, thickness=1,
+                       markerSize=10, markerType=cv2.MARKER_SQUARE)
+
+    for idx in false_negatives:
+        r, c = object_positions_actual[idx]
+        cv2.drawMarker(annotation, position=(r, c), color=RED_RGB, thickness=1,
+                       markerSize=10, markerType=cv2.MARKER_CROSS)
 
     # Write the image
-    tf.imwrite('out/synthetic.png', image)
+    tf.imwrite('out/synthetic.png', image + annotation)
 
 
 if __name__ == '__main__':
