@@ -18,11 +18,11 @@ WHITE_RGB = (255, 255, 255)
 
 def main():
     height, width = 512, 512
-    object_number = 50
+    object_number = 200
     preds_random = False
-    has_daughter = .8
-    false_positives_rate = 0.1
-    false_negative_rate = 0.8
+    has_daughter = .0
+    false_positives_rate = 0.4
+    false_negative_rate = 0.3
     false_positives_n = int(false_positives_rate * object_number)
     false_negatives_n = int(false_negative_rate * object_number)
 
@@ -63,7 +63,7 @@ def main():
     # Draw the matched predictions
     false_negatives = []
     true_positives = []
-    false_positives = []
+
     for agent, task in zip(agents, tasks):
         actual = object_positions_actual[agent]
         pred = object_positions_preds[task]
@@ -75,14 +75,14 @@ def main():
         if distance < 2:
             true_positives.append(agent)
         else:
-            false_positives.append(task)
+            false_negatives.append(agent)
 
-    # false_positives = set(range(len(object_positions_preds))).difference(set(tasks))
+    false_positives = set(range(len(object_positions_preds))).difference(set(tasks))
 
     for idx in false_positives:
         r, c = object_positions_preds[idx]
-        cv2.drawMarker(annotation, position=(r, c), color=RED_RGB, thickness=1,
-                       markerSize=10, markerType=cv2.MARKER_TILTED_CROSS)
+        cv2.drawMarker(annotation, position=(r, c), color=RED_RGB, thickness=2,
+                       markerSize=int(10 / np.sqrt(2)), markerType=cv2.MARKER_TILTED_CROSS)
 
     for idx in true_positives:
         r, c = object_positions_actual[idx]
@@ -91,11 +91,21 @@ def main():
 
     for idx in false_negatives:
         r, c = object_positions_actual[idx]
-        cv2.drawMarker(annotation, position=(r, c), color=RED_RGB, thickness=1,
+        cv2.drawMarker(annotation, position=(r, c), color=RED_RGB, thickness=2,
                        markerSize=10, markerType=cv2.MARKER_CROSS)
 
     # Write the image
-    tf.imwrite('out/synthetic.png', image + annotation)
+    result = cv2.addWeighted(image, .8, annotation, .5, 0)
+    tf.imwrite('out/synthetic.png', result)
+
+    metrics = {'fp': len(false_positives),
+               'fn': len(false_negatives),
+               'tp': len(true_positives)}
+
+    logging.info(metrics)
+
+    logging.info('precision : %s', metrics['tp'] / (metrics['tp'] + metrics['fp']))
+    logging.info('recall : %s', metrics['tp'] / (metrics['tp'] + metrics['fn']))
 
 
 if __name__ == '__main__':
