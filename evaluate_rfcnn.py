@@ -8,10 +8,12 @@ from centrack.data import contrast
 
 logging.basicConfig(level=logging.INFO)
 
-path_dataset = Path('/Users/leoburgy/Dropbox/epfl/centriole_detection/test')
-path_annotation = Path('/Users/leoburgy/Dropbox/epfl/centriole_detection/annotations.csv')
-path_pred_annotation = Path('/Users/leoburgy/Dropbox/epfl/centriole_detection/predictions/annotations')
-path_pred_vis = Path('/Users/leoburgy/Dropbox/epfl/centriole_detection/predictions/visualisation')
+path_root = Path('/Users/leoburgy/Dropbox/epfl/centriole_detection')
+
+path_dataset = path_root / 'test'
+path_annotation = path_root / 'annotations.csv'
+path_pred_annotation = path_root / 'predictions/annotations'
+path_pred_vis = path_root / 'predictions/visualisation'
 path_pred_vis.mkdir(exist_ok=True)
 
 
