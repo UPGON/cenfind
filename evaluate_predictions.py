@@ -3,7 +3,11 @@ import logging
 import cv2
 import numpy as np
 import tifffile as tf
+from pathlib import Path
+import logging
 
+import pandas as pd
+from centrack.data import contrast
 from centrack.metrics import generate_synthetic_data, generate_predictions, compute_metrics
 
 logging.basicConfig(level=logging.INFO)
@@ -11,50 +15,75 @@ logging.basicConfig(level=logging.INFO)
 CYAN_RGB = (0, 255, 255)
 RED_RGB = (255, 0, 0)
 WHITE_RGB = (255, 255, 255)
+path_root = Path('/Users/leoburgy/Dropbox/epfl/centriole_detection')
+
+path_data = path_root / 'data'
+
+path_test = path_data / 'test'
+path_annotation = path_data / 'annotations.csv'
+path_pred_annotation = path_root / 'predictions/annotations'
+path_pred_vis = path_root / 'predictions/visualisation'
+path_pred_vis.mkdir(exist_ok=True)
+image_name = 'RPE1wt_CEP63+CETN2+PCNT_1_004_001_max_C3.tif'
+
+path_file = path_test / image_name
+image_stem = path_file.stem
 
 
 def main():
-    height = 128
-    size = 10
-    positions = generate_synthetic_data(height=height, size=size)
-    predictions = generate_predictions(height=height, foci=positions,
-                                       fp_rate=.1, fn_rate=.05)
+    if not path_file:
+        height = 128
+        size = 10
+        positions = generate_synthetic_data(height=height, size=size)
+        predictions = generate_predictions(height=height, foci=positions,
+                                           fp_rate=.1, fn_rate=.05)
+        image = np.zeros((height, height, 3), dtype=np.uint8)
 
-    results = compute_metrics(positions, predictions, offset_max=2)
+        for focus in positions:
+            r, c = focus
+            cv2.circle(image, radius=2, center=(r, c), color=WHITE_RGB, thickness=-1)
+
+        image = cv2.GaussianBlur(image, (3, 3), 0)
+
+    else:
+        annot_actual = pd.read_csv(path_annotation)
+        positions = annot_actual.loc[annot_actual['image_name'] == image_stem]
+        predictions = pd.read_csv(path_pred_annotation / (image_stem + '.tif.csv'))
+
+        positions = positions[['x', 'y']].to_numpy()
+        predictions = predictions[['x', 'y']].to_numpy()
+
+        image = tf.imread(path_test / (image_stem + '.tif'))
+        image = contrast(image)
+
+    results = compute_metrics(positions, predictions, offset_max=4)
 
     fps = results['fp']
     fns = results['fn']
     tps = results['tp']
 
-    image = np.zeros((height, height, 3), dtype=np.uint8)
-
-    # Generate the ground truth image
-    for focus in positions:
-        r, c = focus
-        cv2.circle(image, radius=2, center=(r, c), color=WHITE_RGB, thickness=-1)
-
-    image = cv2.GaussianBlur(image, (3, 3), 0)
-
-    annotation = np.zeros_like(image)
+    height, width = image.shape
+    annotation = np.zeros((height, width, 3), dtype=np.uint8)
 
     for idx in fps:
         r, c = predictions[idx]
         cv2.drawMarker(annotation, position=(r, c), color=RED_RGB, thickness=2,
                        markerSize=int(10 / np.sqrt(2)), markerType=cv2.MARKER_TILTED_CROSS)
 
-    for idx in tps:
+    for idx in fns:
         r, c = positions[idx]
         cv2.drawMarker(annotation, position=(r, c), color=CYAN_RGB, thickness=1,
                        markerSize=10, markerType=cv2.MARKER_SQUARE)
 
-    for idx in fns:
-        r, c = positions[idx]
-        cv2.drawMarker(annotation, position=(r, c), color=RED_RGB, thickness=2,
+    for idx in tps:
+        r, c = predictions[idx]
+        cv2.drawMarker(annotation, position=(r, c), color=CYAN_RGB, thickness=2,
                        markerSize=10, markerType=cv2.MARKER_CROSS)
 
     # Write the image
-    result = cv2.addWeighted(image, .8, annotation, .5, 0)
-    tf.imwrite('out/synthetic.png', result)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    result = cv2.addWeighted(image_rgb, .8, annotation, .5, 0)
+    tf.imwrite(path_pred_vis / (image_stem + '_annot.png'), result)
 
     metrics = {
         'fp': len(fps),

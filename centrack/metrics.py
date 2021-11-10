@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from numpy.random import default_rng
 from scipy.optimize import linear_sum_assignment
-from scipy.spatial.distance import cdist, euclidean
+from scipy.spatial.distance import cdist
 
 from centrack.annotation import Centre, Contour
 
@@ -84,25 +84,26 @@ def compute_metrics(positions, predictions, offset_max):
     cost_matrix = cdist(positions, predictions)
     agents, tasks = linear_sum_assignment(cost_matrix, maximize=False)
 
-    # Draw the matched predictions
-    fns = []
-    tps = []
+    tps = set()
+    fps = set()
+    fns = set()
 
     for agent, task in zip(agents, tasks):
-        actual = positions[agent]
-        pred = predictions[task]
-
-        distance = euclidean(actual, pred)
-
-        logging.info('distance %i', distance)
-
-        if distance < offset_max:
-            tps.append(agent)
+        if cost_matrix[agent, task] > offset_max:
+            fps.add(task)
+            fns.add(agent)
         else:
-            fns.append(agent)
+            tps.add(task)
 
-    fps = set(range(len(predictions))).difference(set(tasks))
+    pos_idx = set(range(len(positions)))
+    new_fns = pos_idx.difference(set(agents))
+    fns = fns.union(new_fns)
+
+    pred_idx = set(range(len(predictions)))
+    new_fps = pred_idx.difference(set(tasks))
+    fps = fps.union(new_fps)
 
     return {'fp': fps,
             'fn': fns,
-            'tp': tps}
+            'tp': tps,
+            }
