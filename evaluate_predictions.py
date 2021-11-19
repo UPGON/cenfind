@@ -1,12 +1,11 @@
 import logging
+from pathlib import Path
 
 import cv2
 import numpy as np
-import tifffile as tf
-from pathlib import Path
-import logging
-
 import pandas as pd
+import tifffile as tf
+
 from centrack.data import contrast
 from centrack.metrics import generate_synthetic_data, generate_predictions, compute_metrics
 
@@ -15,22 +14,20 @@ logging.basicConfig(level=logging.INFO)
 CYAN_RGB = (0, 255, 255)
 RED_RGB = (255, 0, 0)
 WHITE_RGB = (255, 255, 255)
+
 path_root = Path('/Users/leoburgy/Dropbox/epfl/centriole_detection')
-
 path_data = path_root / 'data'
-
 path_test = path_data / 'test'
 path_annotation = path_data / 'annotations.csv'
 path_pred_annotation = path_root / 'predictions/annotations'
 path_pred_vis = path_root / 'predictions/visualisation'
 path_pred_vis.mkdir(exist_ok=True)
-image_name = 'RPE1wt_CEP63+CETN2+PCNT_1_004_001_max_C3.tif'
-
-path_file = path_test / image_name
-image_stem = path_file.stem
 
 
-def main():
+def metric_for_image(image_name):
+    path_file = path_test / image_name
+    image_stem = path_file.stem
+
     if not path_file:
         height = 128
         size = 10
@@ -93,8 +90,19 @@ def main():
 
     logging.info(metrics)
 
-    logging.info('precision : %.3f', metrics['tp'] / (metrics['tp'] + metrics['fp']))
-    logging.info('recall : %.3f', metrics['tp'] / (metrics['tp'] + metrics['fn']))
+    precision = metrics['tp'] / (metrics['tp'] + metrics['fp'])
+    recall = metrics['tp'] / (metrics['tp'] + metrics['fn'])
+
+    logging.info('precision : %.3f', precision)
+    logging.info('recall : %.3f', recall)
+
+
+def main():
+    for image in path_test.iterdir():
+        if image.name.startswith('.') or not image.name.endswith('tif'):
+            continue
+        logging.info(image.name)
+        metric_for_image(image)
 
 
 if __name__ == '__main__':
