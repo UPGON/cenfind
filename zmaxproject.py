@@ -10,6 +10,15 @@ from tqdm import tqdm
 from centrack.data import DataSet, Field
 
 
+def extract_filename(file):
+    file_name = file.name
+    file_name = file_name.removesuffix(''.join(file.suffixes))
+    file_name = file_name.replace('', '')
+    file_name = re.sub(r'_(Default|MMStack)_\d-Pos', '', file_name)
+
+    return file_name.replace('', '')
+
+
 def main():
     dataset_input = input('Enter the full path to the dataset folder: ')
     dataset_input = Path(dataset_input)
@@ -24,7 +33,6 @@ def main():
     pbar = tqdm(files)
 
     for file in pbar:
-
         with tf.TiffFile(file) as field:
             metadata = field.ome_metadata
             order = field.series[0].axes
@@ -35,11 +43,7 @@ def main():
 
         projected = data.max(axis=2)
 
-        file_name = file.name
-        file_name = file_name.removesuffix(''.join(file.suffixes))
-        file_name = file_name.replace('', '')
-        file_name = re.sub(r'_(Default|MMStack)_\d-Pos', '', file_name)
-        file_name = file_name.replace('', '')
+        file_name = extract_filename(file)
 
         dest_name = f'{file_name}_max.ome.tif'
         path_projected = dataset.projections / dest_name
