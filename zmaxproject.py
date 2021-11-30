@@ -10,7 +10,7 @@ from tqdm import tqdm
 from centrack.data import DataSet, Field
 
 
-if __name__ == '__main__':
+def main():
     dataset_input = input('Enter the full path to the dataset folder: ')
     dataset_input = Path(dataset_input)
     if not dataset_input.exists():
@@ -44,3 +44,7 @@ if __name__ == '__main__':
         dest_name = f'{file_name}_max.ome.tif'
         path_projected = dataset.projections / dest_name
         tf.imwrite(path_projected, projected, photometric='minisblack')
+
+
+if __name__ == '__main__':
+    main()
