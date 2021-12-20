@@ -27,7 +27,6 @@ def channels_combine(stack, channels=(1, 2, 3)):
     return cv2.convertScaleAbs(stack, alpha=255 / stack.max())
 
 
-
 def nuclei_segment(image, threshold=None):
     """
     Extract the nuclei into contours.

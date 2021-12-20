@@ -20,12 +20,7 @@ def extract_filename(file):
 
 
 def main():
-    dataset_input = input('Enter the full path to the dataset folder: ')
-    dataset_input = Path(dataset_input)
-    if not dataset_input.exists():
-        raise FileExistsError
-
-    dataset = DataSet(dataset_input)
+    dataset = DataSet('/Volumes/work/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1')
     dataset.projections.mkdir(exist_ok=True)
 
     files = dataset.fields
@@ -40,14 +35,14 @@ def main():
 
         if len(data.shape) < 5:
             data = np.expand_dims(data, 0)
-
+    #
         projected = data.max(axis=2)
 
         file_name = extract_filename(file)
-
-        dest_name = f'{file_name}_max.ome.tif'
-        path_projected = dataset.projections / dest_name
-        tf.imwrite(path_projected, projected, photometric='minisblack')
+    #
+    #     dest_name = f'{file_name}_max.ome.tif'
+    #     path_projected = dataset.projections / dest_name
+    #     tf.imwrite(path_projected, projected, photometric='minisblack')
 
 
 if __name__ == '__main__':
