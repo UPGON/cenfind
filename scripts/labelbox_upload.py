@@ -13,7 +13,7 @@ if __name__ == '__main__':
     path_projections = path_dataset / 'projections'
     path_projections_channel = path_dataset / 'projections_channel'
 
-    with open('configs/labelbox_api_key.txt', 'r') as apikey:
+    with open('../configs/labelbox_api_key.txt', 'r') as apikey:
         LB_API_KEY = apikey.readline()
         LB_API_KEY = LB_API_KEY.rstrip('\n')
 

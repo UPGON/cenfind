@@ -6,7 +6,7 @@ import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 
-with open('configs/labelbox_api_key.txt', 'r') as apikey:
+with open('../configs/labelbox_api_key.txt', 'r') as apikey:
     LB_API_KEY = apikey.readline()
     LB_API_KEY = LB_API_KEY.rstrip('\n')
 
