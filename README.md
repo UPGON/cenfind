@@ -24,3 +24,7 @@ run `centrack project` to save computing time in the future.
 * Selecting the centriole detection method
 * Choosing for conservative detection or liberal
 * Selecting the cell segmentation algorithm
+
+### Architecture requirements
+- Separate the z-max projection code (caching)
+- Choice: lightweight stack object or use existing classes (AICSImageIO)
