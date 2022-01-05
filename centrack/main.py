@@ -29,8 +29,8 @@ BLUE_BGR_SCALED = color_scale(BLUE_BGR)
 WHITE = (255, 255, 255)
 
 
-def main():
-    config = pytomlpp.load('../configs/config.toml')
+def cli():
+    config = pytomlpp.load('configs/config.toml')
 
     config_dataset = config['dataset']
     path_root = Path(config_dataset['root'])
@@ -84,4 +84,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    cli()

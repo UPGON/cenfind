@@ -4,13 +4,13 @@ author = 'Leo Burgy'
 date = 2021-07-30
 
 [dataset]
-root = "/Volumes/work/datasets"
+root = "/Volumes/work/epfl/datasets"
 
 #RPE1wt_CEP63+CETN2+PCNT_1
 #U2OS_CEP63+SAS6+PCNT_1
 #RPE1wt_CEP152+GTU88+PCNT_1
 
-name = "RPE1wt_CEP63+CETN2+PCNT_1"
+name = "RPE1wt_CEP152+GTU88+PCNT_1"
 
 [data]
 channel = 2

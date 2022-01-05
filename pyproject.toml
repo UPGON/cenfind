@@ -14,6 +14,9 @@ aicsimageio = "4.5.2"
 tifffile = "2021.8.30"
 pytomlpp = "1.0.3"
 
+[tool.poetry.scripts]
+centrack = "centrack.main:cli"
+
 [tool.poetry.dev-dependencies]
 
 [build-system]
