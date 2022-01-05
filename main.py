@@ -1,65 +1,87 @@
+from operator import itemgetter
+from pathlib import Path
+from datetime import datetime as dt
+
+import cv2
 import numpy as np
-import sys
 import tifffile as tf
+import pytomlpp
+
 from aicsimageio import AICSImage
 
-from skimage import io
-from skimage import morphology
-from skimage.filters import gaussian
-from skimage import threshold_adaptive
-from skimage.feature import peak_local_max
-from skimage.morphology import watershed, remove_small_objects
-import skimage.segmentation
-from scipy import ndimage
+from centrack.data import Plane, contrast
+from centrack.annotation import color_scale
+from centrack.detectors import FocusDetector
 
-# Functional parameters
-intensity_blur_rad = 0.
-radius_threshold = 75.
-threshold = -10
-watershed_noise_tolerance = 3
-size_min = 25
+# Foci
+RED_BGR = (44, 36, 187)
+RED_BGR_SCALED = color_scale(RED_BGR)
 
+# Foci label
+VIOLET_BGR = (251, 112, 154)
+VIOLET_BGR_SCALED = color_scale(VIOLET_BGR)
 
-def detect_foci(data):
-    foci_list = []
-    return foci_list
+# Nuclei
+BLUE_BGR = (251, 139, 94)
+BLUE_BGR_SCALED = color_scale(BLUE_BGR)
 
-
-def detect_nuclei(data):
-    # Gaussian filter
-    if intensity_blur_rad >= 1:
-        data = 255 * gaussian(data, sigma=intensity_blur_rad)
-
-    # Adaptive threshold
-    mask = threshold_adaptive(data, radius_threshold, offset=Thr).astype(np.uint8)
-
-    # Binary watershed
-    distance = ndimage.distance_transform_edt(mask)
-    distance = gaussian(distance, sigma=watershed_noise_tolerance)
-    local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((3, 3)), labels=mask)
-    markers = morphology.label(local_maxi)
-    nuclei_labels = watershed(-distance, markers, mask=mask)
-    nuclei_labels = nuclei_labels.astype(np.uint16)
-    nuclei_labels = remove_small_objects(nuclei_labels, min_size=size_min)
-    nuclei_labels = skimage.segmentation.relabel_sequential(nuclei_labels)[0]
-    nuclei_labels = nuclei_labels.astype(np.uint16)
-
-    return nuclei_labels
+# Annotation
+WHITE = (255, 255, 255)
 
 
 def main():
-    channel_id_nuclei = 0
-    channel_id_foci = 1
+    config = pytomlpp.load('../configs/config.toml')
 
-    field = AICSImage('/Volumes/work/epfl/datasets/RPE1wt_CEP63+CETN2+PCNT_1/projections_channel/DAPI/tif/RPE1wt_CEP63+CETN2+PCNT_1_000_000_max_C0.tif')
-    data_nuclei = field.get_image_data('ZYX', C=channel_id_nuclei).max(axis=0).squeeze()
-    data_foci = field.get_image_data('ZYX', C=channel_id_foci).max(axis=0).squeeze()
+    config_dataset = config['dataset']
+    path_root = Path(config_dataset['root'])
+    dataset_name = config_dataset['name']
 
-    nuclei = detect_nuclei(data_nuclei)
-    foci = detect_foci(data_foci)
+    config_data = config['data']
+    channel_id = config_data['channel']
+    x, y = config_data['position']
 
-    return 0
+    # DATA LOADING
+    fov_core = f'{dataset_name}_{x:03}_{y:03}'
+    fov_name = fov_core + '_max.ome.tif'
+    path_projected = path_root / f'{dataset_name}' / 'projections' / fov_name
+    path_out = path_root / dataset_name / 'out'
+    path_out.mkdir(exist_ok=True)
+
+    field = AICSImage(path_projected)
+    data = field.get_image_data('ZYX', C=channel_id).max(axis=0).squeeze()
+    fov = Plane(data, field)
+
+    cv2.imwrite(str(path_out / f"{fov_core}_raw.png"), fov.contrast().data)
+
+    # SEMANTIC ANNOTATION
+    foci_mask = (fov
+                 .blur_median(3)
+                 .maximum_filter(size=5)
+                 .contrast()
+                 .threshold(threshold=20)
+                 )
+
+    cv2.imwrite(str(path_out / f"{fov_core}_mask.png"), foci_mask.data)
+
+    foci_detector = FocusDetector(fov, organelle='centriole')
+    rois = foci_detector.detect()
+
+    annotation_map = cv2.cvtColor(fov.data, cv2.COLOR_GRAY2BGR)
+    annotation_map = contrast(annotation_map)
+
+    path_crop = path_root / dataset_name / 'crops'
+    path_crop.mkdir(exist_ok=True)
+
+    for roi in rois:
+        roi.draw(annotation_map, color=RED_BGR)
+
+    for roi in rois:
+        crop = roi.extract(annotation_map)
+        roi_id = roi.idx
+        cv2.imwrite(str(path_crop / f'{fov_name.split(".")[0]}_C{channel_id}_{roi_id}.png'), crop)
+
+    cv2.imwrite(str(path_out / f"{fov_core}_annot_foci.png"), annotation_map)
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()
