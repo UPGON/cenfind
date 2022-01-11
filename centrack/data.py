@@ -1,9 +1,12 @@
+import logging
 from pathlib import Path
+from dataclasses import dataclass
 
-import cv2
+from cv2 import cv2
 import numpy as np
+import xarray as xr
 
-from aicsimageio import AICSImage
+import tifffile as tf
 
 from scipy.ndimage import maximum_filter, minimum_filter
 
@@ -12,132 +15,92 @@ def contrast(data):
     return cv2.convertScaleAbs(data, alpha=255 / data.max())
 
 
-class FileName:
-    """Model a file name"""
-
-    def __init__(self, genotype, markers, position, extension):
-        self.genotype = genotype
-        self.markers = markers
-        self._position = position
-        self.extension = extension
-
-    @property
-    def position(self):
-        r, c = self.position
-        return f"{r:03}_{c:03}"
-
-    @property
-    def condition(self):
-        return '_'.join([self.genotype, *self.markers, ])
-
-    @property
-    def extension(self):
-        return self._extension
-
-    @extension.setter
-    def extension(self, extension):
-        self._extension = extension
-
-    @property
-    def filename(self):
-        return self.condition + '_' + self.position + '.' + self.extension
-
-    def __repr__(self):
-        return f"{self.__class__.__name__} ({self.filename})"
+@dataclass
+class Marker:
+    position: int
+    name: str
 
 
+@dataclass
+class PixelSize:
+    value: float
+    units: str
+
+    def in_cm(self):
+        conversion_map = {
+            'um': 10e4,
+            'μm': 10e4,
+            'nm': 10e7,
+        }
+        return self.value / conversion_map[self.units]
+
+
+@dataclass
+class Condition:
+    markers: list
+    genotype: str
+    pixel_size: PixelSize
+
+
+@dataclass
 class DataSet:
-    def __init__(self, path):
-        self.path = Path(path)
-
-    def __repr__(self):
-        return str(self.path.name)
-
-    @property
-    def raw(self):
-        """Define the path to raw folder."""
-        return Path(self.path) / 'raw'
+    path: Path
+    condition: Condition
 
     @property
     def projections(self):
         """Define the path to projections folder."""
-        return Path(self.path) / 'projections'
+        return self.path / 'projections'
 
     @property
-    def fields(self):
-        return [p for p in (self.path / 'raw').glob('*.ome.tif') if not p.name.startswith('.')]
-
-    def markers(self, marker_sep='+'):
-        """
-        Extract the markers' name from the dataset string.
-        The string must follows the structure `<genotype>_marker1+marker2`
-        It append the DAPI at the beginning of the list.
-
-        :param marker_sep:
-        :param self:
-        :return: a dictionary of markers
-        """
-
-        markers = self.path.name.split('_')[-2].split(marker_sep)
-        if 'DAPI' not in markers:
-            markers = ['DAPI'] + markers
-
-        return {k: v for k, v in enumerate(markers)}
+    def raw(self):
+        """Define the path to raw folder."""
+        return self.path / 'raw'
 
 
+@dataclass
 class Field:
-    def __init__(self, data, dataset):
-        self.data = data
-        self.dataset = dataset
-
-    def select_plane(self, channel_id):
-        return Plane(self.data.get_image_data("YX", C=channel_id), self)
-
-
-class Plane:
-    def __init__(self, data, field):
-        self.data = data
-        self.field = field
-
-    def __repr__(self):
-        return "Plane"
+    path: Path
+    dataset: DataSet
 
     @property
-    def dims(self):
-        return self.data.shape
+    def markers(self):
+        return self.dataset.condition.markers
 
     @property
-    def height(self):
-        return self.dims[0]
+    def data(self):
+        if not self.path.exists():
+            raise FileNotFoundError(self.path)
 
-    @property
-    def width(self):
-        return self.dims[1]
+        logging.info('Loading %s', self.path)
 
-    @property
-    def is_mask(self):
-        unique_values = np.unique(self.data)
-        return len(unique_values) < 2
+        with tf.TiffFile(self.path) as file:
+            data = file.asarray()
+            data = np.squeeze(data)
 
-    def write_png(self, path):
-        cv2.imwrite(str(path), self.data)
+        result = xr.DataArray(data,
+                              dims=['channel', 'width', 'height'],
+                              coords={'channel': self.markers})
 
-    def contrast(self):
-        return Plane(contrast(self.data), self.field)
+        return result
 
-    def blur_median(self, ks):
-        return Plane(cv2.medianBlur(self.data, ks), self.field)
+    def select(self, marker):
+        data = self.data.loc[marker].to_numpy()
+        return Channel(self, data)
+
+
+@dataclass
+class Channel:
+    field: Field
+    data: np.ndarray
 
     def maximum_filter(self, size):
-        return Plane(maximum_filter(self.data, size=(size, size)), self.field)
-
-    def minimum_filter(self, size):
-        return Plane(minimum_filter(self.data, size=(size, size)), self.field)
+        return Channel(self.field, maximum_filter(self.data, size=(size, size)))
 
     def threshold(self, threshold=0):
         if threshold:
             _, mask = cv2.threshold(self.data, threshold, 255, cv2.THRESH_BINARY)
-            return Plane(mask, self.field)
+            return Channel(self.field, mask)
         else:
             _, mask = cv2.threshold(self.data, threshold, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-            return Plane(mask, self.field)
+            return Channel(self.field, mask)
