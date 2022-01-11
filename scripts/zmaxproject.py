@@ -1,41 +1,28 @@
 # Z-max projection
 
 from pathlib import Path
-import re
-
-import numpy as np
-import tifffile as tf
 from tqdm import tqdm
 
-from centrack.data import DataSet, Field
-
-
-def extract_filename(file):
-    file_name = file.name
-    file_name = file_name.removesuffix(''.join(file.suffixes))
-    file_name = file_name.replace('', '')
-    file_name = re.sub(r'_(Default|MMStack)_\d-Pos', '', file_name)
-
-    return file_name.replace('', '')
+from centrack.data import DataSet, Field, Condition, PixelSize
+from centrack.utils import is_tif, extract_filename
 
 
 def main():
-    dataset = DataSet('/Volumes/work/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1')
+    path_dataset = Path('/Volumes/work/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1')
+    markers = 'DAPI+CEP152+GTU88+PCNT'.split('+')
+    conditions = Condition(markers=markers,
+                           genotype='RPE1wt',
+                           pixel_size=PixelSize(.1025, 'um'))
+    dataset = DataSet(path_dataset, condition=conditions)
     dataset.projections.mkdir(exist_ok=True)
 
-    files = dataset.fields
+    files = [file for file in dataset.projections.iterdir() if is_tif(file)]
 
     pbar = tqdm(files)
 
     for file in pbar:
-        with tf.TiffFile(file) as field:
-            metadata = field.ome_metadata
-            order = field.series[0].axes
-            data = field.asarray()
-
-        if len(data.shape) < 5:
-            data = np.expand_dims(data, 0)
-    #
+        field = Field(file, dataset=dataset)
+        data = field.data
         projected = data.max(axis=2)
 
         file_name = extract_filename(file)
