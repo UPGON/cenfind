@@ -36,11 +36,11 @@ dataset_path = '/Volumes/work/epfl/datasets'
 dataset_name = 'RPE1wt_CEP152+GTU88+PCNT_1'
 ds = Dataset(dataset_path, dataset_name, channels='DAPI+CEP152+GTU88+PCNT'.split('+'))
 
-for field in ds.fields:
+for field in ds.data:
     projection = field.project()
     projection.dump(dataset_name / dataset_name / 'projections' / f'{field.name}_max.tiff')
 
-field = ds.fields[0, 0]
+field = ds.data[0, 0]
 
 centrioles = field['CEP152']
 nuclei = field['DAPI']
