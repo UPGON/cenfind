@@ -1,10 +1,24 @@
 import re
 import json
 
-import cv2
+from cv2 import cv2
 import numpy as np
 
 from centrack.annotation import Contour
+
+
+def extract_filename(file):
+    file_name = file.name
+    file_name = file_name.removesuffix(''.join(file.suffixes))
+    file_name = file_name.replace('', '')
+    file_name = re.sub(r'_(Default|MMStack)_\d-Pos', '', file_name)
+
+    return file_name.replace('', '')
+
+
+def is_tif(filename):
+    _filename = str(filename)
+    return _filename.endswith('.tif') and not _filename.startswith('.')
 
 
 def image_tint(image, tint):
