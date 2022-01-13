@@ -5,7 +5,7 @@ import scipy.ndimage
 from skimage import img_as_float
 from skimage.feature import peak_local_max
 
-from centrack.annotation import Centre
+from centrack.annotation import Centre, Contour
 from centrack.utils import contrast
 
 
@@ -43,3 +43,22 @@ class FocusDetector(Detector):
         foci_coords = peak_local_max(centrioles_float, min_distance=interpeak_min)
 
         return [Centre(f, f_id, self.organelle, confidence=-1) for f_id, f in enumerate(foci_coords)]
+
+
+class NucleiDetector(Detector):
+    """
+    Threshold a DAPI image and run contour detection.
+    """
+    def _mask(self):
+        transformed = self.plane
+        transformed = cv2.GaussianBlur(transformed, (31, 31), 0)
+        transformed = contrast(transformed)
+        th, mask = cv2.threshold(transformed, 200, 255, 0)
+        return mask
+
+    def detect(self):
+        transformed = self._mask()
+        contours, hierarchy = cv2.findContours(transformed,
+                                               cv2.RETR_EXTERNAL,
+                                               cv2.CHAIN_APPROX_SIMPLE)
+        return [Contour(c, self.organelle, c_id, confidence=-1) for c_id, c in enumerate(contours)]

@@ -203,14 +203,14 @@ class Contour(ROI):
     def centre(self):
         moments = cv2.moments(self.contour)
 
-        r_centre = int(moments['m01'] / moments['m00'])
-        c_centre = int(moments['m10'] / moments['m00'])
+        r_centre = int(moments['m01'] / (moments['m00'] + 1e-5))
+        c_centre = int(moments['m10'] / (moments['m00'] + 1e-5))
 
         return Centre((r_centre, c_centre), self.idx, self.label, self.confidence)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, **kwargs):
-        r, c = self.centre
-        offset = int(.01 * image.width)
+        r, c = self.centre.centre
+        offset = int(.01 * image.shape[0])
         cv2.drawContours(image, [self.contour], -1, color, thickness=2)
         if annotation:
             cv2.putText(image, f'BB{self.idx}',
