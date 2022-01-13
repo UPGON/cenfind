@@ -1,8 +1,5 @@
-from math import prod
 from abc import ABC, abstractmethod
-import cv2
-
-from centrack.data import Plane
+from cv2 import cv2
 
 
 def color_scale(color):
@@ -99,7 +96,9 @@ class Centre(ROI):
 
         x, y = c, r
         if annotation:
-            cv2.putText(image, f'C{self.idx}', org=(x, y + offset_col), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            cv2.putText(image, f'C{self.idx}',
+                        org=(x, y + offset_col),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.4, thickness=1, color=color)
 
         return cv2.drawMarker(image, (x, y), color, markerType=marker_type,
@@ -214,7 +213,9 @@ class Contour(ROI):
         offset = int(.01 * image.width)
         cv2.drawContours(image, [self.contour], -1, color, thickness=2)
         if annotation:
-            cv2.putText(image, f'BB{self.idx}', org=(r + offset, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            cv2.putText(image, f'BB{self.idx}',
+                        org=(r + offset, c),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.8, thickness=2, color=color)
         return image
 

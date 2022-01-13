@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 
-import cv2
-import numpy as np
+from cv2 import cv2
+import scipy.ndimage
 from skimage import img_as_float
 from skimage.feature import peak_local_max
 
 from centrack.annotation import Centre
+from centrack.utils import contrast
 
 
 class Detector(ABC):
@@ -25,17 +26,17 @@ class Detector(ABC):
 class FocusDetector(Detector):
     """Combine a preprocessing and a detection step and return a list of centres."""
     def _mask(self):
-        transformed = (self.plane
-                       .blur_median(3)
-                       .maximum_filter(size=5)
-                       .contrast()
-                       .threshold(threshold=50)
-                       )
+        transformed = self.plane
+        transformed = cv2.GaussianBlur(transformed, (3, 3), 0)
+        transformed = scipy.ndimage.maximum_filter(transformed, size=5)
+        transformed = contrast(transformed)
+        th, transformed = cv2.threshold(transformed, 50, 255, cv2.THRESH_BINARY)
+
         return transformed
 
     def detect(self, interpeak_min=3):
-        image = self.plane.data
-        mask = self._mask().data
+        image = self.plane
+        mask = self._mask()
         masked = cv2.bitwise_and(image, image, mask=mask)
 
         centrioles_float = img_as_float(masked)

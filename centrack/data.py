@@ -11,10 +11,6 @@ import tifffile as tf
 from scipy.ndimage import maximum_filter, minimum_filter
 
 
-def contrast(data):
-    return cv2.convertScaleAbs(data, alpha=255 / data.max())
-
-
 @dataclass
 class Marker:
     position: int
@@ -67,8 +63,7 @@ class Field:
     def markers(self):
         return self.dataset.condition.markers
 
-    @property
-    def data(self):
+    def load(self):
         if not self.path.exists():
             raise FileNotFoundError(self.path)
 
@@ -84,23 +79,10 @@ class Field:
 
         return result
 
-    def select(self, marker):
-        data = self.data.loc[marker].to_numpy()
-        return Channel(self, data)
-
 
 @dataclass
 class Channel:
-    field: Field
-    data: np.ndarray
+    data: xr.DataArray
 
-    def maximum_filter(self, size):
-        return Channel(self.field, maximum_filter(self.data, size=(size, size)))
-
-    def threshold(self, threshold=0):
-        if threshold:
-            _, mask = cv2.threshold(self.data, threshold, 255, cv2.THRESH_BINARY)
-            return Channel(self.field, mask)
-        else:
-            _, mask = cv2.threshold(self.data, threshold, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-            return Channel(self.field, mask)
+    def __getitem__(self, item):
+        return self.data.loc[item, :, :]

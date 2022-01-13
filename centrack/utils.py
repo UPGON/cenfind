@@ -1,10 +1,24 @@
+import argparse
 import re
 import json
+import argparse
+from pathlib import Path
 
 from cv2 import cv2
 import numpy as np
 
 from centrack.annotation import Contour
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='CCOUNT: Automatic centriole scoring')
+
+    parser.add_argument('dataset', type=Path, help='path to the dataset')
+    parser.add_argument('marker', type=str, help='marker to use for foci detection')
+    parser.add_argument('coords', type=tuple, help='position, e.g., 0,2')
+    parser.add_argument('-o', '--out', type=Path, help='path for output')
+
+    return parser.parse_args()
 
 
 def extract_filename(file):
@@ -19,6 +33,10 @@ def extract_filename(file):
 def is_tif(filename):
     _filename = str(filename)
     return _filename.endswith('.tif') and not _filename.startswith('.')
+
+
+def contrast(data):
+    return cv2.convertScaleAbs(data, alpha=255 / data.max())
 
 
 def image_tint(image, tint):
