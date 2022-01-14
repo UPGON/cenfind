@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-import numpy as np
 
+import numpy as np
 from cv2 import cv2
+from dataclasses import dataclass
 
 
 def color_scale(color):
@@ -24,6 +24,7 @@ class Stamp:
                     fontScale=.8, thickness=2, color=color)
 
 
+@dataclass
 class ROI(ABC):
     """Abstract class to represent any region of interest"""
 
@@ -61,15 +62,20 @@ class ROI(ABC):
         pass
 
 
+@dataclass
 class Centre(ROI):
-    def __init__(self, position, idx, label, confidence):
-        self.row, self.col = position
-        self.idx = str(idx)
-        self.label = label
-        self.confidence = confidence
+    position: tuple
+    idx: int
+    label: str
+    confidence: float
 
-    def __repr__(self):
-        return f"Centre({self.row} {self.col} {self.idx} {self.label} {self.confidence})"
+    @property
+    def row(self):
+        return self.position[0]
+
+    @property
+    def col(self):
+        return self.position[1]
 
     @property
     def dims(self):
@@ -99,7 +105,7 @@ class Centre(ROI):
 
         x, y = c, r
         if annotation:
-            cv2.putText(image, f'C{self.idx}',
+            cv2.putText(image, f'{self.label} {self.idx}',
                         org=(x, y + offset_col),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.4, thickness=1, color=color)
@@ -112,17 +118,13 @@ class Centre(ROI):
         return self.bbox.extract(plane)
 
 
+@dataclass
 class BBox(ROI):
-    def __init__(self, top_left, bottom_right, idx, label, confidence):
-        self.top_left = top_left
-        self.bottom_right = bottom_right
-        self.idx = idx
-        self.label = label
-        self.confidence = confidence
-
-    def __repr__(self):
-        return f"BoundingBox(id={self.idx} extent=({self.top_left} {self.bottom_right}), \
-        label={self.label}, p={self.confidence})"
+    top_left: tuple
+    bottom_right: tuple
+    idx: int
+    label: str
+    confidence: float
 
     @property
     def dims(self):
@@ -132,15 +134,13 @@ class BBox(ROI):
     def height(self):
         start_row, _ = self.top_left
         stop_row, _ = self.bottom_right
-        height = stop_row - start_row
-        return height
+        return stop_row - start_row
 
     @property
     def width(self):
         _, start_col = self.top_left
         _, stop_col = self.bottom_right
-        width = stop_col - start_col
-        return width
+        return stop_col - start_col
 
     @property
     def centre(self):
@@ -157,9 +157,12 @@ class BBox(ROI):
         """Draw bounding box on an image."""
         offset = int(.01 * image.width)
         r, c = self.centre.centre
-        cv2.rectangle(image, self.top_left, self.bottom_right, color, thickness=kwargs['thickness'])
+        cv2.rectangle(image, self.top_left, self.bottom_right,
+                      color, thickness=kwargs['thickness'])
         if annotation:
-            cv2.putText(image, f'BB{self.idx}', org=(r + offset, c), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            cv2.putText(image, f'{self.label} {self.idx}',
+                        org=(r + offset, c),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.5, thickness=1, color=color)
         return image
 
