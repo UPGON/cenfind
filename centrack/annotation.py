@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+import numpy as np
+
 from cv2 import cv2
 
 
@@ -166,17 +169,14 @@ class BBox(ROI):
         return image[start_row:stop_row, start_col:stop_col]
 
 
+@dataclass
 class Contour(ROI):
     """Represent a blob using the row-column scheme."""
 
-    def __init__(self, contour, idx, label, confidence):
-        self.contour = contour
-        self.label = label
-        self.idx = idx
-        self.confidence = confidence
-
-    def __str__(self):
-        return f"Contour(id={self.idx} extent=({self.centre}), label={self.label}, p={self.confidence})"
+    contour: np.ndarray
+    label: str
+    idx: int
+    confidence: float
 
     @property
     def dims(self):
@@ -209,12 +209,11 @@ class Contour(ROI):
         return Centre((r_centre, c_centre), self.idx, self.label, self.confidence)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, **kwargs):
-        r, c = self.centre.centre
-        offset = int(.01 * image.shape[0])
+        c, r = self.centre.centre
         cv2.drawContours(image, [self.contour], -1, color, thickness=2)
         if annotation:
-            cv2.putText(image, f'BB{self.idx}',
-                        org=(r + offset, c),
+            cv2.putText(image, f'{self.label}{self.idx}',
+                        org=(r, c),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.8, thickness=2, color=color)
         return image
