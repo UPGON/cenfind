@@ -1,8 +1,9 @@
-import json
 from cv2 import cv2
+from cv2 import cv2
+
 from centrack.data import DataSet, Field, Channel, Condition, PixelSize
+from centrack.detectors import FocusDetector, NucleiStardistDetector
 from centrack.utils import parse_args, contrast
-from centrack.detectors import FocusDetector, NucleiDetector
 
 
 def cli():
@@ -22,15 +23,14 @@ def cli():
     data = field.load()
 
     foci = Channel(data)[args.marker].to_numpy()
-    focus_detector = FocusDetector(foci, 'centriole')
+    focus_detector = FocusDetector(foci, 'Centriole')
     foci_detected = focus_detector.detect(5)
 
     nuclei = Channel(data)['DAPI'].to_numpy()
-    nuclei_detector = NucleiDetector(nuclei, 'nuclei')
+    nuclei_detector = NucleiStardistDetector(nuclei, 'Nucleus')
     nuclei_detected = nuclei_detector.detect()
 
-    background = cv2.cvtColor(contrast(foci), cv2.COLOR_GRAY2BGR)
-    background[:, :, 0] = contrast(nuclei)
+    background = cv2.cvtColor(contrast(nuclei), cv2.COLOR_GRAY2BGR)
     for c in foci_detected:
         c.draw(background)
 
