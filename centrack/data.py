@@ -1,20 +1,48 @@
 import logging
+import re
 from pathlib import Path
-from dataclasses import dataclass
 
-from cv2 import cv2
 import numpy as np
-import xarray as xr
-
 import tifffile as tf
-
-from scipy.ndimage import maximum_filter, minimum_filter
+import xarray as xr
+from dataclasses import dataclass
 
 
 @dataclass
 class Marker:
-    position: int
-    name: str
+    """Represents a marker."""
+    protein: str = None
+    channel: str = None
+    position: int = None
+    wave_length: int = None
+    code: str = None
+
+    @property
+    def _code(self):
+        if self.code is not None:
+            return self.code
+        else:
+            return f'{self.channel}{self.protein}{self.wave_length}'
+
+    @classmethod
+    def from_str(cls, code, pattern=r'([rgbm])([\w\d]+)', position=None):
+        if code is None:
+            raise ValueError('Provide a code')
+        if code == 'DAPI':
+            return cls(protein='DNA',
+                       channel='b',
+                       position=0
+                       )
+        else:
+            remainder, wave_length = code[:-3], code[-3:]
+            res = re.match(pattern, remainder)
+            if res is None:
+                raise ValueError(f'Regex unsuccessful: {res=}')
+            channel, protein = res.groups()
+            return cls(protein=protein,
+                       channel=channel,
+                       position=position,
+                       wave_length=wave_length)
 
 
 @dataclass
