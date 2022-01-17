@@ -9,3 +9,5 @@ data/
 configs/
 *.pt
 spotipy/
+models/
+*.h5
