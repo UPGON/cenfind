@@ -25,7 +25,7 @@ metadata_dict = {key: value for key, value in zip(metadata_keys, filename.split(
 
 condition = metadata_dict['genotype']
 markers_list = metadata_dict['markers'].split('+')
-markers = [Marker().from_str(code, position=position)
+markers = [Marker.from_str(code, position=position)
            for position, code in enumerate(markers_list)]
 replicate = metadata_dict['replicate']
 
