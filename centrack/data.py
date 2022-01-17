@@ -25,7 +25,7 @@ class Marker:
             return f'{self.channel}{self.protein}{self.wave_length}'
 
     @classmethod
-    def from_str(cls, code, pattern=r'([rgbm])([\w\d]+)', position=None):
+    def from_code(cls, code, pattern=r'([rgbm])([\w\d]+)', position=None):
         if code is None:
             raise ValueError('Provide a code')
         if code == 'DAPI':
