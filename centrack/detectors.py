@@ -1,15 +1,13 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
-import scipy.ndimage
 from csbdeep.utils import normalize
 from cv2 import cv2
-from skimage import img_as_float
-from skimage.feature import peak_local_max
 from stardist.models import StarDist2D
 
 from centrack.annotation import Centre, Contour
-from centrack.utils import contrast
+from spotipy.spotipy.model import SpotNet, Config
+from spotipy.spotipy.utils import normalize_fast2d
 
 
 def mat2gray(image):
@@ -36,22 +34,22 @@ class FocusDetector(Detector):
 
     def _mask(self):
         transformed = self.plane
-        transformed = cv2.GaussianBlur(transformed, (3, 3), 0)
-        transformed = scipy.ndimage.maximum_filter(transformed, size=5)
-        transformed = contrast(transformed)
-        th, transformed = cv2.threshold(transformed, 50, 255, cv2.THRESH_BINARY)
-
         return transformed
 
     def detect(self, interpeak_min=3):
+        model = SpotNet(Config(), )
         image = self.plane
-        mask = self._mask()
-        masked = cv2.bitwise_and(image, image, mask=mask)
+        x = normalize_fast2d(image)
+        n_tiles = 2
+        prob_thresh = .5
 
-        centrioles_float = img_as_float(masked)
-        foci_coords = peak_local_max(centrioles_float, min_distance=interpeak_min)
+        foci = model.predict(x,
+                             n_tiles=n_tiles,
+                             prob_thresh=prob_thresh,
+                             show_tile_progress=False)
 
-        return [Centre(f, f_id, self.organelle, confidence=-1) for f_id, f in enumerate(foci_coords)]
+        return [Centre(pred_points, f_id, self.organelle, confidence=pred_prob) for f_id, (pred_prob, pred_points) in
+                enumerate(foci)]
 
 
 class NucleiDetector(Detector):
