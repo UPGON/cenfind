@@ -1,5 +1,4 @@
 from cv2 import cv2
-from cv2 import cv2
 
 from centrack.data import DataSet, Field, Channel, Condition, PixelSize
 from centrack.detectors import FocusDetector, NucleiStardistDetector
