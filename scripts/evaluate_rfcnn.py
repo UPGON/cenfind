@@ -1,10 +1,10 @@
 from pathlib import Path
 import logging
 
-import cv2
+from cv2 import cv2
 import pandas as pd
 import tifffile as tf
-from centrack.data import contrast
+from centrack.utils import contrast
 
 logging.basicConfig(level=logging.INFO)
 
