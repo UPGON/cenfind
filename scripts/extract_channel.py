@@ -1,10 +1,11 @@
 import logging
 from pathlib import Path
 
+import numpy as np
 import tifffile as tf
 from cv2 import cv2
+from skimage import exposure
 
-from centrack.utils import contrast
 from centrack.data import Marker
 
 logging.basicConfig(level=logging.DEBUG)
@@ -19,7 +20,6 @@ filename = '20210728_HA-FL_S6_CloneC2_DAPI+rPOC5AF488+mHA568+gCPAP647_R1_4_MMSta
 filename_stripped = filename.replace(projection, '').replace(mm_suffix, '')
 
 metadata_keys = ['date', 'genotype', 's', 'clone', 'markers', 'replicate']
-
 
 metadata_dict = {key: value for key, value in zip(metadata_keys, filename.split('_'))}
 
@@ -56,12 +56,35 @@ if __name__ == '__main__':
 
             file_name_dst = f"{name_core}_C{c}"
 
-            plane = data[c, :, :]
+            data_yxc = np.moveaxis(data, 0, -1)
+            plane = data_yxc[:, :, c]
             tf.imwrite(path_projections_channel / 'tif' / (file_name_dst + ".tif"), plane)
 
-            contrasted = contrast(plane)
-            inverted = cv2.bitwise_not(contrasted)
-            cv2.putText(inverted, f"{file_name_dst} ({channel})", (200, 200), cv2.QT_FONT_NORMAL, .8, color=10,
+            channels = list(range(data.shape[0]))
+            if len(channels) != 4:
+                raise ValueError(f'There are two many channels ({channels}) for *ground splitting')
+
+            other_channels = [o for o in channels if o != c]
+
+            background_bgr = data_yxc[:, :, other_channels]
+
+            _background_gray = cv2.cvtColor(background_bgr, cv2.COLOR_BGR2GRAY)
+            background_gray = cv2.cvtColor(_background_gray, cv2.COLOR_GRAY2BGR)
+
+            def improve(image):
+                percentiles = np.percentile(image, (0.1, 99.9))
+                return exposure.rescale_intensity(image, in_range=tuple(percentiles))
+
+            foreground = np.zeros_like(background_gray)
+            foreground[:, :, 1] = improve(plane)
+            background_gray = improve(background_gray)
+
+            res = cv2.addWeighted(background_gray, .8, foreground, .8, gamma=1)
+            res = exposure.rescale_intensity(res, out_range='uint8')
+
+            cv2.putText(res, f"{file_name_dst} ({channel})", (200, 200), cv2.QT_FONT_NORMAL, .8,
+                        color=(255, 255, 255),
                         thickness=2)
-            cv2.imwrite(str(path_projections_channel / 'png' / (file_name_dst + ".png")), inverted)
+
+            cv2.imwrite(str(path_projections_channel / 'png' / (file_name_dst + ".png")), res)
             logging.info(f'Saved: {name_core} channel: {c}')
