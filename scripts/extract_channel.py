@@ -7,8 +7,15 @@ from cv2 import cv2
 from skimage import exposure
 
 from centrack.data import Marker
+from centrack.utils import contrast
 
 logging.basicConfig(level=logging.DEBUG)
+
+
+def improve(image, percentile=(.1, 99.9)):
+    percentiles = np.percentile(image, percentile)
+    return exposure.rescale_intensity(image, in_range=tuple(percentiles), out_range='uint8')
+
 
 projection = '_max'
 
@@ -60,28 +67,7 @@ if __name__ == '__main__':
             plane = data_yxc[:, :, c]
             tf.imwrite(path_projections_channel / 'tif' / (file_name_dst + ".tif"), plane)
 
-            channels = list(range(data.shape[0]))
-            if len(channels) != 4:
-                raise ValueError(f'There are two many channels ({channels}) for *ground splitting')
-
-            other_channels = [o for o in channels if o != c]
-
-            background_bgr = data_yxc[:, :, other_channels]
-
-            _background_gray = cv2.cvtColor(background_bgr, cv2.COLOR_BGR2GRAY)
-            background_gray = cv2.cvtColor(_background_gray, cv2.COLOR_GRAY2BGR)
-
-            def improve(image):
-                percentiles = np.percentile(image, (0.1, 99.9))
-                return exposure.rescale_intensity(image, in_range=tuple(percentiles))
-
-            foreground = np.zeros_like(background_gray)
-            foreground[:, :, 1] = improve(plane)
-            background_gray = improve(background_gray)
-
-            res = cv2.addWeighted(background_gray, .8, foreground, .8, gamma=1)
-            res = exposure.rescale_intensity(res, out_range='uint8')
-
+            res = cv2.bitwise_not(contrast(plane))
             cv2.putText(res, f"{file_name_dst} ({channel})", (200, 200), cv2.QT_FONT_NORMAL, .8,
                         color=(255, 255, 255),
                         thickness=2)
