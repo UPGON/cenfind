@@ -1,8 +1,10 @@
+import numpy as np
 from cv2 import cv2
 
 from centrack.data import DataSet, Field, Channel, Condition, PixelSize
 from centrack.detectors import FocusDetector, NucleiStardistDetector
 from centrack.utils import parse_args, contrast
+from centrack.score import assign
 
 
 def cli():
@@ -29,12 +31,23 @@ def cli():
     nuclei_detector = NucleiStardistDetector(nuclei, 'Nucleus')
     nuclei_detected = nuclei_detector.detect()
 
-    background = cv2.cvtColor(contrast(nuclei), cv2.COLOR_GRAY2BGR)
+    res = assign(foci_list=foci_detected, nuclei_list=nuclei_detected)
+
+    background = cv2.cvtColor(contrast(foci), cv2.COLOR_GRAY2BGR)
+    # foci_bgr = np.zeros_like(background)
+    # foci_bgr[:, :, 2] = foci
+    # background = cv2.addWeighted(background, .5, foci_bgr, 1, 1)
     for c in foci_detected:
         c.draw(background)
 
     for n in nuclei_detected:
         n.draw(background)
+
+    for c, n in res:
+        start = c.centre
+        end = n.centre.centre
+        print(start, end)
+        cv2.line(background, start, end, (0, 255, 0), 3, lineType=cv2.FILLED)
 
     if args.out:
         args.out.mkdir(exist_ok=True)
