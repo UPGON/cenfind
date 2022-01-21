@@ -24,7 +24,7 @@ class Stamp:
                     fontScale=.8, thickness=2, color=color)
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class ROI(ABC):
     """Abstract class to represent any region of interest"""
 
@@ -62,12 +62,12 @@ class ROI(ABC):
         pass
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Centre(ROI):
     position: tuple
-    idx: int
-    label: str
-    confidence: float
+    idx: int = 0
+    label: str = ''
+    confidence: float = 0
 
     @property
     def row(self):
@@ -103,7 +103,7 @@ class Centre(ROI):
         r, c = self.centre
         offset_col = int(.01 * image.shape[1])
 
-        x, y = c, r
+        x, y = r, c
         if annotation:
             cv2.putText(image, f'{self.label} {self.idx}',
                         org=(x, y + offset_col),
@@ -118,13 +118,13 @@ class Centre(ROI):
         return self.bbox.extract(plane)
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class BBox(ROI):
     top_left: tuple
     bottom_right: tuple
-    idx: int
-    label: str
-    confidence: float
+    idx: int = 0
+    label: str = ''
+    confidence: float = 0
 
     @property
     def dims(self):
@@ -164,6 +164,7 @@ class BBox(ROI):
                         org=(r + offset, c),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.5, thickness=1, color=color)
+
         return image
 
     def extract(self, image):
@@ -172,14 +173,14 @@ class BBox(ROI):
         return image[start_row:stop_row, start_col:stop_col]
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Contour(ROI):
     """Represent a blob using the row-column scheme."""
 
     contour: np.ndarray
-    label: str
-    idx: int
-    confidence: float
+    label: str = ''
+    idx: int = 0
+    confidence: float = 0
 
     @property
     def dims(self):
@@ -206,19 +207,21 @@ class Contour(ROI):
     def centre(self):
         moments = cv2.moments(self.contour)
 
-        r_centre = int(moments['m01'] / (moments['m00'] + 1e-5))
-        c_centre = int(moments['m10'] / (moments['m00'] + 1e-5))
+        r_centre = int(moments['m10'] / (moments['m00'] + 1e-5))
+        c_centre = int(moments['m01'] / (moments['m00'] + 1e-5))
 
         return Centre((r_centre, c_centre), self.idx, self.label, self.confidence)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, **kwargs):
-        c, r = self.centre.centre
+        r, c = self.centre.centre
         cv2.drawContours(image, [self.contour], -1, color, thickness=2)
         if annotation:
             cv2.putText(image, f'{self.label}{self.idx}',
                         org=(r, c),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.8, thickness=2, color=color)
+            cv2.drawMarker(image, (r, c), (0, 0, 255), markerType=cv2.MARKER_STAR,
+                           markerSize=10)
         return image
 
     def extract(self, plane):
