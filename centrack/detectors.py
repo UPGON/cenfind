@@ -1,4 +1,6 @@
+import functools
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import numpy as np
 from csbdeep.utils import normalize
@@ -6,8 +8,17 @@ from cv2 import cv2
 from stardist.models import StarDist2D
 
 from centrack.annotation import Centre, Contour
-from spotipy.spotipy.model import SpotNet, Config
+from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
+
+
+@functools.lru_cache(maxsize=None)
+def get_model(model):
+    path = Path(model)
+    if not path.is_dir():
+        raise (FileNotFoundError(f"{path} is not a directory"))
+
+    return SpotNet(None, name=path.name, basedir=str(path.parent))
 
 
 def mat2gray(image):
@@ -37,19 +48,19 @@ class FocusDetector(Detector):
         return transformed
 
     def detect(self, interpeak_min=3):
-        model = SpotNet(Config(), )
+        model = get_model(
+            model='/Users/leoburgy/Dropbox/epfl/projects/centrack/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
         image = self.plane
         x = normalize_fast2d(image)
-        n_tiles = 2
+        # n_tiles = (2, 2)
         prob_thresh = .5
 
         foci = model.predict(x,
-                             n_tiles=n_tiles,
+                             # n_tiles=n_tiles,
                              prob_thresh=prob_thresh,
                              show_tile_progress=False)
 
-        return [Centre(pred_points, f_id, self.organelle, confidence=pred_prob) for f_id, (pred_prob, pred_points) in
-                enumerate(foci)]
+        return [Centre((y, x), f_id, self.organelle, confidence=-1) for f_id, (x, y) in enumerate(foci[1])]
 
 
 class NucleiDetector(Detector):
