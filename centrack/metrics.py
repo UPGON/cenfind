@@ -1,4 +1,4 @@
-import cv2
+from cv2 import cv2
 import numpy as np
 from numpy.random import default_rng
 from scipy.optimize import linear_sum_assignment
