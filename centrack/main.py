@@ -17,7 +17,7 @@ def cli():
                            pixel_size=PixelSize(.1025, 'um'))
 
     dataset_path = args.dataset
-    field_name = 'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000_max.tif'
+    field_name = f'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_{row:03}_{col:03}_max.tif'
     ds = DataSet(dataset_path, condition=conditions)
     projection_path = dataset_path / 'projections' / field_name
     field = Field(projection_path, dataset=ds)
@@ -33,10 +33,11 @@ def cli():
 
     res = assign(foci_list=foci_detected, nuclei_list=nuclei_detected)
 
-    background = cv2.cvtColor(contrast(foci), cv2.COLOR_GRAY2BGR)
-    # foci_bgr = np.zeros_like(background)
-    # foci_bgr[:, :, 2] = foci
-    # background = cv2.addWeighted(background, .5, foci_bgr, 1, 1)
+    background = cv2.cvtColor(contrast(nuclei), cv2.COLOR_GRAY2BGR)
+    foci_bgr = np.zeros_like(background)
+    foci_bgr[:, :, 2] = contrast(foci)
+    background = cv2.addWeighted(background, .5, foci_bgr, 1, 1)
+
     for c in foci_detected:
         c.draw(background)
 
