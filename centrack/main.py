@@ -1,25 +1,36 @@
+import re
+
 import numpy as np
 from cv2 import cv2
 
 from centrack.data import DataSet, Field, Channel, Condition, PixelSize
 from centrack.detectors import FocusDetector, NucleiStardistDetector
-from centrack.utils import parse_args, contrast
 from centrack.score import assign
+from centrack.utils import parse_args, contrast
 
 
 def cli():
     args = parse_args()
-    row, col = [int(i) for i in args.coords]
-
-    markers = 'DAPI+CEP152+GTU88+PCNT'.split('+')
-    conditions = Condition(markers=markers,
-                           genotype='RPE1wt',
-                           pixel_size=PixelSize(.1025, 'um'))
 
     dataset_path = args.dataset
-    field_name = f'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_{row:03}_{col:03}_max.tif'
+    dataset_name = dataset_path.name
+    projections_path = dataset_path / 'projections'
+
+    row, col = [int(i) for i in args.coords]
+    field_name = f'{dataset_name}_MMStack_1-Pos_{row:03}_{col:03}_max.tif'
+    projection_path = projections_path / field_name
+
+    dataset_regex_hatzopoulos = r'^([a-zA-Z1-9]+)_(?:([a-zA-Z1-9]+)_)?([A-Z1-9+]+)_(\d)$'
+    pat = re.compile(dataset_regex_hatzopoulos)
+    genotype, treatment, markers, replicate = re.match(pat, dataset_name).groups()
+
+    markers_list = markers.split('+')
+    markers_list.insert(0, 'DAPI')
+    conditions = Condition(markers=markers_list,
+                           genotype=genotype,
+                           pixel_size=PixelSize(.1025, 'um'))
+
     ds = DataSet(dataset_path, condition=conditions)
-    projection_path = dataset_path / 'projections' / field_name
     field = Field(projection_path, dataset=ds)
     data = field.load()
 
