@@ -16,7 +16,7 @@ def main():
 
     # Only update this if you have an on-prem deployment
     ontology_builder = OntologyBuilder(tools=[
-        Tool(tool=Tool.Type.BBOX, name="person"),
+        Tool(tool=Tool.Type.POINT, name="centriole"),
     ])
     project = client.create_project(name="image_mal_project")
     dataset = client.create_dataset(name="image_mal_dataset", iam_integration=None)
@@ -37,11 +37,9 @@ def main():
         "dataRow": {
             "id": data_row.uid,
         },
-        "bbox": {
-            "top": int(30),
-            "left": int(30),
-            "height": 200,
-            "width": 200
+        "point": {
+            "x": 200,
+            "y": 200
         }
     }]
 
