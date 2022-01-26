@@ -1,72 +1,76 @@
-import re
+import json
+import os
+import contextlib
+import logging
 
-import numpy as np
 from cv2 import cv2
 
-from centrack.data import DataSet, Field, Channel, Condition, PixelSize
-from centrack.detectors import FocusDetector, NucleiStardistDetector
+from centrack.data import Channel, Field, DataSet
 from centrack.score import assign
-from centrack.utils import parse_args, contrast
+from centrack.utils import (parse_args,
+                            parse_ds_name,
+                            extract_nuclei,
+                            extract_centriole,
+                            prepare_background,
+                            draw_annotation)
+
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 
 def cli():
+    logging.info('Starting Centrack...')
+    dataset_regex_hatzopoulos = r'^([a-zA-Z1-9]+)_(?:([a-zA-Z1-9]+)_)?([A-Z1-9+]+)_(\d)$'
     args = parse_args()
 
     dataset_path = args.dataset
-    dataset_name = dataset_path.name
-    projections_path = dataset_path / 'projections'
+    logging.info('Working at %s', dataset_path)
 
-    row, col = [int(i) for i in args.coords]
-    field_name = f'{dataset_name}_MMStack_1-Pos_{row:03}_{col:03}_max.tif'
-    projection_path = projections_path / field_name
+    condition = parse_ds_name(dataset_path, dataset_regex_hatzopoulos)
+    dataset = DataSet(dataset_path, condition)
 
-    dataset_regex_hatzopoulos = r'^([a-zA-Z1-9]+)_(?:([a-zA-Z1-9]+)_)?([A-Z1-9+]+)_(\d)$'
-    pat = re.compile(dataset_regex_hatzopoulos)
-    genotype, treatment, markers, replicate = re.match(pat, dataset_name).groups()
+    if not args.out:
+        projections_path = dataset.projections
+    else:
+        projections_path = args.out
 
-    markers_list = markers.split('+')
-    markers_list.insert(0, 'DAPI')
-    conditions = Condition(markers=markers_list,
-                           genotype=genotype,
-                           pixel_size=PixelSize(.1025, 'um'))
+    marker = args.marker
+    if marker not in condition.markers:
+        raise ValueError(f'Marker {marker} not in dataset ({condition.markers}).')
 
-    ds = DataSet(dataset_path, condition=conditions)
-    field = Field(projection_path, dataset=ds)
-    data = field.load()
+    fields = tuple(f for f in dataset.projections.glob('*.tif') if not f.name.startswith('.'))
+    logging.info('%s files were found', len(fields))
+    if args.test:
+        fields = fields[0]
 
-    foci = Channel(data)[args.marker].to_numpy()
-    focus_detector = FocusDetector(foci, 'Centriole')
-    foci_detected = focus_detector.detect(5)
+    for path in fields:
+        logging.info('Loading %s', path.name)
+        field = Field(path, dataset)
+        data = field.load()
 
-    nuclei = Channel(data)['DAPI'].to_numpy()
-    nuclei_detector = NucleiStardistDetector(nuclei, 'Nucleus')
-    nuclei_detected = nuclei_detector.detect()
+        logging.info('Detecting the objects...')
+        foci = Channel(data)[marker].to_numpy()
+        nuclei = Channel(data)['DAPI'].to_numpy()
+        with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
+            foci_detected = extract_centriole(foci)
+            nuclei_detected = extract_nuclei(nuclei)
+        logging.info('Done (%s foci, %s nuclei)', len(foci_detected), len(nuclei_detected))
 
-    res = assign(foci_list=foci_detected, nuclei_list=nuclei_detected)
+        logging.info('Assigning foci to nuclei.')
+        assigned = assign(foci_list=foci_detected, nuclei_list=nuclei_detected)
 
-    background = cv2.cvtColor(contrast(nuclei), cv2.COLOR_GRAY2BGR)
-    foci_bgr = np.zeros_like(background)
-    foci_bgr[:, :, 2] = contrast(foci)
-    background = cv2.addWeighted(background, .5, foci_bgr, 1, 1)
+        if args.out:
+            logging.info('Creating annotation image.')
+            background = prepare_background(nuclei, foci)
+            annotation = draw_annotation(background, assigned, foci_detected, nuclei_detected)
+            args.out.mkdir(exist_ok=True)
+            destination_path = projections_path / f'{path.stem}_annot.png'
+            successful = cv2.imwrite(str(destination_path), annotation)
 
-    for c in foci_detected:
-        c.draw(background)
+            if successful:
+                logging.info('Saved at %s', destination_path)
 
-    for n in nuclei_detected:
-        n.draw(background)
-
-    for c, n in res:
-        start = c.centre
-        end = n.centre.centre
-        print(start, end)
-        cv2.line(background, start, end, (0, 255, 0), 3, lineType=cv2.FILLED)
-
-    if args.out:
-        args.out.mkdir(exist_ok=True)
-
-        cv2.imwrite(str(args.out / f'{args.marker}_{row:03}_{col:03}.png'), background)
-        # with open(args.out / 'dump.json', 'w') as fh:
-        #     json.dump(foci_detected, fh)
+            # with open(args.out / 'dump.json', 'w') as fh:
+            #     json.dump(foci_detected, fh)
 
 
 if __name__ == '__main__':

@@ -61,9 +61,11 @@ class PixelSize:
 
 @dataclass
 class Condition:
-    markers: list
-    genotype: str
-    pixel_size: PixelSize
+    genotype: str = 'wt'
+    treatment: str = None
+    replicate: str = 1
+    markers: list = ''
+    pixel_size: PixelSize = 1
 
 
 @dataclass

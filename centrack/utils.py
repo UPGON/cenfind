@@ -1,13 +1,14 @@
 import argparse
-import re
 import json
-import argparse
+import re
 from pathlib import Path
 
-from cv2 import cv2
 import numpy as np
+from cv2 import cv2
 
 from centrack.annotation import Contour
+from data import PixelSize, Condition
+from detectors import FocusDetector, NucleiStardistDetector
 
 
 def parse_args():
@@ -15,7 +16,7 @@ def parse_args():
 
     parser.add_argument('dataset', type=Path, help='path to the dataset')
     parser.add_argument('marker', type=str, help='marker to use for foci detection')
-    parser.add_argument('coords', type=tuple, help='position, e.g., 0,2')
+    parser.add_argument('-t', '--test', type=int, help='test; only run on the ith image')
     parser.add_argument('-o', '--out', type=Path, help='path for output')
 
     return parser.parse_args()
@@ -62,6 +63,7 @@ def channels_combine(stack, channels=(1, 2, 3)):
 def nuclei_segment(image, threshold=None):
     """
     Extract the nuclei into contours.
+    :param image: the image to segment
     :param threshold: if specified, use it instead of the derived.
     :return: the list of contours detected
     """
@@ -110,3 +112,90 @@ def labelbox_annotation_load(path_annotation, image_name):
     image_labels = [image for image in annotation if image['External ID'] == image_name]
 
     return image_labels[0]['Label']['objects']
+
+
+def get_markers(markers, sep='+'):
+    """
+    Convert a '+'-delimited string into a list and prepend the DAPI
+    :param markers:
+    :param sep: delimiter character
+    :return: List of markers
+    """
+    markers_list = markers.split(sep)
+    markers_list.insert(0, 'DAPI')
+    return markers_list
+
+
+def parse_ds_name(dataset_path, pattern):
+    """
+    Extract parameters of dataset.
+    :param dataset_path:
+    :param pattern: must contain 4 groups, namely: genotype, treatment, markers, replicate
+    :return: Condition object
+    """
+    dataset_name = dataset_path.name
+
+    pat = re.compile(pattern)
+    genotype, treatment, markers, replicate = re.match(pat, dataset_name).groups()
+    markers_list = get_markers(markers)
+    return Condition(genotype=genotype,
+                     treatment=treatment,
+                     markers=markers_list,
+                     replicate=replicate,
+                     pixel_size=PixelSize(.1025, 'um'))
+
+
+def extract_centriole(data):
+    """
+    Extract the centrioles from the channel image.
+    :param data:
+    :return: List of Points
+    """
+    focus_detector = FocusDetector(data, 'Centriole')
+    return focus_detector.detect()
+
+
+def extract_nuclei(data):
+    """
+    Extract the nuclei from the nuclei image.
+    :param data:
+    :return: List of Contours.
+    """
+    nuclei_detector = NucleiStardistDetector(data, 'Nucleus')
+    return nuclei_detector.detect()
+
+
+def prepare_background(nuclei, foci):
+    """
+    Create a BGR image from the nuclei (gray) and the centriole (red) channels.
+    :param nuclei:
+    :param foci:
+    :return:
+    """
+    background = cv2.cvtColor(contrast(nuclei), cv2.COLOR_GRAY2BGR)
+    foci_bgr = np.zeros_like(background)
+    foci_bgr[:, :, 2] = contrast(foci)
+    return cv2.addWeighted(background, .5, foci_bgr, 1, 1)
+
+
+def draw_annotation(background, res, foci_detected=None, nuclei_detected=None):
+    """
+    Draw the assigned centrioles on the background image.
+    :param background:
+    :param res:
+    :param foci_detected:
+    :param nuclei_detected:
+    :return: BGR image displaying the annotation
+    """
+    for c in foci_detected:
+        c.draw(background)
+
+    for n in nuclei_detected:
+        n.draw(background)
+
+    for c, n in res:
+        start = c.centre
+        end = n.centre.centre
+        cv2.line(background, start, end, (0, 255, 0), 3, lineType=cv2.FILLED)
+
+    return background
