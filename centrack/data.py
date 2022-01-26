@@ -71,7 +71,6 @@ class Condition:
 @dataclass
 class DataSet:
     path: Path
-    condition: Condition
 
     @property
     def projections(self):
@@ -87,17 +86,16 @@ class DataSet:
 @dataclass
 class Field:
     path: Path
+    condition: Condition
     dataset: DataSet
 
     @property
     def markers(self):
-        return self.dataset.condition.markers
+        return self.condition.markers
 
     def load(self):
         if not self.path.exists():
             raise FileNotFoundError(self.path)
-
-        logging.info('Loading %s', self.path)
 
         with tf.TiffFile(self.path) as file:
             data = file.asarray()

@@ -122,21 +122,25 @@ def get_markers(markers, sep='+'):
     :return: List of markers
     """
     markers_list = markers.split(sep)
-    markers_list.insert(0, 'DAPI')
+    if 'DAPI' not in markers_list:
+        markers_list.insert(0, 'DAPI')
     return markers_list
 
 
-def parse_ds_name(dataset_path, pattern):
+def condition_from_filename(file_name, pattern):
     """
     Extract parameters of dataset.
-    :param dataset_path:
+    :param file_name:
     :param pattern: must contain 4 groups, namely: genotype, treatment, markers, replicate
     :return: Condition object
     """
-    dataset_name = dataset_path.name
 
     pat = re.compile(pattern)
-    genotype, treatment, markers, replicate = re.match(pat, dataset_name).groups()
+    matched = re.match(pat, file_name)
+    if matched is not None:
+        genotype, treatment, markers, replicate = matched.groups()
+    else:
+        raise re.error('no matched element')
     markers_list = get_markers(markers)
     return Condition(genotype=genotype,
                      treatment=treatment,
