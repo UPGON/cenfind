@@ -3,6 +3,8 @@ from pathlib import Path
 
 import labelbox
 
+from utils import get_lb_api_key
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -50,11 +52,9 @@ if __name__ == '__main__':
     path_projections = path_dataset / 'projections'
     path_projections_channel = path_dataset / 'projections_channel'
 
-    with open('../configs/labelbox_api_key.txt', 'r') as apikey:
-        LB_API_KEY = apikey.readline()
-        LB_API_KEY = LB_API_KEY.rstrip('\n')
+    lb_api_key = get_lb_api_key('../configs/labelbox_api_key.txt')
 
-    client = labelbox.Client(api_key=LB_API_KEY)
+    client = labelbox.Client(api_key=lb_api_key)
     logging.info('Connection established')
 
     # PROJECT SETUP

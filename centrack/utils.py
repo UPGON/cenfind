@@ -11,6 +11,12 @@ from data import PixelSize, Condition
 from detectors import FocusDetector, NucleiStardistDetector
 
 
+def get_lb_api_key(path):
+    with open(path, 'r') as apikey:
+        lb_api_key = apikey.readline().rstrip('\n')
+    return lb_api_key
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='CCOUNT: Automatic centriole scoring')
 
@@ -200,6 +206,6 @@ def draw_annotation(background, res, foci_detected=None, nuclei_detected=None):
     for c, n in res:
         start = c.centre
         end = n.centre.centre
-        cv2.line(background, start, end, (0, 255, 0), 3, lineType=cv2.FILLED)
+        cv2.line(background, start, end, (0, 255, 0), thickness=2, lineType=cv2.FILLED)
 
     return background
