@@ -38,8 +38,7 @@ def get_project_uid(client, name):
         return None
 
 
-if __name__ == '__main__':
-
+def main():
     path_root = Path('/Volumes/work/epfl/datasets')
 
     # 20210727_HA-FL-SAS6_Clones
@@ -94,3 +93,7 @@ if __name__ == '__main__':
 
     project.datasets.connect(dataset)
     logging.info('Dataset has been attached to the project')
+
+
+if __name__ == '__main__':
+    main()
