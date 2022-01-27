@@ -11,3 +11,4 @@ configs/
 spotipy/
 models/
 *.h5
+/.python-version
