@@ -11,11 +11,6 @@ from data import PixelSize, Condition
 from detectors import FocusDetector, NucleiStardistDetector
 
 
-def get_lb_api_key(path):
-    with open(path, 'r') as apikey:
-        lb_api_key = apikey.readline().rstrip('\n')
-    return lb_api_key
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description='CCOUNT: Automatic centriole scoring')
