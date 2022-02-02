@@ -3,39 +3,10 @@ from pathlib import Path
 
 import labelbox
 
-from utils import get_lb_api_key
+from centrack.labelbox_api import get_dataset_uid, get_project_uid, \
+    get_lb_api_key
 
 logging.basicConfig(level=logging.INFO)
-
-
-def get_dataset_uid(client, name):
-    """
-    Retrieves the uid of a possibly existing dataset.
-    :param client:
-    :param name:
-    :return:
-    """
-    datasets = client.get_datasets()
-    dataset_ids = {ds.name: ds.uid for ds in datasets}
-    if name in dataset_ids.keys():
-        return dataset_ids[name]
-    else:
-        return None
-
-
-def get_project_uid(client, name):
-    """
-    Retrieves the uid of a possibly existing project.
-    :param client:
-    :param name:
-    :return:
-    """
-    projects = client.get_projects()
-    project_ids = {proj.name: proj.uid for proj in projects}
-    if name in project_ids.keys():
-        return project_ids[name]
-    else:
-        return None
 
 
 def main():
@@ -79,7 +50,7 @@ def main():
 
     # DATA LOADING
     datarows = sorted([str(path) for path in
-                       path_projections_channel.rglob('**/*.png')],
+                       path_projections_channel.rglob('*.png')],
                       key=lambda x: int(x[-5]))
     uploads = []
     for path in datarows:
