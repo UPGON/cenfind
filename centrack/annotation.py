@@ -103,14 +103,13 @@ class Centre(ROI):
         r, c = self.centre
         offset_col = int(.01 * image.shape[1])
 
-        x, y = r, c
         if annotation:
             cv2.putText(image, f'{self.label} {self.idx}',
-                        org=(x, y + offset_col),
+                        org=(r, c + offset_col),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.4, thickness=1, color=color)
 
-        return cv2.drawMarker(image, (x, y), color, markerType=marker_type,
+        return cv2.drawMarker(image, (r, c), color, markerType=marker_type,
                               markerSize=marker_size)
 
     def extract(self, plane):
@@ -197,7 +196,7 @@ class Contour(ROI):
 
     @property
     def bbox(self):
-        r, c, h, w = cv2.boundingRect(self.contour)  # (r, col, h, w)
+        r, c, h, w = cv2.boundingRect(self.contour)  # (r, c, h, w)
         top_left = r, c
         bottom_right = r + h, c + w
 
@@ -207,10 +206,10 @@ class Contour(ROI):
     def centre(self):
         moments = cv2.moments(self.contour)
 
-        r_centre = int(moments['m10'] / (moments['m00'] + 1e-5))
-        c_centre = int(moments['m01'] / (moments['m00'] + 1e-5))
-
-        return Centre((r_centre, c_centre), self.idx, self.label, self.confidence)
+        centre_x = int(moments['m01'] / (moments['m00'] + 1e-5))
+        centre_y = int(moments['m10'] / (moments['m00'] + 1e-5))
+        centre_r, centre_c = centre_y, centre_x
+        return Centre((centre_r, centre_c), self.idx, self.label, self.confidence)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, **kwargs):
         r, c = self.centre.centre
