@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 from random import randint
 
+import tifffile as tf
 import labelbox
 import numpy as np
 from cv2 import cv2
@@ -19,6 +20,7 @@ from labelbox.data.annotation_types import (
 from labelbox.data.serialization import NDJsonConverter
 
 from centrack.annotation import Centre
+from centrack.data import Field, DataSet
 from centrack.labelbox_api import get_dataset_uid, get_project_uid, \
     get_lb_api_key
 
@@ -124,23 +126,35 @@ def label_list_from(mapping_dataset):
 
 
 def main():
-    image_path = Path('../out/mal_upload')
 
-    if image_path.exists():
-        shutil.rmtree(image_path)
-        logging.warning('Delete the existing folder of synthetic images.')
+    synthetic = False
 
-    image_path.mkdir()
+    if synthetic:
+        image_path = Path('../out/mal_upload')
 
-    logging.debug('Create synthetic images')
-    mapping_dataset = dict()
-    for i in range(3):
-        path_dst = str(image_path / f'image{i:02}.png')
-        mapping_dataset[path_dst] = create_image(foci_number=10)
+        if image_path.exists():
+            shutil.rmtree(image_path)
+            logging.warning('Delete the existing folder of synthetic images.')
 
-    logging.debug('Save synthetic images')
-    for path, (annotation, image) in mapping_dataset.items():
-        cv2.imwrite(path, image)
+        image_path.mkdir()
+
+        logging.debug('Create synthetic images')
+        mapping_dataset = dict()
+        for i in range(3):
+            path_dst = str(image_path / f'image{i:02}.png')
+            mapping_dataset[path_dst] = create_image(foci_number=10)
+
+        logging.debug('Save synthetic images')
+        for path, (annotation, image) in mapping_dataset.items():
+            cv2.imwrite(path, image)
+    else:
+        mapping_dataset = dict()
+        dataset_path = Path('/Volumes/work/epfl/datasets/20210727_HA-FL-SAS6_Clones/projections')
+        dataset = DataSet(dataset_path)
+        for path in dataset.projections.iterdir():
+            if path.name.startswith('.tif'):
+                image = tf.imread(path)
+
 
     lb_api_key = get_lb_api_key('../configs/labelbox_api_key.txt')
     client = Client(api_key=lb_api_key)
@@ -153,23 +167,27 @@ def main():
     dataset = create_dataset(dataset_name,
                              client)  # Error upon second run when the project already exists
 
-    # MAL
-    # labels_list = label_list_from(mapping_dataset)
-    # upload_task = annotation_data_upload(client, project, dataset, labels_list)
-    # upload_task.wait_until_done()
-
-    datarows = [p for p in mapping_dataset.keys()]
-    uploads = []
-    for path in datarows:
-        path_name = Path(path).name
-        item = {labelbox.DataRow.row_data: path,
-                labelbox.DataRow.external_id: path_name}
-        uploads.append(item)
-
-    task = dataset.create_data_rows(uploads)
-    task.wait_till_done()
-
     project.datasets.connect(dataset)
+
+    is_mal = False
+
+    if is_mal:
+        labels_list = label_list_from(mapping_dataset)
+        upload_task = annotation_data_upload(client, project, dataset, labels_list)
+        upload_task.wait_until_done()
+    else:
+        datarows = [p for p in mapping_dataset.keys()]
+        uploads = []
+        for path in datarows:
+            path_name = Path(path).name
+            item = {labelbox.DataRow.row_data: path,
+                    labelbox.DataRow.external_id: path_name}
+            uploads.append(item)
+
+        upload_task = dataset.create_data_rows(uploads)
+
+    upload_task.wait_till_done()
+
 
     logging.info('Dataset has been attached to the project')
 
