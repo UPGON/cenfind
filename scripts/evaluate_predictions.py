@@ -1,12 +1,12 @@
 import logging
 from pathlib import Path
 
-import cv2
+from cv2 import cv2
 import numpy as np
 import pandas as pd
 import tifffile as tf
 
-from centrack.data import contrast
+from centrack.utils import contrast
 from centrack.metrics import generate_synthetic_data, generate_predictions, compute_metrics
 
 logging.basicConfig(level=logging.INFO)
