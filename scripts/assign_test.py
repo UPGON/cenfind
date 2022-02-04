@@ -30,7 +30,8 @@ def main():
     # Add foci to the nuclei
     _foci = np.random.randint(inset, width - inset, (30, 2))
     foci_positions = [
-        (r + offset + random.randint(-3 * offset, 3 * offset), c + offset + random.randint(-3 * offset, 3 * offset)) for
+        (r + offset + random.randint(-3 * offset, 3 * offset),
+         c + offset + random.randint(-3 * offset, 3 * offset)) for
         r, c in
         nuclei_centres]
     foci_detected = [Centre(f) for f in foci_positions]
@@ -43,7 +44,8 @@ def main():
         cv2.circle(data_bgr, (r, c), radius // 3, (255, 255, 255), thickness=-1)
 
     # Extract the nuclei into contours
-    nuclei_contours, hierarchy = cv2.findContours(data, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    nuclei_contours, hierarchy = cv2.findContours(data, cv2.RETR_EXTERNAL,
+                                                  cv2.CHAIN_APPROX_SIMPLE)
     nuclei_detected = [Contour(cnt) for cnt in nuclei_contours]
 
     # for nucleus in nuclei_detected:
@@ -51,7 +53,9 @@ def main():
 
     for focus in foci_detected:
         pt = focus.centre
-        distances_to_nuclei = [cv2.pointPolygonTest(nucleus.contour, pt, measureDist=True) for nucleus in nuclei_detected]
+        distances_to_nuclei = [
+            cv2.pointPolygonTest(nucleus.contour, pt, measureDist=True) for
+            nucleus in nuclei_detected]
         print(min(distances_to_nuclei))
 
     # Assign the foci to their nearest nuclei
@@ -61,7 +65,7 @@ def main():
     for focus, nucleus in res:
         nucleus.draw(data_bgr, annotation=False)
         start = focus.centre
-        end = nucleus.centre.centre#[::-1]
+        end = nucleus.centre.centre  # [::-1]
         print(start, end)
         cv2.line(data_bgr, start, end, (0, 255, 0), 3, lineType=cv2.FILLED)
         focus.draw(data_bgr)

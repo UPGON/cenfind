@@ -9,21 +9,6 @@ def color_scale(color):
     return tuple(c / 255. for c in color)
 
 
-class Stamp:
-    def __init__(self, filename, position):
-        self.filename = filename
-        self.position = position
-
-    def draw(self, image, color=255):
-        info = self.filename.filename
-        offset_row = int(.01 * image.shape[0])
-        offset_col = int(.01 * image.shape[1])
-        start_row, start_col = self.position
-        cv2.putText(image, info, org=(start_row + offset_row, start_col + offset_col),
-                    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=.8, thickness=2, color=color)
-
-
 @dataclass(eq=True, frozen=True)
 class ROI(ABC):
     """Abstract class to represent any region of interest"""

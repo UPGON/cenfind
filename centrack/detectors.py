@@ -23,7 +23,8 @@ def get_model(model):
 
 def mat2gray(image):
     """Normalize to the unit interval and return a float image"""
-    return cv2.normalize(image, None, alpha=0., beta=1., norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+    return cv2.normalize(image, None, alpha=0., beta=1.,
+                         norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
 
 class Detector(ABC):
@@ -60,7 +61,8 @@ class FocusDetector(Detector):
                              prob_thresh=prob_thresh,
                              show_tile_progress=False)
 
-        return [Centre((y, x), f_id, self.organelle, confidence=-1) for f_id, (x, y) in enumerate(foci[1])]
+        return [Centre((y, x), f_id, self.organelle, confidence=-1) for
+                f_id, (x, y) in enumerate(foci[1])]
 
 
 class NucleiDetector(Detector):
@@ -87,7 +89,8 @@ class NucleiDetector(Detector):
                                                cv2.RETR_EXTERNAL,
                                                cv2.CHAIN_APPROX_SIMPLE)
 
-        return [Contour(c, self.organelle, c_id, confidence=-1) for c_id, c in enumerate(contours)]
+        return [Contour(c, self.organelle, c_id, confidence=-1) for c_id, c in
+                enumerate(contours)]
 
 
 class NucleiStardistDetector(Detector):
@@ -123,4 +126,25 @@ class NucleiStardistDetector(Detector):
                                                   cv2.CHAIN_APPROX_SIMPLE)
             cnts.append(contour[0])
         contours = tuple(cnts)
-        return [Contour(c, self.organelle, c_id, confidence=-1) for c_id, c in enumerate(contours)]
+        return [Contour(c, self.organelle, c_id, confidence=-1) for c_id, c in
+                enumerate(contours)]
+
+
+def extract_centrioles(data):
+    """
+    Extract the centrioles from the channel image.
+    :param data:
+    :return: List of Points
+    """
+    focus_detector = FocusDetector(data, 'Centriole')
+    return focus_detector.detect()
+
+
+def extract_nuclei(data):
+    """
+    Extract the nuclei from the nuclei image.
+    :param data:
+    :return: List of Contours.
+    """
+    nuclei_detector = NucleiStardistDetector(data, 'Nucleus')
+    return nuclei_detector.detect()

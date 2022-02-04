@@ -15,7 +15,8 @@ from centrack.labelbox_api import (
     labels_list_create,
     task_prepare
     )
-from centrack.utils import contrast, extract_centriole
+from centrack.utils import contrast
+from centrack.detectors import extract_centrioles
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -64,7 +65,7 @@ def main():
         for field in fields:
             data = tf.imread(field)
             foci = data[1, :, :]
-            predictions = extract_centriole(foci)
+            predictions = extract_centrioles(foci)
             predictions_np = [pred.position for pred in predictions]
             image = contrast(foci)
             labels.append(label_create(image, predictions_np))
