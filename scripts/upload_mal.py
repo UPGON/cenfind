@@ -1,10 +1,16 @@
 import logging
 import uuid
+from pathlib import Path
 
 import numpy as np
+import tifffile as tf
 from cv2 import cv2
 from labelbox import (
-    Client, OntologyBuilder, LabelingFrontend, Dataset, Project
+    Client,
+    OntologyBuilder,
+    LabelingFrontend,
+    Dataset,
+    Project,
     )
 from labelbox.data.annotation_types import (
     ObjectAnnotation,
@@ -15,16 +21,28 @@ from labelbox.data.annotation_types import (
     )
 from labelbox.data.serialization import NDJsonConverter
 
+from centrack.data import DataSet
+from centrack.utils import contrast, extract_centriole
+
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.DEBUG)
+logger.setLevel(logging.DEBUG)
+
+synthetic = False
+dataset_name = '20210727_HA-FL-SAS6_Clones'
 
 
 def project_create(client, project_name):
+    """
+    Create a project object and delete any existing with `project name`.
+    :param client:
+    :param project_name:
+    :return:
+    """
     projects_test = client.get_projects(where=Project.name == project_name)
 
     try:
         project = next(projects_test)
-        logger.debug('Project test found (%s)', project)
+        logger.debug('Project test found (%s)', project.uid)
         project.delete()
     except StopIteration:
         logger.debug('No such test project; creating...')
@@ -136,8 +154,8 @@ def main():
 
     client = Client(api_key=lb_api_key)
 
-    project_name = 'Test project'
-    project = project_create(client, project_name)
+    project_name_lb = dataset_name
+    project = project_create(client, project_name_lb)
 
     logger.debug('Enable MAL.')
     project.enable_model_assisted_labeling()
@@ -145,26 +163,39 @@ def main():
     logger.debug('Get the ontology.')
     ontology_setup(client, project, ontology_id='ckywqubua5nkp0zb2h9lm3vn7')
 
-    dataset_name = 'Test dataset'
-    dataset = dataset_create(client, dataset_name)
+    dataset_name_lb = dataset_name
+    dataset_lb = dataset_create(client, dataset_name_lb)
 
-    project.datasets.connect(dataset)
+    project.datasets.connect(dataset_lb)
     logger.debug('Attach the dataset to the project.')
 
-    shape = (2048, 2048)
-    number_foci = 10
+    if synthetic:
+        shape = (2048, 2048)
+        number_foci = 10
 
-    labels = []
-    for i in range(10):
-        logger.debug('Create a label')
-        predictions = np.random.randint(0, min(shape), (number_foci, 2))
-        canvas = np.zeros(shape, 'uint8')
-        image = generate_image(canvas, predictions)
-        labels.append(create_label(image, predictions))
+        labels = []
+        for i in range(10):
+            logger.debug('Create a label')
+            predictions = np.random.randint(0, min(shape), (number_foci, 2))
+            canvas = np.zeros(shape, 'uint8')
+            image = generate_image(canvas, predictions)
+            labels.append(create_label(image, predictions))
+    else:
+        dataset = DataSet(Path('/Volumes/work/epfl/datasets') / dataset_name)
+        fields = tuple(f for f in dataset.projections.glob('*.tif') if
+                       not f.name.startswith('.'))
+        labels = []
+        for field in fields:
+            data = tf.imread(field)
+            foci = data[1, :, :]
+            predictions = extract_centriole(foci)
+            predictions_np = [pred.position for pred in predictions]
+            image = contrast(foci)
+            labels.append(create_label(image, predictions_np))
 
     labels_list = labels_list_create(labels)
 
-    task = prepare_upload_task(client, project, dataset, labels_list)
+    task = prepare_upload_task(client, project, dataset_lb, labels_list)
     task.wait_until_done()
 
 
