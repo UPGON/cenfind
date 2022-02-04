@@ -21,42 +21,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def get_lb_api_key(path):
-    with open(path, 'r') as apikey:
-        lb_api_key = apikey.readline().rstrip('\n')
-    return lb_api_key
-
-
-def get_dataset_uid(client, name):
-    """
-    Retrieves the uid of a possibly existing dataset.
-    :param client:
-    :param name:
-    :return:
-    """
-    datasets = client.get_datasets()
-    dataset_ids = {ds.name: ds.uid for ds in datasets}
-    if name in dataset_ids.keys():
-        return dataset_ids[name]
-    else:
-        return None
-
-
-def get_project_uid(client, name):
-    """
-    Retrieves the uid of a possibly existing project.
-    :param client:
-    :param name:
-    :return:
-    """
-    projects = client.get_projects()
-    project_ids = {proj.name: proj.uid for proj in projects}
-    if name in project_ids.keys():
-        return project_ids[name]
-    else:
-        return None
-
-
 def project_create(client, project_name):
     """
     Create a project object and delete any existing with `project name`.
@@ -112,7 +76,7 @@ def dataset_create(client, dataset_name):
     return dataset
 
 
-def generate_image(canvas, predictions):
+def image_generate(canvas, predictions):
     """
     Draw foci on a black canvas at positions of predictions.
     :param canvas:
@@ -137,7 +101,7 @@ def to_labelbox_format(predictions):
     return annotations
 
 
-def create_label(image, predictions):
+def label_create(image, predictions):
     """
     Combine an image and its annotation into a Label.
     :param predictions:
@@ -159,7 +123,7 @@ def labels_list_create(labels):
     return labels_list
 
 
-def prepare_upload_task(client, project, dataset, labels_list):
+def task_prepare(client, project, dataset, labels_list):
     signer = lambda _bytes: client.upload_data(content=_bytes, sign=True)
 
     labels_list.assign_feature_schema_ids(OntologyBuilder.from_project(project))

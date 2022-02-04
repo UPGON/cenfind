@@ -10,10 +10,10 @@ from centrack.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,
-    generate_image,
-    create_label,
+    image_generate,
+    label_create,
     labels_list_create,
-    prepare_upload_task
+    task_prepare
     )
 from centrack.utils import contrast, extract_centriole
 
@@ -54,8 +54,8 @@ def main():
             logger.debug('Create a label')
             predictions = np.random.randint(0, min(shape), (number_foci, 2))
             canvas = np.zeros(shape, 'uint8')
-            image = generate_image(canvas, predictions)
-            labels.append(create_label(image, predictions))
+            image = image_generate(canvas, predictions)
+            labels.append(label_create(image, predictions))
     else:
         dataset = DataSet(Path('/Volumes/work/epfl/datasets') / dataset_name)
         fields = tuple(f for f in dataset.projections.glob('*.tif') if
@@ -67,11 +67,11 @@ def main():
             predictions = extract_centriole(foci)
             predictions_np = [pred.position for pred in predictions]
             image = contrast(foci)
-            labels.append(create_label(image, predictions_np))
+            labels.append(label_create(image, predictions_np))
 
     labels_list = labels_list_create(labels)
 
-    task = prepare_upload_task(client, project, dataset_lb, labels_list)
+    task = task_prepare(client, project, dataset_lb, labels_list)
     task.wait_until_done()
 
 
