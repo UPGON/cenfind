@@ -12,3 +12,4 @@ spotipy/
 models/
 *.h5
 /.python-version
+dist/
