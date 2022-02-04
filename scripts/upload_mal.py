@@ -68,24 +68,50 @@ def dataset_create(client, dataset_name):
     return dataset
 
 
-def labels_list_create(shape, number_foci):
+def generate_image(canvas, predictions):
     """
-    Generate a synthetic annotated dataset and convert it as a LabelList object.
+    Draw foci on a black canvas at positions of predictions.
+    :param canvas:
+    :param predictions:
     :return:
     """
-    canvas = np.zeros(shape, 'uint8')
-    annotations = []
-    random_2dpoints = np.random.randint(0, min(shape), (number_foci, 2))
-    for r, c in random_2dpoints:
-        logger.debug('Generate object at position %s', (r, c))
+    for r, c in predictions:
         cv2.circle(canvas, (r, c), 20, 255, thickness=cv2.FILLED)
+    return canvas
+
+
+def to_labelbox_format(predictions):
+    """
+    Convert numpy coordinates into Labelbox format.
+    :param predictions:
+    :return:
+    """
+    annotations = []
+    for r, c in predictions:
         annot = ObjectAnnotation(name='Centriole', value=Point(x=r, y=c))
         annotations.append(annot)
+    return annotations
 
-    image_data = ImageData.from_2D_arr(canvas)
+
+def create_label(image, predictions):
+    """
+    Combine an image and its annotation into a Label.
+    :param predictions:
+    :param image:
+    :return:
+    """
+    return Label(data=ImageData.from_2D_arr(image),
+                 annotations=to_labelbox_format(predictions))
+
+
+def labels_list_create(labels):
+    """
+    Combine all labels into a LabelList object.
+    :return:
+    """
     labels_list = LabelList()
-    labels_list.append(Label(data=image_data, annotations=annotations))
-
+    for label in labels:
+        labels_list.append(label)
     return labels_list
 
 
@@ -110,7 +136,7 @@ def main():
 
     client = Client(api_key=lb_api_key)
 
-    project_name = 'Test project.'
+    project_name = 'Test project'
     project = project_create(client, project_name)
 
     logger.debug('Enable MAL.')
@@ -119,13 +145,24 @@ def main():
     logger.debug('Get the ontology.')
     ontology_setup(client, project, ontology_id='ckywqubua5nkp0zb2h9lm3vn7')
 
-    dataset_name = 'Test dataset.'
+    dataset_name = 'Test dataset'
     dataset = dataset_create(client, dataset_name)
 
     project.datasets.connect(dataset)
     logger.debug('Attach the dataset to the project.')
 
-    labels_list = labels_list_create((2048, 2048), 10)
+    shape = (2048, 2048)
+    number_foci = 10
+
+    labels = []
+    for i in range(10):
+        logger.debug('Create a label')
+        predictions = np.random.randint(0, min(shape), (number_foci, 2))
+        canvas = np.zeros(shape, 'uint8')
+        image = generate_image(canvas, predictions)
+        labels.append(create_label(image, predictions))
+
+    labels_list = labels_list_create(labels)
 
     task = prepare_upload_task(client, project, dataset, labels_list)
     task.wait_until_done()
