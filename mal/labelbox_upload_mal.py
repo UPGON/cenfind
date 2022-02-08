@@ -5,7 +5,7 @@ import numpy as np
 import tifffile as tf
 from labelbox import Client
 
-from centrack.data import DataSet
+from centrack.fetch import DataSet
 from centrack.labelbox_api import (
     project_create,
     dataset_create,

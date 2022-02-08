@@ -1,10 +1,9 @@
-from cv2 import cv2
 import numpy as np
+from outline import Centre, Contour
+from cv2 import cv2
 from numpy.random import default_rng
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
-
-from centrack.annotation import Centre, Contour
 
 rng = default_rng(1993)
 
@@ -28,7 +27,8 @@ def mask_from(annotation, w=2048, h=2048, radius=2):
 def overlap(mask_actual, mask_pred):
     """Make a visual estimation of the overlap of two masks."""
     if mask_actual.shape != mask_pred.shape:
-        raise ValueError(f'mask_actual shape ({mask_actual.shape})!= mask_pred shape ({mask_pred.shape})')
+        raise ValueError(
+            f'mask_actual shape ({mask_actual.shape})!= mask_pred shape ({mask_pred.shape})')
 
     h, w = mask_actual.shape
 

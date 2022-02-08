@@ -1,10 +1,4 @@
-import logging
 import re
-from pathlib import Path
-
-import numpy as np
-import tifffile as tf
-import xarray as xr
 from dataclasses import dataclass
 
 
@@ -55,7 +49,7 @@ class PixelSize:
             'um': 10e4,
             'μm': 10e4,
             'nm': 10e7,
-        }
+            }
         return self.value / conversion_map[self.units]
 
 
@@ -68,49 +62,45 @@ class Condition:
     pixel_size: PixelSize = 1
 
 
-@dataclass
-class DataSet:
-    path: Path
-
-    @property
-    def projections(self):
-        """Define the path to projections folder."""
-        return self.path / 'projections'
-
-    @property
-    def raw(self):
-        """Define the path to raw folder."""
-        return self.path / 'raw'
+def get_markers(markers, sep='+'):
+    """
+    Convert a '+'-delimited string into a list and prepend the DAPI
+    :param markers:
+    :param sep: delimiter character
+    :return: List of markers
+    """
+    markers_list = markers.split(sep)
+    if 'DAPI' not in markers_list:
+        markers_list.insert(0, 'DAPI')
+    return markers_list
 
 
-@dataclass
-class Field:
-    path: Path
-    condition: Condition
-    dataset: DataSet
+def condition_from_filename(file_name, pattern):
+    """
+    Extract parameters of dataset.
+    :param file_name:
+    :param pattern: must contain 4 groups, namely: genotype, treatment, markers, replicate
+    :return: Condition object
+    """
 
-    @property
-    def markers(self):
-        return self.condition.markers
-
-    def load(self):
-        if not self.path.exists():
-            raise FileNotFoundError(self.path)
-
-        with tf.TiffFile(self.path) as file:
-            data = file.asarray()
-            data = np.squeeze(data)
-
-        result = xr.DataArray(data,
-                              dims=['channel', 'width', 'height'],
-                              coords={'channel': self.markers})
-
-        return result
+    pat = re.compile(pattern)
+    matched = re.match(pat, file_name)
+    if matched is not None:
+        genotype, treatment, markers, replicate = matched.groups()
+    else:
+        raise re.error('no matched element')
+    markers_list = get_markers(markers)
+    return Condition(genotype=genotype,
+                     treatment=treatment,
+                     markers=markers_list,
+                     replicate=replicate,
+                     pixel_size=PixelSize(.1025, 'um'))
 
 
-@dataclass
-class Channel:
-    data: xr.DataArray
+def extract_filename(file):
+    file_name = file.name
+    file_name = file_name.removesuffix(''.join(file.suffixes))
+    file_name = file_name.replace('', '')
+    file_name = re.sub(r'_(Default|MMStack)_\d-Pos', '', file_name)
 
-    def __getitem__(self, item):
-        return self.data.loc[item, :, :]
+    return file_name.replace('', '')

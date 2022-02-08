@@ -1,12 +1,8 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 import numpy as np
 from cv2 import cv2
-from dataclasses import dataclass
-
-
-def color_scale(color):
-    return tuple(c / 255. for c in color)
 
 
 @dataclass(eq=True, frozen=True)
@@ -82,9 +78,11 @@ class Centre(ROI):
     def bbox(self):
         top_left = self.row - 32, self.col - 32
         bottom_right = self.row + 32, self.col + 32
-        return BBox(top_left, bottom_right, self.idx, self.label, self.confidence)
+        return BBox(top_left, bottom_right, self.idx, self.label,
+                    self.confidence)
 
-    def draw(self, image, color=(0, 255, 0), annotation=True, marker_type=cv2.MARKER_SQUARE, marker_size=8):
+    def draw(self, image, color=(0, 255, 0), annotation=True,
+             marker_type=cv2.MARKER_SQUARE, marker_size=8):
         r, c = self.centre
         offset_col = int(.01 * image.shape[1])
 
@@ -131,7 +129,8 @@ class BBox(ROI):
         """Compute the centre (r_centre, c_centre)"""
         r_centre = (self.bottom_right[0] + self.top_left[0]) // 2
         c_centre = (self.bottom_right[1] + self.top_left[1]) // 2
-        return Centre((r_centre, c_centre), self.idx, self.label, self.confidence)
+        return Centre((r_centre, c_centre), self.idx, self.label,
+                      self.confidence)
 
     @property
     def bbox(self):
@@ -185,7 +184,8 @@ class Contour(ROI):
         top_left = r, c
         bottom_right = r + h, c + w
 
-        return BBox(top_left, bottom_right, self.idx, self.label, self.confidence)
+        return BBox(top_left, bottom_right, self.idx, self.label,
+                    self.confidence)
 
     @property
     def centre(self):
@@ -194,7 +194,8 @@ class Contour(ROI):
         centre_x = int(moments['m01'] / (moments['m00'] + 1e-5))
         centre_y = int(moments['m10'] / (moments['m00'] + 1e-5))
         centre_r, centre_c = centre_y, centre_x
-        return Centre((centre_r, centre_c), self.idx, self.label, self.confidence)
+        return Centre((centre_r, centre_c), self.idx, self.label,
+                      self.confidence)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, **kwargs):
         r, c = self.centre.centre
@@ -204,7 +205,8 @@ class Contour(ROI):
                         org=(r, c),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=.8, thickness=2, color=color)
-            cv2.drawMarker(image, (r, c), (0, 0, 255), markerType=cv2.MARKER_STAR,
+            cv2.drawMarker(image, (r, c), (0, 0, 255),
+                           markerType=cv2.MARKER_STAR,
                            markerSize=10)
         return image
 
@@ -212,5 +214,68 @@ class Contour(ROI):
         return self.bbox.extract(plane)
 
 
-if __name__ == '__main__':
-    print(0)
+def color_scale(color):
+    return tuple(c / 255. for c in color)
+
+
+def contrast(data):
+    return cv2.convertScaleAbs(data, alpha=255 / data.max())
+
+
+def channels_combine(stack, channels=(1, 2, 3)):
+    if stack.shape != (4, 2048, 2048):
+        raise ValueError(f'stack.shape')
+
+    stack = stack[channels, :, :]
+    stack = np.transpose(stack, (1, 2, 0))
+
+    return cv2.convertScaleAbs(stack, alpha=255 / stack.max())
+
+
+def mask_create_from_contours(mask, contours):
+    """
+    Label each blob using connectedComponents.
+    :param mask: the black image to draw the contours
+    :param contours: the list of contours
+    :return: the mask with each contour labelled with different numbers.
+    """
+    cv2.drawContours(mask, contours, -1, 255, -1)
+    _, labels = cv2.connectedComponents(mask)
+    return labels
+
+
+def prepare_background(nuclei, foci):
+    """
+    Create a BGR image from the nuclei (gray) and the centriole (red) channels.
+    :param nuclei:
+    :param foci:
+    :return:
+    """
+    background = cv2.cvtColor(contrast(nuclei), cv2.COLOR_GRAY2BGR)
+    foci_bgr = np.zeros_like(background)
+    foci_bgr[:, :, 2] = contrast(foci)
+    return cv2.addWeighted(background, .5, foci_bgr, 1, 1)
+
+
+def draw_annotation(background, res, foci_detected=None, nuclei_detected=None):
+    """
+    Draw the assigned centrioles on the background image.
+    :param background:
+    :param res:
+    :param foci_detected:
+    :param nuclei_detected:
+    :return: BGR image displaying the annotation
+    """
+    for c in foci_detected:
+        c.draw(background)
+
+    for n in nuclei_detected:
+        n.draw(background)
+
+    for c, n in res:
+        start = c.centre
+        end = n.centre.centre
+        cv2.line(background, start, end, (0, 255, 0), thickness=2,
+                 lineType=cv2.FILLED)
+
+    return background

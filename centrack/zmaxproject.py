@@ -1,17 +1,18 @@
 # Z-max projection
 import logging
-from pathlib import Path
 import re
+from pathlib import Path
 
 import numpy as np
 import tifffile as tf
 from tqdm import tqdm
 
-from centrack.data import DataSet, Condition, PixelSize
-from centrack.utils import is_tif
+from describe import PixelSize
+from fetch import DataSet, Condition, is_tif
 
 if __name__ == '__main__':
-    dataset_path = Path('/Volumes/work/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1/raw')
+    dataset_path = Path(
+        '/Volumes/work/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1/raw')
     markers = 'DAPI+CEP152+GTU88+PCNT'.split('+')
     conditions = Condition(markers=markers,
                            genotype='RPE1wt',

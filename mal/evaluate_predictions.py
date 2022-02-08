@@ -7,7 +7,7 @@ import pandas as pd
 import tifffile as tf
 
 from centrack.utils import contrast
-from centrack.metrics import generate_synthetic_data, generate_predictions, compute_metrics
+from centrack.evaluate import generate_synthetic_data, generate_predictions, compute_metrics
 
 logging.basicConfig(level=logging.INFO)
 
