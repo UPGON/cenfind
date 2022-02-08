@@ -5,7 +5,7 @@ import numpy as np
 import tifffile as tf
 import xarray as xr
 
-from describe import Condition
+from centrack.describe import Condition
 
 
 @dataclass

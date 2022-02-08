@@ -7,7 +7,7 @@ from time import sleep
 import tifffile as tf
 from tqdm import tqdm
 
-from fetch import build_name, fetch_files, write_projection
+from centrack.fetch import build_name, fetch_files, write_projection
 
 logging.basicConfig(format='%(levelname)s: %(message)s')
 

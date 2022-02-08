@@ -1,9 +1,10 @@
 import numpy as np
-from outline import Centre, Contour
 from cv2 import cv2
 from numpy.random import default_rng
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
+
+from centrack.outline import Centre, Contour
 
 rng = default_rng(1993)
 

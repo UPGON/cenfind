@@ -10,16 +10,18 @@ python = ">=3.9,<3.10"
 opencv-python = "^4.5.4.60"
 numpy = "^1.21.2"
 scipy = "1.7.1"
-aicsimageio = "4.5.2"
 tifffile = "2021.8.30"
-pytomlpp = "1.0.3"
+tqdm = "^4.62.3"
+xarray = "^0.21.1"
 
 [tool.poetry.scripts]
-squash = "centrack.centrack.squash:cli"
-score = "centrack.centrack.score:cli"
+squash = "centrack.squash:cli"
+score = "centrack.score:cli"
 
 [tool.poetry.dev-dependencies]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[virtualenvs.in-project]
