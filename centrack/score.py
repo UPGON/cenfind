@@ -54,8 +54,10 @@ class Detector(ABC):
         pass
 
 
-class FocusDetector(Detector):
-    """Combine a preprocessing and a detection step and return a list of centres."""
+class CentriolesDetector(Detector):
+    """
+    Combine a preprocessing and a detection step and return a list of centres.
+    """
 
     def _mask(self):
         transformed = self.plane
@@ -66,11 +68,9 @@ class FocusDetector(Detector):
             model='/Users/leoburgy/Dropbox/epfl/projects/centrack/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
         image = self.plane
         x = normalize_fast2d(image)
-        # n_tiles = (2, 2)
         prob_thresh = .5
 
         foci = model.predict(x,
-                             # n_tiles=n_tiles,
                              prob_thresh=prob_thresh,
                              show_tile_progress=False)
 
@@ -79,34 +79,6 @@ class FocusDetector(Detector):
 
 
 class NucleiDetector(Detector):
-    """
-    Threshold a DAPI image and run contour detection.
-    """
-
-    def _mask(self):
-        image = self.plane
-        image32f = image.astype(float)
-        mu = cv2.GaussianBlur(image32f, (101, 101), 0)
-        mu2 = cv2.GaussianBlur(mu * mu, (31, 31), 0)
-        sigma = cv2.sqrt(mu2 - mu * mu)
-        cv2.imwrite('./out/sigma.png', sigma)
-
-        th, mask = cv2.threshold(sigma, 200, 255, 0)
-        cv2.imwrite('./out/mask.png', mask)
-
-        return mask
-
-    def detect(self):
-        transformed = self._mask()
-        contours, hierarchy = cv2.findContours(transformed,
-                                               cv2.RETR_EXTERNAL,
-                                               cv2.CHAIN_APPROX_SIMPLE)
-
-        return [Contour(c, self.organelle, c_id, confidence=-1) for c_id, c in
-                enumerate(contours)]
-
-
-class NucleiStardistDetector(Detector):
     """
     Resize a DAPI image and run StarDist
     """
@@ -149,7 +121,7 @@ def extract_centrioles(data):
     :param data:
     :return: List of Points
     """
-    focus_detector = FocusDetector(data, 'Centriole')
+    focus_detector = CentriolesDetector(data, 'Centriole')
     return focus_detector.detect()
 
 
@@ -159,7 +131,7 @@ def extract_nuclei(data):
     :param data:
     :return: List of Contours.
     """
-    nuclei_detector = NucleiStardistDetector(data, 'Nucleus')
+    nuclei_detector = NucleiDetector(data, 'Nucleus')
     return nuclei_detector.detect()
 
 
@@ -189,12 +161,18 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='CCOUNT: Automatic centriole scoring')
 
-    parser.add_argument('dataset', type=Path, help='path to the dataset')
-    parser.add_argument('marker', type=str,
+    parser.add_argument('dataset',
+                        type=Path,
+                        help='path to the dataset')
+    parser.add_argument('marker',
+                        type=str,
                         help='marker to use for foci detection')
-    parser.add_argument('-t', '--test', type=int,
+    parser.add_argument('-t', '--test',
+                        type=int,
                         help='test; only run on the ith image')
-    parser.add_argument('-o', '--out', type=Path, help='path for output')
+    parser.add_argument('-o', '--out',
+                        type=Path,
+                        help='path for output')
 
     return parser.parse_args()
 
@@ -270,9 +248,6 @@ def cli():
 
             if successful:
                 logging.debug('Saved at %s', destination_path)
-
-            # with open(args.out / 'dump.json', 'w') as fh:
-            #     json.dump(foci_detected, fh)
 
 
 if __name__ == '__main__':

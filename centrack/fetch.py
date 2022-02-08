@@ -56,6 +56,23 @@ class Channel:
         return self.data.loc[item, :, :]
 
 
+def is_tif(filename):
+    _filename = str(filename)
+    return _filename.endswith('.tif') and not _filename.startswith('.')
+
+
+def build_name(path):
+    """
+    Remove the suffixes and append `_max`.
+    :param path:
+    :return:
+    """
+    file_name = path.name
+    suffixes = ''.join(path.suffixes)
+    file_name_no_suffix = file_name.removesuffix(suffixes)
+    return file_name_no_suffix + '_max' + '.tif'
+
+
 def fetch_files(path_source, file_type='.ome.tif', recursive=False):
     """
     Collect all ome.tif files in a list.
@@ -72,23 +89,6 @@ def fetch_files(path_source, file_type='.ome.tif', recursive=False):
         files_generator = path_source.glob(pattern)
 
     return [file for file in files_generator if not file.name.startswith('.')]
-
-
-def build_name(path):
-    """
-    Remove the suffixes and append `_max`.
-    :param path:
-    :return:
-    """
-    file_name = path.name
-    suffixes = ''.join(path.suffixes)
-    file_name_no_suffix = file_name.removesuffix(suffixes)
-    return file_name_no_suffix + '_max' + '.tif'
-
-
-def is_tif(filename):
-    _filename = str(filename)
-    return _filename.endswith('.tif') and not _filename.startswith('.')
 
 
 def write_projection(dst, data, pixel_size=None):

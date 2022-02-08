@@ -93,15 +93,20 @@ def cli():
     args = parse_args()
     if args.mock:
         logger_cli.warning('Mock mode: Files are not processed.')
-    path_source = Path(args.source)
-    files = fetch_files(path_source, recursive=args.recursive)
+
+    path_raw = args.source / 'raw'
+    if not path_raw.exists():
+        sys.exit(
+            'Please move the raw ome.tif files or tree thereof to `raw/`')
+
+    files = fetch_files(path_raw, recursive=args.recursive)
 
     if args.top:
-        projections_path = path_source / 'projections'
+        projections_path = args.source / 'projections'
         projections_path.mkdir(exist_ok=True)
+        logger_cli.info('Projections will be saved in %s', projections_path)
     else:
         projections_path = None
-    logger_cli.info('Projections will be saved in %s', projections_path)
 
     if files:
         logger_cli.info('Found %s files', len(files))
@@ -112,12 +117,8 @@ def cli():
     pbar = tqdm(files)
 
     for path in pbar:
-        logging.info('Processing: %s', path.name)
+        # logger_cli.info('Processing: %s', path.name)
         dst_name = build_name(path)
-
-        if not Path(path_source / 'raw').exists():
-            sys.exit(
-                'Please move the raw ome.tif files or tree thereof to `raw/`')
 
         if not args.top:
             projections_path = path
@@ -125,7 +126,7 @@ def cli():
         path_dst = projections_path / dst_name
 
         if not args.force and path_dst.exists():
-            logging.warning('Projection already exists (%s)', path_dst)
+            logger_cli.warning('Projection already exists (%s)', path_dst)
             should_overwrite = input(
                 'Do you want to overwrite the existing projection? (y/n): ')
             if should_overwrite in ('n', 'no'):
