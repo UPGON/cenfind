@@ -6,7 +6,7 @@ import tifffile as tf
 from labelbox import Client
 
 from centrack.fetch import DataSet
-from centrack.labelbox_api import (
+from mal.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,
@@ -15,8 +15,8 @@ from centrack.labelbox_api import (
     labels_list_create,
     task_prepare
     )
-from centrack.utils import contrast
-from centrack.detectors import extract_centrioles
+from centrack.outline import contrast
+from centrack.score import extract_centrioles
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

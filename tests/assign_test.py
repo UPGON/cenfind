@@ -3,7 +3,7 @@ import random
 import numpy as np
 from cv2 import cv2
 
-from centrack.annotation import Centre, Contour
+from centrack.outline import Centre, Contour
 from centrack.score import assign
 
 width = 1024
