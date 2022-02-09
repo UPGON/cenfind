@@ -27,7 +27,6 @@ class DataSet:
 class Field:
     path: Path
     condition: Condition
-    dataset: DataSet
 
     @property
     def markers(self):
@@ -83,6 +82,7 @@ def fetch_files(path_source, file_type='.ome.tif', recursive=False):
     """
     pattern = f'*{file_type}'
 
+    path_source = Path(path_source)
     if recursive:
         files_generator = path_source.rglob(pattern)
     else:
