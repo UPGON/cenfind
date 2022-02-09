@@ -281,7 +281,7 @@ def get_markers(markers, sep='+'):
     return markers_list
 
 
-# TODO: Replace hard coded name mangling with extrac_filename()
+# TODO: Replace hard coded name mangling with extract_filename()
 def extract_filename(file):
     file_name = file.name
     file_name = file_name.removesuffix(''.join(file.suffixes))

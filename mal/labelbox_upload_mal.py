@@ -1,3 +1,4 @@
+import argparse
 import logging
 from pathlib import Path
 
@@ -5,7 +6,9 @@ import numpy as np
 import tifffile as tf
 from labelbox import Client
 
-from centrack.fetch import DataSet
+from centrack.describe import DataSet
+from centrack.outline import contrast
+from centrack.score import extract_centrioles
 from mal.labelbox_api import (
     project_create,
     dataset_create,
@@ -15,23 +18,28 @@ from mal.labelbox_api import (
     labels_list_create,
     task_prepare
     )
-from centrack.outline import contrast
-from centrack.score import extract_centrioles
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-synthetic = False
-dataset_name = '20210727_HA-FL-SAS6_Clones'
+
+def args_parse():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('name',
+                        type=str)
+    parser.add_argument('--synthetic',
+                        action='store_true',
+                        )
+    return parser.parse_args()
 
 
-def main():
+def cli(parsed_args):
     with open('../configs/labelbox_api_key.txt', 'r') as apikey:
         lb_api_key = apikey.readline().rstrip('\n')
 
     client = Client(api_key=lb_api_key)
 
-    project_name_lb = dataset_name
+    project_name_lb = parsed_args.name
     project = project_create(client, project_name_lb)
 
     logger.debug('Enable MAL.')
@@ -40,13 +48,13 @@ def main():
     logger.debug('Get the ontology.')
     ontology_setup(client, project, ontology_id='ckywqubua5nkp0zb2h9lm3vn7')
 
-    dataset_name_lb = dataset_name
+    dataset_name_lb = parsed_args.name
     dataset_lb = dataset_create(client, dataset_name_lb)
 
     project.datasets.connect(dataset_lb)
     logger.debug('Attach the dataset to the project.')
 
-    if synthetic:
+    if parsed_args.synthetic:
         shape = (2048, 2048)
         number_foci = 10
 
@@ -58,7 +66,7 @@ def main():
             image = image_generate(canvas, predictions)
             labels.append(label_create(image, predictions))
     else:
-        dataset = DataSet(Path('/Volumes/work/epfl/datasets') / dataset_name)
+        dataset = DataSet(Path('/Volumes/work/epfl/datasets') / parsed_args.name)
         fields = tuple(f for f in dataset.projections.glob('*.tif') if
                        not f.name.startswith('.'))
         labels = []
@@ -77,4 +85,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parsed_arguments = args_parse()
+    cli(parsed_arguments)

@@ -13,7 +13,7 @@ from stardist.models import StarDist2D
 
 from describe import DataSet, Condition
 from centrack.status import PATTERNS
-from fetch import Channel, Field
+from centrack.describe import Channel, Field
 from outline import (
     Centre,
     Contour,
