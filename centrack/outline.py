@@ -99,6 +99,9 @@ class Centre(ROI):
         # return plane[self.row - 32:self.col - 32, self.row + 32:self.col + 32]
         return self.bbox.extract(plane)
 
+    def to_numpy(self):
+        return np.asarray(self.centre)
+
 
 @dataclass(eq=True, frozen=True)
 class BBox(ROI):
