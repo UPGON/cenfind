@@ -11,8 +11,9 @@ from csbdeep.utils import normalize
 from cv2 import cv2
 from stardist.models import StarDist2D
 
-from describe import condition_from_filename
-from fetch import Channel, Field, DataSet
+from describe import DataSet, Condition
+from centrack.status import PATTERNS
+from fetch import Channel, Field
 from outline import (
     Centre,
     Contour,
@@ -180,10 +181,7 @@ def parse_args():
 def cli():
     logging.info('Starting Centrack...')
 
-    filename_patterns = {
-        'hatzopoulos': r'([\w\d]+)_(?:([\w\d-]+)_)?([\w\d\+]+)_(\d)',
-        'garcia': r'^(?:\d{8})_([\w\d-]+)_([\w\d_-]+)_([\w\d\+]+)_((?:R\d_)?\d+)?_MMStack_Default'
-        }
+
 
     args = parse_args()
 
@@ -208,9 +206,9 @@ def cli():
 
     for path in fields:
         logging.info('Loading %s', path.name)
-        condition = condition_from_filename(path.name,
-                                            filename_patterns['hatzopoulos'])
-        field = Field(path, condition, dataset)
+        condition = Condition.from_filename(path.name,
+                                            PATTERNS['hatzopoulos'])
+        field = Field(path, condition)
         data = field.load()
 
         marker = args.marker

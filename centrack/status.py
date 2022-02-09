@@ -2,11 +2,16 @@ import argparse
 import logging
 from pathlib import Path
 
-from describe import DataSet
+from centrack.describe import DataSet
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
+PATTERNS = {
+    'hatzopoulos': r'([\w\d]+)_(?:([\w\d-]+)_)?([\w\d\+]+)_(\d)',
+    'garcia': r'^(?:\d{8})_([\w\d-]+)_([\w\d_-]+)_([\w\d\+]+)_((?:R\d_)?\d+)?_MMStack_Default'
+    }
 
 
 def parse_args():
@@ -18,12 +23,12 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
+def cli():
     logger.debug('Starting')
     args = parse_args()
     ds = DataSet(args.path)
 
-    ds.check_description()
+    ds.check_conditions()
     ds.check_raw()
     ds.check_projections()
     ds.check_outline()
@@ -33,4 +38,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    cli()
