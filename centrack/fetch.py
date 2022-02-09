@@ -9,21 +9,6 @@ from centrack.describe import Condition
 
 
 @dataclass
-class DataSet:
-    path: Path
-
-    @property
-    def projections(self):
-        """Define the path to projections folder."""
-        return self.path / 'projections'
-
-    @property
-    def raw(self):
-        """Define the path to raw folder."""
-        return self.path / 'raw'
-
-
-@dataclass
 class Field:
     path: Path
     condition: Condition
@@ -71,24 +56,6 @@ def build_name(path):
     file_name_no_suffix = file_name.removesuffix(suffixes)
     return file_name_no_suffix + '_max' + '.tif'
 
-
-def fetch_files(path_source, file_type='.ome.tif', recursive=False):
-    """
-    Collect all ome.tif files in a list.
-    :param file_type:
-    :param path_source:
-    :param recursive:
-    :return: A list of Path to ome.tif files
-    """
-    pattern = f'*{file_type}'
-
-    path_source = Path(path_source)
-    if recursive:
-        files_generator = path_source.rglob(pattern)
-    else:
-        files_generator = path_source.glob(pattern)
-
-    return [file for file in files_generator if not file.name.startswith('.')]
 
 
 def write_projection(dst, data, pixel_size=None):

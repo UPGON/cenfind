@@ -14,9 +14,10 @@ projects = {
     'RPE1wt_CEP63+CETN2+PCNT_1': 'ckusghnn68fir0zehargo6jcd',
     'RPE1wt_CEP152+GTU88+PCNT_1': 'ckuwn9zv52zi20zb2esdv14xp',
     'RPE1wt_CP110+GTU88+PCNT_2': 'ckuph8qhf3evx0zagg5g5cwdb',
+    '20210727_HA-FL-SAS6_Clones': 'ckz8af4ss60300zg53zyd92ue'
 }
 
-dataset_name = 'RPE1wt_CEP152+GTU88+PCNT_1'
+dataset_name = '20210727_HA-FL-SAS6_Clones'
 path_root = Path('/Volumes/work/epfl/datasets')
 path_dataset = path_root / dataset_name
 

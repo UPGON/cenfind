@@ -1,5 +1,111 @@
+import logging
 import re
 from dataclasses import dataclass
+from pathlib import Path
+
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.DEBUG)
+
+
+def fetch_files(path_source, file_type='.ome.tif', recursive=False):
+    """
+    Collect all ome.tif files in a list.
+    :param file_type:
+    :param path_source:
+    :param recursive:
+    :return: A list of Path to ome.tif files
+    """
+    pattern = f'*{file_type}'
+
+    path_source = Path(path_source)
+    if recursive:
+        files_generator = path_source.rglob(pattern)
+    else:
+        files_generator = path_source.glob(pattern)
+
+    return [file for file in files_generator if not file.name.startswith('.')]
+
+
+@dataclass
+class DataSet:
+    path: Path
+
+    @property
+    def condition(self):
+        return self.path / 'condition.toml'
+
+    @property
+    def raw(self):
+        """Define the path to raw folder."""
+        return self.path / 'raw'
+
+    @property
+    def projections(self):
+        """Define the path to projections folder."""
+        return self.path / 'projections'
+
+    @property
+    def predictions(self):
+        return self.path / 'predictions.csv'
+
+    @property
+    def annotations(self):
+        return self.path / 'annotation.csv'
+
+    @property
+    def outlines(self):
+        return self.path / 'outlines'
+
+    def check_description(self):
+        if self.condition.exists():
+            logger.info('Description exists')
+        else:
+            logger.info('Description is missing, do you want to create one?')
+
+    def _check_container(self, name: str, file_type: str):
+        """
+        Check if the folder `name` exists and whether it contains `file_type` files (recursively)
+        :param name:
+        :param file_type:
+        :return: None
+        """
+        name = self.path / name
+
+        if not name.exists():
+            logger.info('%s is missing', name)
+            name.mkdir()
+            logger.info('%s has been created', name)
+            return
+
+        logger.info('%s exists', name)
+        files = [f for f in name.iterdir()]
+
+        if len(files) == 0:
+            logger.info(
+                '%s is empty, make sure to move the %s files there', name,
+                file_type)
+            return
+        else:
+            recursive_files = fetch_files(name, recursive=True,
+                                          file_type=file_type)
+            logger.info('%s contains %s %s files', name, len(recursive_files),
+                        file_type)
+
+    def check_raw(self):
+        self._check_container('raw', '.ome.tif')
+
+    def check_projections(self):
+        self._check_container('projections', '_max.tif')
+
+    def check_predictions(self):
+        raise NotImplementedError
+
+    def check_annotations(self):
+        raise NotImplementedError
+
+    def check_outline(self):
+        self._check_container('outline', '.png')
 
 
 @dataclass
