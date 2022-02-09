@@ -33,8 +33,8 @@ def cli():
     ds.check_projections()
     ds.check_outline()
 
-    ds.check_predictions()
-    ds.check_annotations()
+    # ds.check_predictions()
+    # ds.check_annotations()
 
 
 if __name__ == '__main__':
