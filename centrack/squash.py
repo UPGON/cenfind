@@ -7,7 +7,7 @@ from time import sleep
 import tifffile as tf
 from tqdm import tqdm
 
-from centrack.status import build_name, fetch_files, write_projection
+from centrack.status import build_name, fetch_files
 
 logging.basicConfig(format='%(levelname)s: %(message)s')
 
@@ -59,6 +59,17 @@ def project(path):
     projection = _data.max(axis=1)
 
     return pixel_size_cm, projection
+
+
+def write_projection(dst, data, pixel_size=None):
+    """
+    Writes the projection to the disk.
+    """
+    if pixel_size:
+        res = (1 / pixel_size, 1 / pixel_size, 'CENTIMETER')
+    else:
+        res = None
+    tf.imwrite(dst, data, photometric='minisblack', resolution=res)
 
 
 def parse_args():

@@ -213,10 +213,11 @@ class DataSet:
 
     def check_predictions(self):
         """
-        If there is a file there, it should tell us and also check if it's still
-        relevant. If there is nothing or if we want to compare the predictions
-        with annotations, we then should compute the predictions. Then, we
-        should upload the predictions to labelbox.
+        Check for a set of predictions.
+        else if we want to compare the predictions with annotations,
+        Compute the predictions.
+        Upload the predictions to labelbox.
+        Provide the url of the annotated dataset on Labelbox
 
         if not predictions:
             if not force:
@@ -232,10 +233,7 @@ class DataSet:
                 labels_list.append(label)
         task = prepare_task(labels_list)
         task.upload_until_done()
-        logger.info("predictions succesfully uploaded.")
-
-        with open(file, 'w') as f:
-            json.dump(f, labels_list.to_json())
+        logger.info("predictions succesfully uploaded. (URL)")
 
         :return:
         """
@@ -298,17 +296,6 @@ def build_name(path):
     return file_name_no_suffix + '_max' + '.tif'
 
 
-def write_projection(dst, data, pixel_size=None):
-    """
-    Writes the projection to the disk.
-    """
-    if pixel_size:
-        res = (1 / pixel_size, 1 / pixel_size, 'CENTIMETER')
-    else:
-        res = None
-    tf.imwrite(dst, data, photometric='minisblack', resolution=res)
-
-
 def get_markers(markers, sep='+'):
     """
     Convert a '+'-delimited string into a list and prepend the DAPI
@@ -350,9 +337,11 @@ def cli():
     ds.check_raw()
     ds.check_projections()
     ds.check_outlines()
-
-    # ds.check_predictions()
-    # ds.check_annotations()
+    ds.check_predictions()
+    # ds.run_predictions()
+    # with open(file, 'w') as f:
+    #     json.dump(f, labels_list.to_json())
+    ds.check_annotations()
 
 
 if __name__ == '__main__':
