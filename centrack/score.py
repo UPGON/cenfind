@@ -11,15 +11,19 @@ from csbdeep.utils import normalize
 from cv2 import cv2
 from stardist.models import StarDist2D
 
-from describe import DataSet, Condition
-from centrack.status import PATTERNS
-from centrack.describe import Channel, Field
-from outline import (
+from centrack.status import (
+    PATTERNS,
+    DataSet,
+    Condition,
+    Channel,
+    Field,
+)
+from centrack.outline import (
     Centre,
     Contour,
     prepare_background,
     draw_annotation
-    )
+)
 from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
 
@@ -180,8 +184,6 @@ def parse_args():
 
 def cli():
     logging.info('Starting Centrack...')
-
-
 
     args = parse_args()
 
