@@ -6,7 +6,7 @@ import numpy as np
 import tifffile as tf
 from labelbox import Client
 
-from centrack.describe import DataSet
+from centrack.status import DataSet
 from centrack.outline import contrast
 from centrack.score import extract_centrioles
 from mal.labelbox_api import (

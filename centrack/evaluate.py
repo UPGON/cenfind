@@ -5,7 +5,7 @@ from numpy.random import default_rng
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 
-from centrack.describe import Condition, fetch_files, Field
+from centrack.status import Condition, fetch_files, Field
 from centrack.outline import Centre
 from centrack.score import extract_centrioles
 

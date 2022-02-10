@@ -6,7 +6,7 @@ import tifffile as tf
 from cv2 import cv2
 from skimage import exposure
 
-from centrack.describe import Marker
+from centrack.status import Marker
 from centrack.outline import contrast
 
 logging.basicConfig(level=logging.DEBUG)
