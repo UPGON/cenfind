@@ -95,11 +95,11 @@ def compute_metrics(positions, predictions, offset_max=2):
 
 
 def compute_precision(tp: int, fp: int):
-    return tp / (tp + fp)
+    return round(tp / (tp + fp), 3)
 
 
 def compute_recall(tp: int, fn: int):
-    return tp / (tp + fn)
+    return round(tp / (tp + fn), 3)
 
 
 def precision_recall(metrics):
