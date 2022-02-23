@@ -71,7 +71,7 @@ class CentriolesDetector(Detector):
 
     def detect(self, interpeak_min=3):
         model = get_model(
-            model='/Users/leoburgy/Dropbox/epfl/projects/centrack/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
+            model='./models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
         image = self.plane
         x = normalize_fast2d(image)
         prob_thresh = .5
@@ -173,12 +173,12 @@ def parse_args():
     parser.add_argument('marker',
                         type=str,
                         help='marker to use for foci detection')
+    parser.add_argument('format',
+                        type=str,
+                        help='name of the experimenter (garcia or hatzopoulos)')
     parser.add_argument('-t', '--test',
                         type=int,
                         help='test; only run on the ith image')
-    parser.add_argument('-o', '--out',
-                        type=Path,
-                        help='path for output')
 
     return parser.parse_args()
 
@@ -188,41 +188,37 @@ def cli():
 
     args = parse_args()
 
-    dataset_path = Path(args.dataset)
-    logging.debug('Working at %s', dataset_path)
-    results_path = dataset_path / 'results'
-    results_path.mkdir(exist_ok=True)
+    path_dataset = Path(args.dataset)
+    logging.debug('Working at %s', path_dataset)
 
-    dataset = DataSet(dataset_path)
-
-    if not args.out:
-        projections_path = dataset.projections
-    else:
-        projections_path = args.out
-    projections_path.mkdir(exist_ok=True)
+    dataset = DataSet(path_dataset)
 
     fields = tuple(f for f in dataset.projections.glob('*.tif') if
                    not f.name.startswith('.'))
     logging.debug('%s files were found', len(fields))
 
+    condition = Condition.from_filename(path_dataset.name,
+                                        PATTERNS[args.format])
+    marker = args.marker
+    if marker not in condition.markers:
+        raise ValueError(
+            f'Marker {marker} not in dataset ({condition.markers}).')
     if args.test:
         logging.warning('Test mode enabled: only one field will be processed.')
-        fields = [fields[0]]
+        fields = [fields[args.test]]
+
+    path_scores = path_dataset / 'scores'
+    path_scores.mkdir(exist_ok=True)
 
     pairs = []
     for path in fields:
         logging.info('Loading %s', path.name)
-        condition = Condition.from_filename(path.name,
-                                            PATTERNS['garcia'])
         field = Field(path, condition)
         data = field.load()
 
-        marker = args.marker
-        if marker not in condition.markers:
-            raise ValueError(
-                f'Marker {marker} not in dataset ({condition.markers}).')
+        if not data.shape == (4, 2048, 2048):
+            raise ValueError(data.shape)
 
-        logging.info('Detecting the objects...')
         foci = Channel(data)[marker].to_numpy()
         nuclei = Channel(data)['DAPI'].to_numpy()
 
@@ -233,7 +229,8 @@ def cli():
         logging.info('%s: (%s foci, %s nuclei)', path.name, len(foci_detected),
                      len(nuclei_detected))
 
-        logging.debug('Assigning foci to nuclei.')
+        # TODO: write the foci coordinates to a csv.
+
         try:
             assigned = assign(foci_list=foci_detected,
                               nuclei_list=nuclei_detected)
@@ -241,17 +238,18 @@ def cli():
             logging.warning('No foci/nuclei detected (%s)', path.name)
             continue
 
-        if args.out:
-            logging.debug('Creating annotation image.')
-            background = prepare_background(nuclei, foci)
-            annotation = draw_annotation(background, assigned, foci_detected,
-                                         nuclei_detected)
-            args.out.mkdir(exist_ok=True)
-            destination_path = projections_path / f'{path.name.removesuffix(".ome.tif")}_annot.png'
-            successful = cv2.imwrite(str(destination_path), annotation)
+        logging.debug('Creating annotation image...')
+        background = prepare_background(nuclei, foci)
+        annotation = draw_annotation(background, assigned, foci_detected,
+                                     nuclei_detected)
 
-            if successful:
-                logging.debug('Saved at %s', destination_path)
+        file_name = path.name.removesuffix(".tif")
+        destination_path = path_scores / f'{file_name}_annot.png'
+        successful = cv2.imwrite(str(destination_path), annotation)
+
+        if successful:
+            logging.debug('Saved at %s', destination_path)
+
         for pair in assigned:
             pairs.append({'fov': path.name,
                           'channel': marker,
@@ -260,7 +258,7 @@ def cli():
                           })
     results = pd.DataFrame(pairs)
 
-    results.to_csv(results_path / 'results.csv')
+    results.to_csv(path_scores / 'scores.csv')
 
 
 if __name__ == '__main__':

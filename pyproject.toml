@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.10"
-opencv-python = "^4.5.4.60"
+opencv-python = "4.5.1.48"
 numpy = ">=1.21.2, <1.22"
 scipy = "1.7.1"
 tifffile = "2021.8.30"
