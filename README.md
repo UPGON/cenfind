@@ -4,9 +4,38 @@ A command line interface to score centrioles in cells.
 
 ## Installation
 
+centrack is being developed with Python 3.9.5. If you don't have this version, please switch to it for instance with pyenv.
+
+First create a virtual environment with:
 ```shell
-pip install centrack
+$ python3 -m venv centrack-venv
+$ source centrack-venv/bin/activate
 ```
+Your prompt should now be prepended with `(centrack-venv)`.
+
+Install `centrack` with:
+```shell
+$ pip install centrack
+```
+
+Check that centrack is correctly installed with:
+
+```shell
+$ squash --help
+```
+
+## Requirements
+`centrack` assumes a fixed folder structure:
+
+```text
+<project_name>/
+├── conditions.toml
+├── projections/
+├── raw/
+└── scores/
+```
+Especially, the OME.tif files should live under raw/
+
 
 ## Usage
 
@@ -18,34 +47,3 @@ run `centrack project` to save computing time in the future.
 4. After running the `centrack project`, a folder called `projections` is created and contains the 4-d tiff files.
 5. Now, you can swiftly run `centrack score` on the projections files.
 6. You now can specify a few options to guide the scoring.
-
-### Options overview
-
-* Selecting the centriole detection method
-* Choosing for conservative detection or liberal
-* Selecting the cell segmentation algorithm
-
-### Architecture requirements
-- Separate the z-max projection code (caching)
-- Choice: lightweight stack object or use existing classes (AICSImageIO)
-
-### Architecture overview
-
-```python
-dataset_path = '/Volumes/work/epfl/datasets'
-dataset_name = 'RPE1wt_CEP152+GTU88+PCNT_1'
-ds = Dataset(dataset_path, dataset_name, channels='DAPI+CEP152+GTU88+PCNT'.split('+'))
-
-for field in ds.data:
-    projection = field.project()
-    projection.dump(dataset_name / dataset_name / 'projections' / f'{field.name}_max.tiff')
-
-field = ds.data[0, 0]
-
-centrioles = field['CEP152']
-nuclei = field['DAPI']
-
-foci = centrioles.detect_centrioles()
-nuclei = nuclei.segment_cells()
-
-```

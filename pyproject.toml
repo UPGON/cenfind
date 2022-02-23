@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "centrack"
-version = "0.2.0"
+version = "0.3.1"
 description = "Score centrioles in fluorescence images"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
+repository = "https://github.com/UPGON/centrack"
+readme = "README.md"
+keywords = ["microscopy", "scientific", "biology", "image-analysis"]
 license = "MIT"
 
 [tool.poetry.dependencies]
