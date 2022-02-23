@@ -24,21 +24,15 @@ PATTERNS = {
     }
 
 
-def fetch_files(path_source, file_type='.ome.tif', recursive=False):
+def fetch_files(path_source: Path, file_type='.ome.tif'):
     """
     Collect all ome.tif files in a list.
     :param file_type:
     :param path_source:
-    :param recursive:
     :return: A list of Path to ome.tif files
     """
     pattern = f'*{file_type}'
-
-    path_source = Path(path_source)
-    if recursive:
-        files_generator = path_source.rglob(pattern)
-    else:
-        files_generator = path_source.glob(pattern)
+    files_generator = path_source.rglob(pattern)
 
     return [file for file in files_generator if not file.name.startswith('.')]
 
@@ -284,16 +278,17 @@ def is_tif(filename):
     return _filename.endswith('.tif') and not _filename.startswith('.')
 
 
-def build_name(path):
+def build_name(path: Path, projection_type='max') -> str:
     """
-    Remove the suffixes and append `_max`.
+    Extract the file name, remove the suffixes and append the projection type.
+    :param projection_type: the type of projection, by default max
     :param path:
-    :return:
+    :return: file name of the projection
     """
     file_name = path.name
     suffixes = ''.join(path.suffixes)
     file_name_no_suffix = file_name.removesuffix(suffixes)
-    return file_name_no_suffix + '_max' + '.tif'
+    return file_name_no_suffix + f'_{projection_type}.tif'
 
 
 def get_markers(markers, sep='+'):
@@ -333,15 +328,11 @@ def cli():
     args = parse_args()
     ds = DataSet(args.path)
 
-    ds.check_conditions()
-    ds.check_raw()
-    ds.check_projections()
-    ds.check_outlines()
-    ds.check_predictions()
-    # ds.run_predictions()
-    # with open(file, 'w') as f:
-    #     json.dump(f, labels_list.to_json())
-    ds.check_annotations()
+    ds.check_conditions()  # Create a condition file if not existing
+    ds.check_raw()  # Check if the dataset folder has the OME.tif in raw/, if not ask to move all ome tif to raw/
+    ds.check_projections()  # Check if projections exist, if not, ask to launch `squash`
+    ds.check_predictions()  # Check if predictions exist, if not attempt to launch `score`
+    ds.check_annotations()  # Check if annotations exist, if not, attempt to set up the labelbox project and output the url when ready
 
 
 if __name__ == '__main__':

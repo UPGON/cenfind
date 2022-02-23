@@ -15,6 +15,10 @@ tqdm = "^4.62.3"
 xarray = "^0.21.1"
 tensorflow = "^2.8.0"
 pytomlpp = "^1.0.10"
+imageio = "^2.16.0"
+scikit-image = "^0.19.2"
+csbdeep = "^0.6.3"
+stardist = "^0.7.3"
 
 [tool.poetry.scripts]
 status = "centrack.status:cli"
