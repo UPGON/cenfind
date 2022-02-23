@@ -7,27 +7,28 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from csbdeep.utils import normalize
 from cv2 import cv2
 from stardist.models import StarDist2D
 
+from centrack.outline import (
+    Centre,
+    Contour,
+    prepare_background,
+    draw_annotation
+    )
 from centrack.status import (
     PATTERNS,
     DataSet,
     Condition,
     Channel,
     Field,
-)
-from centrack.outline import (
-    Centre,
-    Contour,
-    prepare_background,
-    draw_annotation
-)
+    )
 from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
 
 @functools.lru_cache(maxsize=None)
@@ -187,8 +188,10 @@ def cli():
 
     args = parse_args()
 
-    dataset_path = args.dataset
+    dataset_path = Path(args.dataset)
     logging.debug('Working at %s', dataset_path)
+    results_path = dataset_path / 'results'
+    results_path.mkdir(exist_ok=True)
 
     dataset = DataSet(dataset_path)
 
@@ -206,10 +209,11 @@ def cli():
         logging.warning('Test mode enabled: only one field will be processed.')
         fields = [fields[0]]
 
+    pairs = []
     for path in fields:
         logging.info('Loading %s', path.name)
         condition = Condition.from_filename(path.name,
-                                            PATTERNS['hatzopoulos'])
+                                            PATTERNS['garcia'])
         field = Field(path, condition)
         data = field.load()
 
@@ -248,6 +252,15 @@ def cli():
 
             if successful:
                 logging.debug('Saved at %s', destination_path)
+        for pair in assigned:
+            pairs.append({'fov': path.name,
+                          'channel': marker,
+                          'nucleus': pair[1].centre.to_numpy(),
+                          'centriole': pair[0].to_numpy(),
+                          })
+    results = pd.DataFrame(pairs)
+
+    results.to_csv(results_path / 'results.csv')
 
 
 if __name__ == '__main__':

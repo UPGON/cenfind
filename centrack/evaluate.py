@@ -116,8 +116,9 @@ def precision_recall(metrics):
             'recall': compute_recall(tp, fn)}
 
 
-def process_one_image(data, annotation):
-    predictions = extract_centrioles(data)
+def process_one_image(data, annotation, predictions=None):
+    if predictions is None:
+        predictions = extract_centrioles(data)
     predictions_np = np.asarray([c.to_numpy() for c in predictions])
     annotation_np = np.asarray([a.to_numpy() for a in annotation])
     confusion_matrix = compute_metrics(annotation_np, predictions_np,

@@ -2,11 +2,12 @@ import json
 import logging
 from pathlib import Path
 
-from cv2 import cv2
 import labelbox
+import pandas as pd
 import requests
+from cv2 import cv2
 
-from centrack.evaluate import process_one_image
+from centrack.evaluate import process_one_image, extract_centrioles
 from centrack.outline import Centre
 
 logging.basicConfig(level=logging.INFO)
@@ -35,7 +36,9 @@ def main():
 
         with open(tmp_dir / f"{label_uid}.png", 'wb') as f:
             f.write(data)
-        image = cv2.imread(str(tmp_dir / f"{label_uid}.png"), cv2.IMREAD_GRAYSCALE)
+        image = cv2.imread(str(tmp_dir / f"{label_uid}.png"),
+                           cv2.IMREAD_GRAYSCALE)
+        image_bgr = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         annotation = label.annotations
 
         annotation_list = []
@@ -44,10 +47,17 @@ def main():
                 x, y = int(annot.value.x), int(annot.value.y)
                 f.write(f'{x}, {y}\n')
                 annotation_list.append(Centre((x, y)))
-
-        performances.append(process_one_image(image, annotation_list))
-    with open(tmp_dir / f"precision_recall.txt", 'w') as f:
-        json.dump(performances, f)
+        predictions_list = extract_centrioles(image)
+        performances.append(
+            process_one_image(image, annotation_list, predictions_list))
+        for c in annotation_list:
+            c.draw(image_bgr, marker_type=cv2.MARKER_SQUARE, marker_size=4,
+                   annotation=False)
+        for c in predictions_list:
+            c.draw(image_bgr, marker_type=cv2.MARKER_DIAMOND, annotation=False)
+        cv2.imwrite(str(tmp_dir / f"{label_uid}_annot.png"), image_bgr)
+    results = pd.DataFrame(performances)
+    results.to_csv(tmp_dir / 'precision_recall.csv')
 
 
 if __name__ == '__main__':
