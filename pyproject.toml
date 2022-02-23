@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "centrack"
-version = "0.3.1"
+version = "0.3.6"
 description = "Score centrioles in fluorescence images"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
 repository = "https://github.com/UPGON/centrack"

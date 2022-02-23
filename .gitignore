@@ -9,8 +9,10 @@ data/
 configs/
 *.pt
 spotipy/
+centrack/spotipy/
 models/
 *.h5
 /.python-version
 dist/
+logs/
 /poetry.lock

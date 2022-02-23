@@ -25,8 +25,8 @@ from centrack.status import (
     Channel,
     Field,
     )
-from spotipy.spotipy.model import SpotNet
-from spotipy.spotipy.utils import normalize_fast2d
+from centrack.spotipy.model import SpotNet
+from centrack.spotipy.utils import normalize_fast2d
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
