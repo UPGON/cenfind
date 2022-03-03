@@ -3,8 +3,8 @@ import random
 import numpy as np
 from cv2 import cv2
 
-from centrack.outline import Centre, Contour
-from centrack.score import assign
+from src.centrack.commands import Centre, Contour
+from src.centrack.commands import assign
 
 width = 1024
 height = 1024

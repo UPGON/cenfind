@@ -12,21 +12,21 @@ from csbdeep.utils import normalize
 from cv2 import cv2
 from stardist.models import StarDist2D
 
-from centrack.outline import (
+from .outline import (
     Centre,
     Contour,
     prepare_background,
     draw_annotation
     )
-from centrack.status import (
+from .status import (
     PATTERNS,
     DataSet,
     Condition,
     Channel,
     Field,
     )
-from centrack.spotipy.model import SpotNet
-from centrack.spotipy.utils import normalize_fast2d
+from src.centrack.spotipy.spotipy.model import SpotNet
+from src.centrack.spotipy.spotipy.utils import normalize_fast2d
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
@@ -165,7 +165,7 @@ def assign(foci_list, nuclei_list):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='CCOUNT: Automatic centriole scoring')
+        description='CENTRACK: Automatic centriole scoring')
 
     parser.add_argument('dataset',
                         type=Path,

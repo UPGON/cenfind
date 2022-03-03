@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from spotipy.spotipy.model import SpotNet, Config
+from src.centrack import SpotNet, Config
 
 
 def main():
@@ -10,7 +10,7 @@ def main():
 
     model = SpotNet(config, name=None, basedir=None)
 
-    tf.keras.utils.plot_model(model.keras_model, to_file='../models/spotnet.png',
+    tf.keras.utils.plot_model(model.keras_model, to_file='../../../data/models/spotnet.png',
                               show_shapes=True)
 
 

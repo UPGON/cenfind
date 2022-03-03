@@ -6,11 +6,11 @@ import numpy as np
 import tifffile as tf
 from labelbox import Client
 
-from centrack.status import DataSet
-from centrack.outline import contrast
-from centrack.score import extract_centrioles
+from src.centrack.commands.status import DataSet
+from src.centrack.commands import contrast
+from src.centrack.commands import extract_centrioles
 
-from mal.labelbox_api import (
+from src.centrack.mal.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,
@@ -35,7 +35,7 @@ def args_parse():
 
 
 def cli(parsed_args):
-    with open('../configs/labelbox_api_key.txt', 'r') as apikey:
+    with open('../../../data/labelbox_api_key.txt', 'r') as apikey:
         lb_api_key = apikey.readline().rstrip('\n')
 
     client = Client(api_key=lb_api_key)

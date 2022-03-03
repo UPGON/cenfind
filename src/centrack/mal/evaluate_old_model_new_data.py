@@ -1,4 +1,3 @@
-import json
 import logging
 from pathlib import Path
 
@@ -7,12 +6,12 @@ import pandas as pd
 import requests
 from cv2 import cv2
 
-from centrack.evaluate import process_one_image, extract_centrioles
-from centrack.outline import Centre
+from src.centrack.commands import process_one_image, extract_centrioles
+from src.centrack.commands import Centre
 
 logging.basicConfig(level=logging.INFO)
 
-with open('../configs/labelbox_api_key.txt', 'r') as apikey:
+with open('../../../data/labelbox_api_key.txt', 'r') as apikey:
     LB_API_KEY = apikey.readline()
     LB_API_KEY = LB_API_KEY.rstrip('\n')
 

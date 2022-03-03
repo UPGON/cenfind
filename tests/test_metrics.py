@@ -1,6 +1,6 @@
 import numpy as np
 
-from centrack.evaluate import compute_metrics
+from src.centrack.commands import compute_metrics
 
 
 def test_compute_metrics():

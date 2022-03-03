@@ -8,9 +8,9 @@ docs/
 data/
 configs/
 *.pt
-spotipy/
-centrack/spotipy/
-models/
+src/centrack/spotipy/
+src/centrack/spotipy/
+data/models/
 *.h5
 /.python-version
 dist/
