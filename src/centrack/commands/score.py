@@ -160,7 +160,8 @@ def assign(foci_list, nuclei_list):
             for
             n in nuclei_list]
         nucleus_nearest = max(distances, key=lambda x: x[1])
-        assigned.append((c, nucleus_nearest[0]))
+        if nucleus_nearest[1] > -50:
+            assigned.append((c, nucleus_nearest[0]))
 
     return assigned
 
