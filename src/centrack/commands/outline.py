@@ -72,7 +72,7 @@ class Centre(ROI):
 
     @property
     def centre(self):
-        return self.row, self.col
+        return int(self.row), int(self.col)
 
     @property
     def bbox(self):

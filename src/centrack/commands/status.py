@@ -103,7 +103,7 @@ class Condition:
         pat = re.compile(pattern)
         matched = re.match(pat, file_name)
         if matched is None:
-            raise re.error('%s not found in %s', pattern, file_name)
+            raise re.error(f'{pattern} not found in {file_name}')
         else:
             genotype, treatment, markers, replicate = matched.groups()
         markers_list = get_markers(markers)

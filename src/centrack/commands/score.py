@@ -1,15 +1,16 @@
 import argparse
 import contextlib
+import functools
 import logging
 import os
+import re
 from abc import ABC, abstractmethod
 from pathlib import Path
-import functools
 
+import cv2
 import numpy as np
 import pandas as pd
 from csbdeep.utils import normalize
-import cv2
 from stardist.models import StarDist2D
 
 from centrack.commands.outline import (
@@ -25,7 +26,6 @@ from centrack.commands.status import (
     Channel,
     Field,
     )
-
 from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
 
@@ -72,7 +72,7 @@ class CentriolesDetector(Detector):
 
     def detect(self, interpeak_min=3):
         model = get_model(
-            model='./models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
+            model='../../../data/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
         image = self.plane
         x = normalize_fast2d(image)
         prob_thresh = .5
@@ -156,7 +156,8 @@ def assign(foci_list, nuclei_list):
     assigned = []
     for c in foci_list:
         distances = [
-            (n, cv2.pointPolygonTest(n.contour, c.centre, measureDist=True)) for
+            (n, cv2.pointPolygonTest(n.contour, c.centre, measureDist=True))
+            for
             n in nuclei_list]
         nucleus_nearest = max(distances, key=lambda x: x[1])
         assigned.append((c, nucleus_nearest[0]))
@@ -198,8 +199,12 @@ def cli():
                    not f.name.startswith('.'))
     logging.debug('%s files were found', len(fields))
 
-    condition = Condition.from_filename(path_dataset.name,
-                                        PATTERNS[args.format])
+    try:
+        condition = Condition.from_filename(path_dataset.name,
+                                            PATTERNS[args.format])
+    except re.error:
+        raise ValueError
+
     marker = args.marker
     if marker not in condition.markers:
         raise ValueError(
