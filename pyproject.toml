@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "centrack"
-version = "0.4.2"
+version = "0.5.0"
 description = "Score centrioles in fluorescence images"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
 repository = "https://github.com/UPGON/centrack"
@@ -27,6 +27,8 @@ stardist = "^0.7.3"
 [tool.poetry.scripts]
 runner = "centrack.__main__:cli"
 squash = "centrack.commands.squash:cli"
+score = "centrack.commands.score:cli"
+reduce = "centrack."
 
 [tool.poetry.dev-dependencies]
 

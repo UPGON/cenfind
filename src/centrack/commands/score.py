@@ -214,7 +214,7 @@ def cli():
         logging.warning('Test mode enabled: only one field will be processed.')
         fields = [fields[args.test]]
 
-    path_scores = path_dataset / 'scores'
+    path_scores = path_dataset / 'results'
     path_scores.mkdir(exist_ok=True)
 
     pairs = []
