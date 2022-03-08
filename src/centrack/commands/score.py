@@ -1,32 +1,33 @@
 import argparse
 import contextlib
-import functools
 import logging
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
+import functools
 
 import numpy as np
 import pandas as pd
 from csbdeep.utils import normalize
-from cv2 import cv2
+import cv2
 from stardist.models import StarDist2D
 
-from .outline import (
+from centrack.commands.outline import (
     Centre,
     Contour,
     prepare_background,
     draw_annotation
     )
-from .status import (
+from centrack.commands.status import (
     PATTERNS,
     DataSet,
     Condition,
     Channel,
     Field,
     )
-from src.centrack.spotipy.spotipy.model import SpotNet
-from src.centrack.spotipy.spotipy.utils import normalize_fast2d
+
+from spotipy.spotipy.model import SpotNet
+from spotipy.spotipy.utils import normalize_fast2d
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 

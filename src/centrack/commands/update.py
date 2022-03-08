@@ -3,7 +3,7 @@ Entry point to update the model using new data via labelbox.
 """
 import argparse
 
-from src.centrack.spotipy.spotipy.model import SpotNet
+from spotipy.spotipy.model import SpotNet
 
 
 def parse_args():

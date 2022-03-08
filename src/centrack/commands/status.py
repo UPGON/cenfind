@@ -1,4 +1,3 @@
-import argparse
 import logging
 import re
 from dataclasses import asdict
@@ -14,14 +13,10 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.DEBUG)
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
 PATTERNS = {
     'hatzopoulos': r'([\w\d]+)_(?:([\w\d-]+)_)?([\w\d\+]+)_(\d)',
     'garcia': r'^(?:\d{8})_([\w\d-]+)_([\w\d_-]+)_([\w\d\+]+)_((?:R\d_)?\d+)?_MMStack_Default'
-    }
+}
 
 
 def fetch_files(path_source: Path, file_type='.ome.tif'):
@@ -84,7 +79,7 @@ class PixelSize:
             'um': 10e4,
             'μm': 10e4,
             'nm': 10e7,
-            }
+        }
         return self.value / conversion_map[self.units]
 
 
@@ -108,7 +103,7 @@ class Condition:
         pat = re.compile(pattern)
         matched = re.match(pat, file_name)
         if matched is None:
-            raise re.error('no matched element')
+            raise re.error('%s not found in %s', pattern, file_name)
         else:
             genotype, treatment, markers, replicate = matched.groups()
         markers_list = get_markers(markers)
@@ -167,34 +162,26 @@ class DataSet:
             Condition().to_toml(self.conditions)
             logger.warning('Template conditions was generated; please fill it.')
 
-    def _check_container(self, name: str, file_type: str):
+    def _check_container(self, container_name: str, file_type: str):
         """
-        Check if the folder `name` exists and whether it contains `file_type` files (recursively)
+        Check if the folder `container_name` exists and whether it
+        contains `file_type` files (recursively)
         :param name:
         :param file_type:
         :return: None
         """
-        name = self.path / name
+        container_name = self.path / container_name
 
-        if not name.exists():
-            logger.info('%s is missing', name)
-            name.mkdir()
-            logger.info('%s has been created', name)
-            return
-
-        logger.info('%s exists', name)
-        files = [f for f in name.iterdir()]
-
-        if len(files) == 0:
-            logger.info(
-                '%s is empty, make sure to move the %s files there', name,
-                file_type)
-            return
+        if container_name.exists():
+            files = [f for f in container_name.iterdir()]
+            if len(files) == 0:
+                return []
+            else:
+                recursive_files = fetch_files(container_name,
+                                              file_type=file_type)
+                return recursive_files
         else:
-            recursive_files = fetch_files(name, recursive=True,
-                                          file_type=file_type)
-            logger.info('%s contains %s %s files', name, len(recursive_files),
-                        file_type)
+            container_name.mkdir()
 
     def check_raw(self):
         self._check_container('raw', '.ome.tif')
@@ -205,32 +192,16 @@ class DataSet:
     def check_outlines(self):
         self._check_container('outlines', '.png')
 
-    def check_predictions(self):
+    def check_predictions(self, force=False):
         """
         Check for a set of predictions.
         else if we want to compare the predictions with annotations,
         Compute the predictions.
         Upload the predictions to labelbox.
         Provide the url of the annotated dataset on Labelbox
-
-        if not predictions:
-            if not force:
-                logger.info("There are some predictions, \
-                to force compute the predictions, set the force arg.")
-                return
-            predictions = []
-            for image in self.projections):
-                data = image[1, :,:].to_numpy()
-                prediction = extract_centrioles(data)
-                predictions.append(prediction)
-                label = Label(data, predictions)
-                labels_list.append(label)
-        task = prepare_task(labels_list)
-        task.upload_until_done()
-        logger.info("predictions succesfully uploaded. (URL)")
-
-        :return:
         """
+        for image in self.projections.iterdir():
+            print(image)
 
     def check_annotations(self):
         """
@@ -312,28 +283,3 @@ def extract_filename(file):
     file_name = re.sub(r'_(Default|MMStack)_\d-Pos', '', file_name)
 
     return file_name.replace('', '')
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('path',
-                        type=Path,
-                        help='Path to the dataset')
-
-    return parser.parse_args()
-
-
-def cli():
-    logger.debug('Starting')
-    args = parse_args()
-    ds = DataSet(args.path)
-
-    ds.check_conditions()  # Create a condition file if not existing
-    ds.check_raw()  # Check if the dataset folder has the OME.tif in raw/, if not ask to move all ome tif to raw/
-    ds.check_projections()  # Check if projections exist, if not, ask to launch `squash`
-    ds.check_predictions()  # Check if predictions exist, if not attempt to launch `score`
-    ds.check_annotations()  # Check if annotations exist, if not, attempt to set up the labelbox project and output the url when ready
-
-
-if __name__ == '__main__':
-    cli()

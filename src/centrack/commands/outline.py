@@ -232,7 +232,7 @@ def channels_combine(stack, channels=(1, 2, 3)):
     stack = stack[channels, :, :]
     stack = np.transpose(stack, (1, 2, 0))
 
-    return cv2.convertScaleAbs(stack, alpha=255 / stack.max())
+    return cv2.convertScaleAbs(stack, alpha=255 / stack.max(initial=None))
 
 
 def mask_create_from_contours(mask, contours):

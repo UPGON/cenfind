@@ -6,7 +6,7 @@ import numpy as np
 import tifffile as tf
 from tqdm import tqdm
 
-from .status import build_name, fetch_files
+from centrack.commands.status import build_name, fetch_files
 
 logging.basicConfig(format='%(levelname)s: %(message)s')
 
