@@ -265,7 +265,7 @@ def cli():
                           })
     results = pd.DataFrame(pairs)
 
-    results.to_csv(path_scores / 'scores.csv')
+    results.to_csv(path_scores / 'centrioles.csv')
 
 
 if __name__ == '__main__':
