@@ -3,6 +3,7 @@ import re
 from dataclasses import asdict
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List
 
 import numpy as np
 import pytomlpp
@@ -262,7 +263,7 @@ def build_name(path: Path, projection_type='max') -> str:
     return file_name_no_suffix + f'_{projection_type}.tif'
 
 
-def get_markers(markers, sep='+'):
+def get_markers(markers: str, sep='+') -> List:
     """
     Convert a '+'-delimited string into a list and prepend the DAPI
     :param markers:
