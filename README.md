@@ -4,24 +4,29 @@ A command line interface to score centrioles in cells.
 
 ## Installation
 
-centrack is being developed with Python 3.9.5. If you don't have this version, please switch to it for instance with pyenv.
+1. Install pyenv and build python 3.9.5; set it as the local and the global version using
+```shell
+pyenv install 3.9.5
+pyenv local 3.9.5
+pyenv global 3.9.5
+```
 
-First create a virtual environment with:
+3. Create a virtual environment with:
 ```shell
 $ python3 -m venv centrack-venv
 $ source centrack-venv/bin/activate
 ```
 Your prompt should now be prepended with `(centrack-venv)`.
 
-Install `centrack` with:
+4. Install `centrack` with:
 ```shell
-$ pip install centrack
+$ (centrack-venv) pip install centrack
 ```
 
-Check that centrack is correctly installed with:
+5. Check that `centrack` is correctly installed with:
 
 ```shell
-$ squash --help
+$ (centrack-venv) squash --help
 ```
 
 ## Requirements
@@ -34,16 +39,20 @@ $ squash --help
 ├── raw/
 └── scores/
 ```
-Especially, the OME.tif files should live under raw/
+Especially, the OME.tif files should be located under raw/
 
 
 ## Usage
 
 1. Navigate to the dataset folder.
-2. Group all the raw OME.TIFF files into a folder called `raw`.
-This helps keeping the structure of the processed images clean.
-3. centrack runs on z-max projections so before running the main program `centrack score`, you may want to
-run `centrack project` to save computing time in the future.
-4. After running the `centrack project`, a folder called `projections` is created and contains the 4-d tiff files.
-5. Now, you can swiftly run `centrack score` on the projections files.
-6. You now can specify a few options to guide the scoring.
+2. Group all the raw OME.TIFF files into one folder called `raw`. This helps keep the structure of the processed images clean.
+3. Run `squash` with the argument of the path to the project folder. After running the `squash`, a folder called `projections` is created and contains the 4-d tiff files.
+```shell
+project path/to/dataset --format garcia
+```
+4. Run `score` with the arguments source and the channel to use.
+```shell
+score path/to/dataset --channel <markername>
+```
+5. Check that the predictions are satisfactory by looking at the folder `outlines` and at the results/scores.csv.
+6. Run `reduce` to count the number of centrioles per cell. 

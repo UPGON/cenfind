@@ -28,7 +28,7 @@ stardist = "^0.7.3"
 runner = "centrack.__main__:cli"
 squash = "centrack.commands.squash:cli"
 score = "centrack.commands.score:cli"
-reduce = "centrack."
+reduce = "centrack.commands.reduce:cli"
 
 [tool.poetry.dev-dependencies]
 
