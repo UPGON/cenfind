@@ -15,22 +15,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.DEBUG)
 
 PATTERNS = {
-    'hatzopoulos': r'([\w\d]+)_(?:([\w\d-]+)_)?([\w\d\+]+)_(\d)',
-    'garcia': r'^(?:\d{8})_([\w\d-]+)_([\w\d_-]+)_([\w\d\+]+)_((?:R\d_)?\d+)?_MMStack_Default'
+    'hatzopoulos': re.compile(r'([\w\d]+)_(?:([\w\d-]+)_)?([A-Z0-9+]+)_(\d)'),
+    'garcia': re.compile(
+        r'^(?:\d{8})_([\w\d-]+)_([\w\d_-]+)_([\w\d+]+)_((?:R\d_)?\d+)?_MMStack_Default'),
 }
-
-
-def fetch_files(path_source: Path, file_type='.ome.tif'):
-    """
-    Collect all ome.tif files in a list.
-    :param file_type:
-    :param path_source:
-    :return: A list of Path to ome.tif files
-    """
-    pattern = f'*{file_type}'
-    files_generator = path_source.rglob(pattern)
-
-    return [file for file in files_generator if not file.name.startswith('.')]
 
 
 @dataclass
@@ -284,3 +272,18 @@ def extract_filename(file):
     file_name = re.sub(r'_(Default|MMStack)_\d-Pos', '', file_name)
 
     return file_name.replace('', '')
+
+
+def fetch_files(path_source: Path, file_type):
+    """
+    Collect all ome.tif files in a list.
+    :param file_type:
+    :param path_source:
+    :return: A list of Path to ome.tif files
+    """
+    if not path_source.exists():
+        raise FileExistsError(path_source)
+    pattern = f'*{file_type}'
+    files_generator = path_source.rglob(pattern)
+
+    return [file for file in files_generator if not file.name.startswith('.')]
