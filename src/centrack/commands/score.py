@@ -174,9 +174,6 @@ def parse_args():
     parser.add_argument('channel',
                         type=int,
                         help='channel position to use for foci detection, e.g., 1, 2 or 3')
-    parser.add_argument('format',
-                        type=str,
-                        help='name of the experimenter (garcia or hatzopoulos)')
     parser.add_argument('-t', '--test',
                         type=int,
                         help='test; only run on the ith image')
@@ -198,7 +195,6 @@ def cli():
                    not f.name.startswith('.'))
     logger_score.debug('%s files were found', len(fields))
 
-    condition = Condition()
     centriole_channel = args.channel
     if args.test:
         logger_score.warning('Test mode enabled: only one field will be processed.')
