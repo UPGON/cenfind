@@ -13,20 +13,28 @@ pyenv global 3.9.5
 
 3. Create a virtual environment with:
 ```shell
-$ python3 -m venv centrack-venv
-$ source centrack-venv/bin/activate
+python3 -m venv centrack-venv
+source centrack-venv/bin/activate
 ```
 Your prompt should now be prepended with `(centrack-venv)`.
 
 4. Install `centrack` with:
 ```shell
-$ (centrack-venv) pip install centrack
+git clone git@github.com:UPGON/centrack.git
+cd centrack
 ```
 
 5. Check that `centrack` is correctly installed with:
 
 ```shell
 $ (centrack-venv) squash --help
+```
+
+6. In case of updates, get the last version:
+```shell
+git pull
+poetry install
+
 ```
 
 ## Requirements
