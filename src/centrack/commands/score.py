@@ -72,7 +72,7 @@ class CentriolesDetector(Detector):
 
     def detect(self, interpeak_min=3):
         model = get_model(
-            model='../../../data/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
+            model='../../../models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
         image = self.plane
         x = normalize_fast2d(image)
         prob_thresh = .5
