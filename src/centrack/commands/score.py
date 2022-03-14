@@ -20,11 +20,9 @@ from centrack.commands.outline import (
     draw_annotation
 )
 from centrack.commands.status import (
-    PATTERNS,
     DataSet,
     Condition,
-    Channel,
-    Field,
+    load_projection,
 )
 from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
@@ -200,13 +198,7 @@ def cli():
                    not f.name.startswith('.'))
     logger_score.debug('%s files were found', len(fields))
 
-    try:
-        condition = Condition.from_filename(path_dataset.name,
-                                            PATTERNS[args.format])
-    except re.error:
-        raise ValueError(
-            f'Condition could not be inferred from the file name ({path_dataset.name}) using ({PATTERNS[args.format]}).')
-
+    condition = Condition()
     centriole_channel = args.channel
     if args.test:
         logger_score.warning('Test mode enabled: only one field will be processed.')
@@ -218,14 +210,13 @@ def cli():
     pairs = []
     for path in fields:
         logger_score.info('Loading %s', path.name)
-        field = Field(path, condition)
-        data = field.load()
+        data = load_projection(path)
 
         if not data.shape == (4, 2048, 2048):
             raise ValueError(data.shape)
 
-        foci = data[centriole_channel, :, :].to_numpy()
-        nuclei = data[0, :, :].to_numpy()  # 0 is by default the position of the DAPI channel
+        foci = data[centriole_channel, :, :]
+        nuclei = data[0, :, :]  # 0 is by default the position of the DAPI channel
 
         # This skips the print calls in spotipy
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):

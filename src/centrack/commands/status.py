@@ -201,28 +201,15 @@ class DataSet:
         raise NotImplementedError
 
 
-@dataclass
-class Field:
-    path: Path
-    condition: Condition
+def load_projection(path: Path) -> np.ndarray:
+    if not path.exists():
+        raise FileNotFoundError(path)
 
-    @property
-    def markers(self):
-        return self.condition.markers
+    with tf.TiffFile(path) as file:
+        data = file.asarray()
+        result = np.squeeze(data)
 
-    def load(self):
-        if not self.path.exists():
-            raise FileNotFoundError(self.path)
-
-        with tf.TiffFile(self.path) as file:
-            data = file.asarray()
-            data = np.squeeze(data)
-
-        result = xr.DataArray(data,
-                              dims=['channel', 'width', 'height'],
-                              coords={'channel': self.markers})
-
-        return result
+    return result
 
 
 @dataclass
