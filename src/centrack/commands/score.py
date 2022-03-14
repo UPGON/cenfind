@@ -69,8 +69,10 @@ class CentriolesDetector(Detector):
         return transformed
 
     def detect(self, interpeak_min=3):
+        path_to_model = Path('../../../models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
+        path_to_model_absolute = path_to_model.resolve()
         model = get_model(
-            model='../../../models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
+            model=path_to_model_absolute)
         image = self.plane
         x = normalize_fast2d(image)
         prob_thresh = .5
