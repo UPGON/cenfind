@@ -109,7 +109,7 @@ def cli():
         logger_cli.info('Create projections folder')
         path_projections.mkdir()
 
-    files = fetch_files(path_raw)
+    files = fetch_files(path_raw, file_type='ome.tif')
 
     pbar = tqdm(files)
 
