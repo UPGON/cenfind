@@ -236,8 +236,6 @@ def cli():
         logging.info('%s: (%s foci, %s nuclei)', path.name, len(foci_detected),
                      len(nuclei_detected))
 
-        # TODO: write the foci coordinates to a csv.
-
         try:
             assigned = assign(foci_list=foci_detected,
                               nuclei_list=nuclei_detected)

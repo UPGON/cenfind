@@ -23,6 +23,8 @@ tensorflow = "^2.8.0"
 scipy = "1.7.1"
 csbdeep = "^0.6.3"
 stardist = "^0.7.3"
+spotipy = {git = "ssh://git@github.com/maweigert/spotipy.git", rev = "main"}
+torch = "^1.11.0"
 
 [tool.poetry.scripts]
 runner = "centrack.__main__:cli"

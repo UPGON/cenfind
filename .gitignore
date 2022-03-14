@@ -5,12 +5,9 @@ __pycache__/
 venv/
 out/
 docs/
-data/
 configs/
 *.pt
-src/centrack/spotipy/
-data/models/
-*.h5
+src/spotipy/
 /.python-version
 dist/
 logs/
