@@ -18,19 +18,19 @@ from centrack.commands.outline import (
     Contour,
     prepare_background,
     draw_annotation
-    )
+)
 from centrack.commands.status import (
     PATTERNS,
     DataSet,
     Condition,
     Channel,
     Field,
-    )
+)
 from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-
+logger_score = logging.getLogger()
+logger_score.setLevel(logging.INFO)
 
 @functools.lru_cache(maxsize=None)
 def get_model(model):
@@ -173,9 +173,9 @@ def parse_args():
     parser.add_argument('dataset',
                         type=Path,
                         help='path to the dataset')
-    parser.add_argument('marker',
-                        type=str,
-                        help='marker to use for foci detection')
+    parser.add_argument('channel',
+                        type=int,
+                        help='channel position to use for foci detection, e.g., 1, 2 or 3')
     parser.add_argument('format',
                         type=str,
                         help='name of the experimenter (garcia or hatzopoulos)')
@@ -187,31 +187,29 @@ def parse_args():
 
 
 def cli():
-    logging.info('Starting Centrack...')
+    logger_score.info('Starting Centrack...')
 
     args = parse_args()
 
     path_dataset = Path(args.dataset)
-    logging.debug('Working at %s', path_dataset)
+    logger_score.debug('Working at %s', path_dataset)
 
     dataset = DataSet(path_dataset)
 
     fields = tuple(f for f in dataset.projections.glob('*.tif') if
                    not f.name.startswith('.'))
-    logging.debug('%s files were found', len(fields))
+    logger_score.debug('%s files were found', len(fields))
 
     try:
         condition = Condition.from_filename(path_dataset.name,
                                             PATTERNS[args.format])
     except re.error:
-        raise ValueError(f'Condition could not be inferred from the file name ({path_dataset.name}) using ({PATTERNS[args.format]}).')
-
-    marker = args.marker
-    if marker not in condition.markers:
         raise ValueError(
-            f'Marker {marker} not in dataset ({condition.markers}).')
+            f'Condition could not be inferred from the file name ({path_dataset.name}) using ({PATTERNS[args.format]}).')
+
+    centriole_channel = args.channel
     if args.test:
-        logging.warning('Test mode enabled: only one field will be processed.')
+        logger_score.warning('Test mode enabled: only one field will be processed.')
         fields = [fields[args.test]]
 
     path_scores = path_dataset / 'results'
@@ -219,31 +217,31 @@ def cli():
 
     pairs = []
     for path in fields:
-        logging.info('Loading %s', path.name)
+        logger_score.info('Loading %s', path.name)
         field = Field(path, condition)
         data = field.load()
 
         if not data.shape == (4, 2048, 2048):
             raise ValueError(data.shape)
 
-        foci = Channel(data)[marker].to_numpy()
-        nuclei = Channel(data)['DAPI'].to_numpy()
+        foci = data[centriole_channel, :, :].to_numpy()
+        nuclei = data[0, :, :].to_numpy()  # 0 is by default the position of the DAPI channel
 
         # This skips the print calls in spotipy
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
             foci_detected = extract_centrioles(foci)
             nuclei_detected = extract_nuclei(nuclei)
-        logging.info('%s: (%s foci, %s nuclei)', path.name, len(foci_detected),
+        logger_score.info('%s: (%s foci, %s nuclei)', path.name, len(foci_detected),
                      len(nuclei_detected))
 
         try:
             assigned = assign(foci_list=foci_detected,
                               nuclei_list=nuclei_detected)
         except ValueError:
-            logging.warning('No foci/nuclei detected (%s)', path.name)
+            logger_score.warning('No foci/nuclei detected (%s)', path.name)
             continue
 
-        logging.debug('Creating annotation image...')
+        logger_score.debug('Creating annotation image...')
         background = prepare_background(nuclei, foci)
         annotation = draw_annotation(background, assigned, foci_detected,
                                      nuclei_detected)
@@ -253,17 +251,18 @@ def cli():
         successful = cv2.imwrite(str(destination_path), annotation)
 
         if successful:
-            logging.debug('Saved at %s', destination_path)
+            logger_score.debug('Saved at %s', destination_path)
 
         for pair in assigned:
             pairs.append({'fov': path.name,
-                          'channel': marker,
+                          'channel': centriole_channel,
                           'nucleus': pair[1].centre.to_numpy(),
                           'centriole': pair[0].to_numpy(),
                           })
     results = pd.DataFrame(pairs)
 
     results.to_csv(path_scores / 'centrioles.csv')
+    logger_score.info('Results have been saved at %s', str(path_scores / 'centrioles.csv'))
 
 
 if __name__ == '__main__':
