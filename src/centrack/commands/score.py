@@ -204,7 +204,7 @@ def cli():
         condition = Condition.from_filename(path_dataset.name,
                                             PATTERNS[args.format])
     except re.error:
-        raise ValueError
+        raise ValueError(f'Condition could not be inferred from the file name ({path_dataset.name}) using ({PATTERNS[args.format]}).')
 
     marker = args.marker
     if marker not in condition.markers:
