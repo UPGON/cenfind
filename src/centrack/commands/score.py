@@ -209,8 +209,8 @@ def cli():
         logger_score.info('Loading %s', path.name)
         data = load_projection(path)
 
-        if not data.shape == (4, 2048, 2048):
-            raise ValueError(data.shape)
+        if len(data.shape) != 3:
+            raise ValueError(f"File {path} has shape {data.shape}")
 
         foci = data[centriole_channel, :, :]
         nuclei = data[0, :, :]  # 0 is by default the position of the DAPI channel
