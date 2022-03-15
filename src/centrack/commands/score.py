@@ -38,12 +38,6 @@ def get_model(model):
     return SpotNet(None, name=path.name, basedir=str(path.parent))
 
 
-def mat2gray(image):
-    """Normalize to the unit interval and return a float image"""
-    return cv2.normalize(image, None, alpha=0., beta=1.,
-                         norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-
-
 class Detector(ABC):
     def __init__(self, plane, organelle):
         self.plane = plane
