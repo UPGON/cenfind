@@ -177,20 +177,16 @@ def parse_args():
 
 
 def cli():
-    logger_score.info('Starting Centrack...')
-
     args = parse_args()
-
-    path_dataset = Path(args.dataset)
-    logger_score.debug('Working at %s', path_dataset)
-
+    path_dataset = args.dataset
     dataset = DataSet(path_dataset)
-
+    centriole_channel = args.channel
     fields = tuple(f for f in dataset.projections.glob('*.tif') if
                    not f.name.startswith('.'))
-    logger_score.debug('%s files were found', len(fields))
 
-    centriole_channel = args.channel
+    logger_score.info('Starting Centrack...')
+    logger_score.debug('Working at %s', path_dataset)
+    logger_score.debug('%s files were found', len(fields))
     if args.test:
         logger_score.warning('Test mode enabled: only one field will be processed.')
         fields = [fields[args.test]]
@@ -241,6 +237,7 @@ def cli():
                           'nucleus': pair[1].centre.to_numpy(),
                           'centriole': pair[0].to_numpy(),
                           })
+
     results = pd.DataFrame(pairs)
 
     results.to_csv(path_scores / 'centrioles.csv')
