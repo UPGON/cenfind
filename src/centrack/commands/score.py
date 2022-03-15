@@ -3,11 +3,10 @@ import contextlib
 import functools
 import logging
 import os
-import re
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-import cv2
+from cv2 import cv2
 import numpy as np
 import pandas as pd
 from csbdeep.utils import normalize
@@ -21,7 +20,6 @@ from centrack.commands.outline import (
 )
 from centrack.commands.status import (
     DataSet,
-    Condition,
     load_projection,
 )
 from spotipy.spotipy.model import SpotNet
@@ -29,6 +27,7 @@ from spotipy.spotipy.utils import normalize_fast2d
 
 logger_score = logging.getLogger()
 logger_score.setLevel(logging.INFO)
+
 
 @functools.lru_cache(maxsize=None)
 def get_model(model):
@@ -69,10 +68,10 @@ class CentriolesDetector(Detector):
         return transformed
 
     def detect(self, interpeak_min=3):
-        path_to_model = Path('../../../models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
-        path_to_model_absolute = path_to_model.resolve()
+        current_path = Path(__file__).parent.parent.parent.parent
+        path_to_model = current_path / 'models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300'
         model = get_model(
-            model=path_to_model_absolute)
+            model=path_to_model)
         image = self.plane
         x = normalize_fast2d(image)
         prob_thresh = .5
@@ -221,7 +220,7 @@ def cli():
             foci_detected = extract_centrioles(foci)
             nuclei_detected = extract_nuclei(nuclei)
         logger_score.info('%s: (%s foci, %s nuclei)', path.name, len(foci_detected),
-                     len(nuclei_detected))
+                          len(nuclei_detected))
 
         try:
             assigned = assign(foci_list=foci_detected,
