@@ -275,10 +275,12 @@ def draw_annotation(background, res, foci_detected=None, nuclei_detected=None):
     for n in nuclei_detected:
         n.draw(background)
 
-    for c, n in res:
-        start = c.centre
+    for el in res:
+        n, c = el
         end = n.centre.centre
-        cv2.line(background, start, end, (0, 255, 0), thickness=2,
-                 lineType=cv2.FILLED)
+        for cent in c:
+            start = cent.centre
+            cv2.line(background, start, end, (0, 255, 0), thickness=2,
+                     lineType=cv2.FILLED)
 
     return background

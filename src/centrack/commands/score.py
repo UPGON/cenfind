@@ -5,6 +5,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import List, Tuple, Dict, Any
 
 from cv2 import cv2
 import numpy as np
@@ -135,28 +136,34 @@ def extract_nuclei(data):
     return nuclei_detector.detect()
 
 
-def assign(foci_list, nuclei_list):
+def signed_distance(focus: Centre, nucleus: Contour) -> float:
+    """Wrapper for the opencv PolygonTest"""
+    result = cv2.pointPolygonTest(nucleus.contour,
+                                  focus.centre,
+                                  measureDist=True)
+    return result
+
+
+def assign(foci: list, nuclei: list, vicinity: int) -> list[tuple[Any, list[Any]]]:
     """
     Assign detected centrioles to the nearest nucleus.
-    1.
+    :param foci
+    :param nuclei
+    :param vicinity: the distance in pixels, below which centrioles are assigned to nucleus
     :return: List[Tuple[Centre, Contour]]
     """
-    if len(foci_list) == 0:
-        raise ValueError('Empty foci list')
-    if len(nuclei_list) == 0:
-        raise ValueError('Empty nuclei list')
+    pairs = []
+    _nuclei = nuclei.copy()
+    while _nuclei:
+        n = _nuclei.pop()
+        assigned = []
+        for f in foci:
+            distance = signed_distance(f, n)
+            if distance > -50:
+                assigned.append(f)
+        pairs.append((n, assigned))
 
-    assigned = []
-    for c in foci_list:
-        distances = [
-            (n, cv2.pointPolygonTest(n.contour, c.centre, measureDist=True))
-            for
-            n in nuclei_list]
-        nucleus_nearest = max(distances, key=lambda x: x[1])
-        if nucleus_nearest[1] > -50:
-            assigned.append((c, nucleus_nearest[0]))
-
-    return assigned
+    return pairs
 
 
 def parse_args():
@@ -195,8 +202,10 @@ def cli():
     path_scores.mkdir(exist_ok=True)
 
     pairs = []
+    scored = []
     for path in fields:
         logger_score.info('Loading %s', path.name)
+
         data = load_projection(path)
 
         if len(data.shape) != 3:
@@ -212,12 +221,9 @@ def cli():
         logger_score.info('%s: (%s foci, %s nuclei)', path.name, len(foci_detected),
                           len(nuclei_detected))
 
-        try:
-            assigned = assign(foci_list=foci_detected,
-                              nuclei_list=nuclei_detected)
-        except ValueError:
-            logger_score.warning('No foci/nuclei detected (%s)', path.name)
-            continue
+        assigned = assign(foci=foci_detected,
+                          nuclei=nuclei_detected,
+                          vicinity=-50)
 
         logger_score.debug('Creating annotation image...')
         background = prepare_background(nuclei, foci)
@@ -232,16 +238,26 @@ def cli():
             logger_score.debug('Saved at %s', destination_path)
 
         for pair in assigned:
-            pairs.append({'fov': path.name,
-                          'channel': centriole_channel,
-                          'nucleus': pair[1].centre.to_numpy(),
-                          'centriole': pair[0].to_numpy(),
-                          })
+            n, foci = pair
+            scored.append({'fov': path.name,
+                           'channel': centriole_channel,
+                           'nucleus': n.centre.position,
+                           'centrioles_n': len(foci),
+                           })
+            for focus in foci:
+                pairs.append({'fov': path.name,
+                              'channel': centriole_channel,
+                              'nucleus': n.centre.position,
+                              'centriole': focus.centre,
+                              })
 
     results = pd.DataFrame(pairs)
-
     results.to_csv(path_scores / 'centrioles.csv')
-    logger_score.info('Results have been saved at %s', str(path_scores / 'centrioles.csv'))
+    logger_score.info('Results saved at %s', str(path_scores / 'centrioles.csv'))
+
+    scores = pd.DataFrame(scored)
+    scores.to_csv(path_scores / 'score_primary.csv')
+    logger_score.info('Results saved at %s', str(path_scores / 'score_primary.csv'))
 
 
 if __name__ == '__main__':
