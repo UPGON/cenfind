@@ -5,12 +5,12 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Tuple, Dict, Any
+from typing import Any
 
-from cv2 import cv2
 import numpy as np
 import pandas as pd
 from csbdeep.utils import normalize
+from cv2 import cv2
 from stardist.models import StarDist2D
 
 from centrack.commands.outline import (
@@ -18,11 +18,11 @@ from centrack.commands.outline import (
     Contour,
     prepare_background,
     draw_annotation
-)
+    )
 from centrack.commands.status import (
     DataSet,
     load_projection,
-)
+    )
 from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
 
@@ -144,7 +144,8 @@ def signed_distance(focus: Centre, nucleus: Contour) -> float:
     return result
 
 
-def assign(foci: list, nuclei: list, vicinity: int) -> list[tuple[Any, list[Any]]]:
+def assign(foci: list, nuclei: list, vicinity: int) -> list[
+    tuple[Any, list[Any]]]:
     """
     Assign detected centrioles to the nearest nucleus.
     :param foci
@@ -164,6 +165,28 @@ def assign(foci: list, nuclei: list, vicinity: int) -> list[tuple[Any, list[Any]
         pairs.append((n, assigned))
 
     return pairs
+
+
+def score_summary(df):
+    """
+    Count the absolute frequency of number of centriole per image
+    :param df: Df containing the number of centriole per nuclei
+    :return: Df with absolut frequencies.
+    """
+    cuts = [0, 1, 2, 3, 4, 5, np.inf]
+    labels = '0 1 2 3 4 +'.split(' ')
+
+    result = pd.cut(df['score'], cuts, right=False,
+                    labels=labels, include_lowest=True)
+    result = (result
+              .groupby('fov')
+              .value_counts()
+              .sort_index()
+              .reset_index()
+              .rename({'level_1': 'score_cat',
+                       'score': 'freq_abs'}, axis=1)
+              .pivot(index='fov', columns='score_cat'))
+    return result
 
 
 def parse_args():
@@ -195,7 +218,8 @@ def cli():
     logger_score.debug('Working at %s', path_dataset)
     logger_score.debug('%s files were found', len(fields))
     if args.test:
-        logger_score.warning('Test mode enabled: only one field will be processed.')
+        logger_score.warning(
+            'Test mode enabled: only one field will be processed.')
         fields = [fields[args.test]]
 
     path_scores = path_dataset / 'results'
@@ -212,13 +236,15 @@ def cli():
             raise ValueError(f"File {path} has shape {data.shape}")
 
         foci = data[centriole_channel, :, :]
-        nuclei = data[0, :, :]  # 0 is by default the position of the DAPI channel
+        nuclei = data[0, :,
+                 :]  # 0 is by default the position of the DAPI channel
 
         # This skips the print calls in spotipy
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
             foci_detected = extract_centrioles(foci)
             nuclei_detected = extract_nuclei(nuclei)
-        logger_score.info('%s: (%s foci, %s nuclei)', path.name, len(foci_detected),
+        logger_score.info('%s: (%s foci, %s nuclei)', path.name,
+                          len(foci_detected),
                           len(nuclei_detected))
 
         assigned = assign(foci=foci_detected,
@@ -253,11 +279,13 @@ def cli():
 
     results = pd.DataFrame(pairs)
     results.to_csv(path_scores / 'centrioles.csv')
-    logger_score.info('Results saved at %s', str(path_scores / 'centrioles.csv'))
+    logger_score.info('Results saved at %s',
+                      str(path_scores / 'centrioles.csv'))
 
     scores = pd.DataFrame(scored)
     scores.to_csv(path_scores / 'score_primary.csv')
-    logger_score.info('Results saved at %s', str(path_scores / 'score_primary.csv'))
+    logger_score.info('Results saved at %s',
+                      str(path_scores / 'score_primary.csv'))
 
 
 if __name__ == '__main__':
