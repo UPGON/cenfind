@@ -15,6 +15,6 @@ def test_bins():
         'channel': rng.choice([1, 2, 3], 25),
         'score': rng.choice(list(range(5)) + [6, 1000, 54], 25)
         })
-    df = df.set_index(['fov', 'channel'])
+
     table = score_summary(df)
     assert 0 == 0
