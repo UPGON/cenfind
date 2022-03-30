@@ -47,6 +47,7 @@ class ROI(ABC):
 class Centre(ROI):
     position: tuple
     idx: int = 0
+    channel: int = 1
     label: str = ''
     confidence: float = 0
 
