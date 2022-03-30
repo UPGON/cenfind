@@ -40,8 +40,9 @@ def get_model(model):
 
 
 class Detector(ABC):
-    def __init__(self, plane, organelle):
-        self.plane = plane
+    def __init__(self, data, channel, organelle):
+        self.data = data
+        self.channel = channel
         self.organelle = organelle
 
     @abstractmethod
@@ -59,7 +60,7 @@ class CentriolesDetector(Detector):
     """
 
     def _mask(self):
-        transformed = self.plane
+        transformed = self.data[self.channel, :, :]
         return transformed
 
     def detect(self, interpeak_min=3):
@@ -67,7 +68,7 @@ class CentriolesDetector(Detector):
         path_to_model = current_path / 'models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300'
         model = get_model(
             model=path_to_model)
-        image = self.plane
+        image = self._mask()
         x = normalize_fast2d(image)
         prob_thresh = .5
 
@@ -75,7 +76,7 @@ class CentriolesDetector(Detector):
                              prob_thresh=prob_thresh,
                              show_tile_progress=False)
 
-        return [Centre((y, x), f_id, self.organelle, confidence=-1) for
+        return [Centre((y, x), f_id, self.channel, self.organelle, confidence=-1) for
                 f_id, (x, y) in enumerate(foci[1])]
 
 
@@ -85,7 +86,7 @@ class NucleiDetector(Detector):
     """
 
     def _mask(self):
-        return cv2.resize(self.plane, dsize=(256, 256),
+        return cv2.resize(self.data[self.channel, : ,:], dsize=(256, 256),
                           fx=1, fy=1,
                           interpolation=cv2.INTER_NEAREST)
 
@@ -116,23 +117,23 @@ class NucleiDetector(Detector):
                 enumerate(contours)]
 
 
-def extract_centrioles(data):
+def extract_centrioles(data, channel):
     """
     Extract the centrioles from the channel image.
     :param data:
     :return: List of Points
     """
-    focus_detector = CentriolesDetector(data, 'Centriole')
+    focus_detector = CentriolesDetector(data, channel, 'Centriole')
     return focus_detector.detect()
 
 
-def extract_nuclei(data):
+def extract_nuclei(data, channel):
     """
     Extract the nuclei from the nuclei image.
     :param data:
     :return: List of Contours.
     """
-    nuclei_detector = NucleiDetector(data, 'Nucleus')
+    nuclei_detector = NucleiDetector(data, channel, 'Nucleus')
     return nuclei_detector.detect()
 
 
@@ -176,16 +177,19 @@ def score_summary(df):
     cuts = [0, 1, 2, 3, 4, 5, np.inf]
     labels = '0 1 2 3 4 +'.split(' ')
 
+    df = df.set_index(['fov', 'channel'])
     result = pd.cut(df['score'], cuts, right=False,
                     labels=labels, include_lowest=True)
+
     result = (result
-              .groupby('fov')
+              .groupby(['fov', 'channel'])
               .value_counts()
               .sort_index()
-              .reset_index()
-              .rename({'level_1': 'score_cat',
-                       'score': 'freq_abs'}, axis=1)
-              .pivot(index='fov', columns='score_cat'))
+              .reset_index())
+
+    result = (result.rename({'level_2': 'score_cat',
+                             'score': 'freq_abs'}, axis=1)
+              .pivot(index=['fov', 'channel'], columns='score_cat'))
     return result
 
 
@@ -222,12 +226,14 @@ def cli():
             'Test mode enabled: only one field will be processed.')
         fields = [fields[args.test]]
 
-    path_scores = path_dataset / 'results'
-    path_scores.mkdir(exist_ok=True)
+    path_predictions = path_dataset / 'predictions'
+    path_predictions.mkdir(exist_ok=True)
 
     pairs = []
     scored = []
     for path in fields:
+        path_predictions_fov = path_predictions / path.name
+        path_predictions_fov.mkdir(parents=True, exist_ok=True)
         logger_score.info('Loading %s', path.name)
 
         data = load_projection(path)
@@ -241,11 +247,18 @@ def cli():
 
         # This skips the print calls in spotipy
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
-            foci_detected = extract_centrioles(foci)
-            nuclei_detected = extract_nuclei(nuclei)
+            foci_detected = extract_centrioles(data, centriole_channel)
+            nuclei_detected = extract_nuclei(data, 0)
         logger_score.info('%s: (%s foci, %s nuclei)', path.name,
                           len(foci_detected),
                           len(nuclei_detected))
+
+        foci_df = pd.DataFrame(foci_detected)
+        dst_annotation = str(
+            path_predictions_fov / f'centrioles_ch{centriole_channel}.csv')
+        foci_df.to_csv(dst_annotation)
+        logger_score.info('Centriole annotation saved at %s',
+                          dst_annotation)
 
         assigned = assign(foci=foci_detected,
                           nuclei=nuclei_detected,
@@ -257,7 +270,7 @@ def cli():
                                      nuclei_detected)
 
         file_name = path.name.removesuffix(".tif")
-        destination_path = path_scores / f'{file_name}_annot.png'
+        destination_path = path_visualisation / f'{file_name}_annot.png'
         successful = cv2.imwrite(str(destination_path), annotation)
 
         if successful:
@@ -268,24 +281,24 @@ def cli():
             scored.append({'fov': path.name,
                            'channel': centriole_channel,
                            'nucleus': n.centre.position,
-                           'centrioles_n': len(foci),
+                           'score': len(foci),
                            })
             for focus in foci:
                 pairs.append({'fov': path.name,
                               'channel': centriole_channel,
                               'nucleus': n.centre.position,
-                              'centriole': focus.centre,
+                              'x': focus.centre[0],
+                              'y': focus.centre[1],
                               })
 
-    results = pd.DataFrame(pairs)
-    results.to_csv(path_scores / 'centrioles.csv')
-    logger_score.info('Results saved at %s',
-                      str(path_scores / 'centrioles.csv'))
+
 
     scores = pd.DataFrame(scored)
-    scores.to_csv(path_scores / 'score_primary.csv')
-    logger_score.info('Results saved at %s',
-                      str(path_scores / 'score_primary.csv'))
+    binned = score_summary(scores)
+    dst_statistics = str(path_predictions / f'statistics_ch{centriole_channel}.csv')
+    binned.to_csv(dst_statistics)
+    logger_score.info('Statistics saved at %s',
+                      dst_statistics)
 
 
 if __name__ == '__main__':
