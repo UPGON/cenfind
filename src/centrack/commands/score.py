@@ -76,8 +76,10 @@ class CentriolesDetector(Detector):
                              prob_thresh=prob_thresh,
                              show_tile_progress=False)
 
-        return [Centre((y, x), f_id, self.channel, self.organelle, confidence=-1) for
-                f_id, (x, y) in enumerate(foci[1])]
+        return [
+            Centre((y, x), f_id, self.channel, self.organelle, confidence=-1)
+            for
+            f_id, (x, y) in enumerate(foci[1])]
 
 
 class NucleiDetector(Detector):
@@ -86,7 +88,7 @@ class NucleiDetector(Detector):
     """
 
     def _mask(self):
-        return cv2.resize(self.data[self.channel, : ,:], dsize=(256, 256),
+        return cv2.resize(self.data[self.channel, :, :], dsize=(256, 256),
                           fx=1, fy=1,
                           interpolation=cv2.INTER_NEAREST)
 
@@ -229,6 +231,12 @@ def cli():
     path_predictions = path_dataset / 'predictions'
     path_predictions.mkdir(exist_ok=True)
 
+    path_visualisation = path_dataset / 'visualisations'
+    path_visualisation.mkdir(exist_ok=True)
+
+    path_statistics = path_dataset / 'statistics'
+    path_statistics.mkdir(exist_ok=True)
+
     pairs = []
     scored = []
     for path in fields:
@@ -291,11 +299,10 @@ def cli():
                               'y': focus.centre[1],
                               })
 
-
-
     scores = pd.DataFrame(scored)
     binned = score_summary(scores)
-    dst_statistics = str(path_predictions / f'statistics_ch{centriole_channel}.csv')
+    dst_statistics = str(
+        path_statistics / f'statistics_ch{centriole_channel}.csv')
     binned.to_csv(dst_statistics)
     logger_score.info('Statistics saved at %s',
                       dst_statistics)
