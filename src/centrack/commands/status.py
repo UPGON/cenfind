@@ -209,6 +209,9 @@ def load_projection(path: Path) -> np.ndarray:
         data = file.asarray()
         result = np.squeeze(data)
 
+    if len(result.shape) != 3:
+        raise ValueError(f"File {path} has shape {data.shape}")
+
     return result
 
 

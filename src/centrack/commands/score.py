@@ -15,9 +15,7 @@ from stardist.models import StarDist2D
 
 from centrack.commands.outline import (
     Centre,
-    Contour,
-    prepare_background,
-    draw_annotation
+    Contour, prepare_background, draw_annotation
     )
 from centrack.commands.status import (
     DataSet,
@@ -77,7 +75,7 @@ class CentriolesDetector(Detector):
                              show_tile_progress=False)
 
         return [
-            Centre((y, x), f_id, self.channel, self.organelle, confidence=-1)
+            Centre((y, x), f_id, self.organelle, confidence=foci[0][x, y].round(3))
             for
             f_id, (x, y) in enumerate(foci[1])]
 
@@ -122,6 +120,7 @@ class NucleiDetector(Detector):
 def extract_centrioles(data, channel):
     """
     Extract the centrioles from the channel image.
+    :param channel:
     :param data:
     :return: List of Points
     """
@@ -132,6 +131,7 @@ def extract_centrioles(data, channel):
 def extract_nuclei(data, channel):
     """
     Extract the nuclei from the nuclei image.
+    :param channel:
     :param data:
     :return: List of Contours.
     """
@@ -153,7 +153,8 @@ def assign(foci: list, nuclei: list, vicinity: int) -> list[
     Assign detected centrioles to the nearest nucleus.
     :param foci
     :param nuclei
-    :param vicinity: the distance in pixels, below which centrioles are assigned to nucleus
+    :param vicinity: the distance in pixels, below which centrioles are assigned
+     to nucleus
     :return: List[Tuple[Centre, Contour]]
     """
     pairs = []
@@ -195,6 +196,35 @@ def score_summary(df):
     return result
 
 
+def process_fov(data, centriole_channel):
+    """
+    Extract the nuclei and the foci of on projection FOV.
+    :param path:
+    :param centriole_channel:
+    :return: tuple of list of nuclei, list of foci
+    """
+
+    # This skips the print calls in spotipy
+    with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
+        nuclei = extract_nuclei(data, 0)
+        foci = extract_centrioles(data, centriole_channel)
+
+    logger_score.info('Detection: %s nuclei, %s foci', len(nuclei), len(foci))
+
+    return nuclei, foci
+
+
+def foci_prediction_prepare(foci, centriole_channel):
+    foci_df = pd.DataFrame(foci)
+    foci_df['channel'] = centriole_channel
+    foci_df[['row', 'col']] = pd.DataFrame(foci_df['position'].to_list(),
+                                           index=foci_df.index)
+    foci_df = foci_df[['idx', 'label', 'row', 'col', 'confidence']]
+    result = foci_df.set_index('idx')
+
+    return result
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description='CENTRACK: Automatic centriole scoring')
@@ -204,10 +234,7 @@ def parse_args():
                         help='path to the dataset')
     parser.add_argument('channel',
                         type=int,
-                        help='channel position to use for foci detection, e.g., 1, 2 or 3')
-    parser.add_argument('-t', '--test',
-                        type=int,
-                        help='test; only run on the ith image')
+                        help='channel id for foci detection, e.g., 1, 2 or 3')
 
     return parser.parse_args()
 
@@ -216,66 +243,50 @@ def cli():
     args = parse_args()
     path_dataset = args.dataset
     dataset = DataSet(path_dataset)
+
+    path_predictions = path_dataset / 'predictions'
+    path_visualisation = path_dataset / 'visualisations'
+    path_statistics = path_dataset / 'statistics'
+
+    path_predictions.mkdir(exist_ok=True)
+    path_visualisation.mkdir(exist_ok=True)
+    path_statistics.mkdir(exist_ok=True)
+
     centriole_channel = args.channel
+
     fields = tuple(f for f in dataset.projections.glob('*.tif') if
                    not f.name.startswith('.'))
 
-    logger_score.info('Starting Centrack...')
-    logger_score.debug('Working at %s', path_dataset)
-    logger_score.debug('%s files were found', len(fields))
-    if args.test:
-        logger_score.warning(
-            'Test mode enabled: only one field will be processed.')
-        fields = [fields[args.test]]
-
-    path_predictions = path_dataset / 'predictions'
-    path_predictions.mkdir(exist_ok=True)
-
-    path_visualisation = path_dataset / 'visualisations'
-    path_visualisation.mkdir(exist_ok=True)
-
-    path_statistics = path_dataset / 'statistics'
-    path_statistics.mkdir(exist_ok=True)
-
-    pairs = []
     scored = []
+
     for path in fields:
-        path_predictions_fov = path_predictions / path.name
-        path_predictions_fov.mkdir(parents=True, exist_ok=True)
         logger_score.info('Loading %s', path.name)
 
         data = load_projection(path)
 
-        if len(data.shape) != 3:
-            raise ValueError(f"File {path} has shape {data.shape}")
+        nuclei, foci = process_fov(data, centriole_channel)
 
-        foci = data[centriole_channel, :, :]
-        nuclei = data[0, :,
-                 :]  # 0 is by default the position of the DAPI channel
+        mask_nuclei = np.zeros((2048, 2048), dtype=np.uint8)
+        for n in nuclei:
+            color = n.idx
+            n.draw(mask_nuclei, color=color, thickness=-1,
+                   annotation=False)
+            cv2.imwrite(str(path_predictions / f"{path.stem}_nuclei_preds.png"),
+                        mask_nuclei)
 
-        # This skips the print calls in spotipy
-        with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
-            foci_detected = extract_centrioles(data, centriole_channel)
-            nuclei_detected = extract_nuclei(data, 0)
-        logger_score.info('%s: (%s foci, %s nuclei)', path.name,
-                          len(foci_detected),
-                          len(nuclei_detected))
+        foci_df = foci_prediction_prepare(foci, centriole_channel)
+        foci_df.to_csv(path_predictions / f"{path.stem}_foci_preds.csv")
 
-        foci_df = pd.DataFrame(foci_detected)
-        dst_annotation = str(
-            path_predictions_fov / f'centrioles_ch{centriole_channel}.csv')
-        foci_df.to_csv(dst_annotation)
-        logger_score.info('Centriole annotation saved at %s',
-                          dst_annotation)
-
-        assigned = assign(foci=foci_detected,
-                          nuclei=nuclei_detected,
+        assigned = assign(foci=foci,
+                          nuclei=nuclei,
                           vicinity=-50)
 
+        foci_plane = data[centriole_channel, :, :]
+        nuclei_plane = data[0, :, :]
+
         logger_score.debug('Creating annotation image...')
-        background = prepare_background(nuclei, foci)
-        annotation = draw_annotation(background, assigned, foci_detected,
-                                     nuclei_detected)
+        background = prepare_background(nuclei_plane, foci_plane)
+        annotation = draw_annotation(background, assigned, foci, nuclei)
 
         file_name = path.name.removesuffix(".tif")
         destination_path = path_visualisation / f'{file_name}_annot.png'
@@ -291,21 +302,11 @@ def cli():
                            'nucleus': n.centre.position,
                            'score': len(foci),
                            })
-            for focus in foci:
-                pairs.append({'fov': path.name,
-                              'channel': centriole_channel,
-                              'nucleus': n.centre.position,
-                              'x': focus.centre[0],
-                              'y': focus.centre[1],
-                              })
 
     scores = pd.DataFrame(scored)
     binned = score_summary(scores)
-    dst_statistics = str(
-        path_statistics / f'statistics_ch{centriole_channel}.csv')
+    dst_statistics = str(path_statistics / f'statistics.csv')
     binned.to_csv(dst_statistics)
-    logger_score.info('Statistics saved at %s',
-                      dst_statistics)
 
 
 if __name__ == '__main__':

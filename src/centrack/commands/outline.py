@@ -47,7 +47,6 @@ class ROI(ABC):
 class Centre(ROI):
     position: tuple
     idx: int = 0
-    channel: int = 1
     label: str = ''
     confidence: float = 0
 
@@ -201,9 +200,9 @@ class Contour(ROI):
         return Centre((centre_r, centre_c), self.idx, self.label,
                       self.confidence)
 
-    def draw(self, image, color=(0, 255, 0), annotation=True, **kwargs):
+    def draw(self, image, color=(0, 255, 0), annotation=True, thickness=2, **kwargs):
         r, c = self.centre.centre
-        cv2.drawContours(image, [self.contour], -1, color, thickness=2)
+        cv2.drawContours(image, [self.contour], -1, color, thickness=thickness)
         if annotation:
             cv2.putText(image, f'{self.label}{self.idx}',
                         org=(r, c),
