@@ -2,6 +2,11 @@
 
 A command line interface to score centrioles in cells.
 
+## Navigation
+If you want to read about Centrack, head to the Introduction. 
+If you want to process data head to Routine use. 
+If you want to install centrack, head to Set up the environment for centrack
+
 ## Introduction
 
 Centrack is a command line interface that allow the batch processing of ome tiff files.
@@ -28,8 +33,15 @@ this situation is temporary and in the near future spotipy will become a
 simple dependency of centrack. Next, when both centrack and spotipy will be 
 publicly available, centrack will be downloadable directly from PyPI.
 
+## Routine use
+1. Open a new shell
+2. Set centrack as the current directory: cd ~/centrack
+3. Activate the virtual environment: `source venv-centrack/bin/activate`
+4. Fetch potential updates from centrack's github repository: `git pull`
+5. Update centrack command line programs: poetry install
+6. Process your data after making sure that the dataset structure meets the requirements listed here.
 
-## Setting up the Python environment prior the installation
+## Set up the environment for centrack
 
 In order to minimise interference with other Python versions, we will manage 
 multiple python interpreters using pyenv. Please follow instructions at 
@@ -49,10 +61,10 @@ within a virtual environment.
 
 3. Create a virtual environment with:
 ```shell
-python3 -m venv centrack-venv
-source centrack-venv/bin/activate
+python3 -m venv venv-centrack
+source venv-centrack/bin/activate
 ```
-Your prompt should now be prepended with `(centrack-venv)`.
+Your prompt should now be prepended with `(venv-centrack)`.
 
 Check that you're at the correct location (simple and recommended location 
 is `cd ~`, i.e., your home folder). 
@@ -78,6 +90,7 @@ squash --help
 6. In case of updates, get the last version:
 ```shell
 git pull
+poetry install
 
 ```
 A common session involves running `squash`, `score` and `reduce`. Below, we 
@@ -85,11 +98,11 @@ describe each program, their input, the algorithm and the expected output.
 
 ### Squashing the stacks to projections
 `squash` is a program that expect a path to a dataset folder containing a single folder 
-called `raw/`. Inside raw, you have put all the folders that contains *.ome.tif 
+called `raw/`. Inside raw, you have put all the folders that contains ome.tif 
 files. These will be fetched, 
-squashed and saved to `projections/`, next to the `raw` folder.
+squashed and saved to `projections/`, next to the `raw/` folder.
 
-squash fetch all files recursively inside raw/ that ends with *.ome.tif. The 
+`squash` fetches all ome.tif files recursively in raw/. The 
 files are loaded using tifffile into the memory (intensive; as each file may 
 be 4.2 GB in size). Each file as up to 5 dimensions (TCZYX) but so far only 
 CZYX are supported by squash. The first step is to figure out the position 
@@ -126,9 +139,10 @@ Especially, the OME.tif files should be located under raw/
 
 ## Usage
 
-1. Navigate to the dataset folder.
-2. Group all the raw OME.TIFF files into one folder called `raw`. This helps keep the structure of the processed images clean.
-3. Run `squash` with the argument of the path to the project folder. After running the `squash`, a folder called `projections` is created and contains the 4-d tiff files.
+1. Make sure that the centrack programs are accessible from the shell by running `squash --help`
+2. Navigate to the dataset folder.
+3. Group all the raw OME.TIFF files into one folder called `raw`. This helps keep the structure of the processed images clean.
+4. Run `squash` with the argument of the path to the project folder. After running the `squash`, a folder called `projections` is created and contains the 4-d tiff files.
 ```shell
 squash path/to/dataset
 ```
