@@ -1,5 +1,7 @@
 import argparse
 import logging
+import os
+from dotenv import load_dotenv
 from pathlib import Path
 
 import numpy as np
@@ -7,8 +9,8 @@ import tifffile as tf
 from labelbox import Client
 
 from src.centrack.commands.status import DataSet
-from src.centrack.commands import contrast
-from src.centrack.commands import extract_centrioles
+from src.centrack.commands.outline import contrast
+from src.centrack.commands.score import extract_centrioles
 
 from src.centrack.mal.labelbox_api import (
     project_create,
@@ -26,8 +28,8 @@ logger.setLevel(logging.DEBUG)
 
 def args_parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument('name',
-                        type=str)
+    parser.add_argument('path',
+                        type=Path)
     parser.add_argument('--synthetic',
                         action='store_true',
                         )
@@ -35,12 +37,11 @@ def args_parse():
 
 
 def cli(parsed_args):
-    with open('../../../data/labelbox_api_key.txt', 'r') as apikey:
-        lb_api_key = apikey.readline().rstrip('\n')
+    load_dotenv('/home/buergy/projects/centrack/.env')
+    client = Client(api_key=os.environ['LABELBOX_API_KEY'])
 
-    client = Client(api_key=lb_api_key)
-
-    project_name_lb = parsed_args.name
+    path_dataset = Path(parsed_args.path)
+    project_name_lb = path_dataset.name
     project = project_create(client, project_name_lb)
 
     logger.debug('Enable MAL.')
@@ -49,7 +50,7 @@ def cli(parsed_args):
     logger.debug('Get the ontology.')
     ontology_setup(client, project, ontology_id='ckywqubua5nkp0zb2h9lm3vn7')
 
-    dataset_name_lb = parsed_args.name
+    dataset_name_lb = project_name_lb
     dataset_lb = dataset_create(client, dataset_name_lb)
 
     project.datasets.connect(dataset_lb)
@@ -67,14 +68,14 @@ def cli(parsed_args):
             image = image_generate(canvas, predictions)
             labels.append(label_create(image, predictions))
     else:
-        dataset = DataSet(Path('/Volumes/work/epfl/datasets') / parsed_args.name)
+        dataset = DataSet(path_dataset)
         fields = tuple(f for f in dataset.projections.glob('*.tif') if
                        not f.name.startswith('.'))
         labels = []
         for field in fields:
             data = tf.imread(field)
-            foci = data[1, :, :]
-            predictions = extract_centrioles(foci)
+            foci = data[2, :, :]
+            predictions = extract_centrioles(data, 2)
             predictions_np = [pred.position for pred in predictions]
             image = contrast(foci)
             labels.append(label_create(image, predictions_np))
