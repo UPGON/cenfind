@@ -2,6 +2,7 @@
 .python-version
 .ipynb_checkpoints/
 .idea/
+.env
 __pycache__/
 venv/
 out/
