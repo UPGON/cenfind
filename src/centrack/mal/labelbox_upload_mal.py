@@ -8,11 +8,11 @@ import numpy as np
 import tifffile as tf
 from labelbox import Client
 
-from src.centrack.commands.status import DataSet
-from src.centrack.commands.outline import contrast
-from src.centrack.commands.score import extract_centrioles
+from centrack.commands.status import DataSet
+from centrack.commands.outline import contrast
+from centrack.commands.score import extract_centrioles
 
-from src.centrack.mal.labelbox_api import (
+from centrack.mal.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,
@@ -36,7 +36,8 @@ def args_parse():
     return parser.parse_args()
 
 
-def cli(parsed_args):
+def cli():
+    parsed_args = args_parse()
     load_dotenv('/home/buergy/projects/centrack/.env')
     client = Client(api_key=os.environ['LABELBOX_API_KEY'])
 
@@ -73,12 +74,13 @@ def cli(parsed_args):
                        not f.name.startswith('.'))
         labels = []
         for field in fields:
+            external_id = field.name
             data = tf.imread(field)
             foci = data[2, :, :]
             predictions = extract_centrioles(data, 2)
             predictions_np = [pred.position for pred in predictions]
             image = contrast(foci)
-            labels.append(label_create(image, predictions_np))
+            labels.append(label_create(image, predictions_np, external_id))
 
     labels_list = labels_list_create(labels)
 
@@ -87,5 +89,4 @@ def cli(parsed_args):
 
 
 if __name__ == '__main__':
-    parsed_arguments = args_parse()
-    cli(parsed_arguments)
+    cli()

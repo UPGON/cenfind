@@ -30,6 +30,7 @@ torch = "^1.11.0"
 runner = "centrack.__main__:cli"
 squash = "centrack.commands.squash:cli"
 score = "centrack.commands.score:cli"
+upload = "centrack.mal.labelbox_upload_mal:cli"
 
 [tool.poetry.dev-dependencies]
 

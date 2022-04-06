@@ -35,7 +35,7 @@ def project_create(client, project_name):
         logger.debug('Project test found (%s)', project.uid)
         project.delete()
     except StopIteration:
-        logger.debug('No such test project; creating...')
+        logger.debug('No such project; creating...')
     finally:
         project = client.create_project(name=project_name, description='')
     return project
@@ -101,15 +101,17 @@ def to_labelbox_format(predictions):
     return annotations
 
 
-def label_create(image, predictions):
+def label_create(image, predictions, external_id):
     """
     Combine an image and its annotation into a Label.
     :param predictions:
     :param image:
     :return:
     """
-    return Label(data=ImageData.from_2D_arr(image),
+    label = Label(data=ImageData.from_2D_arr(image),
                  annotations=to_labelbox_format(predictions))
+    label.data.external_id = external_id
+    return label
 
 
 def labels_list_create(labels):
