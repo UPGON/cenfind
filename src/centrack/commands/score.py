@@ -196,7 +196,7 @@ def score_summary(df):
     return result
 
 
-def process_fov(data, centriole_channel):
+def process_fov(data, centriole_channel, nuclei_channel):
     """
     Extract the nuclei and the foci of on projection FOV.
     :param centriole_channel:
@@ -205,7 +205,7 @@ def process_fov(data, centriole_channel):
 
     # This skips the print calls in spotipy
     with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
-        nuclei = extract_nuclei(data, 0)
+        nuclei = extract_nuclei(data, nuclei_channel)
         foci = extract_centrioles(data, centriole_channel)
 
     logger_score.info('Detection: %s nuclei, %s foci', len(nuclei), len(foci))
@@ -218,7 +218,7 @@ def foci_prediction_prepare(foci, centriole_channel):
     foci_df['channel'] = centriole_channel
     foci_df[['row', 'col']] = pd.DataFrame(foci_df['position'].to_list(),
                                            index=foci_df.index)
-    foci_df = foci_df[['idx', 'label', 'row', 'col', 'confidence']]
+    foci_df = foci_df[['idx', 'channel', 'label', 'row', 'col', 'confidence']]
     result = foci_df.set_index('idx')
 
     return result
@@ -231,9 +231,14 @@ def parse_args():
     parser.add_argument('dataset',
                         type=Path,
                         help='path to the dataset')
-    parser.add_argument('channel',
+    parser.add_argument('channel_centriole',
                         type=int,
-                        help='channel id for foci detection, e.g., 1, 2 or 3')
+                        help='channel id for centriole detection, e.g., 1, 2 or 3')
+
+    parser.add_argument('channel_nuclei',
+                        type=int,
+                        default=0,
+                        help='channel id for nuclei segmentation, e.g., 0 or 4, default 0')
 
     return parser.parse_args()
 
@@ -251,7 +256,8 @@ def cli():
     path_visualisation.mkdir(exist_ok=True)
     path_statistics.mkdir(exist_ok=True)
 
-    centriole_channel = args.channel
+    centriole_channel = args.channel_centriole
+    nuclei_channel = args.channel_nuclei
 
     fields = tuple(f for f in dataset.projections.glob('*.tif') if
                    not f.name.startswith('.'))
@@ -263,7 +269,7 @@ def cli():
 
         data = load_projection(path)
 
-        nuclei, foci = process_fov(data, centriole_channel)
+        nuclei, foci = process_fov(data, centriole_channel, nuclei_channel)
 
         mask_nuclei = np.zeros((2048, 2048), dtype=np.uint8)
         for n in nuclei:
@@ -281,7 +287,7 @@ def cli():
                           vicinity=-50)
 
         foci_plane = data[centriole_channel, :, :]
-        nuclei_plane = data[0, :, :]
+        nuclei_plane = data[nuclei_channel, :, :]
 
         logger_score.debug('Creating annotation image...')
         background = prepare_background(nuclei_plane, foci_plane)
