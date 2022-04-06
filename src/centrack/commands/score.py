@@ -16,11 +16,11 @@ from stardist.models import StarDist2D
 from centrack.commands.outline import (
     Centre,
     Contour, prepare_background, draw_annotation
-    )
+)
 from centrack.commands.status import (
     DataSet,
     load_projection,
-    )
+)
 from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
 
@@ -196,23 +196,6 @@ def score_summary(df):
     return result
 
 
-def process_fov(data, centriole_channel, nuclei_channel):
-    """
-    Extract the nuclei and the foci of on projection FOV.
-    :param centriole_channel:
-    :return: tuple of list of nuclei, list of foci
-    """
-
-    # This skips the print calls in spotipy
-    with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
-        nuclei = extract_nuclei(data, nuclei_channel)
-        foci = extract_centrioles(data, centriole_channel)
-
-    logger_score.info('Detection: %s nuclei, %s foci', len(nuclei), len(foci))
-
-    return nuclei, foci
-
-
 def foci_prediction_prepare(foci, centriole_channel):
     foci_df = pd.DataFrame(foci)
     foci_df['channel'] = centriole_channel
@@ -231,9 +214,6 @@ def parse_args():
     parser.add_argument('dataset',
                         type=Path,
                         help='path to the dataset')
-    parser.add_argument('channel_centriole',
-                        type=int,
-                        help='channel id for centriole detection, e.g., 1, 2 or 3')
 
     parser.add_argument('channel_nuclei',
                         type=int,
@@ -256,7 +236,6 @@ def cli():
     path_visualisation.mkdir(exist_ok=True)
     path_statistics.mkdir(exist_ok=True)
 
-    centriole_channel = args.channel_centriole
     nuclei_channel = args.channel_nuclei
 
     fields = tuple(f for f in dataset.projections.glob('*.tif') if
@@ -268,9 +247,12 @@ def cli():
         logger_score.info('Loading %s', path.name)
 
         data = load_projection(path)
+        channels = list(range(data.shape[0]))
+        channels.pop(nuclei_channel)
 
-        nuclei, foci = process_fov(data, centriole_channel, nuclei_channel)
-
+        # This skips the print calls in spotipy
+        with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
+            nuclei = extract_nuclei(data, nuclei_channel)
         mask_nuclei = np.zeros((2048, 2048), dtype=np.uint8)
         for n in nuclei:
             color = n.idx
@@ -278,35 +260,38 @@ def cli():
                    annotation=False)
             cv2.imwrite(str(path_predictions / f"{path.stem}_nuclei_preds.png"),
                         mask_nuclei)
-
-        foci_df = foci_prediction_prepare(foci, centriole_channel)
-        foci_df.to_csv(path_predictions / f"{path.stem}_foci_preds.csv")
-
-        assigned = assign(foci=foci,
-                          nuclei=nuclei,
-                          vicinity=-50)
-
-        foci_plane = data[centriole_channel, :, :]
         nuclei_plane = data[nuclei_channel, :, :]
 
-        logger_score.debug('Creating annotation image...')
-        background = prepare_background(nuclei_plane, foci_plane)
-        annotation = draw_annotation(background, assigned, foci, nuclei)
+        for i in channels:
+            with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
+                foci = extract_centrioles(data, i)
+            foci_df = foci_prediction_prepare(foci, i)
+            foci_df.to_csv(path_predictions / f"{path.stem}_foci_{i}_preds.csv")
+            logger_score.info('Detection in channel %s: %s nuclei, %s foci', i, len(nuclei), len(foci))
+            assigned = assign(foci=foci,
+                              nuclei=nuclei,
+                              vicinity=-50)
 
-        file_name = path.name.removesuffix(".tif")
-        destination_path = path_visualisation / f'{file_name}_annot.png'
-        successful = cv2.imwrite(str(destination_path), annotation)
+            foci_plane = data[i, :, :]
 
-        if successful:
-            logger_score.debug('Saved at %s', destination_path)
+            logger_score.debug('Creating annotation image...')
+            background = prepare_background(nuclei_plane, foci_plane)
+            annotation = draw_annotation(background, assigned, foci, nuclei)
 
-        for pair in assigned:
-            n, foci = pair
-            scored.append({'fov': path.name,
-                           'channel': centriole_channel,
-                           'nucleus': n.centre.position,
-                           'score': len(foci),
-                           })
+            file_name = path.name.removesuffix(".tif")
+            destination_path = path_visualisation / f'{file_name}_annot.png'
+            successful = cv2.imwrite(str(destination_path), annotation)
+
+            if successful:
+                logger_score.debug('Saved at %s', destination_path)
+
+            for pair in assigned:
+                n, foci = pair
+                scored.append({'fov': path.name,
+                               'channel': i,
+                               'nucleus': n.centre.position,
+                               'score': len(foci),
+                               })
 
     scores = pd.DataFrame(scored)
     binned = score_summary(scores)
