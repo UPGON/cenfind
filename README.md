@@ -29,7 +29,7 @@ However, because the dependency spotipy cannot be downloaded via pip
 normally, one needs to download the whole repository and then git clone the 
 spotipy repository under src/ next to centrack.
 
-this situation is temporary and in the near future spotipy will become a 
+This situation is temporary and in the near future spotipy will become a 
 simple dependency of centrack. Next, when both centrack and spotipy will be 
 publicly available, centrack will be downloadable directly from PyPI.
 
