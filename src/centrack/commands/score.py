@@ -199,7 +199,6 @@ def score_summary(df):
 def process_fov(data, centriole_channel):
     """
     Extract the nuclei and the foci of on projection FOV.
-    :param path:
     :param centriole_channel:
     :return: tuple of list of nuclei, list of foci
     """
