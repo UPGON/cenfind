@@ -86,18 +86,25 @@ class NucleiDetector(Detector):
     """
 
     def _mask(self):
-        return cv2.resize(self.data[self.channel, :, :], dsize=(256, 256),
-                          fx=1, fy=1,
-                          interpolation=cv2.INTER_NEAREST)
+        _, height, width = self.data.shape
+        shrinkage_factor = 8
+        height_scaled = int(height // shrinkage_factor)
+        width_scaled = int(width // shrinkage_factor)
+        return shrinkage_factor, cv2.resize(self.data[self.channel, :, :],
+                                            dsize=(height_scaled, width_scaled),
+                                            fx=1, fy=1,
+                                            interpolation=cv2.INTER_NEAREST)
 
     def detect(self):
         model = StarDist2D.from_pretrained('2D_versatile_fluo')
-        transformed = self._mask()
+        shrinkage_factor, transformed = self._mask()
 
         transformed = transformed
         labels, coords = model.predict_instances(normalize(transformed))
 
-        nuclei_detected = cv2.resize(labels, dsize=(2048, 2048),
+        _, height, width = self.data.shape
+
+        nuclei_detected = cv2.resize(labels, dsize=(height, width),
                                      fx=1, fy=1,
                                      interpolation=cv2.INTER_NEAREST)
 
