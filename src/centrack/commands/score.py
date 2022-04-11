@@ -291,7 +291,7 @@ def cli():
             annotation = draw_annotation(background, assigned, foci, nuclei)
 
             file_name = path.name.removesuffix(".tif")
-            destination_path = path_visualisation / f'{file_name}_annot.png'
+            destination_path = path_visualisation / f'{file_name}_{i}_annot.png'
             successful = cv2.imwrite(str(destination_path), annotation)
 
             if successful:
