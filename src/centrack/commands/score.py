@@ -237,7 +237,8 @@ def cli():
     path_statistics.mkdir(exist_ok=True)
 
     nuclei_channel = args.channel_nuclei
-
+    if not dataset.projections.exists():
+        raise FileExistsError('Projection folder does not exist. Have you run `squash`?')
     fields = tuple(f for f in dataset.projections.glob('*.tif') if
                    not f.name.startswith('.'))
 
