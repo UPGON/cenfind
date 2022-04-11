@@ -266,9 +266,12 @@ def cli():
         for i in channels:
             with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
                 foci = extract_centrioles(data, i)
-            foci_df = foci_prediction_prepare(foci, i)
-            foci_df.to_csv(path_predictions / f"{path.stem}_foci_{i}_preds.csv")
-            logger_score.info('Detection in channel %s: %s nuclei, %s foci', i, len(nuclei), len(foci))
+            if foci:
+                foci_df = foci_prediction_prepare(foci, i)
+                foci_df.to_csv(path_predictions / f"{path.stem}_foci_{i}_preds.csv")
+                logger_score.info('Detection in channel %s: %s nuclei, %s foci', i, len(nuclei), len(foci))
+            else:
+                logger_score.warning('No object were detected in channel %s: skipping...', i)
             assigned = assign(foci=foci,
                               nuclei=nuclei,
                               vicinity=-50)
