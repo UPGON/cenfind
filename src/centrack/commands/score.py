@@ -255,13 +255,14 @@ def cli():
         logger_score.info('Loading %s', path.name)
 
         data = load_projection(path)
-        channels = list(range(data.shape[0]))
+        channels, height, width = data.shape
+        channels = list(range(channels))
         channels.pop(nuclei_channel)
 
         # This skips the print calls in spotipy
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
             nuclei = extract_nuclei(data, nuclei_channel)
-        mask_nuclei = np.zeros((2048, 2048), dtype=np.uint8)
+        mask_nuclei = np.zeros((height, width), dtype=np.uint8)
         for n in nuclei:
             color = n.idx
             n.draw(mask_nuclei, color=color, thickness=-1,
@@ -308,6 +309,7 @@ def cli():
     binned = score_summary(scores)
     dst_statistics = str(path_statistics / f'statistics.csv')
     binned.to_csv(dst_statistics)
+    logger_score.info('Analysis done.')
 
 
 if __name__ == '__main__':
