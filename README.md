@@ -39,7 +39,7 @@ within a virtual environment.
 1. Install python via pyenv
 2. Install poetry, system-wide with `pip install poetry`
 
-4. Create a virtual environment with:
+3. Create a virtual environment with:
 ```shell
 python3 -m venv venv-centrack
 source venv-centrack/bin/activate
@@ -49,32 +49,32 @@ Your prompt should now be prepended with `(venv-centrack)`.
 Check that you're at the correct location (simple and recommended location 
 is `cd ~`, i.e., your home folder). 
 
-2. Download `centrack` with:
+4. Download `centrack` with:
 ```shell
 git clone git@github.com:UPGON/centrack.git
 cd centrack
 ```
-3. As of now, you need to git clone the spotipy package in place in centrack/src/:
+5. As of now, you need to git clone the spotipy package in place in centrack/src/:
 !!! You need to have access to this private repo; contact Leo for setting up the permission.
 ```shell
 cd src
 git clone git@github.com:maweigert/spotipy 
 ```
-4. Add the programs `squash` and `score` to the PATH so that they can be run from 
+6. Add the programs `squash` and `score` to the PATH so that they can be run from 
 the command line, without the need to type the whole path.
 
 ```shell
 poetry install
 ```
 
-5. Check that `centrack`'s programs are correctly installed:
+7. Check that `centrack`'s programs are correctly installed:
 
 ```shell
 squash --help
 ```
 Note: it may take a few seconds.
 
-6. In case of updates, get the last version:
+8. In case of updates, get the last version:
 ```shell
 git pull
 poetry install
@@ -93,7 +93,7 @@ squash path/to/dataset
 ```shell
 score path/to/dataset 0
 ```
-5. Check that the predictions are satisfactory by looking at the folder `outlines` and at the results/scores.csv.
+4. Check that the predictions are satisfactory by looking at the folder `outlines` and at the results/scores.csv.
  
 ### Squashing the stacks to projections
 `squash` expects one argument: a path to a dataset folder that contains a single folder 
