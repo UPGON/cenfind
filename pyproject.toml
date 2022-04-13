@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "centrack"
-version = "0.7.1"
+version = "0.7.2"
 description = "Score centrioles in fluorescence images"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
 repository = "https://github.com/UPGON/centrack"
@@ -24,7 +24,6 @@ scipy = "1.7.1"
 csbdeep = "^0.6.3"
 stardist = "^0.7.3"
 spotipy = {git = "ssh://git@github.com/maweigert/spotipy.git", rev = "main"}
-torch = "^1.11.0"
 
 [tool.poetry.scripts]
 runner = "centrack.__main__:cli"
