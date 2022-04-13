@@ -54,7 +54,12 @@ is `cd ~`, i.e., your home folder).
 git clone git@github.com:UPGON/centrack.git
 cd centrack
 ```
-
+3. As of now, you need to git clone the spotipy package in place in centrack/src/:
+!!! You need to have access to this private repo; contact Leo for setting up the permission.
+```shell
+cd src
+git clone git@github.com:maweigert/spotipy 
+```
 4. Add the programs `squash` and `score` to the PATH so that they can be run from 
 the command line, without the need to type the whole path.
 
