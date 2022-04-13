@@ -99,7 +99,6 @@ def cli():
     args = parse_args()
 
     path_raw = args.source / 'raw'
-
     if not path_raw.exists():
         raise FileNotFoundError(
             f'raw/ folder not found, please make sure to move the ome.tif files in raw/.')
@@ -111,11 +110,8 @@ def cli():
 
     files = fetch_files(path_raw, file_type='ome.tif')
 
-    pbar = tqdm(files)
-
-    for path in pbar:
+    for path in tqdm(files):
         pixel_size_cm, projection = project(path)
-
         dst_name = build_name(path)
         path_dst = path_projections / dst_name
         write_projection(path_dst, projection, pixel_size_cm)
