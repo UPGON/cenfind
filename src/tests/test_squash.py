@@ -5,6 +5,7 @@ import pytest
 
 from centrack.commands.squash import (
     squash,
+    load_ome_tif,
     read_ome_tif,
     correct_axes,
     extract_pixel_size,
@@ -42,8 +43,8 @@ def foci():
 @pytest.fixture()
 def foci_mask(empty_stack_zcyx, foci):
     _plane = empty_stack_zcyx.copy()
-    for r, c in foci:
-        _plane[30, 1, r, c] = 1
+    for i, (r, c) in enumerate(foci):
+        _plane[i, 1, r, c] = 1
 
     return _plane
 
@@ -64,7 +65,7 @@ def test_extract_axes_order(path_ome):
 
 
 def test_read_ome_tif(path_ome):
-    data = read_ome_tif(path_ome)
+    data = load_ome_tif(path_ome)
     assert data.shape == (4, 67, 2048, 2048)
 
 
@@ -87,3 +88,9 @@ def test_correct_axes_values(foci_mask):
     assert foci_mask.sum() == 6
     assert projected.max() == 1
     assert swapped_projected.max() == 1
+
+
+def test_read_ome(path_ome):
+    pixel_size, data = read_ome_tif(path_ome)
+    assert pixel_size == 1.025e-5
+    assert data.shape == (4, 67, 2048, 2048)

@@ -29,7 +29,7 @@ def extract_axes_order(path):
     return axes_order
 
 
-def read_ome_tif(path: Path):
+def load_ome_tif(path: Path):
     """
     Read an OME tif file from the disk into a numpy array
     :param path:
@@ -47,3 +47,12 @@ def squash(data: np.ndarray):
     :return:
     """
     return data.max(axis=1)
+
+
+def read_ome_tif(path_ome):
+    data = load_ome_tif(path_ome)
+    pixel_size = extract_pixel_size(path_ome)
+    axes_order = extract_axes_order(path_ome)
+    if axes_order == 'ZCYX':
+        data = correct_axes(data)
+    return pixel_size, data
