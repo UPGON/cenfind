@@ -17,32 +17,9 @@ logger_tifffile = logging.getLogger("tifffile")
 logger_tifffile.setLevel(logging.ERROR)
 
 
-def project(path: Path) -> (float, np.ndarray):
-    """
-    Reads an OME.tiff and applies a max projection for the z-axis.
-    :param path: Path object of an OME.tif file
-    :returns the pixel size in centimeters and the CYX-array.
-    """
-    if not path.exists:
-        raise FileNotFoundError(path)
-
+def extract_pixel_size(path):
+    """Extract the pixel size of an ome.tif file"""
     with tf.TiffFile(path) as file:
-        shape = file.series[0].shape
-        order = file.series[0].axes
-        dimensions_found = set(order.lower())
-        dimensions_expected = set('czyx')
-
-        if dimensions_found != dimensions_expected:
-            raise ValueError(
-                f"Dimension mismatch: found: {dimensions_found} vs expected: {dimensions_expected}")
-
-        if order == 'ZCYX':
-            z, c, y, x = shape
-        elif order == 'CZYX':
-            c, z, y, x = shape
-        else:
-            raise ValueError(f'Order is not understood {order}')
-
         try:
             micromanager_metadata = file.micromanager_metadata
             pixel_size_um = micromanager_metadata['Summary']['PixelSize_um']
@@ -50,19 +27,53 @@ def project(path: Path) -> (float, np.ndarray):
             pixel_size_um = None
             logging.warning('No pixel size could be found')
 
-        if pixel_size_um:
-            pixel_size_cm = pixel_size_um / 1e4
-        else:
-            pixel_size_cm = None
+    if pixel_size_um:
+        pixel_size_cm = pixel_size_um / 1e4
+    else:
+        pixel_size_cm = None
 
+    return pixel_size_cm
+
+
+def reshape(path: Path) -> np.ndarray:
+    """
+    Determine the shape of the stack and reshape it as CZYX.
+    """
+    with tf.TiffFile(path) as file:
+        shape = file.series[0].shape
+        order = file.series[0].axes
         data = file.asarray()
 
-        logging.info('Order: %s Shape: %s', order, shape)
-        _data = data.reshape((c, z, y, x))
+    dimensions_found = set(order.lower())
+    dimensions_expected = set('czyx')
 
-    projection = _data.max(axis=1)
+    if dimensions_found != dimensions_expected:
+        raise ValueError(
+            f"Dimension mismatch: found: {dimensions_found} vs expected: {dimensions_expected}")
 
-    return pixel_size_cm, projection
+    if order == 'ZCYX':
+        z, c, y, x = shape
+    elif order == 'CZYX':
+        c, z, y, x = shape
+    else:
+        raise ValueError(f'Order is not understood {order}')
+
+    reshaped = data.reshape((c, z, y, x))
+
+    return reshaped
+
+
+def project(data: np.ndarray) -> np.ndarray:
+    """Max project a CZYX numpy stack."""
+    _data = data.copy()
+    return _data.max(axis=1)
+
+
+def process(path):
+    pixel_size_cm = extract_pixel_size(path)
+    data_reshaped = reshape(path)
+    projection = project(data_reshaped)
+    return projection, pixel_size_cm
 
 
 def write_projection(dst: Path, data: np.ndarray, pixel_size=None) -> None:
@@ -111,10 +122,9 @@ def cli():
     files = fetch_files(path_raw, file_type='ome.tif')
 
     for path in tqdm(files):
-        pixel_size_cm, projection = project(path)
+        projection, pixel_size_cm = process(path)
         dst_name = build_name(path)
-        path_dst = path_projections / dst_name
-        write_projection(path_dst, projection, pixel_size_cm)
+        write_projection(path_projections / dst_name, projection, pixel_size_cm)
 
 
 if __name__ == '__main__':
