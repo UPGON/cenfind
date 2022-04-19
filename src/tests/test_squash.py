@@ -3,7 +3,13 @@ from pathlib import Path
 
 import pytest
 
-from centrack.commands.squash import squash, read_ome_tif, correct_axes
+from centrack.commands.squash import (
+    squash,
+    read_ome_tif,
+    correct_axes,
+    extract_pixel_size,
+    extract_axes_order,
+)
 
 
 @pytest.fixture()
@@ -42,12 +48,24 @@ def foci_mask(empty_stack_zcyx, foci):
     return _plane
 
 
-def test_read_ome_tif():
-    path = Path('../../data/RPE1wt_CEP152+GTU88+PCNT_1/raw/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.ome.tif')
-    pixel_size, order, data = read_ome_tif(path)
-    assert data.shape == (4, 67, 2048, 2048)
-    assert pixel_size == .1025
+@pytest.fixture()
+def path_ome():
+    return Path('../../data/RPE1wt_CEP152+GTU88+PCNT_1/raw/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.ome.tif')
+
+
+def test_extract_pixel_size(path_ome):
+    pixel_size = extract_pixel_size(path_ome)
+    assert pixel_size == 1.025e-05
+
+
+def test_extract_axes_order(path_ome):
+    order = extract_axes_order(path_ome)
     assert order in ('CZYX', 'ZCYX')
+
+
+def test_read_ome_tif(path_ome):
+    data = read_ome_tif(path_ome)
+    assert data.shape == (4, 67, 2048, 2048)
 
 
 def test_squash(empty_stack_czyx, projection):
