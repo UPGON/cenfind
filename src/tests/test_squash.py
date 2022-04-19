@@ -24,8 +24,9 @@ def projection():
 @pytest.fixture()
 def foci():
     return np.asarray([
-        [4, 26],
-        [5, 20],
+        [0, 0],
+        [3, 0],
+        [3, 4],
         [400, 260],
         [1209, 3],
         [2000, 1500],
@@ -60,9 +61,9 @@ def test_correct_axes(empty_stack_zcyx, empty_stack_czyx):
 
 
 def test_correct_axes_values(foci_mask):
-    projected = squash(foci_mask)
     swapped = correct_axes(foci_mask)
+    projected = squash(foci_mask)
     swapped_projected = squash(swapped)
-    assert foci_mask.sum() == 5
-    assert projected.sum() == 5
-    assert swapped_projected.sum() == 5
+    assert foci_mask.sum() == 6
+    assert projected.max() == 1
+    assert swapped_projected.max() == 1
