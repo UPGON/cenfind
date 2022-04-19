@@ -1,6 +1,12 @@
 import numpy
+import numpy as np
 import tifffile as tf
 from pathlib import Path
+
+def correct_axes(data: np.ndarray):
+    z, c, y, x = data.shape
+    corrected = data.copy()
+    return corrected.reshape((c, z, y, x))
 
 def read_ome_tif(path: Path):
     """
@@ -11,7 +17,7 @@ def read_ome_tif(path: Path):
     data = tf.imread(path)
     return data
 
-def squash(data: numpy.ndarray):
+def squash(data: np.ndarray):
     """
     Squash a numpy array along the z-axis using max function.
     :param data:
