@@ -1,3 +1,6 @@
+import os
+import tempfile
+
 import numpy as np
 from pathlib import Path
 
@@ -12,6 +15,46 @@ from src.centrack.commands.squash import (
     extract_axes_order,
     collect_ome_tif, write_projection,
     )
+
+HERE = Path(__file__).resolve()
+TEMP_DIR = HERE / '_tmp'
+if not TEMP_DIR.exists():
+    TEMP_DIR = tempfile.gettempdir()
+
+
+def random_data(shape, dtype):
+    rng = np.random.RandomState(1993)
+    dtype_info = np.iinfo(dtype)
+    return rng.randint(low=dtype_info.min,
+                       high=dtype_info.max,
+                       size=shape,
+                       dtype=dtype)
+
+
+class TempFileName:
+    """
+    Temporary file name context manager.
+    from @cgholke
+    """
+    def __init__(self, name=None, ext='.tif', remove=False):
+        self.remove = remove or TEMP_DIR == tempfile.gettempdir()
+        if not name:
+            fh = tempfile.NamedTemporaryFile(prefix='test_')
+            self.name = fh.named
+            fh.close()
+        else:
+            self.name = TEMP_DIR / f'test_{name}{ext}'
+
+    def __enter__(self):
+        return self.name
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.remove:
+            try:
+                os.remove(self.name)
+            except OSError:
+                pass
+
 
 
 @pytest.fixture()
