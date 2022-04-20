@@ -70,3 +70,21 @@ def collect_ome_tif(path_dataset: Path):
 
     return (f for f in path_dataset.rglob('*.ome.tif')
                  if not f.name.startswith('.'))
+
+def write_projection(dst: Path, data: np.ndarray, pixel_size=None) -> None:
+    """
+    Writes the projection to the disk.
+    :param dst: the path of the output file
+    :param data: the data to write to dst
+    :param pixel_size: the pixel size in cm
+
+    :return None
+    """
+
+    if pixel_size:
+        res = (1 / pixel_size, 1 / pixel_size, 'CENTIMETER')
+    else:
+        res = None
+
+    tf.imwrite(dst, data, photometric='minisblack', resolution=res)
+

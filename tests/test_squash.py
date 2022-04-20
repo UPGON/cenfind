@@ -10,7 +10,7 @@ from src.centrack.commands.squash import (
     correct_axes,
     extract_pixel_size,
     extract_axes_order,
-    collect_ome_tif,
+    collect_ome_tif, write_projection,
     )
 
 
@@ -45,35 +45,20 @@ def foci():
 def foci_mask(empty_stack_zcyx, foci):
     _plane = empty_stack_zcyx.copy()
     for i, (r, c) in enumerate(foci):
-        _plane[i, 1, r, c] = 1
+        _plane[30, 1, r, c] = 1
 
     return _plane
 
 
-@pytest.fixture()
+@pytest.fixture(scope='class')
 def path_dataset():
     return Path('data')
 
 
-@pytest.fixture()
+@pytest.fixture(scope='class')
 def path_ome():
     return Path(
-        'tests/data/raw/20210727_RPE1_p53-Control_DAPI+rPOC5AF488+mHA568+gCPAP647_1_MMStack_Default.ome.tif')
-
-
-def test_extract_pixel_size(path_ome):
-    pixel_size = extract_pixel_size(path_ome)
-    assert pixel_size == 1.025e-05
-
-
-def test_extract_axes_order(path_ome):
-    order = extract_axes_order(path_ome)
-    assert order in ('CZYX', 'ZCYX')
-
-
-def test_read_ome_tif(path_ome):
-    data = load_ome_tif(path_ome)
-    assert data.shape == (4, 67, 2048, 2048)
+        'data/raw/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.ome.tif')
 
 
 def test_squash(empty_stack_czyx, projection):
@@ -97,12 +82,40 @@ def test_correct_axes_values(foci_mask):
     assert swapped_projected.max() == 1
 
 
-def test_read_ome(path_ome):
-    pixel_size, data = read_ome_tif(path_ome)
-    assert pixel_size == 1.025e-5
-    assert data.shape == (4, 67, 2048, 2048)
+class TestOMETIFF:
+    def test_extract_pixel_size(self, path_ome):
+        pixel_size = extract_pixel_size(path_ome)
+        assert pixel_size == 1.025e-05
+
+    def test_extract_axes_order(self, path_ome):
+        order = extract_axes_order(path_ome)
+        assert order in ('CZYX', 'ZCYX')
+
+    def test_read_ome_tif(self, path_ome):
+        data = load_ome_tif(path_ome)
+        assert data.shape == (4, 67, 2048, 2048)
+
+    def test_read_ome(self, path_ome):
+        pixel_size, data = read_ome_tif(path_ome)
+        assert pixel_size == 1.025e-5
+        assert data.shape == (4, 67, 2048, 2048)
 
 
-def test_collect_ome_tif(path_dataset):
-    files_to_process = collect_ome_tif(path_dataset)
-    assert all([f.name.endswith('.ome.tif') for f in files_to_process]) == True
+class TestDataset:
+    def test_collect_ome_tif(self, path_dataset):
+        files_to_process = collect_ome_tif(path_dataset)
+        assert all(
+            [f.name.endswith('.ome.tif') for f in files_to_process]) == True
+
+    def test_squash_dataset(self, path_dataset):
+        files_to_process = collect_ome_tif(path_dataset)
+        path_projections = path_dataset / 'projections'
+        for f in files_to_process:
+            pixel_size, data = read_ome_tif(f)
+            projected = squash(data)
+            file_name = f"{f.stem.removesuffix('.ome.tif')}_max.tif"
+            write_projection(path_projections / file_name, projected,
+                             pixel_size=pixel_size)
+
+        assert all(
+            [f.name.endswith('_max.tif') for f in path_projections.iterdir()])
