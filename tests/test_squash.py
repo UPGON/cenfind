@@ -10,7 +10,7 @@ from src.centrack.commands.squash import (
     correct_axes,
     extract_pixel_size,
     extract_axes_order,
-)
+    )
 
 
 @pytest.fixture()
@@ -37,7 +37,7 @@ def foci():
         [400, 260],
         [1209, 3],
         [2000, 1500],
-    ])
+        ])
 
 
 @pytest.fixture()
@@ -51,7 +51,8 @@ def foci_mask(empty_stack_zcyx, foci):
 
 @pytest.fixture()
 def path_ome():
-    return Path('../../data/RPE1wt_CEP152+GTU88+PCNT_1/raw/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.ome.tif')
+    return Path(
+        'src/tests/data/raw/20210727_RPE1_p53-Control_DAPI+rPOC5AF488+mHA568+gCPAP647_1_MMStack_Default.ome.tif')
 
 
 def test_extract_pixel_size(path_ome):
