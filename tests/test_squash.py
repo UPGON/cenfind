@@ -10,6 +10,7 @@ from src.centrack.commands.squash import (
     correct_axes,
     extract_pixel_size,
     extract_axes_order,
+    collect_ome_tif,
     )
 
 
@@ -50,9 +51,14 @@ def foci_mask(empty_stack_zcyx, foci):
 
 
 @pytest.fixture()
+def path_dataset():
+    return Path('data')
+
+
+@pytest.fixture()
 def path_ome():
     return Path(
-        'src/tests/data/raw/20210727_RPE1_p53-Control_DAPI+rPOC5AF488+mHA568+gCPAP647_1_MMStack_Default.ome.tif')
+        'tests/data/raw/20210727_RPE1_p53-Control_DAPI+rPOC5AF488+mHA568+gCPAP647_1_MMStack_Default.ome.tif')
 
 
 def test_extract_pixel_size(path_ome):
@@ -95,3 +101,8 @@ def test_read_ome(path_ome):
     pixel_size, data = read_ome_tif(path_ome)
     assert pixel_size == 1.025e-5
     assert data.shape == (4, 67, 2048, 2048)
+
+
+def test_collect_ome_tif(path_dataset):
+    files_to_process = collect_ome_tif(path_dataset)
+    assert all([f.name.endswith('.ome.tif') for f in files_to_process]) == True

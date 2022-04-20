@@ -56,3 +56,17 @@ def read_ome_tif(path_ome):
     if axes_order == 'ZCYX':
         data = correct_axes(data)
     return pixel_size, data
+
+def collect_ome_tif(path_dataset: Path):
+    """
+    Collect all OME.tif files located under raw/
+    :param path_dataset:
+    :return:
+    """
+    path_raw = path_dataset / 'raw'
+
+    if not path_raw.exists():
+        raise FileNotFoundError(path_raw.resolve())
+
+    return (f for f in path_dataset.rglob('*.ome.tif')
+                 if not f.name.startswith('.'))
