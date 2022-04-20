@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from centrack.commands.squash import (
+from src.centrack.commands.squash import (
     squash,
     load_ome_tif,
     read_ome_tif,
