@@ -2,8 +2,10 @@ import numpy as np
 import tifffile as tf
 from pathlib import Path
 
+from typing import Tuple, Generator
 
-def correct_axes(data: np.ndarray):
+
+def correct_axes(data: np.ndarray) -> np.ndarray:
     z, c, y, x = data.shape
     corrected = data.copy()
     return corrected.reshape((c, z, y, x))
@@ -29,13 +31,13 @@ def extract_pixel_size(path: Path) -> float:
         return -1
 
 
-def extract_axes_order(path):
+def extract_axes_order(path: Path) -> str:
     with tf.TiffFile(path) as f:
         axes_order = f.series[0].axes
     return axes_order
 
 
-def load_ome_tif(path: Path):
+def load_ome_tif(path: Path) -> np.ndarray:
     """
     Read an OME tif file from the disk into a numpy array
     :param path:
@@ -46,7 +48,7 @@ def load_ome_tif(path: Path):
     return data
 
 
-def squash(data: np.ndarray):
+def squash(data: np.ndarray) -> np.ndarray:
     """
     Squash a numpy array along the z-axis using max function.
     :param data:
@@ -55,7 +57,7 @@ def squash(data: np.ndarray):
     return data.max(axis=1)
 
 
-def read_ome_tif(path_ome):
+def read_ome_tif(path_ome: Path) -> Tuple[float, np.ndarray]:
     data = load_ome_tif(path_ome)
     pixel_size = extract_pixel_size(path_ome)
     axes_order = extract_axes_order(path_ome)
@@ -64,7 +66,7 @@ def read_ome_tif(path_ome):
     return pixel_size, data
 
 
-def collect_ome_tif(path_dataset: Path):
+def collect_ome_tif(path_dataset: Path) -> Generator:
     """
     Collect all OME.tif files located under raw/
     :param path_dataset:
@@ -96,4 +98,5 @@ def write_projection(dst: Path,
     else:
         res = None
 
-    tf.imwrite(dst, data, kwargs={"photometric": 'minisblack', "resolution": res})
+    tf.imwrite(dst, data, kwargs={"photometric": 'minisblack',
+                                  "resolution": res})
