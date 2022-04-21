@@ -100,3 +100,11 @@ def write_projection(dst: Path,
 
     tf.imwrite(dst, data, kwargs={"photometric": 'minisblack',
                                   "resolution": res})
+
+
+def cli():
+    pass
+
+
+if __name__ == "__main__":
+    cli()
