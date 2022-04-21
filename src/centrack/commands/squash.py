@@ -9,18 +9,24 @@ def correct_axes(data: np.ndarray):
     return corrected.reshape((c, z, y, x))
 
 
-def extract_pixel_size(path: Path):
+def extract_pixel_size(path: Path) -> float:
+    """
+    Extract the pixel size (um) and return the pixel size (cm).
+    :param path:
+    :return: the pixel size in cm or -1 if not found
+    """
     with tf.TiffFile(path) as f:
-        mm_metadata_summary = f.micromanager_metadata['Summary']
+        mm_metadata = f.micromanager_metadata
+
+    if mm_metadata is None:
+        return -1
+
+    mm_metadata_summary = f.micromanager_metadata['Summary']
     try:
         pixel_size_um = mm_metadata_summary['PixelSize_um']
-    except KeyError:
-        pixel_size_um = None
-
-    if pixel_size_um:
         return pixel_size_um / 1e4
-    else:
-        return None
+    except KeyError:
+        return -1
 
 
 def extract_axes_order(path):
@@ -57,6 +63,7 @@ def read_ome_tif(path_ome):
         data = correct_axes(data)
     return pixel_size, data
 
+
 def collect_ome_tif(path_dataset: Path):
     """
     Collect all OME.tif files located under raw/
@@ -69,9 +76,12 @@ def collect_ome_tif(path_dataset: Path):
         raise FileNotFoundError(path_raw.resolve())
 
     return (f for f in path_dataset.rglob('*.ome.tif')
-                 if not f.name.startswith('.'))
+            if not f.name.startswith('.'))
 
-def write_projection(dst: Path, data: np.ndarray, pixel_size=None) -> None:
+
+def write_projection(dst: Path,
+                     data: np.ndarray,
+                     pixel_size=None) -> None:
     """
     Writes the projection to the disk.
     :param dst: the path of the output file
@@ -86,5 +96,4 @@ def write_projection(dst: Path, data: np.ndarray, pixel_size=None) -> None:
     else:
         res = None
 
-    tf.imwrite(dst, data, photometric='minisblack', resolution=res)
-
+    tf.imwrite(dst, data, kwargs={"photometric": 'minisblack', "resolution": res})
