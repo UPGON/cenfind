@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import tifffile as tf
 
-from centrack.squash import (
+from src.centrack.squash import (
     squash,
     read_ome_tif,
     correct_axes,
