@@ -16,11 +16,11 @@ from stardist.models import StarDist2D
 from centrack.commands.outline import (
     Centre,
     Contour, prepare_background, draw_annotation
-)
+    )
 from centrack.commands.status import (
     DataSet,
     load_projection,
-)
+    )
 from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
 
@@ -75,7 +75,8 @@ class CentriolesDetector(Detector):
                              show_tile_progress=False)
 
         return [
-            Centre((y, x), f_id, self.organelle, confidence=foci[0][x, y].round(3))
+            Centre((y, x), f_id, self.organelle,
+                   confidence=foci[0][x, y].round(3))
             for
             f_id, (x, y) in enumerate(foci[1])]
 
@@ -245,7 +246,8 @@ def cli():
 
     nuclei_channel = args.channel_nuclei
     if not dataset.projections.exists():
-        raise FileExistsError('Projection folder does not exist. Have you run `squash`?')
+        raise FileExistsError(
+            'Projection folder does not exist. Have you run `squash`?')
     fields = tuple(f for f in dataset.projections.glob('*.tif') if
                    not f.name.startswith('.'))
 
@@ -276,10 +278,13 @@ def cli():
                 foci = extract_centrioles(data, i)
             if foci:
                 foci_df = foci_prediction_prepare(foci, i)
-                foci_df.to_csv(path_predictions / f"{path.stem}_foci_{i}_preds.csv")
-                logger_score.info('Detection in channel %s: %s nuclei, %s foci', i, len(nuclei), len(foci))
+                foci_df.to_csv(
+                    path_predictions / f"{path.stem}_foci_{i}_preds.csv")
+                logger_score.info('Detection in channel %s: %s nuclei, %s foci',
+                                  i, len(nuclei), len(foci))
             else:
-                logger_score.warning('No object were detected in channel %s: skipping...', i)
+                logger_score.warning(
+                    'No object were detected in channel %s: skipping...', i)
             assigned = assign(foci=foci,
                               nuclei=nuclei,
                               vicinity=-50)
