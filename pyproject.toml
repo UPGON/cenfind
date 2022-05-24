@@ -12,7 +12,7 @@ license = "MIT"
 python = ">=3.9,<3.10"
 opencv-python = "^4.5.5.62"
 numpy = ">=1.21.2, <1.22"
-tifffile = "2021.8.30"
+tifffile = "^2022.5.4"
 tqdm = "^4.62.3"
 xarray = "^0.21.1"
 pytomlpp = "^1.0.10"
@@ -22,7 +22,7 @@ pandas = "^1.4.1"
 tensorflow = "^2.8.0"
 scipy = "1.7.1"
 csbdeep = "^0.6.3"
-stardist = "^0.7.3"
+stardist = "^0.8.0"
 #spotipy = {git = "ssh://git@github.com/maweigert/spotipy.git", rev = "main"}
 
 [tool.poetry.scripts]
