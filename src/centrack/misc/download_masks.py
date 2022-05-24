@@ -10,20 +10,16 @@ from dotenv import load_dotenv
 def main():
     load_dotenv('/home/buergy/projects/centrack/.env')
 
-    path_dataset = Path('/data1/centrioles/cells_rpe')
+    path_dataset = Path('/data1/centrioles/rpe')
 
-    path_train = path_dataset / 'train'
-    path_train_images = path_train / 'images'
-    path_train_masks = path_train / 'masks'
-    path_train_images.mkdir(parents=True, exist_ok=True)
-    path_train_masks.mkdir(parents=True, exist_ok=True)
+    path_raw = path_dataset / 'raw'
+    path_projections = path_dataset / 'projections'
+    path_annotations = path_dataset / 'annotations'
 
-    path_test = path_dataset / 'test'
-    path_test_images = path_test / 'images'
-    path_test_masks = path_test / 'masks'
-    path_test_images.mkdir(parents=True, exist_ok=True)
-    path_test_masks.mkdir(parents=True, exist_ok=True)
+    for folder in [path_raw, path_projections, path_annotations]:
+        folder.mkdir(parents=True, exist_ok=True)
 
+    path_annotations_cells = path_annotations / 'cells'
     # Create Labelbox client
     lb = labelbox.Client(api_key=os.environ['LABELBOX_API_KEY'])
 
@@ -40,7 +36,7 @@ def main():
             cell_mask = struct.value.mask.value[:, :, 0]
             if struct.name == 'Cell':
                 mask_multi += ((cell_mask / 255) * i).astype('uint16')
-        tf.imwrite(path_train_masks / name, mask_multi)
+        tf.imwrite(path_annotations_cells / name, mask_multi)
 
 
 if __name__ == '__main__':

@@ -49,7 +49,7 @@ def reshape(path: Path) -> np.ndarray:
 
     if dimensions_found != dimensions_expected:
         raise ValueError(
-            f"Dimension mismatch: found: {dimensions_found} vs expected: {dimensions_expected}")
+            f"Dimension mismatch in {path}: found: {dimensions_found} vs expected: {dimensions_expected}")
 
     if order == 'ZCYX':
         z, c, y, x = shape
@@ -70,7 +70,7 @@ def project(data: np.ndarray) -> np.ndarray:
 
 
 def process(path):
-    pixel_size_cm = extract_pixel_size(path)
+    pixel_size_cm = None
     data_reshaped = reshape(path)
     projection = project(data_reshaped)
     return projection, pixel_size_cm
