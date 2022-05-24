@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+import numpy as np
+import tifffile as tf
 import labelbox
 from dotenv import load_dotenv
 
@@ -27,24 +29,18 @@ def main():
 
     # Get project by ID
     project = lb.get_project('cl3cxyu0o9lnb0884fnsjea91')
-    # Export image and text data as an annotation generator:
 
+    # Export image and text data as an annotation generator:
     labels = project.label_generator()
-    print('Easy stuff done...')
-    # for label in labels:
-    #     print('reading label')
-    #     name = label.data.external_id.replace('_C2.png', '.tif')
-    #     mask_multi = np.zeros((2048, 2048), dtype='uint16')
-    #     for i, struct in enumerate(label.annotations):
-    #         print('reading structure')
-    #         if struct.name == 'Cell':
-    #             cell_mask = struct.value.mask
-    #             cell_mask += ((cell_mask / 255) * i).astype('uint16')
-    #         if struct.name == 'Focus':
-    #             pass
-    #     print('saving mask')
-    #     tf.imwrite(path_train_masks / name, mask_multi)
-    #     print('done')
+
+    for label in labels:
+        name = label.data.external_id.replace('.png', '.tif')
+        mask_multi = np.zeros((2048, 2048), dtype='uint16')
+        for i, struct in enumerate(label.annotations):
+            cell_mask = struct.value.mask.value[:, :, 0]
+            if struct.name == 'Cell':
+                mask_multi += ((cell_mask / 255) * i).astype('uint16')
+        tf.imwrite(path_train_masks / name, mask_multi)
 
 
 if __name__ == '__main__':
