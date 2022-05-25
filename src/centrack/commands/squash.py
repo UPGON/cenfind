@@ -48,13 +48,18 @@ def reshape(path: Path) -> np.ndarray:
     dimensions_expected = set('czyx')
 
     if dimensions_found != dimensions_expected:
-        raise ValueError(
-            f"Dimension mismatch in {path}: found: {dimensions_found} vs expected: {dimensions_expected}")
+        if dimensions_found != set('zyx'):
+            raise ValueError(
+                f"Dimension mismatch in {path}: found: {dimensions_found} vs expected: {dimensions_expected}")
 
     if order == 'ZCYX':
         z, c, y, x = shape
     elif order == 'CZYX':
         c, z, y, x = shape
+    elif order == 'ZYX':
+        c = 1
+        z, y, x = shape
+        data = np.expand_dims(data, 0)
     else:
         raise ValueError(f'Order is not understood {order}')
 
@@ -63,17 +68,21 @@ def reshape(path: Path) -> np.ndarray:
     return reshaped
 
 
-def project(data: np.ndarray) -> np.ndarray:
+def project(data: np.ndarray, p) -> np.ndarray:
     """Max project a CZYX numpy stack."""
     _data = data.copy()
     return _data.max(axis=1)
 
 
-def process(path):
+def process(path, projection_type):
     pixel_size_cm = None
     data_reshaped = reshape(path)
-    projection = project(data_reshaped)
-    return projection, pixel_size_cm
+    if projection_type == 'max':
+        projection = np.max(data_reshaped, axis=1)
+        return projection, pixel_size_cm
+    if projection_type == 'sum':
+        projection = np.sum(data_reshaped, axis=1)
+        return projection, pixel_size_cm
 
 
 def write_projection(dst: Path, data: np.ndarray, pixel_size=None) -> None:
@@ -102,6 +111,12 @@ def parse_args():
                         type=Path,
                         help='Path to the dataset folder; the parent of `raw`.',
                         )
+    parser.add_argument('format',
+                        type=str,
+                        help='Format of the raw files, e.g., `.ome.tif` or `.stk`')
+    parser.add_argument('projection_type',
+                        type=str,
+                        help='Type of projection: `max`, `sum`, `mean`')
 
     return parser.parse_args()
 
@@ -119,12 +134,15 @@ def cli():
         logger_cli.info('Create projections folder')
         path_projections.mkdir()
 
-    files = fetch_files(path_raw, file_type='ome.tif')
+    files = fetch_files(path_raw, file_type=args.format)
 
     for path in tqdm(files):
-        projection, pixel_size_cm = process(path)
-        dst_name = build_name(path)
-        write_projection(path_projections / dst_name, projection, pixel_size_cm)
+        projection, pixel_size_cm = process(path, args.projection_type)
+        channels = projection.shape[0]
+        for i in range(channels):
+            single_channel = projection[i, :, :].squeeze()
+            dst_name = build_name(path, projection_type=args.projection_type, channel=i)
+            write_projection(path_projections / dst_name, single_channel, pixel_size_cm)
 
 
 if __name__ == '__main__':
