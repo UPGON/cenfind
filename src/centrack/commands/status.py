@@ -228,17 +228,18 @@ def is_tif(filename):
     return _filename.endswith('.tif') and not _filename.startswith('.')
 
 
-def build_name(path: Path, projection_type='max') -> str:
+def build_name(path: Path, channel: int, projection_type='max') -> str:
     """
     Extract the file name, remove the suffixes and append the projection type.
-    :param projection_type: the type of projection, by default max
     :param path:
+    :param channel:
+    :param projection_type: the type of projection, by default max
     :return: file name of the projection
     """
     file_name = path.name
     suffixes = ''.join(path.suffixes)
     file_name_no_suffix = file_name.removesuffix(suffixes)
-    return file_name_no_suffix + f'_{projection_type}.tif'
+    return file_name_no_suffix + f'_{projection_type}_C{channel}.tif'
 
 
 def get_markers(markers: str, sep='+') -> List:
