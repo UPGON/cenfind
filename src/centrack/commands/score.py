@@ -16,11 +16,11 @@ from stardist.models import StarDist2D
 from centrack.commands.outline import (
     Centre,
     Contour, prepare_background, draw_annotation
-    )
+)
 from centrack.commands.status import (
     DataSet,
     load_projection,
-    )
+)
 from spotipy.spotipy.model import SpotNet
 from spotipy.spotipy.utils import normalize_fast2d
 
@@ -58,8 +58,10 @@ class CentriolesDetector(Detector):
     """
 
     def _mask(self):
-        transformed = self.data[self.channel, :, :]
-        return transformed
+        if self.channel == -1:
+            return self.data
+        else:
+            return self.data[self.channel, :, :]
 
     def detect(self, interpeak_min=3):
         current_path = Path(__file__).parent.parent.parent.parent
