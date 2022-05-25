@@ -20,7 +20,7 @@ from centrack.mal.labelbox_api import (
     label_create,
     labels_list_create,
     task_prepare
-    )
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -49,7 +49,7 @@ def cli():
     project.enable_model_assisted_labeling()
 
     logger.debug('Get the ontology.')
-    ontology_setup(client, project, ontology_id='ckywqubua5nkp0zb2h9lm3vn7')
+    ontology_setup(client, project, ontology_id='cl3k8y38t11xc07807tar8hg6')
 
     dataset_name_lb = project_name_lb
     dataset_lb = dataset_create(client, dataset_name_lb)
@@ -76,10 +76,13 @@ def cli():
         for field in fields:
             external_id = field.name
             data = tf.imread(field)
-            foci = data[2, :, :]
-            predictions = extract_centrioles(data, 2)
+            if data.ndim == 2:
+                foci = data
+            else:
+                foci = data[2, :, :]
+            predictions = extract_centrioles(data, -1)
             predictions_np = [pred.position for pred in predictions]
-            image = contrast(foci)
+            image = contrast(foci, blur=True)
             labels.append(label_create(image, predictions_np, external_id))
 
     labels_list = labels_list_create(labels)
