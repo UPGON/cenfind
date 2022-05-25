@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-
+import PIL
 import numpy as np
 import tifffile as tf
 import labelbox
@@ -20,6 +20,7 @@ def main():
         folder.mkdir(parents=True, exist_ok=True)
 
     path_annotations_cells = path_annotations / 'cells'
+    path_annotations_cells.mkdir(exist_ok=True)
     # Create Labelbox client
     lb = labelbox.Client(api_key=os.environ['LABELBOX_API_KEY'])
 
@@ -33,7 +34,11 @@ def main():
         name = label.data.external_id.replace('.png', '.tif')
         mask_multi = np.zeros((2048, 2048), dtype='uint16')
         for i, struct in enumerate(label.annotations):
-            cell_mask = struct.value.mask.value[:, :, 0]
+            try:
+                cell_mask = struct.value.mask.value[:, :, 0]
+            except PIL.UnidentifiedImageError as e:
+                print(f'Problem with {label} ({e})')
+                continue
             if struct.name == 'Cell':
                 mask_multi += ((cell_mask / 255) * i).astype('uint16')
         tf.imwrite(path_annotations_cells / name, mask_multi)
