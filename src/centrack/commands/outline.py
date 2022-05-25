@@ -221,7 +221,9 @@ def color_scale(color):
     return tuple(c / 255. for c in color)
 
 
-def contrast(data):
+def contrast(data, blur=False):
+    if blur:
+        data = cv2.medianBlur(data, ksize=3)
     return cv2.convertScaleAbs(data, alpha=255 / data.max())
 
 
