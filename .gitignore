@@ -14,6 +14,5 @@ dist/
 logs/
 data/
 poetry.lock
-/models/spotnet.png
 /models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300/weights_now.h5
-/publication/
+*.idlk
