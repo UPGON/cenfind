@@ -1,3 +1,4 @@
+#! /home/buergy/.cache/pypoetry/virtualenvs/centrack-7dpZ9I7w-py3.9/bin/python
 import argparse
 import logging
 import os
@@ -20,7 +21,7 @@ from centrack.mal.labelbox_api import (
     label_create,
     labels_list_create,
     task_prepare
-)
+    )
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -30,9 +31,10 @@ def args_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('path',
                         type=Path)
-    parser.add_argument('--synthetic',
-                        action='store_true',
-                        )
+    parser.add_argument('channel',
+                        type=str,
+                        help='Index of the channel')
+
     return parser.parse_args()
 
 
@@ -42,7 +44,8 @@ def cli():
     client = Client(api_key=os.environ['LABELBOX_API_KEY'])
 
     path_dataset = Path(parsed_args.path)
-    project_name_lb = path_dataset.name
+    channel_index = parsed_args.channel
+    project_name_lb = f"{path_dataset.name}_C{channel_index}"
     project = project_create(client, project_name_lb)
 
     logger.debug('Enable MAL.')
@@ -58,8 +61,9 @@ def cli():
     logger.debug('Attach the dataset to the project.')
 
     dataset = DataSet(path_dataset)
-    fields = tuple(f for f in dataset.projections.glob('*.tif') if
-                   not f.name.startswith('.'))
+    fields = tuple(
+        f for f in dataset.projections.glob(f'*C{channel_index}.tif') if
+        not f.name.startswith('.'))
     labels = []
     for field in fields:
         external_id = field.name
@@ -67,7 +71,7 @@ def cli():
         if data.ndim == 2:
             foci = data
         else:
-            foci = data[2, :, :]
+            foci = data[channel_index, :, :]
         predictions = extract_centrioles(data, -1)
         predictions_np = [pred.position for pred in predictions]
         image = contrast(foci, blur=True)
