@@ -127,6 +127,11 @@ class DataSet:
         return self.path / 'projections'
 
     @property
+    def vignettes(self):
+        """Define the path to the vignettes folder."""
+        return self.path / 'vignettes'
+
+    @property
     def predictions(self):
         return self.path / 'predictions.csv'
 
