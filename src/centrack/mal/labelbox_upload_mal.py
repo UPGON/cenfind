@@ -1,27 +1,25 @@
-#! /home/buergy/.cache/pypoetry/virtualenvs/centrack-7dpZ9I7w-py3.9/bin/python
 import argparse
 import logging
 import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-import numpy as np
 import tifffile as tf
+from cv2 import cv2
 from labelbox import Client
 
 from centrack.commands.status import DataSet
-from centrack.commands.outline import contrast
+from centrack.commands.outline import to_8bit
 from centrack.commands.score import extract_centrioles
 
 from centrack.mal.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,
-    image_generate,
     label_create,
     labels_list_create,
     task_prepare
-    )
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -74,7 +72,7 @@ def cli():
             foci = data[channel_index, :, :]
         predictions = extract_centrioles(data, -1)
         predictions_np = [pred.position for pred in predictions]
-        image = contrast(foci, blur=True)
+        image = to_8bit(foci)
         labels.append(label_create(image, predictions_np, external_id))
 
     labels_list = labels_list_create(labels)
