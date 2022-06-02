@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import tifffile as tf
 
 import numpy as np
 from cv2 import cv2
@@ -221,10 +222,8 @@ def color_scale(color):
     return tuple(c / 255. for c in color)
 
 
-def contrast(data, blur=False):
-    if blur:
-        data = cv2.medianBlur(data, ksize=3)
-    return cv2.convertScaleAbs(data, alpha=255 / data.max())
+def to_8bit(data):
+    return ((255 / data.max()) * data).astype('uint8')
 
 
 def channels_combine(stack, channels=(1, 2, 3)):
@@ -256,9 +255,9 @@ def prepare_background(nuclei, foci):
     :param foci:
     :return:
     """
-    background = cv2.cvtColor(contrast(nuclei), cv2.COLOR_GRAY2BGR)
+    background = cv2.cvtColor(to_8bit(nuclei), cv2.COLOR_GRAY2BGR)
     foci_bgr = np.zeros_like(background)
-    foci_bgr[:, :, 2] = contrast(foci)
+    foci_bgr[:, :, 2] = to_8bit(foci)
     return cv2.addWeighted(background, .5, foci_bgr, 1, 1)
 
 
@@ -286,3 +285,10 @@ def draw_annotation(background, res, foci_detected=None, nuclei_detected=None):
                      lineType=cv2.FILLED)
 
     return background
+
+
+if __name__ == '__main__':
+    data = tf.imread(
+        '/data1/centrioles/rpe/RPE1p53_Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_000_max_C0.tif')
+    contrasted = to_8bit(data)
+    cv2.imshow(contrasted)
