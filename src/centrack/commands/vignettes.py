@@ -7,7 +7,7 @@ Create vignettes for projections
 """
 import argparse
 from pathlib import Path
-from src.centrack.commands.status import DataSet
+from centrack.commands.status import DataSet
 from cv2 import cv2
 import tifffile as tf
 from skimage import exposure

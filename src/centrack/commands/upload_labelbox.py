@@ -12,8 +12,6 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-import tifffile as tf
-from cv2 import cv2
 from labelbox import Client
 
 from centrack.commands.status import DataSet
@@ -41,7 +39,6 @@ def args_parse():
 
 def cli():
     parsed_args = args_parse()
-    load_dotenv('/home/buergy/projects/centrack/.env')
     client = Client(api_key=os.environ['LABELBOX_API_KEY'])
 
     path_dataset = Path(parsed_args.path)
@@ -77,4 +74,5 @@ def cli():
 
 
 if __name__ == '__main__':
+    load_dotenv('/home/buergy/projects/centrack/.env')
     cli()

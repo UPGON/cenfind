@@ -6,7 +6,7 @@ from src.centrack.commands.status import fetch_files
 def main():
     p = .9
     suffix = '.ome.tif'
-    path_dataset = Path('/data1/centrioles/rpe')
+    path_dataset = Path('/data1/centrioles/rpe/RPE1p53_Cnone_CEP63+CETN2+PCNT_1')
     path_raw = path_dataset / 'raw'
     files = fetch_files(path_raw, suffix)
 
