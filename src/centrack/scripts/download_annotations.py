@@ -5,12 +5,21 @@ import numpy as np
 import tifffile as tf
 import labelbox
 from dotenv import load_dotenv
+import argparse
+
+load_dotenv('/home/buergy/projects/centrack/.env')
+
+
+def opts_parse():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('path', type=Path)
+
+    return parser.parse_args()
 
 
 def main():
-    load_dotenv('/home/buergy/projects/centrack/.env')
-
-    path_dataset = Path('/data1/centrioles/rpe/RPE1p53_Cnone_CEP63+CETN2+PCNT_1')
+    opts = opts_parse()
+    path_dataset = Path(opts.path)
 
     path_raw = path_dataset / 'raw'
     path_projections = path_dataset / 'projections'
@@ -20,7 +29,7 @@ def main():
         folder.mkdir(parents=True, exist_ok=True)
 
     lb = labelbox.Client(api_key=os.environ['LABELBOX_API_KEY'])
-    project = lb.get_project('cl3wrm1u32n29079r8olkbunu')
+    project = lb.get_project('cl405ug7g03zk075g26jpaj8a')
 
     # Foci lists
     path_annotations_centrioles = path_annotations / 'centrioles'
@@ -33,7 +42,6 @@ def main():
     labels = project.label_generator()
 
     for label in labels:
-
         # Foci file generation
         foci_in_label = [l for l in label.annotations if l.name == 'Centriole']
         annotation_file = label.data.external_id.replace('.png', '.txt')

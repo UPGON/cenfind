@@ -14,7 +14,7 @@ def test_bins():
         'fov': [f'fov{i}' for i in itertools.chain(*fov_id)],
         'channel': rng.choice([1, 2, 3], 25),
         'score': rng.choice(list(range(5)) + [6, 1000, 54], 25)
-        })
+    })
 
     table = score_summary(df)
     assert 0 == 0

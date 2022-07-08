@@ -14,9 +14,9 @@ from pathlib import Path
 
 from labelbox import Client
 
-from centrack.commands.status import DataSet
+from centrack.utils.status import DataSet
 
-from centrack.mal.labelbox_api import (
+from centrack.utils.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,
@@ -27,22 +27,21 @@ logger.setLevel(logging.DEBUG)
 
 
 def args_parse():
+    return parser.parse_args()
+
+
+def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('path',
                         type=Path)
     parser.add_argument('channel',
                         type=str,
                         help='Index of the channel')
-
-    return parser.parse_args()
-
-
-def cli():
-    parsed_args = args_parse()
+    args = parser.parse_args()
     client = Client(api_key=os.environ['LABELBOX_API_KEY'])
 
-    path_dataset = Path(parsed_args.path)
-    channel_index = parsed_args.channel
+    path_dataset = Path(args.path)
+    channel_index = args.channel
     project_name_lb = f"{path_dataset.name}_C{channel_index}"
     project = project_create(client, project_name_lb)
 

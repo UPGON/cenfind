@@ -3,12 +3,11 @@ Create vignettes for projections
 - png
 - 8bit
 - by channel, like projections
-- contrast adjusted CLAHE
 """
 import argparse
 from pathlib import Path
-from centrack.commands.status import DataSet
-from cv2 import cv2
+from centrack.utils.status import DataSet
+import cv2
 import tifffile as tf
 from skimage import exposure
 
@@ -20,23 +19,22 @@ def optimise_contrast(data):
     return res
 
 
-def args_parse():
+def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('path', type=Path)
-    parser.add_argument('channel', type=int)
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    dataset = DataSet(args.path)
+    dataset.vignettes.mkdir(exist_ok=True)
+
+    for path in dataset.projections.iterdir():
+        projection = tf.imread(path)
+        for ch in range(4):
+            channel = projection[ch, :, :]
+            contrasted = optimise_contrast(channel)
+            vignette_name = path.name.replace('_max.tif', f'_max_C{ch}.png')
+            cv2.imwrite(str(dataset.vignettes / vignette_name), cv2.bitwise_not(contrasted))
 
 
 if __name__ == '__main__':
-    opts = args_parse()
-    dataset = DataSet(Path(opts.path))
-    dataset.vignettes.mkdir(exist_ok=True)
-    data_rows = []
-
-    for projection in dataset.projections.iterdir():
-        if projection.stem.endswith(f'C{opts.channel}'):
-            channel = tf.imread(projection)
-            external_id = projection.stem
-            contrasted = optimise_contrast(channel)
-            cv2.imwrite(str(dataset.vignettes / f"{projection.stem}.png"), cv2.bitwise_not(contrasted))
+    cli()

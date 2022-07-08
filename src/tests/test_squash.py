@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import tifffile as tf
 
-from src.centrack.commands.squash import project, write_projection
+from centrack.commands.squash import project, write_projection
 
 
 def random_data(shape):
@@ -39,4 +39,5 @@ class TestSquash:
         assert (self.pixel_size == .1025) or (self.pixel_size is None)
 
     def test_write_projection(self):
-        write_projection(self.path_projections / f'{self.path_raw_file.stem}_max.tif', self.data_projected, self.pixel_size)
+        write_projection(self.path_projections / f'{self.path_raw_file.stem}_max.tif', self.data_projected,
+                         self.pixel_size)

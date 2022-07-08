@@ -6,7 +6,7 @@ import numpy as np
 import tifffile as tf
 from tqdm import tqdm
 
-from centrack.commands.status import build_name, fetch_files
+from centrack.utils.status import fetch_files
 
 logging.basicConfig(format='%(levelname)s: %(message)s')
 
@@ -103,7 +103,7 @@ def write_projection(dst: Path, data: np.ndarray, pixel_size=None) -> None:
     tf.imwrite(dst, data, photometric='minisblack', resolution=res)
 
 
-def parse_args():
+def cli():
     parser = argparse.ArgumentParser(allow_abbrev=True,
                                      description='Project OME.tiff files',
                                      formatter_class=argparse.RawTextHelpFormatter)
@@ -118,11 +118,7 @@ def parse_args():
                         type=str,
                         help='Type of projection: `max`, `sum`, `mean`')
 
-    return parser.parse_args()
-
-
-def cli():
-    args = parse_args()
+    args = parser.parse_args()
 
     path_raw = args.source / 'raw'
     if not path_raw.exists():
@@ -138,11 +134,8 @@ def cli():
 
     for path in tqdm(files):
         projection, pixel_size_cm = process(path, args.projection_type)
-        channels = projection.shape[0]
-        for i in range(channels):
-            single_channel = projection[i, :, :].squeeze()
-            dst_name = build_name(path, projection_type=args.projection_type, channel=i)
-            write_projection(path_projections / dst_name, single_channel, pixel_size_cm)
+        dst_name = path.name.replace(args.format, f"_{args.projection_type}.tif")
+        write_projection(path_projections / dst_name, projection, pixel_size_cm)
 
 
 if __name__ == '__main__':

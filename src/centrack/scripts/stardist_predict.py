@@ -8,7 +8,7 @@ from stardist import random_label_cmap
 from stardist.models import StarDist2D
 from csbdeep.utils import normalize
 
-from src.centrack.misc.train_stardist import load_set
+from centrack.scripts.train_stardist import load_set
 
 lbl_cmap = random_label_cmap()
 

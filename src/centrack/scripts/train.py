@@ -1,10 +1,10 @@
 from pathlib import Path
 import json
 import numpy as np
-import tifffile as tf
+import tifffile as tif
 
 from spotipy.spotipy.utils import points_to_prob
-from spotipy.spotipy.model import Config, SpotNet, SpotNetData
+from spotipy.spotipy.model import SpotNet, Config
 
 
 def load_pairs(path, split='train'):
@@ -21,7 +21,7 @@ def load_pairs(path, split='train'):
     positions = []
     for fov in fovs:
         image_path = str(path_projections / f"{fov}_max_C2.tif")
-        image = tf.imread(image_path)
+        image = tif.imread(image_path)
         images.append(image)
 
         foci_path = str(path_centrioles / f"{fov}_max_C2.txt")
@@ -37,7 +37,7 @@ def load_pairs(path, split='train'):
 
 if __name__ == '__main__':
     # Load the data...
-    path_dataset = Path('/data1/centrioles/rpe/RPE1p53_Cnone_CEP63+CETN2+PCNT_1')
+    path_dataset = Path('/Volumes/work/epfl/datasets/rpe/RPE1p53_Cnone_CEP63+CETN2+PCNT_1')
 
     fov_shape = (2048, 2048)
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     config = Config(**config_dict)
 
     # Create a model instance
-    model = SpotNet(config, name=None, basedir=None)
+    model = SpotNet(config, name=None, basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/test_model')
 
     # Train loop
-    model.train(train_x, train_y, validation_data=[train_x, train_y], steps_per_epoch=2)
+    model.train(train_x, train_y, validation_data=(test_x, test_y))

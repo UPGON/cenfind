@@ -5,14 +5,13 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 import tifffile as tf
-from cv2 import cv2
 from labelbox import Client
 
-from centrack.commands.status import DataSet
-from centrack.commands.outline import to_8bit
+from centrack.utils.status import DataSet
+from centrack.utils.outline import to_8bit
 from centrack.commands.score import extract_centrioles
 
-from centrack.mal.labelbox_api import (
+from centrack.utils.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,

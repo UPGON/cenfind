@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import tifffile as tf
 
 import numpy as np
-from cv2 import cv2
+import cv2
 
 
 @dataclass(eq=True, frozen=True)

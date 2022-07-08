@@ -22,14 +22,13 @@ pandas = "^1.4.1"
 tensorflow = "^2.8.0"
 scipy = "1.7.1"
 csbdeep = "^0.6.3"
-stardist = "^0.8.0"
-#spotipy = {git = "ssh://git@github.com/maweigert/spotipy.git", rev = "main"}
+stardist = "^0.8.3"
+#_spotipy = {git = "ssh://git@github.com/maweigert/_spotipy.git", rev = "main"}
 
 [tool.poetry.scripts]
-runner = "centrack.__main__:cli"
 squash = "centrack.commands.squash:cli"
 score = "centrack.commands.score:cli"
-upload = "centrack.mal.labelbox_upload_mal:cli"
+evaluate = "centrack.commands.evaluate:cli"
 
 [tool.poetry.dev-dependencies]
 

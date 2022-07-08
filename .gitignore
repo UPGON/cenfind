@@ -9,7 +9,8 @@ out/
 docs/
 configs/
 *.pt
-src/spotipy/
+spotipy/
+_spotipy/
 dist/
 logs/
 data/
@@ -21,3 +22,4 @@ poetry.lock
 *.pdf
 *.indd
 *.docx
+/src/_spotipy/spotipy/callbacks.py
