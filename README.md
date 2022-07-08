@@ -10,28 +10,28 @@ If you want to install centrack, head to Set up the environment for centrack
 
 ## Introduction
 
-Centrack is a command line interface that allow the batch processing of ome tiff files.
-Currently, it orchestrates :
+Centrack is a command line interface that allows the batch processing of ome tiff files in order to automate the
+centriole detection and the associated workflows.
+Specifically, it orchestrates :
 
 - the z-max projection of the raw files,
 - the detection of centrioles
 - the detection of the nuclei
 - the assignment of the centrioles to the nearest nucleus.
+- the brightness of the detected centrioles
 
-Eventually, centrack will be living on PyPI and can be installed using pip
-install centrack.
-However, currently, this method cannot be used as centrack is not publicly
-available.
-Therefore, it needs to be installed from the private GitHub repository
-(UPGON/centrack).
+### Repository / Source code
 
-However, because the dependency spotipy cannot be downloaded via pip
-normally, one needs to download the whole repository and then git clone the
-spotipy repository under src/ next to centrack.
+Eventually, centrack will be living on PyPI and can be installed using `pip install centrack`.
+However, currently, this method cannot be used as centrack is not publicly available.
+Therefore, it needs to be installed from the private GitHub repository (UPGON/centrack).
+
+However, because the dependency spotipy cannot be downloaded via pip normally, one needs to download the whole
+repository and then git clone the spotipy repository under src/ next to centrack.
 
 This situation is temporary and in the near future spotipy will become a
-simple dependency of centrack. Next, when both centrack and spotipy will be
-publicly available, centrack will be downloadable directly from PyPI.
+simple dependency of centrack.
+Next, when both centrack and spotipy will be publicly available, centrack will be downloadable directly from PyPI.
 
 ## Installation
 
@@ -159,3 +159,9 @@ Especially, the OME.tif files should be located under raw/
 ├── raw/
 └── scores/
 ```
+
+## Training the model
+
+- Declare the train/test split which will be used to define which images are never used as training instances (
+  scripts/train_test.py).
+- 
