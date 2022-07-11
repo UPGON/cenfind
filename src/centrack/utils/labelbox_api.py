@@ -1,20 +1,20 @@
 import logging
 import uuid
 
-from cv2 import cv2
+import cv2
 from labelbox import (
     OntologyBuilder,
     LabelingFrontend,
     Dataset,
     Project,
-    )
+)
 from labelbox.data.annotation_types import (
     ObjectAnnotation,
     Point,
     LabelList,
     Label,
     ImageData,
-    )
+)
 from labelbox.data.serialization import NDJsonConverter
 
 logger = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ def label_create(image, predictions, external_id):
     :return:
     """
     label = Label(data=ImageData.from_2D_arr(image),
-                 annotations=to_labelbox_format(predictions))
+                  annotations=to_labelbox_format(predictions))
     label.data.external_id = external_id
     return label
 
@@ -136,5 +136,5 @@ def task_prepare(client, project, dataset, labels_list):
         name=f'upload-job-{uuid.uuid4()}',
         annotations=ndjsons,
         validate=True
-        )
+    )
     return task

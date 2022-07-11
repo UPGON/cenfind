@@ -1,13 +1,18 @@
+import argparse
 import logging
+from pathlib import Path
 
+import pandas as pd
 import numpy as np
 from numpy.random import default_rng
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 
-from .status import Condition, fetch_files, Field
-from .outline import Centre
-from .score import extract_centrioles
+import tifffile as tf
+
+from centrack.utils.status import DataSet
+from centrack.utils.outline import Centre
+from centrack.commands.score import extract_centrioles, get_model
 
 logging.basicConfig(level=logging.INFO)
 
@@ -22,25 +27,23 @@ def generate_synthetic_data(height=512, size=200, has_daughter=.8):
     :param has_daughter:
     :return:
     """
-    foci = rng.integers(0, height, size=(size, 2))
+    _foci = rng.integers(0, height, size=(size, 2))
     daughter_n = int(has_daughter * size)
     offset = rng.integers(-4, 4, size=(daughter_n, 2))
 
-    daughters = rng.choice(foci, daughter_n, replace=False) + offset
-    foci = np.concatenate([foci, daughters], axis=0)
+    daughters = rng.choice(_foci, daughter_n, replace=False) + offset
+    _foci = np.concatenate([_foci, daughters], axis=0)
 
-    return [Centre(f) for f in foci]
+    return [Centre(f) for f in _foci]
 
 
-def generate_predictions(height: int, foci, fn_rate=.1, fp_rate=.2,
-                         random=False):
+def generate_predictions(height: int, foci, fn_rate=.1, fp_rate=.2):
     """
     Generate predictions from annotation
     :param height:
     :param foci:
     :param fn_rate:
     :param fp_rate:
-    :param random:
     :return: List[Centre]
     """
     size = len(foci)
@@ -91,7 +94,7 @@ def compute_metrics(positions, predictions, offset_max=2):
         'fp': len(fps),
         'fn': len(fns),
         'tp': len(tps)
-        }
+    }
 
 
 def compute_precision(tp: int, fp: int):
@@ -116,33 +119,49 @@ def precision_recall(metrics):
             'recall': compute_recall(tp, fn)}
 
 
-def process_one_image(data, annotation, predictions=None):
+def process_one_image(data, model, annotation, offset_max=2, predictions=None):
     if predictions is None:
-        predictions = extract_centrioles(data)
+        predictions = extract_centrioles(data, model=model)
     predictions_np = np.asarray([c.to_numpy() for c in predictions])
-    annotation_np = np.asarray([a.to_numpy() for a in annotation])
+    annotation_np = np.asarray([a for a in annotation])
     confusion_matrix = compute_metrics(annotation_np, predictions_np,
-                                       offset_max=2)
+                                       offset_max=offset_max)
 
     return precision_recall(confusion_matrix)
 
 
-def cli():
-    images = fetch_files(
-        '/Volumes/work/epfl/datasets/20210727_HA-FL-SAS6_Clones/projections',
-        file_type='.tif')
-    condition = Condition(markers='DAPI+rPOC5AF488+mHA568+gCPAP647'.split('+'))
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('path_dataset', type=Path, help='Path to the dataset folder')
+    args = parser.parse_args()
 
-    for image in images[:2]:
-        image = Field(image, condition).load()
-        data = image[1, :, :].to_numpy()
-        positions = np.asarray([Centre((500, 500)).to_numpy()])
-        results = process_one_image(data, positions)
-        logging.info('Image: %s: Precision : %.3f; Recall : %.3f',
-                     image.name,
-                     results['precision'],
-                     results['recall'])
+    dataset = DataSet(args.path_dataset)
+    path_centrioles = args.path_dataset / 'annotations/centrioles'
 
+    centriole_detector = get_model(
+        '/home/buergy/projects/centrack/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
 
-if __name__ == "__main__":
-    cli()
+    performances = []
+
+    for fov in dataset.projections.iterdir():
+        data = tf.imread(fov)
+        for ch in range(1, data.shape[0]):
+            channel = data[ch, :, :]
+            annotation_file = fov.name.replace('.tif', f'_C{ch}.txt')
+            foci_path = str(path_centrioles / annotation_file)
+            try:
+                foci = np.loadtxt(foci_path, dtype=int, delimiter=',')
+            except FileNotFoundError:
+                logging.info('Annotation file not found (%s)', str(foci_path))
+                continue
+            results = process_one_image(channel, centriole_detector, foci, offset_max=2)
+            results['fov'] = fov.name
+            results['channel'] = ch
+            performances.append(results)
+            logging.info('Image: %s; Channel: %s; Precision : %.3f; Recall : %.3f',
+                         fov.name,
+                         ch,
+                         results['precision'],
+                         results['recall'])
+    results = pd.DataFrame(performances)
+    results.to_csv(args.path_dataset / 'precision_recall.csv')
