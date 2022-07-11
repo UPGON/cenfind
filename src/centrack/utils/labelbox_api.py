@@ -32,10 +32,10 @@ def project_create(client, project_name):
 
     try:
         project = next(projects_test)
-        logger.debug('Project test found (%s)', project.uid)
+        logger.debug('Project found (%s)', project.uid)
         project.delete()
     except StopIteration:
-        logger.debug('No such project; creating...')
+        logger.debug('No such project; creating one...')
     finally:
         project = client.create_project(name=project_name, description='')
     return project
@@ -67,10 +67,10 @@ def dataset_create(client, dataset_name):
     datasets_test = client.get_datasets(where=Dataset.name == dataset_name)
     try:
         dataset = next(datasets_test)
-        logger.debug('Found a test dataset (%s)', dataset.name)
+        logger.debug('Found a dataset (%s)', dataset.name)
         dataset.delete()
     except StopIteration:
-        logger.debug('No such test dataset; creating one...')
+        logger.debug('No such dataset; creating one...')
     finally:
         dataset = client.create_dataset(name=dataset_name, iam_integration=None)
     return dataset
