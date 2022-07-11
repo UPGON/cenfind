@@ -26,29 +26,20 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def args_parse():
-    return parser.parse_args()
-
-
 def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('path',
                         type=Path)
-    parser.add_argument('channel',
-                        type=str,
-                        help='Index of the channel')
     args = parser.parse_args()
     client = Client(api_key=os.environ['LABELBOX_API_KEY'])
 
     path_dataset = Path(args.path)
-    channel_index = args.channel
-    project_name_lb = f"{path_dataset.name}_C{channel_index}"
-    project = project_create(client, project_name_lb)
+    dataset_name_lb = path_dataset.name
+    project = project_create(client, 'centrioles')
 
     logger.debug('Get the ontology.')
     ontology_setup(client, project, ontology_id='cl3k8y38t11xc07807tar8hg6')
 
-    dataset_name_lb = project_name_lb
     dataset_lb = dataset_create(client, dataset_name_lb)
 
     project.datasets.connect(dataset_lb)
@@ -56,7 +47,7 @@ def cli():
 
     dataset = DataSet(path_dataset)
     fields = tuple(
-        f for f in dataset.vignettes.glob(f'*C{channel_index}.png') if
+        f for f in dataset.vignettes.glob(f'*.png') if
         not f.name.startswith('.'))
 
     data_rows = []
@@ -73,5 +64,5 @@ def cli():
 
 
 if __name__ == '__main__':
-    load_dotenv('/home/buergy/projects/centrack/.env')
+    load_dotenv('/Users/buergy/Dropbox/epfl/projects/centrack/.env')
     cli()
