@@ -15,16 +15,16 @@ def load_pairs(path, split='train'):
     """
     path_projections = path / 'projections'
     path_centrioles = path / 'annotations/centrioles'
-    with open(path / f'{split}.txt', 'r') as fh:
-        fovs = [i.strip() for i in fh.readlines()]
+    with open(path / f'{split}_channels.txt', 'r') as fh:
+        fovs = [i.strip().split(',') for i in fh.readlines()]
     images = []
     positions = []
-    for fov in fovs:
-        image_path = str(path_projections / f"{fov}_max_C2.tif")
+    for fov, chid in fovs:
+        image_path = str(path_projections / f"{fov}_max.tif")
         image = tif.imread(image_path)
-        images.append(image)
+        images.append(image[chid, :, :])
 
-        foci_path = str(path_centrioles / f"{fov}_max_C2.txt")
+        foci_path = str(path_centrioles / f"{fov}_max_C{chid}.txt")
         foci = np.loadtxt(foci_path, dtype=int, delimiter=',')
         foci_mask = points_to_prob(foci, shape=fov_shape, sigma=1)
         positions.append(foci_mask)
@@ -37,7 +37,7 @@ def load_pairs(path, split='train'):
 
 if __name__ == '__main__':
     # Load the data...
-    path_dataset = Path('/Volumes/work/epfl/datasets/rpe/RPE1p53_Cnone_CEP63+CETN2+PCNT_1')
+    path_dataset = Path('/Users/buergy/Dropbox/epfl/datasets/RPE1wt_CEP63+CETN2+PCNT_1')
 
     fov_shape = (2048, 2048)
 
