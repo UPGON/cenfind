@@ -51,7 +51,7 @@ def cli():
             channel = projection[ch, :, :]
             channel = optimise_contrast(channel)
             channel_bgr = color_channel(channel, color=(0, 1, 0))
-            blended = cv2.addWeighted(channel_bgr, 0.8, nuclei_bgr, 0.2, 50)
+            blended = cv2.addWeighted(channel_bgr, 0.8, nuclei_bgr, 0.2, 100)
             vignette_name = path.name.replace('_max.tif', f'_max_C{ch}.png')
             cv2.imwrite(str(dataset.vignettes / vignette_name), blended)
 

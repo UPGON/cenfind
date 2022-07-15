@@ -6,21 +6,18 @@ Construct the dataset on labelbox
 Append it if necessary to the project on labelbox
 Upload
 """
-import argparse
 import logging
 import os
 from dotenv import load_dotenv
-from pathlib import Path
-
 from labelbox import Client
 
 from centrack.utils.status import DataSet
-
 from centrack.utils.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,
 )
+from centrack.utils.constants import PREFIX, datasets
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
