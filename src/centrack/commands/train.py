@@ -2,8 +2,9 @@ from pathlib import Path
 import json
 import numpy as np
 import tifffile as tif
+from albumentations import Compose, RandomBrightnessContrast, HorizontalFlip, VerticalFlip, Rotate
 
-from spotipy.spotipy.utils import points_to_prob
+from spotipy.spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.spotipy.model import SpotNet, Config
 
 
@@ -20,9 +21,12 @@ def load_pairs(path, split='train'):
     images = []
     positions = []
     for fov, chid in fovs:
+        chid = int(chid)
         image_path = str(path_projections / f"{fov}_max.tif")
         image = tif.imread(image_path)
-        images.append(image[chid, :, :])
+        image = image[chid, :, :]
+        imaged_norm = normalize_fast2d(image)
+        images.append(imaged_norm)
 
         foci_path = str(path_centrioles / f"{fov}_max_C{chid}.txt")
         foci = np.loadtxt(foci_path, dtype=int, delimiter=',')
@@ -34,6 +38,12 @@ def load_pairs(path, split='train'):
 
     return images, positions
 
+
+transforms = Compose([Rotate(p=.5),
+                      RandomBrightnessContrast(p=.5),
+                      HorizontalFlip(p=.5),
+                      VerticalFlip(p=.5)
+                      ])
 
 if __name__ == '__main__':
     # Load the data...
@@ -54,4 +64,4 @@ if __name__ == '__main__':
     model = SpotNet(config, name=None, basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/test_model')
 
     # Train loop
-    model.train(train_x, train_y, validation_data=(test_x, test_y))
+    model.train(train_x, train_y, validation_data=(train_x, train_y), augmenter=transforms)

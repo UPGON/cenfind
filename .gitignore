@@ -23,3 +23,4 @@ poetry.lock
 *.indd
 *.docx
 /src/_spotipy/spotipy/callbacks.py
+/src/spotipy2/

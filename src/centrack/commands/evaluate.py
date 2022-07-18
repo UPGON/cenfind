@@ -139,7 +139,9 @@ if __name__ == '__main__':
     path_centrioles = args.path_dataset / 'annotations/centrioles'
 
     centriole_detector = get_model(
-        '/home/buergy/projects/centrack/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
+        # '/Users/buergy/Dropbox/epfl/projects/centrack/models/test_model/2022-07-14-15-54-59.555651'
+        '/Users/buergy/Dropbox/epfl/projects/centrack/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300'
+    )
 
     performances = []
 
