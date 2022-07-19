@@ -2,8 +2,10 @@ from pathlib import Path
 import json
 import numpy as np
 import tifffile as tif
+import tensorflow as tf
 from albumentations import Compose, RandomBrightnessContrast, HorizontalFlip, VerticalFlip, Rotate
 
+from centrack.utils.visualisation import show_images
 from spotipy.spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.spotipy.model import SpotNet, Config
 
@@ -30,20 +32,22 @@ def load_pairs(path, split='train'):
 
         foci_path = str(path_centrioles / f"{fov}_max_C{chid}.txt")
         foci = np.loadtxt(foci_path, dtype=int, delimiter=',')
+
         foci_mask = points_to_prob(foci, shape=fov_shape, sigma=1)
         positions.append(foci_mask)
 
     images = np.stack(images)
     positions = np.stack(positions)
+    print(images.shape)
 
     return images, positions
 
 
-transforms = Compose([Rotate(p=.5),
-                      RandomBrightnessContrast(p=.5),
-                      HorizontalFlip(p=.5),
-                      VerticalFlip(p=.5)
-                      ])
+transform = Compose([Rotate(p=.5),
+                     RandomBrightnessContrast(p=.5),
+                     HorizontalFlip(p=.5),
+                     VerticalFlip(p=.5)
+                     ])
 
 if __name__ == '__main__':
     # Load the data...
@@ -64,4 +68,4 @@ if __name__ == '__main__':
     model = SpotNet(config, name=None, basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/test_model')
 
     # Train loop
-    model.train(train_x, train_y, validation_data=(train_x, train_y), augmenter=transforms)
+    model.train(train_x, train_y, validation_data=(test_x, test_y))

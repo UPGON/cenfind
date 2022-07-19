@@ -1,7 +1,6 @@
 import numpy as np
 from spotipy.spotipy.model import Config, SpotNetData, SpotNet
 from spotipy.spotipy.utils import points_to_prob
-from centrack.commands.train import transforms
 
 
 def generate_data(points, fov_shape):
