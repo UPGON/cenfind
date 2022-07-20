@@ -1,6 +1,8 @@
 import logging
+import random
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Tuple, List
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -90,6 +92,19 @@ class DataSet:
         :return:
         """
         raise NotImplementedError
+
+    def create_splits(self, p=.9, suffix='.ome.tif') -> Tuple[List, List]:
+        files = fetch_files(self.raw, suffix)
+
+        file_stems = [f.name.removesuffix(suffix) for f in files]
+
+        size = len(file_stems)
+        split_idx = int(p * size)
+
+        random.seed(1993)
+        shuffled = random.sample(file_stems, k=size)
+
+        return shuffled[:split_idx], shuffled[split_idx:]
 
 
 def build_name(path: Path, projection_type='max') -> str:
