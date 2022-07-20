@@ -3,11 +3,10 @@ from stardist.models import Config2D, StarDist2D, StarDistData2D
 from stardist import gputools_available
 from csbdeep.utils import normalize
 import tifffile as tf
-from glob import glob
 from tqdm import tqdm
 from pathlib import Path
 
-from typing import Tuple, List
+from typing import List
 
 
 def load_set(path: Path) -> List:

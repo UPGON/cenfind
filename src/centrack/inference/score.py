@@ -14,7 +14,7 @@ from stardist.models import StarDist2D
 import tifffile as tf
 
 from centrack.layout.status import DataSet
-from centrack.utils.outline import (
+from centrack.visualisation.outline import (
     Centre,
     Contour,
     prepare_background,

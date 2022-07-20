@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import tifffile
 
-from centrack.prediction.score import get_model
+from centrack.inference.score import get_model
 from centrack.layout.constants import datasets, PREFIX
-from centrack.utils.visualisation import show_images
+from centrack.visualisation.visualisation import show_images
 from spotipy.spotipy.utils import normalize_fast2d, points_to_prob, points_matching, warp
 
 if __name__ == '__main__':

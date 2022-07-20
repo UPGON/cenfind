@@ -8,8 +8,8 @@ import tifffile as tf
 from labelbox import Client
 
 from centrack.layout.status import DataSet
-from centrack.utils.outline import to_8bit
-from centrack.prediction.score import extract_centrioles
+from centrack.visualisation.outline import to_8bit
+from centrack.inference.score import extract_centrioles
 
 from centrack.scripts.labelbox_api import (
     project_create,
