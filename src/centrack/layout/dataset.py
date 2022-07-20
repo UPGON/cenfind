@@ -93,7 +93,13 @@ class DataSet:
         """
         raise NotImplementedError
 
-    def create_splits(self, p=.9, suffix='.ome.tif') -> Tuple[List, List]:
+    def splits(self, p=.9, suffix='.ome.tif') -> Tuple[List, List]:
+        """
+        Assign the FOV between train and test.
+        :param p:
+        :param suffix:
+        :return:
+        """
         files = fetch_files(self.raw, suffix)
 
         file_stems = [f.name.removesuffix(suffix) for f in files]
