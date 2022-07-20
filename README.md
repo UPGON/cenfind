@@ -102,13 +102,13 @@ describe each program, their input, the algorithm and the expected output.
    called `projections` is created and contains the 4-d tiff files.
 
 ```shell
-squash path/to/dataset
+squash path/to/ds
 ```
 
 3. Run `score` with the arguments source and the index of the nuclei channel (usually 0 or 3).
 
 ```shell
-score path/to/dataset 0
+score path/to/ds 0
 ```
 
 4. Check that the predictions are satisfactory by looking at the folder `outlines` and at the results/scores.csv.

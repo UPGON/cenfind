@@ -15,7 +15,7 @@ dist/
 logs/
 data/
 poetry.lock
-/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300/weights_now.h5
+/models/master/weights_now.h5
 *.idlk
 *.h5
 *.json

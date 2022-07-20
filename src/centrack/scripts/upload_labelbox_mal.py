@@ -55,7 +55,7 @@ def cli():
     dataset_lb = dataset_create(client, dataset_name_lb)
 
     project.datasets.connect(dataset_lb)
-    logger.debug('Attach the dataset to the project.')
+    logger.debug('Attach the ds to the project.')
 
     dataset = DataSet(path_dataset)
     fields = tuple(

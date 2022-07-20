@@ -22,7 +22,7 @@ if __name__ == '__main__':
     P_test = np.random.randint(10, fov_shape - 10, (3, 30, 2))
     X_test, Y_test = generate_data(P_test, fov_shape)
 
-    model = SpotNet(config, name=None, basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/test_model')
+    model = SpotNet(config, name=None, basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/dev')
 
     model.train(X_train, Y_train, validation_data=[X_test, Y_test],
                 steps_per_epoch=100)

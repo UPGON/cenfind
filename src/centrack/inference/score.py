@@ -170,9 +170,9 @@ def cli():
     parser = argparse.ArgumentParser(
         description='CENTRACK: Automatic centriole scoring')
 
-    parser.add_argument('dataset',
+    parser.add_argument('ds',
                         type=Path,
-                        help='path to the dataset')
+                        help='path to the ds')
 
     parser.add_argument('channel_nuclei',
                         type=int,
@@ -193,7 +193,7 @@ def cli():
     path_statistics.mkdir(exist_ok=True)
 
     centriole_detector = get_model(
-        '/home/buergy/projects/centrack/models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
+        '/home/buergy/projects/centrack/models/master')
 
     nuclei_channel = args.channel_nuclei
     if not dataset.projections.exists():

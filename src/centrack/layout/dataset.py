@@ -4,6 +4,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Tuple, List
 
+import numpy as np
+import tifffile as tf
+
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.DEBUG)
@@ -34,15 +37,19 @@ class DataSet:
 
     @property
     def predictions(self):
-        return self.path / 'predictions.csv'
+        return self.path / 'predictions'
 
     @property
     def annotations(self):
-        return self.path / 'annotation.csv'
+        return self.path / 'annotations'
 
     @property
     def outlines(self):
         return self.path / 'outlines'
+
+    @property
+    def visualisation(self):
+        return self.path / 'visualisation'
 
     def _check_container(self, container_name: str, file_type: str):
         """
@@ -80,7 +87,7 @@ class DataSet:
         else if we want to compare the predictions with annotations,
         Compute the predictions.
         Upload the predictions to labelbox.
-        Provide the url of the annotated dataset on Labelbox
+        Provide the url of the annotated ds on Labelbox
         """
         for image in self.projections.iterdir():
             print(image)
@@ -88,7 +95,7 @@ class DataSet:
     def check_annotations(self):
         """
         If there is no annotation present, we should fetch them from labelbox.
-        If the dataset is not on labelbox, we should upload it with the predictions
+        If the ds is not on labelbox, we should upload it with the predictions
         :return:
         """
         raise NotImplementedError
@@ -110,6 +117,12 @@ class DataSet:
         split_test = shuffled[split_idx:]
         split_train = shuffled[:split_idx]
         return split_train, split_test
+
+    def split_images_channel(self, split_type):
+        with open(self.path / f'{split_type}_channels.txt', 'r') as f:
+            files = f.read().splitlines()
+        files = [f.split(',') for f in files if f]
+        return files
 
 
 def build_name(path: Path, projection_type='max') -> str:
@@ -139,3 +152,37 @@ def fetch_files(path_source: Path, file_type):
     files_generator = path_source.rglob(pattern)
 
     return [file for file in files_generator if not file.name.startswith('.')]
+
+
+@dataclass
+class FieldOfView:
+    """
+    Representation of a projection (CxHxW)
+    """
+    path: Path
+
+    @property
+    def dataset(self) -> DataSet:
+        return DataSet(self.path.parent.parent)
+
+    @property
+    def name(self):
+        return self.path.stem
+
+    @property
+    def data(self) -> np.array:
+        return tf.imread(str(self.path))
+
+    def __getitem__(self, item: int):
+        return self.data[int(item), :, :]
+
+    def fetch_annotation(self, chid):
+        path_annotation = self.dataset.annotations / 'centrioles' / f"{self.name}_C{chid}.txt"
+
+        try:
+            annotation = np.loadtxt(path_annotation, dtype=int, delimiter=',')
+        except FileNotFoundError:
+            print(f'annotation not found for {path_annotation}')
+            annotation = np.asarray([0, 0])
+
+        return annotation

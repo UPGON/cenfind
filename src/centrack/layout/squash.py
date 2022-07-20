@@ -109,7 +109,7 @@ def cli():
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('source',
                         type=Path,
-                        help='Path to the dataset folder; the parent of `raw`.',
+                        help='Path to the ds folder; the parent of `raw`.',
                         )
     parser.add_argument('format',
                         type=str,

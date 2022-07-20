@@ -59,7 +59,7 @@ def ontology_setup(client, project, ontology_id):
 
 def dataset_create(client, dataset_name):
     """
-    Create a dataset object and delete any dataset with same name.
+    Create a ds object and delete any ds with same name.
     :param client:
     :param dataset_name:
     :return:
@@ -67,10 +67,10 @@ def dataset_create(client, dataset_name):
     datasets_test = client.get_datasets(where=Dataset.name == dataset_name)
     try:
         dataset = next(datasets_test)
-        logger.debug('Found a dataset (%s)', dataset.name)
+        logger.debug('Found a ds (%s)', dataset.name)
         dataset.delete()
     except StopIteration:
-        logger.debug('No such dataset; creating one...')
+        logger.debug('No such ds; creating one...')
     finally:
         dataset = client.create_dataset(name=dataset_name, iam_integration=None)
     return dataset

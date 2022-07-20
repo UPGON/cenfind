@@ -1,8 +1,8 @@
 #! /home/buergy/.cache/pypoetry/virtualenvs/centrack-7dpZ9I7w-py3.9/bin/python
 """
-Take the path to the projection dataset
+Take the path to the projection ds
 Select the channel
-Construct the dataset on labelbox
+Construct the ds on labelbox
 Append it if necessary to the project on labelbox
 Upload
 """
@@ -36,7 +36,7 @@ def cli():
         dataset_lb = dataset_create(client, dataset_name_lb)
 
         project.datasets.connect(dataset_lb)
-        logger.debug('Attach the dataset to the project.')
+        logger.debug('Attach the ds to the project.')
 
         dataset = DataSet(path_dataset)
         fields = tuple(
@@ -49,7 +49,7 @@ def cli():
             data_rows.append({'row_data': field,
                               'external_id': external_id})
 
-        # Bulk add data rows to the dataset
+        # Bulk add data rows to the ds
         task = dataset_lb.create_data_rows(data_rows)
 
         task.wait_till_done()

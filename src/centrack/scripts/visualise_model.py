@@ -3,7 +3,7 @@ from centrack.inference.score import get_model
 
 
 def main():
-    model = get_model('../../../models/leo3_multiscale_True_mae_aug_1_sigma_1.5_split_2_batch_2_n_300')
+    model = get_model('../../../models/master')
 
     plot_model(model.keras_model,
                show_shapes=False,

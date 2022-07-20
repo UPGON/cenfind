@@ -10,7 +10,7 @@ from spotipy.spotipy.model import SpotNet, Config
 def load_pairs(path, split='train'):
     """
     Load two arrays, the images and the foci masks
-    path: the path to the dataset
+    path: the path to the ds
     split: either train or test
     """
     path_projections = path / 'projections'
@@ -43,10 +43,10 @@ if __name__ == '__main__':
     train_x, train_y = load_pairs(path_dataset, split='train')
     test_x, test_y = load_pairs(path_dataset, split='test')
 
-    with open('../../../models/config.json',
+    with open('models/dev/config.json',
               'r') as config:
         config_dict = json.load(config)
     config = Config(**config_dict)
 
-    model = SpotNet(config, name=None, basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/test_model')
+    model = SpotNet(config, name=None, basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/dev')
     model.train(train_x, train_y, validation_data=(test_x, test_y))
