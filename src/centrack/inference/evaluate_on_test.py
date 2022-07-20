@@ -1,11 +1,9 @@
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import tifffile
 
-from centrack.commands.score import get_model
-from centrack.utils.constants import datasets, PREFIX
+from centrack.prediction.score import get_model
+from centrack.layout.constants import datasets, PREFIX
 from centrack.utils.visualisation import show_images
 from spotipy.spotipy.utils import normalize_fast2d, points_to_prob, points_matching, warp
 

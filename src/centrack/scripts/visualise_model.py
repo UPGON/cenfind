@@ -1,5 +1,5 @@
 from keras.utils.vis_utils import plot_model
-from centrack.commands.score import get_model
+from centrack.inference.score import get_model
 
 
 def main():

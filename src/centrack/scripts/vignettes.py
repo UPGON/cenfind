@@ -6,7 +6,7 @@ Create vignettes for projections
 """
 import argparse
 from pathlib import Path
-from centrack.utils.status import DataSet
+from centrack.layout.status import DataSet
 import cv2
 import numpy as np
 import tifffile as tf

@@ -13,7 +13,7 @@ import cv2
 from stardist.models import StarDist2D
 import tifffile as tf
 
-from centrack.utils.status import DataSet
+from centrack.layout.status import DataSet
 from centrack.utils.outline import (
     Centre,
     Contour,

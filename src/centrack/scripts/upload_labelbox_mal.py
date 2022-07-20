@@ -7,11 +7,11 @@ from pathlib import Path
 import tifffile as tf
 from labelbox import Client
 
-from centrack.utils.status import DataSet
+from centrack.layout.status import DataSet
 from centrack.utils.outline import to_8bit
-from centrack.commands.score import extract_centrioles
+from centrack.prediction.score import extract_centrioles
 
-from centrack.utils.labelbox_api import (
+from centrack.scripts.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,

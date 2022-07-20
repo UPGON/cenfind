@@ -1,5 +1,5 @@
 import random
-from centrack.utils.constants import datasets, PREFIX
+from centrack.layout.constants import datasets, PREFIX
 
 
 def generate_channels(in_file, out_file):

@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import tifffile as tf
 
-from centrack.commands.squash import project, write_projection
+from centrack.layout.squash import project, write_projection
 
 
 def random_data(shape):

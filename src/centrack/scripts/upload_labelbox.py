@@ -11,13 +11,13 @@ import os
 from dotenv import load_dotenv
 from labelbox import Client
 
-from centrack.utils.status import DataSet
-from centrack.utils.labelbox_api import (
+from centrack.layout.status import DataSet
+from centrack.scripts.labelbox_api import (
     project_create,
     dataset_create,
     ontology_setup,
 )
-from centrack.utils.constants import PREFIX, datasets
+from centrack.layout.constants import PREFIX, datasets
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

@@ -1,5 +1,5 @@
 import itertools
-from centrack.commands.score import score_summary
+from centrack.prediction.score import score_summary
 import pandas as pd
 from numpy.random import default_rng
 
