@@ -11,7 +11,7 @@ import os
 from dotenv import load_dotenv
 from labelbox import Client
 
-from centrack.layout.status import DataSet
+from centrack.layout.dataset import DataSet
 from centrack.scripts.labelbox_api import (
     project_create,
     dataset_create,

@@ -7,7 +7,7 @@ from pathlib import Path
 import tifffile as tf
 from labelbox import Client
 
-from centrack.layout.status import DataSet
+from centrack.layout.dataset import DataSet
 from centrack.visualisation.outline import to_8bit
 from centrack.inference.score import extract_centrioles
 

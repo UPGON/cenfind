@@ -1,6 +1,6 @@
 import random
 from pathlib import Path
-from centrack.layout.status import fetch_files
+from centrack.layout.dataset import fetch_files
 from centrack.layout.constants import PREFIX, datasets
 
 

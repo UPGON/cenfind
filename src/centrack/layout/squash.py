@@ -6,7 +6,7 @@ import numpy as np
 import tifffile as tf
 from tqdm import tqdm
 
-from centrack.layout.status import fetch_files
+from centrack.layout.dataset import fetch_files
 
 logging.basicConfig(format='%(levelname)s: %(message)s')
 

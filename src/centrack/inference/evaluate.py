@@ -8,7 +8,7 @@ from numpy.random import default_rng
 
 import tifffile as tf
 
-from centrack.layout.status import DataSet
+from centrack.layout.dataset import DataSet
 from centrack.inference.score import extract_centrioles, get_model
 from spotipy.spotipy.utils import points_matching
 
