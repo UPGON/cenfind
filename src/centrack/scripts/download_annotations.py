@@ -34,6 +34,8 @@ def main():
         with open(path_annotations_centrioles / annotation_file, 'w') as f:
             nucleus_id = 1
             for lab in foci_in_label:
+                # the coordinates in labelbox are (x, y) and start on the top left corner;
+                # thus, they correspond to (col, row).
                 x = int(lab.value.x)
                 y = int(lab.value.y)
                 f.write(f"{x},{y}\n")
