@@ -5,11 +5,11 @@ from centrack.scripts.synthetic_spotnet import generate_data
 
 def show_images(image, mask):
     fig, ax = plt.subplots(ncols=3, figsize=(10, 3))
-    ax[0].imshow(image)
+    ax[0].imshow(image, vmin=0, vmax=1)
     ax[0].set_title('Image')
-    ax[1].imshow(mask)
+    ax[1].imshow(mask, vmin=0, vmax=.1)
     ax[1].set_title('Mask')
-    ax[2].imshow(mask * image)
+    ax[2].imshow(mask * image, vmin=0, vmax=1)
     ax[2].set_title('Cross')
     return fig
 

@@ -7,7 +7,7 @@ import tifffile
 from centrack.commands.score import get_model
 from centrack.utils.constants import datasets, PREFIX
 from centrack.utils.visualisation import show_images
-from spotipy.spotipy.utils import normalize_fast2d, points_to_label, points_to_prob, points_matching
+from spotipy.spotipy.utils import normalize_fast2d, points_to_prob, points_matching, warp
 
 if __name__ == '__main__':
     model = get_model(
@@ -44,7 +44,8 @@ if __name__ == '__main__':
                                  'precision': res.precision,
                                  'recall': res.recall})
             # Visualisation
-            fig = show_images(inp, mask_actual)
+            result_image = warp(inp, points_preds)
+            fig = show_images(inp, mask_preds)
             fig.savefig(path_visualisation / f"{fov_name}_max_C{chid}.png")
 
     performances_df = pd.DataFrame(performances).round(3)
