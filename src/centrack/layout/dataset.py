@@ -96,21 +96,20 @@ class DataSet:
     def splits(self, p=.9, suffix='.ome.tif') -> Tuple[List, List]:
         """
         Assign the FOV between train and test.
-        :param p:
-        :param suffix:
-        :return:
+        :param p: the fraction of train examples, by default .9
+        :param suffix: the type of raw files, by default .ome.tif
+        :return: a tuple of lists
         """
+        random.seed(1993)
+
         files = fetch_files(self.raw, suffix)
-
         file_stems = [f.name.removesuffix(suffix) for f in files]
-
         size = len(file_stems)
         split_idx = int(p * size)
-
-        random.seed(1993)
         shuffled = random.sample(file_stems, k=size)
-
-        return shuffled[:split_idx], shuffled[split_idx:]
+        split_test = shuffled[split_idx:]
+        split_train = shuffled[:split_idx]
+        return split_train, split_test
 
 
 def build_name(path: Path, projection_type='max') -> str:
