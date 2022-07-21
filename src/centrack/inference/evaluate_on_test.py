@@ -8,7 +8,7 @@ from spotipy.spotipy.utils import normalize_fast2d, points_matching
 
 
 def main():
-    model = get_model('models/master')
+    model = get_model('models/dev/2022-07-21-09-22-20.799347')
     performances = []
     for path_ds in datasets:
         print(path_ds)

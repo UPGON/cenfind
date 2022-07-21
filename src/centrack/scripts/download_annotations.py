@@ -32,7 +32,7 @@ def main():
         annotation_file = external_name.replace('.png', '.txt')
         foci_in_label = [lab for lab in label.annotations if lab.name == 'Centriole']
         nucleus_id = 1
-        if not annotation_file.endswith('C0.txt'):
+        if not external_name.endswith('C0.png'):
             with open(path_annotations_centrioles / annotation_file, 'w') as f:
                 for lab in foci_in_label:
                     # the coordinates in labelbox are (x, y) and start on the top left corner;
@@ -42,23 +42,23 @@ def main():
                     f.write(f"{x},{y}\n")
                 print(f'{annotation_file} written')
 
-        nuclei_in_label = [lab for lab in label.annotations if lab.name == 'Nucleus']
-        if len(nuclei_in_label) == 0:
-            continue
-        path_annotations_cells = path_annotations / 'cells'
-        path_annotations_cells.mkdir(exist_ok=True)
-        mask_name = external_name.replace('.png', '.tif')
-        res = np.zeros((2048, 2048), dtype='uint16')
-        for lab in nuclei_in_label:
-            try:
-                cell_mask = lab.value.mask.value[:, :, 0]
-                res += ((cell_mask / 255) * nucleus_id).astype('uint16')
-                nucleus_id += 1
-            except PIL.UnidentifiedImageError as e:
-                print(f'Problem with {label} ({e})')
-                continue
-        tf.imwrite(path_annotations_cells / mask_name, res)
-        print(f'Writing mask for {mask_name}')
+        # nuclei_in_label = [lab for lab in label.annotations if lab.name == 'Nucleus']
+        # if len(nuclei_in_label) == 0:
+        #     continue
+        # path_annotations_cells = path_annotations / 'cells'
+        # path_annotations_cells.mkdir(exist_ok=True)
+        # mask_name = external_name.replace('.png', '.tif')
+        # res = np.zeros((2048, 2048), dtype='uint16')
+        # for lab in nuclei_in_label:
+        #     try:
+        #         cell_mask = lab.value.mask.value[:, :, 0]
+        #         res += ((cell_mask / 255) * nucleus_id).astype('uint16')
+        #         nucleus_id += 1
+        #     except PIL.UnidentifiedImageError as e:
+        #         print(f'Problem with {label} ({e})')
+        #         continue
+        # tf.imwrite(path_annotations_cells / mask_name, res)
+        # print(f'Writing mask for {mask_name}')
 
 
 if __name__ == '__main__':

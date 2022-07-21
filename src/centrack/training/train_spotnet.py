@@ -7,6 +7,17 @@ from spotipy.spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.spotipy.model import SpotNet, Config
 
 
+def read_config(path):
+    """
+    Read config json file.
+    :param path:
+    :return:
+    """
+    with open(path, 'r') as config:
+        config_dict = json.load(config)
+    return Config(**config_dict)
+
+
 def load_pairs(path, split='train'):
     """
     Load two arrays, the images and the foci masks
@@ -43,10 +54,7 @@ if __name__ == '__main__':
     train_x, train_y = load_pairs(path_dataset, split='train')
     test_x, test_y = load_pairs(path_dataset, split='test')
 
-    with open('models/dev/config.json',
-              'r') as config:
-        config_dict = json.load(config)
-    config = Config(**config_dict)
+    config = read_config('models/dev/config.json')
 
-    model = SpotNet(config, name=None, basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/dev')
+    model = SpotNet(config, name='model_ds1', basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/dev')
     model.train(train_x, train_y, validation_data=(test_x, test_y))

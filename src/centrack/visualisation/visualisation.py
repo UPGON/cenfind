@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy as np
-from centrack.scripts.synthetic_spotnet import generate_data
+from centrack.training.synthetic_spotnet import generate_data
 
 
 def show_images(image, mask):
