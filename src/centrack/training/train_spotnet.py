@@ -37,8 +37,8 @@ def load_pairs(path, split='train'):
         image_path = str(path_projections / f"{fov}_max.tif")
         image = tif.imread(image_path)
         image = image[chid, :, :]
-        image = normalize_fast2d(image)
-        images.append(image)
+        image_norm = image.astype('float32') / image.max()
+        images.append(image_norm)
 
         foci_path = str(path_centrioles / f"{fov}_max_C{chid}.txt")
         foci = np.loadtxt(foci_path, dtype=int, delimiter=',')  # in format x, y; origin at top left
