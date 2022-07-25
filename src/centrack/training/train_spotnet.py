@@ -2,11 +2,15 @@ from pathlib import Path
 import json
 import numpy as np
 import tifffile as tif
+import tensorflow as tf
 
 from spotipy.spotipy.utils import points_to_prob
 from spotipy.spotipy.model import SpotNet, Config
+from spotipy.spotipy.utils import normalize_fast2d
 
 from centrack.layout.dataset import DataSet
+from centrack.inference.score import get_model
+from centrack.layout.constants import datasets
 
 
 def read_config(path):
@@ -27,15 +31,18 @@ def load_pairs(dataset: DataSet, split='train'):
     split: either train or test
     """
 
-    fovs = dataset.split_images_channel(split)
     images = []
     positions = []
+
+    fovs = dataset.split_images_channel(split)
+
     for fov, channel_id in fovs:
         channel_id = int(channel_id)
         image_path = str(dataset.projections / f"{fov}_max.tif")
         image = tif.imread(image_path)
         image = image[channel_id, :, :]
-        image_norm = image.astype('float32') / image.max()
+        # image_norm = image.astype('float32') / image.max()
+        image_norm = normalize_fast2d(image, clip=True)
         images.append(image_norm)
 
         foci_path = str(dataset.annotations / 'centrioles' / f"{fov}_max_C{channel_id}.txt")
@@ -47,12 +54,33 @@ def load_pairs(dataset: DataSet, split='train'):
     return np.stack(images), np.stack(positions)
 
 
-if __name__ == '__main__':
-    dataset = DataSet(Path('/Users/buergy/Dropbox/epfl/datasets/RPE1wt_CEP63+CETN2+PCNT_1'))
-    train_x, train_y = load_pairs(dataset, split='train')
-    test_x, test_y = load_pairs(dataset, split='test')
+def main():
+    all_train_x = []
+    all_train_y = []
+    all_test_x = []
+    all_test_y = []
+
+    for dataset_name in datasets:
+        dataset = DataSet(Path(f'/Users/buergy/Dropbox/epfl/datasets/{dataset_name}'))
+        train_x, train_y = load_pairs(dataset, split='train')
+        test_x, test_y = load_pairs(dataset, split='test')
+        all_train_x.append(train_x)
+        all_train_y.append(train_y)
+        all_test_x.append(test_x)
+        all_test_y.append(test_y)
+
+    all_train_x = np.concatenate(all_train_x)
+    all_train_y = np.concatenate(all_train_y)
+    all_test_x = np.concatenate(all_test_x)
+    all_test_y = np.concatenate(all_test_y)
 
     config = read_config('models/dev/config.json')
+    model = SpotNet(config, name='all_ds', basedir='models/dev')
+    model.train(all_train_x, all_train_y,
+                validation_data=(all_test_x, all_test_y),
+                # augmenter=data_augmentation,
+                epochs=100)
 
-    model = SpotNet(config, name='model_ds1', basedir='/Users/buergy/Dropbox/epfl/projects/centrack/models/dev')
-    model.train(train_x, train_y, validation_data=(test_x, test_y))
+
+if __name__ == '__main__':
+    main()
