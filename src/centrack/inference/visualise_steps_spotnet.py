@@ -8,7 +8,7 @@ from matplotlib_scalebar.scalebar import ScaleBar
 import cv2
 import numpy as np
 from skimage import exposure
-from centrack.visualisation.outline import prepare_background
+from centrack.visualisation.outline import to_8bit
 
 plt.rcParams["font.family"] = "Helvetica"
 
@@ -26,10 +26,14 @@ def main():
     top_left = slice(x, x + width)
     bottom_right = slice(y, y + width)
 
-    composite = prepare_background(dna, data)
+    composite = np.zeros_like(data)
+    composite = cv2.cvtColor(composite, cv2.COLOR_GRAY2RGB)
+    composite[:, :, 2] = to_8bit(dna)
+    composite[:, :, 1] = to_8bit(data)
     percentiles = np.percentile(composite, (percentile, 100 - percentile))
     scaled = exposure.rescale_intensity(composite,
-                                        in_range=tuple(percentiles))
+                                        in_range=tuple(percentiles),
+                                        out_range='uint8')
     cell = composite[top_left, bottom_right]
 
     x = normalize_fast2d(data)
