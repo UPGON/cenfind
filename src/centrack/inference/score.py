@@ -21,8 +21,8 @@ from centrack.visualisation.outline import (
     draw_annotation
 )
 
-from spotipy.spotipy.model import SpotNet
-from spotipy.spotipy.utils import normalize_fast2d
+from spotipy.model import SpotNet
+from spotipy.utils import normalize_fast2d
 
 logger_score = logging.getLogger()
 logger_score.setLevel(logging.INFO)
