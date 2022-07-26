@@ -255,9 +255,9 @@ def prepare_background(nuclei, foci):
     :param foci:
     :return:
     """
-    background = cv2.cvtColor(to_8bit(nuclei), cv2.COLOR_GRAY2BGR)
+    background = cv2.cvtColor(to_8bit(nuclei), cv2.COLOR_GRAY2RGB)
     foci_bgr = np.zeros_like(background)
-    foci_bgr[:, :, 2] = to_8bit(foci)
+    foci_bgr[:, :, 1] = to_8bit(foci)
     return cv2.addWeighted(background, .5, foci_bgr, 1, 1)
 
 
