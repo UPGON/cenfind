@@ -24,3 +24,4 @@ poetry.lock
 *.docx
 /src/_spotipy/spotipy/callbacks.py
 /src/spotipy2/
+/src/napari-spotipy/
