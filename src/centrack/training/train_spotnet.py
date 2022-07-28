@@ -2,7 +2,6 @@ from pathlib import Path
 import json
 import numpy as np
 import tifffile as tif
-import albumentations as A
 
 from spotipy.spotipy.utils import points_to_prob
 from spotipy.spotipy.model import SpotNet, Config
