@@ -14,11 +14,10 @@ logger.setLevel(level=logging.DEBUG)
 
 @dataclass
 class DataSet:
+    """
+    Represents a dataset structure
+    """
     path: Path
-
-    @property
-    def conditions(self):
-        return self.path / 'conditions.toml'
 
     @property
     def raw(self):
@@ -32,20 +31,16 @@ class DataSet:
 
     @property
     def vignettes(self):
-        """Define the path to the vignettes folder."""
+        """Define the path to the vignettes' folder."""
         return self.path / 'vignettes'
-
-    @property
-    def predictions(self):
-        return self.path / 'predictions'
 
     @property
     def annotations(self):
         return self.path / 'annotations'
 
     @property
-    def outlines(self):
-        return self.path / 'outlines'
+    def predictions(self):
+        return self.path / 'predictions'
 
     @property
     def visualisation(self):
@@ -77,9 +72,6 @@ class DataSet:
 
     def check_projections(self):
         self._check_container('projections', '_max.tif')
-
-    def check_outlines(self):
-        self._check_container('outlines', '.png')
 
     def check_predictions(self, force=False):
         """
@@ -173,16 +165,15 @@ class FieldOfView:
     def data(self) -> np.array:
         return tf.imread(str(self.path))
 
-    def __getitem__(self, item: int):
-        return self.data[int(item), :, :]
+    def __getitem__(self, item):
+        return self.data[item, :, :]
 
-    def fetch_annotation(self, chid):
-        path_annotation = self.dataset.annotations / 'centrioles' / f"{self.name}_C{chid}.txt"
+    def fetch_annotation(self, channel_id):
+        path_annotation = self.dataset.annotations / 'centrioles' / f"{self.name}_C{channel_id}.txt"
 
         try:
             annotation = np.loadtxt(path_annotation, dtype=int, delimiter=',')
         except FileNotFoundError:
-            print(f'annotation not found for {path_annotation}')
-            annotation = np.asarray([0, 0])
+            raise f'Annotation not found for {path_annotation}'
 
         return annotation
