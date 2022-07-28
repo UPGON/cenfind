@@ -2,14 +2,12 @@ from pathlib import Path
 import json
 import numpy as np
 import tifffile as tif
-import tensorflow as tf
+import albumentations as A
 
 from spotipy.spotipy.utils import points_to_prob
 from spotipy.spotipy.model import SpotNet, Config
-from spotipy.spotipy.utils import normalize_fast2d
 
 from centrack.layout.dataset import DataSet
-from centrack.inference.score import get_model
 from centrack.layout.constants import datasets
 
 
@@ -31,8 +29,8 @@ def load_pairs(dataset: DataSet, split='train'):
     split: either train or test
     """
 
-    images = []
-    positions = []
+    channels = []
+    masks = []
 
     fovs = dataset.split_images_channel(split)
 
@@ -40,21 +38,24 @@ def load_pairs(dataset: DataSet, split='train'):
         channel_id = int(channel_id)
         image_path = str(dataset.projections / f"{fov}_max.tif")
         image = tif.imread(image_path)
-        image = image[channel_id, :, :]
-        # image_norm = image.astype('float32') / image.max()
-        image_norm = normalize_fast2d(image, clip=True)
-        images.append(image_norm)
+        channel = image[channel_id, :, :]
+        channel = channel.astype('float32') / channel.max()
+        channels.append(channel)
 
         foci_path = str(dataset.annotations / 'centrioles' / f"{fov}_max_C{channel_id}.txt")
         foci = np.loadtxt(foci_path, dtype=int, delimiter=',')  # in format x, y; origin at top left
+        print(f"N foci: {foci.shape}")
+        mask = points_to_prob(foci, shape=channel.shape, sigma=1)
+        masks.append(mask)
+        print(f"max in mask: {mask.max()}")
+        print(f"mean intensity image: {channel.mean()}\nmean intensity mask: {mask.mean()}")
 
-        foci_mask = points_to_prob(foci, shape=image.shape, sigma=1)
-        positions.append(foci_mask)
-
-    return np.stack(images), np.stack(positions)
+    return np.stack(channels), np.stack(masks)
 
 
 def main():
+    config = read_config('models/dev/config.json')
+    model = SpotNet(config, name='all_ds', basedir='models/dev')
     all_train_x = []
     all_train_y = []
     all_test_x = []
@@ -74,12 +75,8 @@ def main():
     all_test_x = np.concatenate(all_test_x)
     all_test_y = np.concatenate(all_test_y)
 
-    config = read_config('models/dev/config.json')
-    model = SpotNet(config, name='all_ds', basedir='models/dev')
     model.train(all_train_x, all_train_y,
-                validation_data=(all_test_x, all_test_y),
-                # augmenter=data_augmentation,
-                epochs=100)
+                validation_data=(all_test_x, all_test_y))
 
 
 if __name__ == '__main__':
