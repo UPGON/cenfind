@@ -29,33 +29,32 @@ def cli():
     logger.debug('Get the ontology.')
     ontology_setup(client, project, ontology_id='cl3k8y38t11xc07807tar8hg6')
 
-    for ds in datasets:
-        path_dataset = PREFIX / ds
-        dataset_name_lb = path_dataset.name
+    path_dataset = PREFIX / 'WTsiNC_sync8h'
+    dataset_name_lb = path_dataset.name
 
-        dataset_lb = dataset_create(client, dataset_name_lb)
+    dataset_lb = dataset_create(client, dataset_name_lb)
 
-        project.datasets.connect(dataset_lb)
-        logger.debug('Attach the ds to the project.')
+    project.datasets.connect(dataset_lb)
+    logger.debug('Attach the ds to the project.')
 
-        dataset = DataSet(path_dataset)
-        fields = tuple(
-            f for f in dataset.vignettes.glob(f'*.png') if
-            not f.name.startswith('.'))
+    dataset = DataSet(path_dataset)
+    fields = tuple(
+        f for f in dataset.vignettes.glob(f'*.png') if
+        not f.name.startswith('.'))
 
-        data_rows = []
-        for field in sorted(fields):
-            external_id = field.name
-            data_rows.append({'row_data': field,
-                              'external_id': external_id})
+    data_rows = []
+    for field in sorted(fields):
+        external_id = field.name
+        data_rows.append({'row_data': field,
+                          'external_id': external_id})
 
-        # Bulk add data rows to the ds
-        task = dataset_lb.create_data_rows(data_rows)
+    # Bulk add data rows to the ds
+    task = dataset_lb.create_data_rows(data_rows)
 
-        task.wait_till_done()
-        print(task.status)
+    task.wait_till_done()
+    print(task.status)
 
 
 if __name__ == '__main__':
-    load_dotenv('/.env')
+    load_dotenv('.env')
     cli()
