@@ -21,26 +21,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def project_create(client, project_name):
-    """
-    Create a project object and delete any existing with `project name`.
-    :param client:
-    :param project_name:
-    :return:
-    """
-    projects_test = client.get_projects(where=Project.name == project_name)
-
-    try:
-        project = next(projects_test)
-        logger.debug('Project found (%s)', project.uid)
-        project.delete()
-    except StopIteration:
-        logger.debug('No such project; creating one...')
-    finally:
-        project = client.create_project(name=project_name, description='')
-    return project
-
-
 def ontology_setup(client, project, ontology_id):
     """
     Fetch the ontology using the ID and attach it to the project.
@@ -55,25 +35,6 @@ def ontology_setup(client, project, ontology_id):
     editor = next(
         client.get_labeling_frontends(where=LabelingFrontend.name == 'editor'))
     project.setup(editor, ontology_builder.asdict())
-
-
-def dataset_create(client, dataset_name):
-    """
-    Create a ds object and delete any ds with same name.
-    :param client:
-    :param dataset_name:
-    :return:
-    """
-    datasets_test = client.get_datasets(where=Dataset.name == dataset_name)
-    try:
-        dataset = next(datasets_test)
-        logger.debug('Found a ds (%s)', dataset.name)
-        dataset.delete()
-    except StopIteration:
-        logger.debug('No such ds; creating one...')
-    finally:
-        dataset = client.create_dataset(name=dataset_name, iam_integration=None)
-    return dataset
 
 
 def image_generate(canvas, predictions):

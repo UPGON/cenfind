@@ -12,8 +12,6 @@ from centrack.visualisation.outline import to_8bit
 from centrack.inference.score import extract_centrioles
 
 from centrack.scripts.labelbox_api import (
-    project_create,
-    dataset_create,
     ontology_setup,
     label_create,
     labels_list_create,
@@ -36,14 +34,13 @@ def args_parse():
 
 
 def cli():
-    parsed_args = args_parse()
-    load_dotenv('/home/buergy/projects/centrack/.env')
     client = Client(api_key=os.environ['LABELBOX_API_KEY'])
 
     path_dataset = Path(parsed_args.path)
     channel_index = parsed_args.channel
-    project_name_lb = f"{path_dataset.name}_C{channel_index}"
-    project = project_create(client, project_name_lb)
+
+    project = client.get_project(project_id='cl64z5mv20gte07vfbsjqdtvb')
+    dataset = DataSet(path_dataset)
 
     logger.debug('Enable MAL.')
     project.enable_model_assisted_labeling()
@@ -51,16 +48,16 @@ def cli():
     logger.debug('Get the ontology.')
     ontology_setup(client, project, ontology_id='cl3k8y38t11xc07807tar8hg6')
 
-    dataset_name_lb = project_name_lb
-    dataset_lb = dataset_create(client, dataset_name_lb)
+    dataset_lb = client.create_dataset(name=f"{dataset.name}_C{channel_index}",
+                                       iam_integration=None)
 
     project.datasets.connect(dataset_lb)
     logger.debug('Attach the ds to the project.')
 
-    dataset = DataSet(path_dataset)
     fields = tuple(
         f for f in dataset.projections.glob(f'*C{channel_index}.tif') if
         not f.name.startswith('.'))
+
     labels = []
     for field in fields:
         external_id = field.name
@@ -81,4 +78,6 @@ def cli():
 
 
 if __name__ == '__main__':
+    parsed_args = args_parse()
+    load_dotenv('/home/buergy/projects/centrack/.env')
     cli()
