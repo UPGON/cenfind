@@ -1,13 +1,14 @@
 from pathlib import Path
 import json
+from typing import Tuple
 import numpy as np
 import tifffile as tif
 
 from spotipy.spotipy.utils import points_to_prob
 from spotipy.spotipy.model import SpotNet, Config
 
-from centrack.layout.dataset import DataSet
-from centrack.layout.constants import datasets
+from centrack.layout.dataset import DataSet, FieldOfView
+from centrack.layout.constants import datasets, PREFIX
 
 
 def read_config(path):
@@ -21,6 +22,34 @@ def read_config(path):
     return Config(**config_dict)
 
 
+def generate_mask(path: Path | str, shape: Tuple[int, int]) -> np.ndarray:
+    """
+    Generate a mask with points as bright spots
+    :param path:
+    :param shape:
+    :return:
+    """
+    foci = np.loadtxt(path, dtype=int, delimiter=',')  # in format x, y; origin at top left
+    mask = points_to_prob(foci, shape=shape, sigma=1)
+    return mask
+
+
+def generate_image(dataset: DataSet, fov: str, channel_id: int) -> np.ndarray:
+    """
+    Extract the channel from a projection image.
+    :param dataset:
+    :param fov:
+    :param channel_id:
+    :return:
+    """
+
+    image_path = str(dataset.projections / f"{fov}_max.tif")
+    image = tif.imread(image_path)
+    channel = image[channel_id, :, :]
+    channel = channel.astype('float32') / channel.max()
+    return channel
+
+
 def load_pairs(dataset: DataSet, split='train'):
     """
     Load two arrays, the images and the foci masks
@@ -32,50 +61,31 @@ def load_pairs(dataset: DataSet, split='train'):
     masks = []
 
     fovs = dataset.split_images_channel(split)
-
-    for fov, channel_id in fovs:
+    channel_id = 2
+    for fov, _ in fovs:
         channel_id = int(channel_id)
-        image_path = str(dataset.projections / f"{fov}_max.tif")
-        image = tif.imread(image_path)
-        channel = image[channel_id, :, :]
-        channel = channel.astype('float32') / channel.max()
-        channels.append(channel)
+
+        image = FieldOfView(dataset.projections / f"{fov}_max.tif").data[channel_id]
+        image = image.astype('float32') / image.max()
+        channels.append(image)
 
         foci_path = str(dataset.annotations / 'centrioles' / f"{fov}_max_C{channel_id}.txt")
-        foci = np.loadtxt(foci_path, dtype=int, delimiter=',')  # in format x, y; origin at top left
-        print(f"N foci: {foci.shape}")
-        mask = points_to_prob(foci, shape=channel.shape, sigma=1)
+        mask = generate_mask(foci_path, shape=(2048, 2048))
         masks.append(mask)
-        print(f"max in mask: {mask.max()}")
-        print(f"mean intensity image: {channel.mean()}\nmean intensity mask: {mask.mean()}")
 
     return np.stack(channels), np.stack(masks)
 
 
 def main():
     config = read_config('models/dev/config.json')
-    model = SpotNet(config, name='all_ds', basedir='models/dev')
-    all_train_x = []
-    all_train_y = []
-    all_test_x = []
-    all_test_y = []
+    model = SpotNet(config, name='one_ds', basedir='models/dev')
+    dataset_path = PREFIX / datasets[0]
+    dataset = DataSet(dataset_path)
+    train_x, train_y = load_pairs(dataset, split='train')
+    test_x, test_y = load_pairs(dataset, split='test')
 
-    for dataset_name in datasets:
-        dataset = DataSet(Path(f'/Users/buergy/Dropbox/epfl/datasets/{dataset_name}'))
-        train_x, train_y = load_pairs(dataset, split='train')
-        test_x, test_y = load_pairs(dataset, split='test')
-        all_train_x.append(train_x)
-        all_train_y.append(train_y)
-        all_test_x.append(test_x)
-        all_test_y.append(test_y)
-
-    all_train_x = np.concatenate(all_train_x)
-    all_train_y = np.concatenate(all_train_y)
-    all_test_x = np.concatenate(all_test_x)
-    all_test_y = np.concatenate(all_test_y)
-
-    model.train(all_train_x, all_train_y,
-                validation_data=(all_test_x, all_test_y))
+    model.train(train_x, train_y,
+                validation_data=(test_x, test_y))
 
 
 if __name__ == '__main__':
