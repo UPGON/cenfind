@@ -20,6 +20,10 @@ class DataSet:
     path: Path
 
     @property
+    def name(self):
+        return self.path.name
+
+    @property
     def raw(self):
         """Define the path to raw folder."""
         return self.path / 'raw'
