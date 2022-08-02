@@ -7,7 +7,7 @@ from spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.model import SpotNet, Config
 
 from centrack.layout.dataset import DataSet, FieldOfView
-from centrack.layout.constants import datasets, PREFIX
+from centrack.layout.constants import datasets, PREFIX_LOCAL, PREFIX_REMOTE
 
 
 def read_config(path):
@@ -42,7 +42,7 @@ def load_pairs(dataset: DataSet, split: str = 'train', channel_id: int = 2, sigm
         image = fov.load_channel(channel_id)
         foci = fov.load_annotation(channel_id)
         image = normalize_fast2d(image)
-        mask = points_to_prob(foci, shape=shape, sigma=sigma)
+        mask = points_to_prob(foci, shape=image.shape, sigma=sigma)
 
         channels.append(image)
         masks.append(mask)
@@ -51,6 +51,7 @@ def load_pairs(dataset: DataSet, split: str = 'train', channel_id: int = 2, sigm
 
 
 def main():
+    prefix = PREFIX_REMOTE
     config = Config(n_channel_in=1,
                     backbone='unet',
                     unet_n_depth=3,
@@ -67,10 +68,10 @@ def main():
                     train_batch_size=2)
 
     model = SpotNet(config, name=str(uuid.uuid4()), basedir='models/dev')
-    dataset_path = PREFIX / datasets[0]
+    dataset_path = prefix / datasets[0]
     dataset = DataSet(dataset_path)
-    train_x, train_y = load_pairs(dataset, split='train')
-    test_x, test_y = load_pairs(dataset, split='test')
+    train_x, train_y = load_pairs(dataset, split='train', channel_id=2)
+    test_x, test_y = load_pairs(dataset, split='test', channel_id=2)
 
     model.train(train_x, train_y, validation_data=(test_x, test_y))
 

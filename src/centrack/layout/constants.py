@@ -1,6 +1,7 @@
 from pathlib import Path
 
-PREFIX = Path('/Users/buergy/Dropbox/epfl/datasets')
+PREFIX_LOCAL = Path('/Users/buergy/Dropbox/epfl/datasets')
+PREFIX_REMOTE = Path('/data1/centrioles/datasets')
 datasets = [
     'RPE1wt_CEP63+CETN2+PCNT_1',
     'RPE1wt_CP110+GTU88+PCNT_2',

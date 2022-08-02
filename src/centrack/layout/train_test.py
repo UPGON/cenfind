@@ -1,6 +1,6 @@
 import random
 from centrack.layout.dataset import DataSet
-from centrack.layout.constants import PREFIX, datasets
+from centrack.layout.constants import PREFIX_LOCAL, datasets
 
 
 def generate_channels(in_file, out_file):
@@ -16,7 +16,7 @@ def generate_channels(in_file, out_file):
 
 def main():
     for ds in datasets:
-        path_dataset = PREFIX / ds
+        path_dataset = PREFIX_LOCAL / ds
         dataset = DataSet(path_dataset)
         train_images, test_images = dataset.splits(p=.9)
         with open(path_dataset / 'train.txt', 'w') as f:
@@ -28,8 +28,8 @@ def main():
                 f.write(f"{fov}\n")
 
     for ds in datasets:
-        generate_channels(PREFIX / ds / 'train.txt', PREFIX / ds / 'train_channels.txt')
-        generate_channels(PREFIX / ds / 'test.txt', PREFIX / ds / 'test_channels.txt')
+        generate_channels(PREFIX_LOCAL / ds / 'train.txt', PREFIX_LOCAL / ds / 'train_channels.txt')
+        generate_channels(PREFIX_LOCAL / ds / 'test.txt', PREFIX_LOCAL / ds / 'test_channels.txt')
 
 
 if __name__ == '__main__':

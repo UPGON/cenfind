@@ -4,7 +4,7 @@ import numpy as np
 import tifffile as tf
 import labelbox
 from dotenv import load_dotenv
-from centrack.layout.constants import PREFIX
+from centrack.layout.constants import PREFIX_LOCAL
 
 load_dotenv('/Users/buergy/Dropbox/epfl/projects/centrack/.env')
 
@@ -16,7 +16,7 @@ def main():
 
     for label in labels:
         ds = label.extra['Dataset Name']
-        path_dataset = PREFIX / ds
+        path_dataset = PREFIX_LOCAL / ds
         path_raw = path_dataset / 'raw'
         path_projections = path_dataset / 'projections'
         path_annotations = path_dataset / 'annotations'

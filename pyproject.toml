@@ -23,7 +23,7 @@ tensorflow = "^2.8.0"
 scipy = "1.7.1"
 csbdeep = "^0.6.3"
 stardist = "^0.8.3"
-#_spotipy = {git = "ssh://git@github.com/maweigert/_spotipy.git", rev = "main"}
+spotipy = { git = "ssh://git@github.com/maweigert/spotipy.git", branch = "main" }
 
 [tool.poetry.scripts]
 squash = "centrack.commands.squash:cli"

@@ -1,7 +1,7 @@
 import pandas as pd
 
 from centrack.inference.score import get_model
-from centrack.layout.constants import datasets, PREFIX
+from centrack.layout.constants import datasets, PREFIX_LOCAL
 from centrack.layout.dataset import DataSet, FieldOfView
 from spotipy.spotipy.utils import normalize_fast2d, points_matching
 
@@ -54,7 +54,7 @@ def main():
     performances = []
 
     for ds_name in datasets:
-        path_dataset = PREFIX / ds_name
+        path_dataset = PREFIX_LOCAL / ds_name
         for cutoff in cutoffs:
             performance = run_evaluation(path_dataset, model, cutoff)
             performances.append(performance)

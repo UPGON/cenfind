@@ -113,10 +113,6 @@ class FieldOfView:
     name: str
 
     @property
-    def name(self):
-        return self.name
-
-    @property
     def data(self) -> np.array:
         return tf.imread(str(self.dataset.path / 'projections' / f"{self.name}_max.tif"))
 
@@ -124,11 +120,9 @@ class FieldOfView:
         return self.data[channel_id, :, :]
 
     def load_annotation(self, channel_id):
-        path_annotation = self.dataset.annotations / 'centrioles' / f"{self.name}_C{channel_id}.txt"
-
-        try:
-            annotation = np.loadtxt(path_annotation, dtype=int, delimiter=',')
-        except FileNotFoundError:
-            raise f'Annotation not found for {path_annotation}'
-
-        return annotation
+        path_annotation = self.dataset.annotations / 'centrioles' / f"{self.name}_max_C{channel_id}.txt"
+        if path_annotation.exists():
+            annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=',')
+            return annotation
+        else:
+            raise FileExistsError(f"{path_annotation}")
