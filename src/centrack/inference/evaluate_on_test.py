@@ -25,7 +25,7 @@ def run_evaluation(path, model, cutoff):
         channel = fov[channel_id]
         inp = normalize_fast2d(channel)
 
-        annotation = fov.fetch_annotation(channel_id)
+        annotation = fov.load_annotation(channel_id)
         mask_preds, points_preds = model.predict(inp,
                                                  prob_thresh=.5,
                                                  min_distance=2)
