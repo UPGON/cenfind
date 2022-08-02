@@ -1,6 +1,6 @@
 import numpy as np
-from spotipy.spotipy.model import Config, SpotNetData, SpotNet
-from spotipy.spotipy.utils import points_to_prob
+from spotipy.model import Config, SpotNetData, SpotNet
+from spotipy.utils import points_to_prob
 
 if __name__ == '__main__':
     config = Config(axes="YXC", n_channel_in=1, train_patch_size=(64, 64),

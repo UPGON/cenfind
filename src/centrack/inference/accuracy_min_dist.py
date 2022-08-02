@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib
 from matplotlib import pyplot as plt
 
-from centrack.layout.constants import datasets
+from centrack.utils.constants import datasets
 
 font = {'family': 'Helvetica',
 

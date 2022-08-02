@@ -1,9 +1,9 @@
 import pandas as pd
 
 from centrack.inference.score import get_model
-from centrack.layout.constants import datasets, PREFIX_LOCAL
+from centrack.utils.constants import datasets, PREFIX_LOCAL
 from centrack.layout.dataset import DataSet, FieldOfView
-from spotipy.spotipy.utils import normalize_fast2d, points_matching
+from spotipy.utils import normalize_fast2d, points_matching
 
 
 def write_performances(dst, performances):

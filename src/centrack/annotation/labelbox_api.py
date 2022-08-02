@@ -5,8 +5,6 @@ import cv2
 from labelbox import (
     OntologyBuilder,
     LabelingFrontend,
-    Dataset,
-    Project,
 )
 from labelbox.data.annotation_types import (
     ObjectAnnotation,

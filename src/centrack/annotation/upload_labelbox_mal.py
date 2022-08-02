@@ -11,7 +11,7 @@ from centrack.layout.dataset import DataSet
 from centrack.visualisation.outline import to_8bit
 from centrack.inference.score import extract_centrioles
 
-from centrack.scripts.labelbox_api import (
+from centrack.annotation.labelbox_api import (
     ontology_setup,
     label_create,
     labels_list_create,

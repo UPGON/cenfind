@@ -23,12 +23,10 @@ tensorflow = "^2.8.0"
 scipy = "1.7.1"
 csbdeep = "^0.6.3"
 stardist = "^0.8.3"
-spotipy = { git = "ssh://git@github.com/maweigert/spotipy.git", branch = "main" }
+#spotipy = { git = "ssh://git@github.com/maweigert/spotipy.git", branch = "main" }
 
 [tool.poetry.scripts]
-squash = "centrack.commands.squash:cli"
-score = "centrack.commands.score:cli"
-evaluate = "centrack.commands.evaluate:cli"
+train = "centrack.training.train_spotnet:main"
 
 [tool.poetry.dev-dependencies]
 

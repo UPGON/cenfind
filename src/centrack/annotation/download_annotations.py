@@ -4,9 +4,9 @@ import numpy as np
 import tifffile as tf
 import labelbox
 from dotenv import load_dotenv
-from centrack.layout.constants import PREFIX_LOCAL
+from centrack.utils.constants import PREFIX_LOCAL
 
-load_dotenv('/Users/buergy/Dropbox/epfl/projects/centrack/.env')
+load_dotenv('/.env')
 
 
 def main():

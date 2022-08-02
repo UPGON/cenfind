@@ -10,7 +10,7 @@ import tifffile as tf
 
 from centrack.layout.dataset import DataSet
 from centrack.inference.score import extract_centrioles, get_model
-from spotipy.spotipy.utils import points_matching
+from spotipy.utils import points_matching
 
 logging.basicConfig(level=logging.INFO)
 

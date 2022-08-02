@@ -1,3 +1,4 @@
+import argparse
 import json
 import uuid
 
@@ -7,7 +8,7 @@ from spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.model import SpotNet, Config
 
 from centrack.layout.dataset import DataSet, FieldOfView
-from centrack.layout.constants import datasets, PREFIX_LOCAL, PREFIX_REMOTE
+from centrack.utils.constants import datasets, PREFIX_REMOTE
 
 
 def read_config(path):
@@ -51,7 +52,9 @@ def load_pairs(dataset: DataSet, split: str = 'train', channel_id: int = 2, sigm
 
 
 def main():
-    prefix = PREFIX_REMOTE
+    parser = argparse.ArgumentParser()
+    parser.add_argument('dataset', type=str, help='The path to the dataset')
+    args = parser.parse_args()
     config = Config(n_channel_in=1,
                     backbone='unet',
                     unet_n_depth=3,
@@ -68,8 +71,7 @@ def main():
                     train_batch_size=2)
 
     model = SpotNet(config, name=str(uuid.uuid4()), basedir='models/dev')
-    dataset_path = prefix / datasets[0]
-    dataset = DataSet(dataset_path)
+    dataset = DataSet(args.path)
     train_x, train_y = load_pairs(dataset, split='train', channel_id=2)
     test_x, test_y = load_pairs(dataset, split='test', channel_id=2)
 
