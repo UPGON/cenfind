@@ -14,7 +14,7 @@ def generate_data(points, fov_shape):
 
 if __name__ == '__main__':
     fov_shape = 2048
-    config = read_config('models/dev/config.json')
+    config = read_config('../../../models/models/dev/config.json')
 
     P_train = np.random.randint(10, fov_shape - 10, (22, 30, 2))
     X_train, Y_train = generate_data(P_train, fov_shape)
