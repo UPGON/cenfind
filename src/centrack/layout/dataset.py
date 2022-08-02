@@ -50,55 +50,9 @@ class DataSet:
     def visualisation(self):
         return self.path / 'visualisation'
 
-    def _check_container(self, container_name: str, file_type: str):
-        """
-        Check if the folder `container_name` exists and whether it
-        contains `file_type` files (recursively)
-        :param name:
-        :param file_type:
-        :return: None
-        """
-        container_name = self.path / container_name
-
-        if container_name.exists():
-            files = [f for f in container_name.iterdir()]
-            if len(files) == 0:
-                return []
-            else:
-                recursive_files = fetch_files(container_name,
-                                              file_type=file_type)
-                return recursive_files
-        else:
-            container_name.mkdir()
-
-    def check_raw(self):
-        self._check_container('raw', '.ome.tif')
-
-    def check_projections(self):
-        self._check_container('projections', '_max.tif')
-
-    def check_predictions(self, force=False):
-        """
-        Check for a set of predictions.
-        else if we want to compare the predictions with annotations,
-        Compute the predictions.
-        Upload the predictions to labelbox.
-        Provide the url of the annotated ds on Labelbox
-        """
-        for image in self.projections.iterdir():
-            print(image)
-
-    def check_annotations(self):
-        """
-        If there is no annotation present, we should fetch them from labelbox.
-        If the ds is not on labelbox, we should upload it with the predictions
-        :return:
-        """
-        raise NotImplementedError
-
     def splits(self, p=.9, suffix='.ome.tif') -> Tuple[List, List]:
         """
-        Assign the FOV between train and test.
+        Assign the FOV between train and test
         :param p: the fraction of train examples, by default .9
         :param suffix: the type of raw files, by default .ome.tif
         :return: a tuple of lists
@@ -137,10 +91,10 @@ def build_name(path: Path, projection_type='max') -> str:
 
 def fetch_files(path_source: Path, file_type):
     """
-    Collect all ome.tif files in a list.
-    :param file_type:
+    Create a list of files.
     :param path_source:
-    :return: A list of Path to ome.tif files
+    :param file_type:
+    :return:
     """
     if not path_source.exists():
         raise FileExistsError(path_source)
@@ -155,24 +109,21 @@ class FieldOfView:
     """
     Representation of a projection (CxHxW)
     """
-    path: Path
-
-    @property
-    def dataset(self) -> DataSet:
-        return DataSet(self.path.parent.parent)
+    dataset: DataSet
+    name: str
 
     @property
     def name(self):
-        return self.path.stem
+        return self.name
 
     @property
     def data(self) -> np.array:
-        return tf.imread(str(self.path))
+        return tf.imread(str(self.dataset.path / 'projections' / f"{self.name}_max.tif"))
 
-    def __getitem__(self, item):
-        return self.data[item, :, :]
+    def load_channel(self, channel_id):
+        return self.data[channel_id, :, :]
 
-    def fetch_annotation(self, channel_id):
+    def load_annotation(self, channel_id):
         path_annotation = self.dataset.annotations / 'centrioles' / f"{self.name}_C{channel_id}.txt"
 
         try:
