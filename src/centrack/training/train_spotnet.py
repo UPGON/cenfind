@@ -1,11 +1,10 @@
-from pathlib import Path
 import json
-from typing import Tuple
-import numpy as np
-import tifffile as tif
+import uuid
 
-from spotipy.spotipy.utils import points_to_prob
-from spotipy.spotipy.model import SpotNet, Config
+import numpy as np
+
+from spotipy.utils import points_to_prob, normalize_fast2d
+from spotipy.model import SpotNet, Config
 
 from centrack.layout.dataset import DataSet, FieldOfView
 from centrack.layout.constants import datasets, PREFIX
@@ -22,35 +21,7 @@ def read_config(path):
     return Config(**config_dict)
 
 
-def generate_mask(path: Path | str, shape: Tuple[int, int]) -> np.ndarray:
-    """
-    Generate a mask with points as bright spots
-    :param path:
-    :param shape:
-    :return:
-    """
-    foci = np.loadtxt(path, dtype=int, delimiter=',')  # in format x, y; origin at top left
-    mask = points_to_prob(foci, shape=shape, sigma=1)
-    return mask
-
-
-def generate_image(dataset: DataSet, fov: str, channel_id: int) -> np.ndarray:
-    """
-    Extract the channel from a projection image.
-    :param dataset:
-    :param fov:
-    :param channel_id:
-    :return:
-    """
-
-    image_path = str(dataset.projections / f"{fov}_max.tif")
-    image = tif.imread(image_path)
-    channel = image[channel_id, :, :]
-    channel = channel.astype('float32') / channel.max()
-    return channel
-
-
-def load_pairs(dataset: DataSet, split='train'):
+def load_pairs(dataset: DataSet, split: str = 'train', channel_id: int = 2, sigma: float = 1.5):
     """
     Load two arrays, the images and the foci masks
     path: the path to the ds
@@ -61,31 +32,47 @@ def load_pairs(dataset: DataSet, split='train'):
     masks = []
 
     fovs = dataset.split_images_channel(split)
-    channel_id = 2
-    for fov, _ in fovs:
-        channel_id = int(channel_id)
+    channel_id = channel_id
 
-        image = FieldOfView(dataset.projections / f"{fov}_max.tif").data[channel_id]
-        image = image.astype('float32') / image.max()
+    for fov_name, defined_channel_id in fovs:
+        fov = FieldOfView(dataset, fov_name)
+        if channel_id is None:
+            channel_id = defined_channel_id
+
+        image = fov.load_channel(channel_id)
+        foci = fov.load_annotation(channel_id)
+        image = normalize_fast2d(image)
+        mask = points_to_prob(foci, shape=shape, sigma=sigma)
+
         channels.append(image)
-
-        foci_path = str(dataset.annotations / 'centrioles' / f"{fov}_max_C{channel_id}.txt")
-        mask = generate_mask(foci_path, shape=(2048, 2048))
         masks.append(mask)
 
     return np.stack(channels), np.stack(masks)
 
 
 def main():
-    config = read_config('models/dev/config.json')
-    model = SpotNet(config, name='one_ds', basedir='models/dev')
+    config = Config(n_channel_in=1,
+                    backbone='unet',
+                    unet_n_depth=3,
+                    unet_pool=4,
+                    unet_n_filter_base=64,
+                    spot_weight=40,
+                    multiscale=True,
+                    train_learning_rate=3e-4,
+                    train_foreground_prob=1,
+                    train_batch_norm=False,
+                    train_multiscale_loss_decay_exponent=1,
+                    train_patch_size=(512, 512),
+                    spot_weight_decay=.0,
+                    train_batch_size=2)
+
+    model = SpotNet(config, name=str(uuid.uuid4()), basedir='models/dev')
     dataset_path = PREFIX / datasets[0]
     dataset = DataSet(dataset_path)
     train_x, train_y = load_pairs(dataset, split='train')
     test_x, test_y = load_pairs(dataset, split='test')
 
-    model.train(train_x, train_y,
-                validation_data=(test_x, test_y))
+    model.train(train_x, train_y, validation_data=(test_x, test_y))
 
 
 if __name__ == '__main__':
