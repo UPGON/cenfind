@@ -79,7 +79,6 @@ def build_name(path: Path, projection_type='max') -> str:
     """
     Extract the file name, remove the suffixes and append the projection type.
     :param path:
-    :param channel:
     :param projection_type: the type of projection, by default max
     :return: file name of the projection
     """
@@ -91,7 +90,7 @@ def build_name(path: Path, projection_type='max') -> str:
 
 def fetch_files(path_source: Path, file_type):
     """
-    Create a list of files.
+    Create a list of files
     :param path_source:
     :param file_type:
     :return:

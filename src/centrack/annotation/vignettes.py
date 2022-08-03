@@ -24,7 +24,7 @@ def color_channel(data, color=(1, 1, 0)):
 
 
 def prepare_channel(fov: FieldOfView, index: int, color: Tuple[int, int, int]):
-    res = fov[index]
+    res = fov.load_channel(index)
     res = exposure.rescale_intensity(res, out_range='uint8')
     res = color_channel(res, color)
     return res
@@ -51,7 +51,7 @@ def cli():
             continue
 
         print(f'Processing {path.name}')
-        projection = FieldOfView(path)
+        projection = FieldOfView(dataset, path.name)
 
         for ch in range(4):
             vignette = create_vignettes(projection, ch, args.nuclei_index)

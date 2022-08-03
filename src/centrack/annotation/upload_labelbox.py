@@ -14,7 +14,6 @@ logger.setLevel(logging.DEBUG)
 def get_args():
     parser = argparse.ArgumentParser('Upload dataset to Labelbox')
     parser.add_argument('path', type=Path, help='The path to the dataset')
-    parser.add_argument('channel', type=int, help='The channel to use')
     return parser.parse_args()
 
 

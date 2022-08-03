@@ -20,9 +20,9 @@ def run_evaluation(path, model, cutoff):
 
     for fov_name, channel_id in test_files:
         print(fov_name)
-        projection = ds.projections / f"{fov_name}_max.tif"
-        fov = FieldOfView(projection)
-        channel = fov[channel_id]
+        projection = f"{fov_name}_max.tif"
+        fov = FieldOfView(ds, projection)
+        channel = fov.load_channel(channel_id)
         inp = normalize_fast2d(channel)
 
         annotation = fov.load_annotation(channel_id)
