@@ -14,7 +14,7 @@ matplotlib.rc('font', **font)
 
 def main():
     accuracy_thresholds = [0, .5, .75, .9, 1.]
-    data = pd.read_csv('out/performances_master.csv')
+    data = pd.read_csv('out/performances_1660050056531151243.csv')
     print(data)
     fig, ax = plt.subplots(1, len(datasets), figsize=(12, 2))
     for col, ds in enumerate(datasets):

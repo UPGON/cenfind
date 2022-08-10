@@ -1,7 +1,7 @@
 import pandas as pd
 
 from centrack.inference.score import get_model
-from centrack.utils.constants import datasets, PREFIX_LOCAL
+from centrack.utils.constants import datasets, PREFIX_REMOTE
 from centrack.layout.dataset import DataSet, FieldOfView
 from spotipy.utils import normalize_fast2d, points_matching
 
@@ -20,8 +20,8 @@ def run_evaluation(path, model, cutoff):
 
     for fov_name, channel_id in test_files:
         print(fov_name)
-        projection = f"{fov_name}_max.tif"
-        fov = FieldOfView(ds, projection)
+        channel_id = int(channel_id)
+        fov = FieldOfView(ds, fov_name)
         channel = fov.load_channel(channel_id)
         inp = normalize_fast2d(channel)
 
@@ -47,14 +47,14 @@ def run_evaluation(path, model, cutoff):
 
 
 def main():
-    model_name = 'master'
+    model_name = '1660050056531151243'
     cutoffs = [1, 2, 5, 10]
-    model = get_model(f'models/{model_name}')
-    dst = f'out/performances_{model_name}.csv'
+    model = get_model(f'models/dev/{model_name}')
+    dst = f'/home/buergy/projects/centrack/out/performances_{model_name}.csv'
     performances = []
 
     for ds_name in datasets:
-        path_dataset = PREFIX_LOCAL / ds_name
+        path_dataset = PREFIX_REMOTE / ds_name
         for cutoff in cutoffs:
             performance = run_evaluation(path_dataset, model, cutoff)
             performances.append(performance)

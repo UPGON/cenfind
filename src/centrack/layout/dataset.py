@@ -1,15 +1,14 @@
-import logging
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple, List
+from typing import List
+from typing import Tuple
 
+import cv2
 import numpy as np
 import tifffile as tf
-
-logging.basicConfig()
-logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.DEBUG)
+from skimage.exposure import rescale_intensity
+from spotipy.utils import normalize_fast2d
 
 
 @dataclass
@@ -50,7 +49,7 @@ class DataSet:
     def visualisation(self):
         return self.path / 'visualisation'
 
-    def splits(self, p=.9, suffix='.ome.tif') -> Tuple[List, List]:
+    def splits(self, suffix, p=.9) -> Tuple[List, List]:
         """
         Assign the FOV between train and test
         :param p: the fraction of train examples, by default .9
@@ -75,17 +74,74 @@ class DataSet:
         return files
 
 
-def build_name(path: Path, projection_type='max') -> str:
+@dataclass
+class FieldOfView:
     """
-    Extract the file name, remove the suffixes and append the projection type.
-    :param path:
-    :param projection_type: the type of projection, by default max
-    :return: file name of the projection
+    Representation of a projection (CxHxW)
     """
-    file_name = path.name
-    suffixes = ''.join(path.suffixes)
-    file_name_no_suffix = file_name.removesuffix(suffixes)
-    return file_name_no_suffix + f'_{projection_type}.tif'
+    dataset: DataSet
+    name: str
+
+    @property
+    def data(self) -> np.array:
+        return tf.imread(str(self.dataset.path / 'projections' / f"{self.name}_max.tif"))
+
+    def load_channel(self, channel: int):
+        return self.data[channel, :, :]
+
+    def load_annotation(self, channel):
+        path_annotation = self.dataset.annotations / 'centrioles' / f"{self.name}_max_C{channel}.txt"
+        if path_annotation.exists():
+            annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=',')
+            return annotation
+        else:
+            raise FileExistsError(f"{path_annotation}")
+
+    def generate_vignette(self, marker_index: int, nuclei_index: int):
+        """
+        Normalise all markers
+        Represent them as blue
+        Highlight the channel in green
+        :param nuclei_index:
+        :param marker_index:
+        :return:
+        """
+        layer_nuclei = self.load_channel(nuclei_index)
+        layer_marker = self.load_channel(marker_index)
+
+        nuclei = contrast_color(layer_nuclei, (1, 1, 1), 'uint8')
+        marker = contrast_color(layer_marker, (0, 1, 0), 'uint8')
+
+        res = cv2.addWeighted(marker, 1, nuclei, .2, 50)
+        res = cv2.putText(res, f"{self.name} channel: {marker_index}",
+                          (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
+                          .8, (255, 255, 255), 2, cv2.LINE_AA)
+
+        return res
+
+    def detect_centrioles(self, channel_id, model, prob_threshold=.5, min_distance=2):
+        """
+        Detect centrioles
+        :param channel_id:
+        :param model:
+        :param prob_threshold:
+        :param min_distance:
+        :return:
+        """
+        foci = self.load_channel(channel_id)
+        foci = normalize_fast2d(foci)
+        probs, points = model.predict(foci, prob_thresh=prob_threshold, min_distance=min_distance)
+
+        return probs, points
+
+    def _combine_other_layers(self, nuclei_index, marker_index):
+        channels_n = self.data.shape[0]
+        used = {marker_index, nuclei_index}
+        other_channels = set(range(channels_n)).difference(used)
+        layers = [rescale_intensity(self.load_channel(l), out_range='uint8')
+                  for l in other_channels]
+        other_layers = np.stack(layers, axis=0).max(axis=0)
+        return other_layers
 
 
 def fetch_files(path_source: Path, file_type):
@@ -103,25 +159,22 @@ def fetch_files(path_source: Path, file_type):
     return [file for file in files_generator if not file.name.startswith('.')]
 
 
-@dataclass
-class FieldOfView:
+def color_channel(layer, color):
     """
-    Representation of a projection (CxHxW)
+    Create a colored version of a channel image
+    :param layer:
+    :param color:
+    :return:
     """
-    dataset: DataSet
-    name: str
+    b = np.multiply(layer, color[0], casting='unsafe')
+    g = np.multiply(layer, color[1], casting='unsafe')
+    r = np.multiply(layer, color[2], casting='unsafe')
+    res = cv2.merge([b, g, r])
+    return res
 
-    @property
-    def data(self) -> np.array:
-        return tf.imread(str(self.dataset.path / 'projections' / f"{self.name}_max.tif"))
 
-    def load_channel(self, channel_id):
-        return self.data[channel_id, :, :]
-
-    def load_annotation(self, channel_id):
-        path_annotation = self.dataset.annotations / 'centrioles' / f"{self.name}_max_C{channel_id}.txt"
-        if path_annotation.exists():
-            annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=',')
-            return annotation
-        else:
-            raise FileExistsError(f"{path_annotation}")
+def contrast_color(data, color, out_range):
+    res = rescale_intensity(data, out_range=out_range)
+    # res = cv2.equalizeHist(res)
+    res = color_channel(res, color)
+    return res
