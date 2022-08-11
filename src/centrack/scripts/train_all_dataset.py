@@ -4,7 +4,7 @@ import numpy as np
 from spotipy.model import SpotNet
 
 from centrack.layout.dataset import DataSet
-from centrack.training.train_spotnet import load_pairs, config
+from centrack.training.train_spotnet import load_pairs, config, transform
 from centrack.utils.constants import datasets, PREFIX_REMOTE
 
 
@@ -19,7 +19,7 @@ def main():
     all_test_y = []
 
     for ds in dss:
-        train_x, train_y = load_pairs(ds, split='train')
+        train_x, train_y = load_pairs(ds, split='train', transform=transform)
         test_x, test_y = load_pairs(ds, split='test')
         all_train_x.append(train_x)
         all_train_y.append(train_y)
@@ -32,7 +32,7 @@ def main():
     all_test_x = np.concatenate(all_test_x, axis=0)
     all_test_y = np.concatenate(all_test_y, axis=0)
     time_stamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-   
+
     model = SpotNet(config, name=time_stamp, basedir='models/dev')
     model.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y))
 

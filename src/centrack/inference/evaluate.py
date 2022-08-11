@@ -34,10 +34,7 @@ if __name__ == '__main__':
     dataset = DataSet(args.path_dataset)
     path_centrioles = args.path_dataset / 'annotations/centrioles'
 
-    centriole_detector = get_model(
-        # '/Users/buergy/Dropbox/epfl/projects/centrack/models/dev/2022-07-14-15-54-59.555651'
-        '/Users/buergy/Dropbox/epfl/projects/centrack/models/master'
-    )
+    centriole_detector = get_model('/home/buergy/projects/centrack/models/dev/2022-08-10_18:09:45')
 
     performances = []
 

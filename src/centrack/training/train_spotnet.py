@@ -1,14 +1,13 @@
 import argparse
 import json
 import uuid
-
+import albumentations as alb
 import numpy as np
 
 from spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.model import SpotNet, Config
 
 from centrack.layout.dataset import DataSet, FieldOfView
-from centrack.utils.constants import datasets, PREFIX_REMOTE
 
 config = Config(n_channel_in=1,
                 backbone='unet',
@@ -25,6 +24,11 @@ config = Config(n_channel_in=1,
                 spot_weight_decay=.5,
                 train_batch_size=2)
 
+transform = alb.Compose([
+    alb.ShiftScaleRotate(scale_limit=0.),
+    alb.Flip(),
+])
+
 
 def read_config(path):
     """
@@ -37,7 +41,7 @@ def read_config(path):
     return Config(**config_dict)
 
 
-def load_pairs(dataset: DataSet, split: str, sigma: float = 1.5):
+def load_pairs(dataset: DataSet, split: str, sigma: float = 1.5, transform: alb.Compose = None):
     """
     Load two arrays, the images and the foci masks
     path: the path to the ds
@@ -57,6 +61,11 @@ def load_pairs(dataset: DataSet, split: str, sigma: float = 1.5):
         image = normalize_fast2d(image)
         mask = points_to_prob(foci, shape=image.shape, sigma=sigma)
 
+        if transform is not None:
+            transformed = transform(image=image, mask=mask)
+            image = transformed['image']
+            mask = transformed['mask']
+
         channels.append(image)
         masks.append(mask)
 
@@ -70,7 +79,7 @@ def main():
 
     model = SpotNet(config, name=str(uuid.uuid4()), basedir='models/dev')
     dataset = DataSet(args.path)
-    train_x, train_y = load_pairs(dataset, split='train')
+    train_x, train_y = load_pairs(dataset, split='train', transform=transform)
     test_x, test_y = load_pairs(dataset, split='test')
 
     model.train(train_x, train_y, validation_data=(test_x, test_y))

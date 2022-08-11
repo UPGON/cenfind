@@ -16,19 +16,19 @@ def cli():
     config = dotenv_values('/home/buergy/projects/centrack/.env')
 
     client = Client(api_key=config['LABELBOX_API_KEY'])
-    project = client.create_project(name='centrioles')
-    project.enable_model_assisted_labeling()
-
-    ontology_id = config['ONTOLOGY_CENTRIOLES']
-    ontology = client.get_ontology(ontology_id)
-    ontology_builder = OntologyBuilder.from_ontology(ontology)
-    editor = next(client.get_labeling_frontends(where=LabelingFrontend.name == "Editor"))
-    project.setup(editor, ontology_builder.asdict())
+    # project = client.create_project(name='centrioles')
+    # project.enable_model_assisted_labeling()
+    #
+    # ontology_id = config['ONTOLOGY_CENTRIOLES']
+    # ontology = client.get_ontology(ontology_id)
+    # ontology_builder = OntologyBuilder.from_ontology(ontology)
+    # editor = next(client.get_labeling_frontends(where=LabelingFrontend.name == "Editor"))
+    # project.setup(editor, ontology_builder.asdict())
 
     ds = DataSet(args.path)
 
     dataset = client.create_dataset(name=f"{ds.name}", iam_integration=None)
-    project.datasets.connect(dataset)
+    # project.datasets.connect(dataset)
 
     asset = [{"row_data": path, "external_id": path.name} for path in ds.vignettes.iterdir()]
     dataset.create_data_rows(asset)
