@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2
 from tqdm import tqdm
 
-from centrack.layout.dataset import DataSet, FieldOfView
+from centrack.data.base import Dataset, Projection, generate_vignette
 
 
 def cli():
@@ -13,18 +13,17 @@ def cli():
     parser.add_argument('nuclei_index', type=int)
     args = parser.parse_args()
 
-    dataset = DataSet(args.path)
+    dataset = Dataset(args.path)
     dataset.vignettes.mkdir(exist_ok=True)
 
-    train_files = dataset.split_images_channel('train')
-    test_files = dataset.split_images_channel('test')
+    train_files = dataset.splits_for('train')
+    test_files = dataset.splits_for('test')
     all_files = train_files + test_files
 
     for fov_name, channel_id in tqdm(all_files):
         channel_id = int(channel_id)
-        fov = FieldOfView(dataset, fov_name)
-        vignette = fov.generate_vignette(channel_id,
-                                         args.nuclei_index)
+        projection = Projection(dataset, fov_name)
+        vignette = generate_vignette(projection, channel_id, args.nuclei_index)
 
         dst = str(dataset.vignettes / f'{fov_name}_max_C{channel_id}.png')
         cv2.imwrite(dst, vignette)

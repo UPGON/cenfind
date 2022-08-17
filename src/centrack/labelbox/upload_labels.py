@@ -6,7 +6,7 @@ from labelbox import (Client,
                       OntologyBuilder,
                       LabelingFrontend, )
 
-from centrack.layout.dataset import DataSet
+from centrack.data.base import Dataset
 
 
 def cli():
@@ -25,7 +25,7 @@ def cli():
     # editor = next(client.get_labeling_frontends(where=LabelingFrontend.name == "Editor"))
     # project.setup(editor, ontology_builder.asdict())
 
-    ds = DataSet(args.path)
+    ds = Dataset(args.path)
 
     dataset = client.create_dataset(name=f"{ds.name}", iam_integration=None)
     # project.datasets.connect(dataset)

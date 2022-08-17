@@ -20,7 +20,7 @@ imageio = "^2.16.0"
 scikit-image = "^0.19.2"
 pandas = "^1.4.1"
 tensorflow = "^2.8.0"
-scipy = "1.7.1"
+scipy = "^1.7.1"
 csbdeep = "^0.6.3"
 stardist = "^0.8.3"
 #spotipy = { git = "ssh://git@github.com/maweigert/spotipy.git", branch = "main" }

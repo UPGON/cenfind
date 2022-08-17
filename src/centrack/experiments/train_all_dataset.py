@@ -3,14 +3,14 @@ from datetime import datetime
 import numpy as np
 from spotipy.model import SpotNet
 
-from centrack.layout.dataset import DataSet
-from centrack.training.train_spotnet import load_pairs, config, transform
-from centrack.utils.constants import datasets, PREFIX_REMOTE
+from centrack.data.base import Dataset
+from centrack.experiments.train_spotnet import load_pairs, config, transform
+from centrack.experiments.constants import datasets, PREFIX_REMOTE
 
 
 def main():
     path_datasets = [PREFIX_REMOTE / ds for ds in datasets]
-    dss = [DataSet(path) for path in path_datasets]
+    dss = [Dataset(path) for path in path_datasets]
 
     all_train_x = []
     all_train_y = []
@@ -34,7 +34,7 @@ def main():
     time_stamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 
     model = SpotNet(config, name=time_stamp, basedir='models/dev')
-    model.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y))
+    model.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=200)
 
     return 0
 

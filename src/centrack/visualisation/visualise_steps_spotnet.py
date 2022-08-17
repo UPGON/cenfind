@@ -1,5 +1,5 @@
 from spotipy.utils import normalize_fast2d
-from centrack.inference.score import get_model
+from centrack.cli.score import get_model
 from pathlib import Path
 from matplotlib import pyplot as plt
 from matplotlib import patches
@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from skimage import exposure
 from centrack.visualisation.outline import to_8bit
-from centrack.layout.dataset import DataSet, FieldOfView
+from centrack.data.base import Dataset, Projection
 
 plt.rcParams["font.family"] = "Helvetica"
 
@@ -16,8 +16,8 @@ plt.rcParams["font.family"] = "Helvetica"
 def main():
     model = get_model('models/dev/5785b6d9-f09b-4486-af65-0a923c8ae533')
 
-    dataset = DataSet(Path('/Users/buergy/Dropbox/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1'))
-    fov = FieldOfView(dataset, 'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_002')
+    dataset = Dataset(Path('/Users/buergy/Dropbox/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1'))
+    fov = Projection(dataset, 'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_002')
     data = fov.data[2, :, :]
     dna = fov.data[0, :, :]
 

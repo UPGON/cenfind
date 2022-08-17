@@ -7,7 +7,7 @@ import numpy as np
 from spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.model import SpotNet, Config
 
-from centrack.layout.dataset import DataSet, FieldOfView
+from centrack.data.base import Dataset, Projection, Channel
 
 config = Config(n_channel_in=1,
                 backbone='unet',
@@ -41,7 +41,7 @@ def read_config(path):
     return Config(**config_dict)
 
 
-def load_pairs(dataset: DataSet, split: str, sigma: float = 1.5, transform: alb.Compose = None):
+def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.Compose = None):
     """
     Load two arrays, the images and the foci masks
     path: the path to the ds
@@ -51,14 +51,16 @@ def load_pairs(dataset: DataSet, split: str, sigma: float = 1.5, transform: alb.
     channels = []
     masks = []
 
-    fovs = dataset.split_images_channel(split)
+    fovs = dataset.splits_for(split)
 
     for fov_name, channel_id in fovs:
-        fov = FieldOfView(dataset, fov_name)
+        fov_name = fov_name.replace('_max.tif', '')
+        projection = Projection(dataset, fov_name)
         channel_id = int(channel_id)
-        image = fov.load_channel(channel_id)
-        foci = fov.load_annotation(channel_id)
-        image = normalize_fast2d(image)
+        channel = Channel(projection, channel_id)
+        data = channel.data
+        foci = channel.annotation()
+        image = normalize_fast2d(data)
         mask = points_to_prob(foci, shape=image.shape, sigma=sigma)
 
         if transform is not None:
@@ -78,7 +80,7 @@ def main():
     args = parser.parse_args()
 
     model = SpotNet(config, name=str(uuid.uuid4()), basedir='models/dev')
-    dataset = DataSet(args.path)
+    dataset = Dataset(args.path)
     train_x, train_y = load_pairs(dataset, split='train', transform=transform)
     test_x, test_y = load_pairs(dataset, split='test')
 
