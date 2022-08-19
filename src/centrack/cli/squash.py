@@ -30,11 +30,11 @@ def cli():
     if not dataset.projections.exists():
         dataset.projections.mkdir()
 
-    files_raw = dataset.fetch('raw')
+    files_raw = dataset.fields('raw')
 
     for path in tqdm(files_raw):
         stack = Stack(dataset, path.name)
-        stack.write_projection(suffix=args.suffix)
+        stack.write_projection()
 
 
 if __name__ == '__main__':

@@ -289,6 +289,6 @@ def draw_annotation(background, res, foci_detected=None, nuclei_detected=None):
 
 if __name__ == '__main__':
     data = tf.imread(
-        '/data1/centrioles/rpe/RPE1p53_Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_000_max_C0.tif')
+        '/data1/centrioles/RPE1p53_Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_000_max_C0.tif')
     contrasted = to_8bit(data)
     cv2.imshow(contrasted)

@@ -7,7 +7,7 @@ import numpy as np
 from spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.model import SpotNet, Config
 
-from centrack.data.base import Dataset, Projection, Channel
+from centrack.data.base import Dataset, Projection, Channel, Field
 
 config = Config(n_channel_in=1,
                 backbone='unet',
@@ -55,7 +55,8 @@ def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.
 
     for fov_name, channel_id in fovs:
         fov_name = fov_name.replace('_max.tif', '')
-        projection = Projection(dataset, fov_name)
+        field = Field(fov_name)
+        projection = Projection(dataset, field)
         channel_id = int(channel_id)
         channel = Channel(projection, channel_id)
         data = channel.data

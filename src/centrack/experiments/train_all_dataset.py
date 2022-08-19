@@ -9,7 +9,7 @@ from centrack.experiments.constants import datasets, PREFIX_REMOTE
 
 
 def main():
-    path_datasets = [PREFIX_REMOTE / ds for ds in datasets]
+    path_datasets = [PREFIX_REMOTE / ds for ds in datasets[:3]]
     dss = [Dataset(path) for path in path_datasets]
 
     all_train_x = []

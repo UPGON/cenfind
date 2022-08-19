@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 from centrack.cli.score import get_model
 
-from centrack.experiments.constants import datasets, PREFIX_REMOTE, pattern_dataset
+from centrack.experiments.constants import datasets, PREFIX_REMOTE, pattern_dataset, protein_names, celltype_names
 from centrack.data.base import Dataset, Projection, Channel, Field, extract_info
 from spotipy.utils import normalize_fast2d, points_matching
 
@@ -42,7 +42,7 @@ def run_evaluation(path, model, cutoffs):
                                   points_preds,
                                   cutoff_distance=cutoff)
 
-            perfs.append({'ds': ds.path.name,
+            perfs.append({'dataset': ds.path.name,
                           'fov': fov.name,
                           'channel': channel_id,
                           'foci_actual_n': len(annotation),
@@ -53,58 +53,6 @@ def run_evaluation(path, model, cutoffs):
                           'recall': res.recall}
                          )
     return perfs
-
-
-def _setup_ax(ax):
-    ax.set_ylim(0, 1)
-    ax.spines['right'].set_visible(False)
-
-    return ax
-
-
-def plot_setup_accuracy(ax, data, title, metadata, accuracy_thresholds=(0, .5, .75, .9, 1.)):
-    """
-    Plot the accuracy on the specified ax
-    :param metadata:
-    :param ax:
-    :param data:
-    :param title:
-    :param accuracy_thresholds:
-    :return:
-    """
-    ax = _setup_ax(ax)
-    for c in data.channel.unique():
-        marker_index = int(c) - 1
-        marker_name = f"{metadata['markers'][marker_index]}"
-        sub = data.loc[data['channel'] == c]
-        ax.plot(sub['cutoff'], sub['f1'],
-                color='black', ls='-', lw=.5, marker='.', alpha=1, mew=0, label=marker_name)
-    ax.set_xlabel('Tolerance [pixel]')
-    ax.set_ylabel('Accuracy [F-1 score]')
-    ax.set_yticks(accuracy_thresholds)
-    ax.set_title(title)
-    ax.legend(loc='lower right')
-    return ax
-
-
-def plot_accuracy(performances: str, metadata: dict):
-    data = pd.read_csv(performances)
-    fig, axs = plt.subplots(1, len(datasets), figsize=(2 * len(datasets), 2))
-    accuracy_thresholds = (0, .5, .75, .9, 1.)
-
-    def scaler(x):
-        return x * 102.5
-
-    for col, ds in enumerate(datasets):
-        title = metadata[ds]['cell_type']
-        sub = data.loc[data['ds'] == ds]
-        ax = axs[col]
-        ax2 = ax.secondary_xaxis("top", functions=(scaler, scaler))
-        ax2.set_xlabel('Tolerance [nm]')
-        plot_setup_accuracy(ax, sub, title, metadata[ds], accuracy_thresholds)
-    fig.tight_layout()
-
-    return fig
 
 
 def perf2df(performances) -> pd.DataFrame:
@@ -122,24 +70,19 @@ def perf2df(performances) -> pd.DataFrame:
 
 
 def main():
-    model_name = '2022-08-15_13:45:46'
+    model_name = '2022-08-17_17:27:44'
     cutoffs = list(range(6))
     model = get_model(f'models/dev/{model_name}')
     path_perfs = f'/home/buergy/projects/centrack/out/performances_{model_name}.csv'
     performances = []
-    metadata = {}
 
     for dataset_name in datasets:
-        metadata[dataset_name] = extract_info(pattern_dataset, dataset_name)
         path_dataset = PREFIX_REMOTE / dataset_name
         performance = run_evaluation(path_dataset, model, cutoffs)
         performances.append(performance)
 
     performances_df = perf2df(performances)
     performances_df.to_csv(path_perfs)
-
-    fig = plot_accuracy(path_perfs, metadata)
-    fig.savefig('out/accuracy_resolution.png', dpi=300)
 
 
 if __name__ == '__main__':

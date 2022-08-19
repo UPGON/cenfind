@@ -19,12 +19,12 @@ def main():
     path_dataset = args.path
     dataset = Dataset(path_dataset)
 
-    logging.info("%s" % dataset.name)
+    logging.info("%s" % dataset.file_name)
 
     if not dataset.projections:
         sys.exit()
 
-    fovs = [f.name for f in dataset.fetch('raw')]
+    fovs = [f.name for f in dataset.fields('raw')]
     train_split, test_split = split_train_test(fovs, p=.9)
 
     train_pairs = [(fov, channel)

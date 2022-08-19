@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from skimage import exposure
 from centrack.visualisation.outline import to_8bit
-from centrack.data.base import Dataset, Projection
+from centrack.data.base import Dataset, Projection, Field
 
 plt.rcParams["font.family"] = "Helvetica"
 
@@ -17,7 +17,8 @@ def main():
     model = get_model('models/dev/5785b6d9-f09b-4486-af65-0a923c8ae533')
 
     dataset = Dataset(Path('/Users/buergy/Dropbox/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1'))
-    fov = Projection(dataset, 'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_002')
+    field = Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_002')
+    fov = Projection(dataset, field)
     data = fov.data[2, :, :]
     dna = fov.data[0, :, :]
 

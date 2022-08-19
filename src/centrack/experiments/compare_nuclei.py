@@ -1,6 +1,7 @@
 import logging
 import os
 
+import pandas as pd
 from stardist.models import StarDist2D
 from tqdm import tqdm
 
@@ -19,6 +20,7 @@ def main():
     path_dataset = PREFIX_REMOTE / datasets[0]
     dataset = Dataset(path_dataset)
     model = StarDist2D.from_pretrained('2D_versatile_fluo')
+    accuracies = []
     for field in tqdm(dataset.fields('_max.tif')):
         projection = Projection(dataset, field)
         nuclei = Channel(projection, 0)
@@ -29,6 +31,10 @@ def main():
         preds = [p.position for p in centres_preds]
         actual = [p.position for p in centres_actual]
         res = points_matching(preds, actual, cutoff_distance=50)
+        accuracies.append({'field': field.name,
+                           'f1': np.round(res.f1, 3)})
+        acc_df = pd.DataFrame(accuracies)
+        acc_df.to_csv('out/nuclei_acc.csv')
 
 
 if __name__ == '__main__':
