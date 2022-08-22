@@ -14,6 +14,15 @@ datasets = [
     'RPE1p53_PLK4flag_CEP63+CETN2+PCNT_1',
 ]
 
+protein_positions = {
+    'RPE1wt_CEP63+CETN2+PCNT_1': ('DAPI', 'CEP63', 'CETN2', 'PCNT'),
+    'RPE1wt_CP110+GTU88+PCNT_2': ('DAPI', 'CP110', 'GTU88', 'PCNT'),
+    'RPE1wt_CEP152+GTU88+PCNT_1': ('DAPI', 'CEP152', 'GTU88', 'PCNT'),
+    'U2OS_CEP63+SAS6+PCNT_1': ('DAPI', 'CEP63', 'SAS6', 'PCNT'),
+    'RPE1p53_Cnone_CEP63+CETN2+PCNT_1': ('DAPI', 'CEP63', 'CETN2', 'PCNT'),
+    'RPE1p53_PLK4flag_CEP63+CETN2+PCNT_1': ('DAPI', 'CEP63', 'CETN2', 'PCNT'),
+}
+
 protein_names = {
     'CEP63': 'Cep63',
     'CEP152': 'Cep152',
