@@ -5,7 +5,8 @@ from matplotlib import pyplot as plt
 
 from centrack.cli.score import get_model
 
-from centrack.experiments.constants import datasets, PREFIX_REMOTE, pattern_dataset, protein_names, celltype_names
+from centrack.experiments.constants import datasets, PREFIX_REMOTE, pattern_dataset, protein_names, celltype_names, \
+    protein_positions
 from centrack.data.base import Dataset, Projection, Channel, Field, extract_info
 from spotipy.utils import normalize_fast2d, points_matching
 
@@ -37,21 +38,25 @@ def run_evaluation(path, model, cutoffs):
         mask_preds, points_preds = model.predict(inp,
                                                  prob_thresh=.5,
                                                  min_distance=2)
+
+        protein_code = protein_positions[ds.file_name][channel_id]
+        protein_name = protein_names[protein_code]
         for cutoff in cutoffs:
             res = points_matching(annotation[:, [1, 0]],
                                   points_preds,
                                   cutoff_distance=cutoff)
 
-            perfs.append({'dataset': ds.path.name,
-                          'fov': fov.name,
-                          'channel': channel_id,
-                          'foci_actual_n': len(annotation),
-                          'foci_preds_n': len(points_preds),
-                          'cutoff': cutoff,
-                          'f1': res.f1,
-                          'precision': res.precision,
-                          'recall': res.recall}
-                         )
+            perfs.append({
+                'Field': fov.field.name,
+                'Channel': protein_name,
+                'Foci_actual_n': len(annotation),
+                'Foci_preds_n': len(points_preds),
+                'Tolerance': cutoff,
+                'Precision': res.precision,
+                'Recall': res.recall,
+                'F1': res.f1,
+            }
+            )
     return perfs
 
 
@@ -65,12 +70,12 @@ def perf2df(performances) -> pd.DataFrame:
                   for p in performances
                   for s in p]
     performances_df = pd.DataFrame(perfs_flat).round(3)
-    performances_df = performances_df.set_index('fov')
+    performances_df = performances_df.set_index('Field')
     return performances_df
 
 
 def main():
-    model_name = '2022-08-17_17:27:44'
+    model_name = '2022-08-15_13:45:46'
     cutoffs = list(range(6))
     model = get_model(f'models/dev/{model_name}')
     path_perfs = f'/home/buergy/projects/centrack/out/performances_{model_name}.csv'
