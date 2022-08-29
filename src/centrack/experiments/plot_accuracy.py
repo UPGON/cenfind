@@ -1,17 +1,11 @@
 import matplotlib
-import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from centrack.cli.score import get_model
-
-from centrack.experiments.constants import datasets, PREFIX_REMOTE, pattern_dataset, protein_names, celltype_names
-from centrack.data.base import Dataset, Projection, Channel, Field, extract_info
-from spotipy.utils import normalize_fast2d, points_matching
+from centrack.data.base import extract_info
+from centrack.experiments.constants import datasets, pattern_dataset, protein_names, celltype_names
 
 font = {
-    # 'family': 'Helvetica',
-    # 'weight': 'light',
     'size': 6
 }
 matplotlib.rc('font', **font)
@@ -24,7 +18,7 @@ def _setup_ax(ax):
     return ax
 
 
-def plot_setup_accuracy(ax, data, title, metadata, accuracy_thresholds=(0, .5, .75, .9, 1.)):
+def plot_setup_accuracy(ax, data, metadata, title, accuracy_thresholds=(0, .5, .75, .9, 1.)):
     """
     Plot the accuracy on the specified ax
     :param metadata:
@@ -36,15 +30,17 @@ def plot_setup_accuracy(ax, data, title, metadata, accuracy_thresholds=(0, .5, .
     """
     line_types = ['-', '--', ':']
     ax = _setup_ax(ax)
-    for c in data.channel.unique():
-        marker_index = int(c) - 1
-        protein = metadata['markers'][marker_index]
-        marker_name = f"{protein_names[protein]}"
-        line_type = line_types[marker_index]
-        sub = data.loc[data['channel'] == c]
-        ax.plot(sub['cutoff'], sub['f1'],
-                color='blue', ls=line_type, lw=1, label=marker_name)
-    ax.set_xlim(2, 5)
+    for channel in data.channel.unique():
+        channel = int(channel) - 1
+        protein_code = metadata["markers"][channel]
+        protein_name = protein_names[protein_code]
+        marker_name = f"{protein_name}"
+        line_type = line_types[channel]
+        sub = data.loc[data['channel'] == channel + 1]
+        print(channel, line_type, marker_name, channel, sub)
+        ax.plot(sub['tolerance'], sub['f1'],
+                color='#BF3F3F', ls=line_type, lw=1, label=marker_name)
+    ax.set_xlim(0, 5)
     ax.set_xlabel('[pixel]\nTolerance')
     ax.set_ylabel('Accuracy [F-1 score]')
 
@@ -69,14 +65,14 @@ def plot_accuracy(performances: str, metadata: dict):
         ax = axs[col]
         ax2 = ax.secondary_xaxis("top", functions=(scaler, scaler))
         ax2.set_xlabel('[nm]')
-        plot_setup_accuracy(ax, sub, title, metadata[ds], accuracy_thresholds)
+        plot_setup_accuracy(ax, sub, metadata[ds], title, accuracy_thresholds)
     fig.tight_layout()
 
     return fig
 
 
 def main():
-    model_name = '2022-08-17_17:27:44'
+    model_name = '2022-08-15_13:45:46'
     path_perfs = f'/home/buergy/projects/centrack/out/performances_{model_name}.csv'
     metadata = {}
     for dataset_name in datasets:

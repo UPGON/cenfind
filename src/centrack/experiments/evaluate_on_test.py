@@ -39,22 +39,21 @@ def run_evaluation(path, model, cutoffs):
                                                  prob_thresh=.5,
                                                  min_distance=2)
 
-        protein_code = protein_positions[ds.file_name][channel_id]
-        protein_name = protein_names[protein_code]
         for cutoff in cutoffs:
             res = points_matching(annotation[:, [1, 0]],
                                   points_preds,
                                   cutoff_distance=cutoff)
 
             perfs.append({
-                'Field': fov.field.name,
-                'Channel': protein_name,
-                'Foci_actual_n': len(annotation),
-                'Foci_preds_n': len(points_preds),
-                'Tolerance': cutoff,
-                'Precision': res.precision,
-                'Recall': res.recall,
-                'F1': res.f1,
+                'dataset': fov.dataset.path.name,
+                'field': fov.field.name,
+                'channel': channel_id,
+                'foci_actual_n': len(annotation),
+                'foci_preds_n': len(points_preds),
+                'tolerance': cutoff,
+                'precision': res.precision,
+                'recall': res.recall,
+                'f1': res.f1,
             }
             )
     return perfs
@@ -70,7 +69,7 @@ def perf2df(performances) -> pd.DataFrame:
                   for p in performances
                   for s in p]
     performances_df = pd.DataFrame(perfs_flat).round(3)
-    performances_df = performances_df.set_index('Field')
+    performances_df = performances_df.set_index('field')
     return performances_df
 
 
