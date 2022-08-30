@@ -27,7 +27,7 @@ def cli():
 
     ds = Dataset(args.path)
 
-    dataset = client.create_dataset(name=f"{ds.name}", iam_integration=None)
+    dataset = client.create_dataset(name=f"{ds.file_name}", iam_integration=None)
     # project.datasets.connect(dataset)
 
     asset = [{"row_data": path, "external_id": path.name} for path in ds.vignettes.iterdir()]

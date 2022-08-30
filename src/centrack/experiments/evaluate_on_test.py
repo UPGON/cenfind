@@ -1,14 +1,13 @@
+from pathlib import Path
+
 import matplotlib
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
+from spotipy.utils import normalize_fast2d, points_matching
 
 from centrack.cli.score import get_model
-
-from centrack.experiments.constants import datasets, PREFIX_REMOTE, pattern_dataset, protein_names, celltype_names, \
-    protein_positions
-from centrack.data.base import Dataset, Projection, Channel, Field, extract_info
-from spotipy.utils import normalize_fast2d, points_matching
+from centrack.data.base import Dataset, Projection, Channel, Field
+from centrack.experiments.constants import datasets, PREFIX_REMOTE
 
 font = {'family': 'Helvetica',
         'weight': 'light',
@@ -74,10 +73,12 @@ def perf2df(performances) -> pd.DataFrame:
 
 
 def main():
-    model_name = '2022-08-15_13:45:46'
+    model_name = '2022-08-29_15:22:04'
     cutoffs = list(range(6))
     model = get_model(f'models/dev/{model_name}')
-    path_perfs = f'/home/buergy/projects/centrack/out/performances_{model_name}.csv'
+    path_out = Path('/home/buergy/projects/centrack/out/')
+    path_perfs = path_out / f'performances_{model_name}.csv'
+    path_perfs_3px = path_out / f'performances_{model_name}_3px.csv'
     performances = []
 
     for dataset_name in datasets:
@@ -87,6 +88,9 @@ def main():
 
     performances_df = perf2df(performances)
     performances_df.to_csv(path_perfs)
+    performances_df_3px = performances_df.loc[performances_df["tolerance"] == 3]
+    performances_df_3px.columns = [col.replace('_', ' ').upper() for col in performances_df_3px.columns]
+    performances_df_3px.to_csv(path_perfs_3px)
 
 
 if __name__ == '__main__':

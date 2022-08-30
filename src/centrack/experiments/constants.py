@@ -12,6 +12,9 @@ datasets = [
     'U2OS_CEP63+SAS6+PCNT_1',
     'RPE1p53_Cnone_CEP63+CETN2+PCNT_1',
     'RPE1p53_PLK4flag_CEP63+CETN2+PCNT_1',
+    'U2OS_WT_siNC_sync10h',
+    'U2OS_WT_si2222_sync10h',
+
 ]
 
 protein_positions = {
@@ -21,6 +24,8 @@ protein_positions = {
     'U2OS_CEP63+SAS6+PCNT_1': ('DAPI', 'CEP63', 'SAS6', 'PCNT'),
     'RPE1p53_Cnone_CEP63+CETN2+PCNT_1': ('DAPI', 'CEP63', 'CETN2', 'PCNT'),
     'RPE1p53_PLK4flag_CEP63+CETN2+PCNT_1': ('DAPI', 'CEP63', 'CETN2', 'PCNT'),
+    'U2OS_WT_siNC_sync10h': ('AcTub', 'Plk4', 'STIL'),
+    'U2OS_WT_si2222_sync10h': ('AcTub', 'Plk4', 'STIL'),
 }
 
 protein_names = {
@@ -30,7 +35,10 @@ protein_names = {
     'PCNT': 'Pericentrin',
     'CETN2': 'Centrin',
     'SAS6': 'SAS6',
-    'CP110': 'Cp110'
+    'CP110': 'Cp110',
+    'AcTub': 'Ac. Tub',
+    'Plk4': 'Plk4',
+    'STIL': 'STIL',
 }
 
 celltype_names = {

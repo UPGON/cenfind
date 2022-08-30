@@ -6,7 +6,7 @@ from tqdm import tqdm
 from centrack.data.base import Dataset, Stack
 
 
-def cli():
+def main():
     parser = argparse.ArgumentParser(allow_abbrev=True,
                                      description='Project OME.tiff files',
                                      formatter_class=argparse.RawTextHelpFormatter)
@@ -30,7 +30,7 @@ def cli():
     if not dataset.projections.exists():
         dataset.projections.mkdir()
 
-    files_raw = dataset.fields('raw')
+    files_raw = dataset.fields(args.suffix)
 
     for path in tqdm(files_raw):
         stack = Stack(dataset, path.name)
@@ -38,4 +38,4 @@ def cli():
 
 
 if __name__ == '__main__':
-    cli()
+    main()

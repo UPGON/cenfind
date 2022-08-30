@@ -46,7 +46,7 @@ def main():
     # 32 is a good default choice (see 1_data.ipynb)
     n_rays = 32
 
-    # Use OpenCL-based computations for data generator during training (requires 'gputools')
+    # Use OpenCL-based computations for dataset_test generator during training (requires 'gputools')
     use_gpu = False and gputools_available()
 
     # Predict on sub-sampled grid for increased efficiency and larger field of view

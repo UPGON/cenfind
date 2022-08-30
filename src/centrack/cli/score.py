@@ -15,7 +15,7 @@ logger_score = logging.getLogger()
 logger_score.setLevel(logging.INFO)
 
 
-def cli():
+def main():
     parser = argparse.ArgumentParser(
         description='CENTRACK: Automatic centriole scoring')
 
@@ -26,7 +26,7 @@ def cli():
     parser.add_argument('channel_nuclei',
                         type=int,
                         default=0,
-                        help='channel id for nuclei segmentation, e.g., 0 or 4, default 0')
+                        help='channel id for nuclei segmentation, e.g., 0 or 3, default 0')
 
     args = parser.parse_args()
 
@@ -41,7 +41,7 @@ def cli():
     path_visualisation.mkdir(exist_ok=True)
     path_statistics.mkdir(exist_ok=True)
 
-    model = get_model(
+    model_spotnet = get_model(
         '/home/buergy/projects/centrack/models/master')
 
     nuclei_channel = args.channel_nuclei
@@ -60,17 +60,17 @@ def cli():
         channels.pop(nuclei_channel)
 
         nuclei = Channel(projection, nuclei_channel)
-        model = StarDist2D.from_pretrained('2D_versatile_fluo')
+        model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
 
         # This skips the print calls in spotipy
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
-            centres, nuclei = nuclei.extract_nuclei(model)
+            centres, nuclei = nuclei.extract_nuclei(model_stardist)
 
         for channel in channels:
             centrioles = Channel(projection, channel)
 
             with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
-                foci = centrioles.detect_centrioles(model=model)
+                foci = centrioles.detect_centrioles(model=model_spotnet)
 
             if foci:
                 foci_df = foci_prediction_prepare(foci, channel)
@@ -100,4 +100,4 @@ def cli():
 
 
 if __name__ == '__main__':
-    cli()
+    main()

@@ -1,13 +1,15 @@
 import argparse
 import logging
 from pathlib import Path
+from types import SimpleNamespace
 
 import pandas as pd
 from numpy.random import default_rng
+import numpy as np
+from spotipy.utils import points_matching
 
 from centrack.data.base import Dataset, Projection, Field, Channel
 from centrack.data.base import get_model
-from centrack.data.measure import evaluate_one_image
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,15 +30,27 @@ if __name__ == '__main__':
     performances = []
 
     projs_test = dataset.splits_for('test')
-    for proj_name, ch in projs_test:
+    projs_train = dataset.splits_for('train')
+    projs_all = projs_train + projs_test
+    for proj_name, ch in projs_all:
         field = Field(proj_name)
         proj = Projection(dataset, field)
         channel = Channel(proj, ch)
         annotation = channel.annotation()
-        results = evaluate_one_image(channel, centriole_detector,
-                                     annotation, offset_max=args.offset)
+        predictions = channel.detect_centrioles(model=centriole_detector)
+        predictions_np = np.asarray([c.to_numpy() for c in predictions])
+        annotation_np = np.asarray([a for a in annotation])
+        if all((len(predictions_np), len(annotation_np))) > 0:
+            results = points_matching(annotation_np, predictions_np, cutoff_distance=args.offset)
+        else:
+            logging.warning('detected: %d; annotated: %d... Set precision and accuracy to zero' % (
+            len(predictions_np), len(predictions_np)))
+            results = SimpleNamespace()
+            results.precision = 0
+            results.recall = 0
+
         performances.append(results)
         logging.info('Image: %s; Channel: %s; Precision : %.3f; Recall : %.3f',
-                     proj.name, ch, results.precision, results.recall)
+                     proj.field.name, ch, results.precision, results.recall)
     results = pd.DataFrame(performances)
     results.to_csv(args.path_dataset / f'precision_recall_{args.offset}.csv')
