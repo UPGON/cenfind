@@ -23,6 +23,7 @@ poetry.lock
 *.indd
 *.docx
 *.out
+*.tif
 /src/_spotipy/spotipy/callbacks.py
 /src/spotipy2/
 /src/napari-spotipy/
