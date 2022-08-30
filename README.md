@@ -10,8 +10,7 @@ If you want to install centrack, head to Set up the environment for centrack
 
 ## Introduction
 
-Centrack is a command line interface that allows the batch processing of ome tiff files in order to automate the
-centriole detection and the associated workflows.
+Centrack is a command line interface to detect centrioles in immunofluorescence images of human cells.
 Specifically, it orchestrates :
 
 - the z-max projection of the raw files,
@@ -22,12 +21,12 @@ Specifically, it orchestrates :
 
 ### Repository / Source code
 
-Eventually, centrack will be living on PyPI and can be installed using `pip install centrack`.
+Eventually, centrack will be living on PyPI and will be installed using `pip install centrack`.
 However, currently, this method cannot be used as centrack is not publicly available.
 Therefore, it needs to be installed from the private GitHub repository (UPGON/centrack).
 
-However, because the dependency spotipy cannot be downloaded via pip normally, one needs to download the whole
-repository and then git clone the spotipy repository under src/ next to centrack.
+Centrack relies on the private dependency spotipy, which cannot be downloaded via pip normally repository. Thus, follow
+the instructions below.
 
 This situation is temporary and in the near future spotipy will become a
 simple dependency of centrack.
@@ -64,14 +63,16 @@ cd centrack
    !!! You need to have access to this private repo; contact Leo for setting up the permission.
 
 ```shell
-cd src
-git clone git@github.com:maweigert/_spotipy 
+cd ..
+git clone git@github.com:maweigert/spotipy.git
+pip install -e spotipy/
 ```
 
 6. Add the programs `squash` and `score` to the PATH so that they can be run from
    the command line, without the need to type the whole path.
 
 ```shell
+cd centrack
 poetry install
 ```
 
@@ -88,7 +89,6 @@ Note: it may take a few seconds.
 ```shell
 git pull
 poetry install
-
 ```
 
 A common session involves running `squash` then `score`. Below, we
@@ -98,11 +98,12 @@ describe each program, their input, the algorithm and the expected output.
 
 1. Group all the raw OME.TIFF files into one folder called `raw`. This helps keep the structure of the processed images
    clean.
-2. Run `squash` with the argument of the path to the project folder. After running the `squash`, a folder
+2. Run `squash` with the argument of the path to the project folder and the suffix of the raw files. After running
+   the `squash`, a folder
    called `projections` is created and contains the 4-d tiff files.
 
 ```shell
-squash path/to/ds
+squash path/to/ds .ome.tif
 ```
 
 3. Run `score` with the arguments source and the index of the nuclei channel (usually 0 or 3).
@@ -115,8 +116,9 @@ score path/to/ds 0
 
 ### Squashing the stacks to projections
 
-`squash` expects one argument: a path to a dataset folder that contains a single folder
-called `raw/`. Inside raw, you have put all the folders that contains ome.tif
+`squash` expects two argument: a path to a dataset folder that contains a single folder
+called `raw/` and the type of raw images (.ome.tif, .stk). Inside raw, you have put all the folders that contains
+ome.tif
 files. These ome.tif files are fetched, squashed and saved to `projections/`, next to the `raw/` folder.
 
 The files are loaded using tifffile into the memory (intensive; as each file may
@@ -130,8 +132,9 @@ repeated for each file in raw.
 No further preprocessing is applied to the projections, for instance the bit
 depth is unchanged (16bit) and no contrast adjustment is applied.
 
-That being said, projections files need to be converted into 8bit png files,
-prior to uploading onto Labelbox platform.
+However, projections files need to be converted into 8bit png files,
+prior to uploading onto Labelbox platform. This conversion is further explained in the tutorial "Experimenting and
+Extending centrack with new datasets"
 
 ### Scoring the centrioles
 
@@ -154,7 +157,6 @@ Especially, the OME.tif files should be located under raw/
 
 ```text
 <project_name>/
-├── conditions.toml
 ├── projections/
 ├── raw/
 └── scores/
@@ -164,4 +166,4 @@ Especially, the OME.tif files should be located under raw/
 
 - Declare the train/test split which will be used to define which images are never used as training instances (
   scripts/train_test.py).
-- 
+- TODO
