@@ -13,7 +13,7 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('path', type=Path)
     args = parser.parse_args()
-    config = dotenv_values('/home/buergy/projects/centrack/.env')
+    config = dotenv_values('../../../.env')
 
     client = Client(api_key=config['LABELBOX_API_KEY'])
     # project = client.create_project(name='centrioles')

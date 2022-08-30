@@ -9,13 +9,13 @@ from dotenv import dotenv_values
 
 from centrack.experiments.constants import PREFIX_REMOTE
 
-config = dotenv_values('/home/buergy/projects/centrack/.env')
+config = dotenv_values('../../../.env')
 
 
 def main():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-    ch = logging.FileHandler('/home/buergy/projects/centrack/logs/download.log')
+    ch = logging.FileHandler('../../../logs/download.log')
     formatter = logging.Formatter('%(asctime)s %(message)s')
     ch.setFormatter(formatter)
     logger.addHandler(ch)

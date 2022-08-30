@@ -59,7 +59,7 @@ def main():
         n_channel_in=n_channel,
     )
 
-    model = StarDist2D(conf, name='stardist_centrin', basedir='/home/buergy/projects/centrack/models')
+    model = StarDist2D(conf, name='stardist_centrin', basedir='../../../models')
 
     model.train(images_trn, masks_trn, validation_data=(images_val, masks_val),
                 # epochs=2,

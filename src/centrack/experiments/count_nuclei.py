@@ -4,7 +4,7 @@ import labelbox
 import pandas as pd
 from dotenv import dotenv_values
 
-config = dotenv_values('/home/buergy/projects/centrack/.env')
+config = dotenv_values('../../../.env')
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)

@@ -73,7 +73,7 @@ def plot_accuracy(performances: str, metadata: dict):
 
 def main():
     model_name = '2022-08-15_13:45:46'
-    path_perfs = f'/home/buergy/projects/centrack/out/performances_{model_name}.csv'
+    path_perfs = f'../../../out/performances_{model_name}.csv'
     metadata = {}
     for dataset_name in datasets:
         metadata[dataset_name] = extract_info(pattern_dataset, dataset_name)

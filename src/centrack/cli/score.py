@@ -42,7 +42,7 @@ def main():
     path_statistics.mkdir(exist_ok=True)
 
     model_spotnet = get_model(
-        '/home/buergy/projects/centrack/models/master')
+        '../../../models/master')
 
     nuclei_channel = args.channel_nuclei
     if not dataset.projections.exists():

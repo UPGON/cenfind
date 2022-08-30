@@ -76,7 +76,7 @@ def main():
     model_name = '2022-08-29_15:22:04'
     cutoffs = list(range(6))
     model = get_model(f'models/dev/{model_name}')
-    path_out = Path('/home/buergy/projects/centrack/out/')
+    path_out = Path('../../../out/')
     path_perfs = path_out / f'performances_{model_name}.csv'
     path_perfs_3px = path_out / f'performances_{model_name}_3px.csv'
     performances = []
