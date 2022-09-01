@@ -9,11 +9,11 @@ from labelbox import (Client,
 from centrack.data.base import Dataset
 
 
-def cli():
-    parser = argparse.ArgumentParser()
+def main():
+    parser = argparse.ArgumentParser(description="Upload the vignettes to labelbox")
     parser.add_argument('path', type=Path)
     args = parser.parse_args()
-    config = dotenv_values('../../../.env')
+    config = dotenv_values('.env')
 
     client = Client(api_key=config['LABELBOX_API_KEY'])
     # project = client.create_project(name='centrioles')
@@ -35,4 +35,4 @@ def cli():
 
 
 if __name__ == '__main__':
-    cli()
+    main()

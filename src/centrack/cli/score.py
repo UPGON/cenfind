@@ -23,9 +23,12 @@ def main():
                         type=Path,
                         help='path to the ds')
 
+    parser.add_argument('model',
+                        type=Path,
+                        help='absolute path to the model folder')
+
     parser.add_argument('channel_nuclei',
                         type=int,
-                        default=0,
                         help='channel id for nuclei segmentation, e.g., 0 or 3, default 0')
 
     args = parser.parse_args()
@@ -41,8 +44,9 @@ def main():
     path_visualisation.mkdir(exist_ok=True)
     path_statistics.mkdir(exist_ok=True)
 
-    model_spotnet = get_model(
-        '../../../models/master')
+    if not args.model.exists():
+        raise FileNotFoundError(f"{args.model} does not exist")
+    model_spotnet = get_model(args.model)
 
     nuclei_channel = args.channel_nuclei
     if not dataset.projections.exists():
@@ -96,6 +100,7 @@ def main():
     binned = score_summary(scores)
     dst_statistics = str(path_statistics / f'statistics.csv')
     binned.to_csv(dst_statistics)
+    logger_score.info('Saving statistics to %s' % path_statistics)
     logger_score.info('Analysis done.')
 
 

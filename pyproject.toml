@@ -28,6 +28,9 @@ stardist = "^0.8.3"
 [tool.poetry.scripts]
 squash = "centrack.cli.squash:main"
 score = "centrack.cli.score:main"
+vignettes = "centrack.labelbox.vignettes:main"
+splits = "centrack.experiments.train_test:main"
+upload = "centrack.labelbox.upload_labels:main"
 
 [tool.poetry.dev-dependencies]
 

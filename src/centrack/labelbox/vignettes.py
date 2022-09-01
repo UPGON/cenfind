@@ -7,10 +7,10 @@ from tqdm import tqdm
 from centrack.data.base import Dataset, Projection, generate_vignette, Field
 
 
-def cli():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('path', type=Path)
-    parser.add_argument('nuclei_index', type=int)
+def main():
+    parser = argparse.ArgumentParser(description="VIGNETTE: create png version of channel+nuclei for annotation tool")
+    parser.add_argument('path', type=Path, help="the path to the dataset")
+    parser.add_argument('nuclei_index', type=int, help="the index of the nuclei (often, 0 or 3, first or last)")
     args = parser.parse_args()
 
     dataset = Dataset(args.path)
@@ -31,4 +31,4 @@ def cli():
 
 
 if __name__ == '__main__':
-    cli()
+    main()

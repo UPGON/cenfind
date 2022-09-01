@@ -37,7 +37,6 @@ def plot_setup_accuracy(ax, data, metadata, title, accuracy_thresholds=(0, .5, .
         marker_name = f"{protein_name}"
         line_type = line_types[channel]
         sub = data.loc[data['channel'] == channel + 1]
-        print(channel, line_type, marker_name, channel, sub)
         ax.plot(sub['tolerance'], sub['f1'],
                 color='#BF3F3F', ls=line_type, lw=1, label=marker_name)
     ax.set_xlim(0, 5)
@@ -59,6 +58,7 @@ def plot_accuracy(performances: str, metadata: dict):
         return x * 102.5
 
     for col, ds in enumerate(datasets):
+        print(ds)
         cell_type = metadata[ds]['cell_type']
         title = f"{celltype_names[cell_type]} {metadata[ds]['treatment'] or ''}"
         sub = data.loc[data['dataset'] == ds]
@@ -72,8 +72,8 @@ def plot_accuracy(performances: str, metadata: dict):
 
 
 def main():
-    model_name = '2022-08-15_13:45:46'
-    path_perfs = f'../../../out/performances_{model_name}.csv'
+    model_name = '2022-08-31_16:53:44'
+    path_perfs = f'out/performances_{model_name}.csv'
     metadata = {}
     for dataset_name in datasets:
         metadata[dataset_name] = extract_info(pattern_dataset, dataset_name)

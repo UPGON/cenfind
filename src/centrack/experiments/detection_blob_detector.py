@@ -19,7 +19,7 @@ def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
     return res
 
 
-def detect_centrioles_skimage_blob_dog(data: Channel) -> list:
+def detect_centrioles_skimage_blob_log(data: Channel) -> list:
     data = data.data
     data = rescale_intensity(data, out_range=(0, 1))
     foci = blob_log(data, min_sigma=.5, max_sigma=5, num_sigma=10, threshold=.1)
@@ -58,8 +58,8 @@ def main():
             proj = Projection(ds, field)
             data = Channel(proj, channel)
             annot = data.annotation()
-            foci = detect_centrioles_skimage_blob_dog(data)
-            res = points_matching(annot, foci)
+            foci = detect_centrioles_cv2_simple_blob_detector(data)
+            res = points_matching(annot, foci, cutoff_distance=3)
             f1 = np.round(res.f1, 3)
             perf = {'field': field.name,
                     'channel': channel,
@@ -78,7 +78,7 @@ def main():
                     continue
             cv2.imwrite(f'out/images/{field.channel_name(channel)}_preds.png', mask)
 
-    pd.DataFrame(perfs).to_csv('out/perfs_blobdetector_log.csv')
+    pd.DataFrame(perfs).to_csv('out/perfs_blobdetector_blobcv2.csv')
 
 
 if __name__ == '__main__':

@@ -11,9 +11,7 @@ datasets = [
     'RPE1wt_CEP152+GTU88+PCNT_1',
     'U2OS_CEP63+SAS6+PCNT_1',
     'RPE1p53_Cnone_CEP63+CETN2+PCNT_1',
-    'RPE1p53_PLK4flag_CEP63+CETN2+PCNT_1',
-    'U2OS_WT_siNC_sync10h',
-    'U2OS_WT_si2222_sync10h',
+    'U2OSwt_siNC2h_AcTub+Plk4+STIL_1',
 
 ]
 
@@ -23,9 +21,7 @@ protein_positions = {
     'RPE1wt_CEP152+GTU88+PCNT_1': ('DAPI', 'CEP152', 'GTU88', 'PCNT'),
     'U2OS_CEP63+SAS6+PCNT_1': ('DAPI', 'CEP63', 'SAS6', 'PCNT'),
     'RPE1p53_Cnone_CEP63+CETN2+PCNT_1': ('DAPI', 'CEP63', 'CETN2', 'PCNT'),
-    'RPE1p53_PLK4flag_CEP63+CETN2+PCNT_1': ('DAPI', 'CEP63', 'CETN2', 'PCNT'),
-    'U2OS_WT_siNC_sync10h': ('AcTub', 'Plk4', 'STIL'),
-    'U2OS_WT_si2222_sync10h': ('AcTub', 'Plk4', 'STIL'),
+    'U2OSwt_siNC2h_AcTub+Plk4+STIL_1': ('AcTub', 'Plk4', 'STIL'),
 }
 
 protein_names = {
@@ -44,7 +40,8 @@ protein_names = {
 celltype_names = {
     'RPE1wt': 'RPE-1 WT',
     'RPE1p53': 'RPE-1 p53-/-',
-    'U2OS': 'U2-OS'
+    'U2OS': 'U2-OS',
+    'U2OSwt': 'U2-OS',
 }
 
 pattern_dataset = re.compile(
