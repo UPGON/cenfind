@@ -4,8 +4,8 @@ import pandas as pd
 from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 from skimage.feature import blob_log
-from spotipy.utils import points_matching
-
+from spotipy.utils import points_matching, normalize_fast2d
+from centrack.cli.score import get_model
 from centrack.data.base import Dataset, Projection, Channel, Field
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
 from centrosome_analysis import centrosome_analysis_backend
@@ -20,7 +20,8 @@ def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
     return res
 
 
-def log_skimage(data: Channel, **kwargs) -> list:
+def log_skimage(data: Projection, channel: int, **kwargs) -> list:
+    data = Channel(data, channel)
     data = data.data
     data = rescale_intensity(data, out_range=(0, 1))
     foci = blob_log(data, min_sigma=.5, max_sigma=5, num_sigma=10, threshold=.1)
@@ -29,7 +30,8 @@ def log_skimage(data: Channel, **kwargs) -> list:
     return res
 
 
-def simpleblob_cv2(data: Channel, **kwargs) -> list:
+def simpleblob_cv2(data: Projection, channel: int, **kwargs) -> list:
+    data = Channel(data, channel)
     foci = rescale_intensity(data.data, out_range='uint8')
     params = cv2.SimpleBlobDetector_Params()
 
@@ -49,16 +51,30 @@ def simpleblob_cv2(data: Channel, **kwargs) -> list:
     return res
 
 
-def sankaran(data, foci_model_file):
+def spotnet(data: Projection, foci_model_file, channel):
+    data = Channel(data, channel)
+    data = data.data
+    data = normalize_fast2d(data)
+    model = get_model(foci_model_file)
+    mask_preds, points_preds = model.predict(data,
+                                             prob_thresh=.5,
+                                             min_distance=2)
+    return points_preds[:, [1, 0]]
+
+
+def sankaran(data: Projection, foci_model_file, **kwargs):
+    data = data.data[1:, :, :]
     foci_model = centrosome_analysis_backend.load_foci_model(foci_model_file=foci_model_file)
     foci, foci_scores = centrosome_analysis_backend.run_detection_model(data, foci_model)
-    detections = foci[foci_scores > .7, :]
+    detections = foci[foci_scores > .99, :]
     detections = np.round(detections).astype(int)
     return detections
 
 
-def run_detection(method, data, annot, tolerance):
-    foci = method(data, foci_model_file='src/centrosome_analysis/foci_model.pt')
+def run_detection(method, data: Projection, tolerance, channel=None, model_path=None):
+    channel_data = Channel(data, channel)
+    annot = channel_data.annotation()
+    foci = method(data, foci_model_file=model_path, channel=channel)
     res = points_matching(annot, foci, cutoff_distance=tolerance)
     f1 = np.round(res.f1, 3)
     return foci, f1
@@ -76,29 +92,29 @@ def draw_foci(data, foci):
 
 
 def main():
+    methods = [spotnet, sankaran, log_skimage, simpleblob_cv2]
+    model_paths = {
+        'sankaran': 'src/centrosome_analysis/foci_model.pt',
+        'spotnet': 'models/dev/2022-09-01_15:20:19',
+        'log_skimage': None,
+        'simpleblob_cv2': None,
+    }
     perfs = []
-    methods = [sankaran, log_skimage, simpleblob_cv2]
     for ds_name in datasets:
         ds = Dataset(PREFIX_REMOTE / ds_name)
         test_fields = ds.splits_for('test')
         for field_name, channel in test_fields:
-            print(field_name)
             field = Field(field_name)
             proj = Projection(ds, field)
-            data = Channel(proj, channel)
-            annot = data.annotation()
-            annot_swp = annot[:, [1, 0]]
+            vis = proj.data[channel, :, :]
 
             for method in methods:
-                print(method.__name__)
-                if method == sankaran:
-                    foci, f1 = run_detection(method, proj.data, annot_swp, 3)
-                else:
-                    foci, f1 = run_detection(method, data, annot, 3)
-                print(f"{field_name}: {f1}")
+                model_path = model_paths[method.__name__]
+                foci, f1 = run_detection(method, proj, 3, channel=channel, model_path=model_path)
+                print(f"{field_name} using {method.__name__}: F1={f1}")
                 perf = {'field': field.name, 'channel': channel, 'method': method.__name__, 'f1': f1}
                 perfs.append(perf)
-                mask = draw_foci(data, foci)
+                mask = draw_foci(vis, foci)
                 cv2.imwrite(f'out/images/{field.channel_name(channel)}_preds_{method.__name__}.png', mask)
 
     pd.DataFrame(perfs).to_csv(f'out/perfs_blobdetectors.csv')
