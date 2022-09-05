@@ -85,7 +85,7 @@ def main():
     train_x, train_y = load_pairs(dataset, split='train', transform=transform)
     test_x, test_y = load_pairs(dataset, split='test')
 
-    model.train(train_x, train_y, validation_data=(test_x, test_y))
+    model.train(train_x, train_y, validation_data=(test_x, test_y), epochs=100)
 
 
 if __name__ == '__main__':

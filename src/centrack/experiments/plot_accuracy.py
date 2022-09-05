@@ -72,7 +72,7 @@ def plot_accuracy(performances: str, metadata: dict):
 
 
 def main():
-    model_name = '2022-09-01_15:20:19'
+    model_name = '2022-09-02_14:31:28'
     path_perfs = f'out/performances_{model_name}.csv'
     metadata = {}
     for dataset_name in datasets:

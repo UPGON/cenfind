@@ -73,7 +73,7 @@ def perf2df(performances) -> pd.DataFrame:
 
 
 def main():
-    model_name = '2022-09-01_15:20:19'
+    model_name = '2022-09-05_09:19:37'
     cutoffs = list(range(6))
     model = get_model(f'models/dev/{model_name}')
     path_out = Path('out')

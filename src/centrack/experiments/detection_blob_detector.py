@@ -94,8 +94,8 @@ def draw_foci(data, foci):
 def main():
     methods = [spotnet, sankaran, log_skimage, simpleblob_cv2]
     model_paths = {
-        'sankaran': 'src/centrosome_analysis/foci_model.pt',
-        'spotnet': 'models/dev/2022-09-01_15:20:19',
+        'sankaran': 'models/sankaran/dev/2022-09-05_09:23:45',
+        'spotnet': 'models/dev/2022-09-02_14:31:28',
         'log_skimage': None,
         'simpleblob_cv2': None,
     }

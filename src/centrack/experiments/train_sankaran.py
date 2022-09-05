@@ -18,7 +18,7 @@ def main():
 
     model = FociDetector()
     print('Start learning')
-    model = train_model_fcn(model, train_files=train_files, need_sigmoid=True, num_epochs=3)
+    model = train_model_fcn(model, train_files=train_files, need_sigmoid=True, num_epochs=100)
     time_stamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 
     torch.save(model.state_dict(), f'models/sankaran/dev/{time_stamp}')
