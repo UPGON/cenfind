@@ -1,10 +1,13 @@
 import argparse
 from pathlib import Path
-import labelbox
-from shapely.errors import TopologicalError
+
 import pandas as pd
 from dotenv import dotenv_values
 from tqdm import tqdm
+
+from centrack.data.base import Dataset, Field, Projection, Channel
+from centrack.experiments.constants import datasets, PREFIX_REMOTE
+from centrack.visualisation.outline import Contour
 
 config = dotenv_values('.env')
 
@@ -16,53 +19,38 @@ pd.set_option('display.max_colwidth', None)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--project', type=str, default=None)
     parser.add_argument('--destination', type=str, default=None)
     args = parser.parse_args()
 
-    project_id = args.project
-    if args.project is None:
-        project_id = config['PROJECT_CENTRIOLES']
+    statistics_path = Path(args.destination)
+    statistics_path.touch()
 
-    lb = labelbox.Client(api_key=config['LABELBOX_API_KEY'])
-    project = lb.get_project(project_id)
-    labels = project.label_generator(timeout_seconds=90 * 100)
-
-    counts = []
     pad_lower = int(.1 * 2048)
     pad_upper = 2048 - pad_lower
-    for label in labels:
-        nuclei_in_label = [lab for lab in label.annotations if lab.name == 'Nucleus']
-        dataset_name = label.extra['Dataset Name']
-        label_name = label.data.external_id
-        print(dataset_name)
+    records = []
+    for dataset in datasets:
+        dataset = Dataset(PREFIX_REMOTE / dataset)
+        for field in dataset.fields('_max.tif'):
+            projection = Projection(dataset, field)
 
-        nuclei_n = len(nuclei_in_label)
-        at_edge = 0
-        for nuc in tqdm(nuclei_in_label):
-            try:
-                coords = nuc.value.shapely.centroid.centroid.coords
-            except TopologicalError:
-                print(f"problem with label {dataset_name} ({label_name})")
-                continue
-            if len(coords) != 2:
-                print(f"problem with coords: {coords}")
-                continue
-            centre = [int(i) for i in coords[0]]
+            channel = Channel(projection, 0)
+            annot_nuclei = channel.mask(0)
+            centres, contours = channel.extract_nuclei(annotation=annot_nuclei)
+            for centre in centres:
+                at_edge = True
+                if all([pad_lower < c < pad_upper for c in centre.centre]):
+                    at_edge = False
+                records.append({'dataset': dataset.file_name,
+                                'field': field.name,
+                                'centre': centre.centre,
+                                'at_edge': at_edge})
+    df = pd.DataFrame(records)
 
-            if not all(pad_lower < p < pad_upper for p in centre):
-                at_edge += 1
+    def frac(x):
+        return x.sum() / len(x)
 
-        record = (dataset_name, label_name, nuclei_n, at_edge)
-        counts.append(record)
-        with open(Path(args.destination), 'a+') as f:
-            f.write(f"{record}\n")
-
-    data_df = pd.DataFrame(counts)
-    if args.destination is not None:
-        data_df.to_csv(args.destination)
-    else:
-        print(data_df)
+    summary = df.groupby(['dataset'])['at_edge'].agg(['count', sum, frac])
+    summary.to_csv(statistics_path)
 
 
 if __name__ == '__main__':
