@@ -7,6 +7,7 @@ from spotipy.utils import normalize_fast2d, points_matching
 
 from centrack.cli.score import get_model
 from centrack.data.base import Dataset, Projection, Channel, Field
+from centrack.data.measure import frac, at_edge
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
 
 font = {'family': 'Helvetica',
