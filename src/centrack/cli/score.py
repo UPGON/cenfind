@@ -68,7 +68,7 @@ def main():
 
         # This skips the print calls in spotipy
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
-            centres, nuclei = nuclei.extract_nuclei(model_stardist)
+            centres, nuclei = nuclei.extract_nuclei(model_stardist, model_stardist)
 
         for channel in channels:
             centrioles = Channel(projection, channel)

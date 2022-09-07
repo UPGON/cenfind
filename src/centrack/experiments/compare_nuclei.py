@@ -28,8 +28,8 @@ def main():
             projection = Projection(dataset, field)
             nuclei = Channel(projection, 0)
             nuclei_mask = nuclei.mask(0)
-            centres_preds, nuclei_preds = nuclei.extract_nuclei(model=model)
-            centres_actual, nuclei_actual = nuclei.extract_nuclei(annotation=nuclei_mask)
+            centres_preds, nuclei_preds = nuclei.extract_nuclei(model_stardist)
+            centres_actual, nuclei_actual = nuclei.extract_nuclei(model_stardist, annotation=nuclei_mask)
             logging.info("Found %d nuclei instead of %d" % (len(centres_preds), len(centres_actual)))
             preds = preds + [p.position for p in centres_preds]
             actual = actual + [p.position for p in centres_actual]
