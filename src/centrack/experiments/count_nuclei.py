@@ -3,11 +3,9 @@ from pathlib import Path
 
 import pandas as pd
 from dotenv import dotenv_values
-from tqdm import tqdm
 
-from centrack.data.base import Dataset, Field, Projection, Channel
+from centrack.data.base import Dataset, Projection, Channel
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
-from centrack.visualisation.outline import Contour
 
 config = dotenv_values('.env')
 
