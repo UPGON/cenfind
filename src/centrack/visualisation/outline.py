@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import tifffile as tf
 
-import numpy as np
 import cv2
+import numpy as np
+import tifffile as tf
+from skimage.exposure import rescale_intensity
 
 
 @dataclass(eq=True, frozen=True)
@@ -285,6 +286,43 @@ def draw_annotation(background, res, foci_detected=None, nuclei_detected=None):
                      lineType=cv2.FILLED)
 
     return background
+
+
+def _color_channel(data, color, out_range):
+    """
+    Create a colored version of a channel image
+    :return:
+    """
+    data = rescale_intensity(data, out_range=out_range)
+    b = np.multiply(data, color[0], casting='unsafe')
+    g = np.multiply(data, color[1], casting='unsafe')
+    r = np.multiply(data, color[2], casting='unsafe')
+    res = cv2.merge([b, g, r])
+    return res
+
+
+def generate_vignette(projection, marker_index: int, nuclei_index: int):
+    """
+    Normalise all markers
+    Represent them as blue
+    Highlight the channel in green
+    :param projection:
+    :param nuclei_index:
+    :param marker_index:
+    :return:
+    """
+    layer_nuclei = projection.data[nuclei_index, :, :]
+    layer_marker = projection.data[marker_index, :, :]
+
+    nuclei = _color_channel(layer_nuclei, (1, 0, 0), 'uint8')
+    marker = _color_channel(layer_marker, (0, 1, 0), 'uint8')
+
+    res = cv2.addWeighted(marker, 1, nuclei, .2, 50)
+    res = cv2.putText(res, f"{projection.name} {marker_index}",
+                      (5, 20), cv2.FONT_HERSHEY_SIMPLEX,
+                      .8, (255, 255, 255), 1, cv2.LINE_AA)
+
+    return res
 
 
 if __name__ == '__main__':

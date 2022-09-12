@@ -21,14 +21,8 @@ def main():
     args = parser.parse_args()
 
     path_dataset = args.source
-    if not path_dataset.exists():
-        raise FileNotFoundError(
-            f'raw/ folder not found, please make sure to move the ome.tif files in {path_dataset}.')
-
     dataset = Dataset(path_dataset)
-
-    if not dataset.projections.exists():
-        dataset.projections.mkdir()
+    (dataset.path / 'projections').mkdir(exist_ok=True)
 
     files_raw = dataset.fields(args.suffix)
 

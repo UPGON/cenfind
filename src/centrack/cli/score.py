@@ -9,7 +9,7 @@ import pandas as pd
 from stardist.models import StarDist2D
 from centrack.data.base import Dataset, Projection, Channel
 from centrack.data.base import get_model
-from centrack.data.measure import foci_prediction_prepare, assign, score_summary
+from centrack.scoring.measure import foci_prediction_prepare, assign, score_summary, full_in_field
 
 logger_score = logging.getLogger()
 logger_score.setLevel(logging.INFO)
@@ -36,23 +36,16 @@ def main():
     path_dataset = Path(args.path)
     dataset = Dataset(path_dataset)
 
-    path_predictions = path_dataset / 'predictions'
-    path_visualisation = path_dataset / 'visualisations'
-    path_statistics = path_dataset / 'statistics'
-
-    path_predictions.mkdir(exist_ok=True)
-    path_visualisation.mkdir(exist_ok=True)
-    path_statistics.mkdir(exist_ok=True)
-
     if not args.model.exists():
         raise FileNotFoundError(f"{args.model} does not exist")
     model_spotnet = get_model(args.model)
 
     nuclei_channel = args.channel_nuclei
-    if not dataset.projections.exists():
+    if not (dataset.path / 'projections').exists():
         raise FileExistsError(
             'Projection folder does not exist. Have you run `squash`?')
 
+    model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
     scored = []
 
     for projection in dataset.fields('_max.tif'):
@@ -64,27 +57,17 @@ def main():
         channels.pop(nuclei_channel)
 
         nuclei = Channel(projection, nuclei_channel)
-        model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
 
-        # This skips the print calls in spotipy
-        with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
-            centres, nuclei = nuclei.extract_nuclei(model_stardist)
+        centres, nuclei = nuclei.extract_nuclei(model_stardist)
 
         for channel in channels:
             centrioles = Channel(projection, channel)
-
-            with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
-                foci = centrioles.detect_centrioles(model=model_spotnet)
-
+            foci = centrioles.detect_centrioles(model=model_spotnet)
             if foci:
                 foci_df = foci_prediction_prepare(foci, channel)
-                foci_df.to_csv(path_predictions / f"{projection.name}_foci_{channel}_preds.csv")
-
-                logger_score.info('Detection in channel %s: %s nuclei, %s foci',
-                                  channel, len(nuclei), len(foci))
+                foci_df.to_csv(dataset.predictions / f"{projection.name}_foci_{channel}_preds.csv")
             else:
-                logger_score.warning(
-                    'No object were detected in channel %s: skipping...', channel)
+                continue
 
             assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)
 
@@ -94,14 +77,13 @@ def main():
                                'channel': channel,
                                'nucleus': n.centre.position,
                                'score': len(foci),
+                               'is_full': full_in_field(n.centre.position, .05, channel.data)
                                })
 
     scores = pd.DataFrame(scored)
     binned = score_summary(scores)
-    dst_statistics = str(path_statistics / f'statistics.csv')
+    dst_statistics = str(dataset.statistics / f'statistics.csv')
     binned.to_csv(dst_statistics)
-    logger_score.info('Saving statistics to %s' % path_statistics)
-    logger_score.info('Analysis done.')
 
 
 if __name__ == '__main__':

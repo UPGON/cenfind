@@ -6,7 +6,7 @@ from dotenv import dotenv_values
 from tqdm import tqdm
 from centrack.data.base import Dataset, Projection, Channel, generate_vignette
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
-from centrack.data.measure import frac, at_edge
+from centrack.scoring.measure import frac, full_in_field
 
 config = dotenv_values('.env')
 
@@ -32,22 +32,29 @@ def main():
             annot_nuclei = channel.mask(0)
             centres, contours = channel.extract_nuclei(annotation=annot_nuclei)
             vignette = generate_vignette(projection, 1, 0)
+            # foci = channel.annotation()
+            # foci = [Centre(f, label='Focus') for f in foci]
+            # for focus in foci:
+            #     focus.draw(vignette)
             for centre, contour in zip(centres, contours):
-                is_at_edge = at_edge(centre.centre, .05, annot_nuclei)
+                is_full = full_in_field(centre.centre, .05, annot_nuclei)
                 color = (0, 0, 255)
-                if is_at_edge:
+                if is_full:
                     color = (0, 255, 0)
                 records.append({'dataset': dataset.file_name,
                                 'field': field.name,
                                 'centre': centre.centre,
-                                'is_at_edge': is_at_edge})
+                                'is_full': is_full})
 
-                contour.draw(vignette, color=color)
+                # contour.draw(vignette, color=color)
+            #
+            # assigned = assign(foci, contours, -50)
+            # draw_annotation(vignette, assigned, foci, contours)
 
             cv2.imwrite(f'out/checks/{field.name}.png', vignette)
     df = pd.DataFrame(records)
 
-    summary = df.groupby(['dataset'])['is_at_edge'].agg(['count', sum, frac])
+    summary = df.groupby(['dataset'])['is_full'].agg(['count', sum, frac])
     summary.to_csv(statistics_path)
 
 

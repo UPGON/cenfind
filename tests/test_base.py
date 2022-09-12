@@ -18,17 +18,12 @@ class TestData:
 
     def test_dataset(self):
         assert self.dataset.path == self.path_dataset
-        assert self.dataset.file_name == 'dataset_test'
         assert self.dataset.fields('.ome.tif') == [Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002'),
                                                    Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000')]
-
-        assert self.dataset.raw == self.path_dataset / 'raw'
-        assert self.dataset.projections == self.path_dataset / 'projections'
 
     def test_stack(self):
         assert self.stack.field.name == self.field_name
         assert self.stack.path == self.path_dataset / 'raw/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.ome.tif'
-        assert self.stack.dataset.file_name == self.path_dataset.name
         assert self.stack.data().ndim == 4
         assert self.stack.project()[0].ndim == 3
 

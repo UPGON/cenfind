@@ -7,7 +7,6 @@ from spotipy.utils import normalize_fast2d, points_matching
 
 from centrack.cli.score import get_model
 from centrack.data.base import Dataset, Projection, Channel, Field
-from centrack.data.measure import frac, at_edge
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
 
 font = {'family': 'Helvetica',
@@ -80,6 +79,7 @@ def main():
     path_out = Path('out')
     path_perfs = path_out / f'performances_{model_name}.csv'
     path_perfs_3px = path_out / f'performances_{model_name}_3px.csv'
+    path_summary = path_out / f'performances_{model_name}_3px_summary.csv'
     performances = []
 
     for dataset_name in datasets:
@@ -90,8 +90,10 @@ def main():
     performances_df = perf2df(performances)
     performances_df.to_csv(path_perfs)
     performances_df_3px = performances_df.loc[performances_df["tolerance"] == 3]
-    performances_df_3px.columns = [col.replace('_', ' ').upper() for col in performances_df_3px.columns]
+    # performances_df_3px.columns = [col.replace('_', ' ').upper() for col in performances_df_3px.columns]
     performances_df_3px.to_csv(path_perfs_3px)
+    summary = performances_df_3px.groupby(['dataset', 'channel']).agg('mean', 'std')['f1']
+    summary.to_csv(path_summary)
 
 
 if __name__ == '__main__':

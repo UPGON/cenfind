@@ -5,7 +5,7 @@ import pandas as pd
 
 from centrack.data.base import Dataset, Field, Projection, Channel
 from centrack.data.base import get_model
-from centrack.data.measure import assign
+from centrack.scoring.measure import assign
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
 from stardist.models import StarDist2D
 

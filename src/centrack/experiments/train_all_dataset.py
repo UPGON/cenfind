@@ -4,7 +4,7 @@ import numpy as np
 from spotipy.model import SpotNet
 
 from centrack.data.base import Dataset
-from centrack.experiments.train_spotnet import load_pairs, config, transform
+from centrack.training.train_spotnet import load_pairs, config, transform
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
 
 
