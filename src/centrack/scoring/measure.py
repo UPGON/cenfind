@@ -6,14 +6,32 @@ import numpy as np
 import pandas as pd
 from stardist.models import StarDist2D
 
-from centrack.data.base import Projection, Channel, Dataset, Field
-from centrack.visualisation.outline import (
-    Centre,
-    Contour
-)
+from centrack.data.base import Field
+from centrack.visualisation.outline import Contour, Centre
 
 
-def score_fov(dataset: Dataset, field: Field,
+def prob2img(data):
+    return (((2 ** 16) - 1) * data).astype('uint16')
+
+
+def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
+    res = tuple(int(c) for c in keypoint.pt)
+    return res
+
+
+def _resize_image(data):
+    height, width = data.shape
+    shrinkage_factor = int(height // 256)
+    height_scaled = int(height // shrinkage_factor)
+    width_scaled = int(width // shrinkage_factor)
+    data_resized = cv2.resize(data,
+                              dsize=(height_scaled, width_scaled),
+                              fx=1, fy=1,
+                              interpolation=cv2.INTER_NEAREST)
+    return data_resized
+
+
+def score_fov(field: Field,
               model_nuclei: StarDist2D, model_foci: Path,
               nuclei_channel: int, channel: int):
     """
@@ -30,24 +48,27 @@ def score_fov(dataset: Dataset, field: Field,
     :return:
     """
 
-    projection = Projection(dataset, field)
-
-    nuclei = Channel(projection, nuclei_channel)
+    nuclei = field.channel(nuclei_channel)
     centres, nuclei = nuclei.extract_nuclei(model_nuclei)
 
-    centrioles = Channel(projection, channel)
+    centrioles = field.channel(channel)
     foci = centrioles.detect_centrioles(model=model_foci)
+    foci = [
+        Centre((y, x), f_id, 'Centriole',
+               confidence=foci[0][x, y].round(3))
+        for
+        f_id, (x, y) in enumerate(foci[1])]
 
     assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)
 
     scored = []
     for pair in assigned:
         n, foci = pair
-        scored.append({'fov': projection.name,
+        scored.append({'fov': field.name,
                        'channel': channel,
                        'nucleus': n.centre.position,
                        'score': len(foci),
-                       'is_full': full_in_field(n.centre.position, .05, centrioles.data)
+                       'is_full': full_in_field(n.centre.position, .05, centrioles.projection)
                        })
     return scored
 

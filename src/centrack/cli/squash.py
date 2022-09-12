@@ -1,9 +1,10 @@
 import argparse
 from pathlib import Path
 
+import tifffile as tf
 from tqdm import tqdm
 
-from centrack.data.base import Dataset, Stack
+from centrack.data.base import Dataset, Field
 
 
 def main():
@@ -14,21 +15,16 @@ def main():
                         type=Path,
                         help='Path to the ds folder; the parent of `raw`.',
                         )
-    parser.add_argument('suffix',
-                        type=str,
-                        help='Format of the raw files, e.g., `.ome.tif` or `.stk`')
-
     args = parser.parse_args()
 
     path_dataset = args.source
     dataset = Dataset(path_dataset)
-    (dataset.path / 'projections').mkdir(exist_ok=True)
 
-    files_raw = dataset.fields(args.suffix)
-
-    for path in tqdm(files_raw):
-        stack = Stack(dataset, path.name)
-        stack.write_projection()
+    for field in tqdm(dataset.fields):
+        field = Field(field, dataset)
+        stack = tf.imread(field.stack)
+        projection = stack.max(1)
+        tf.imwrite(dataset.projections / f"{field.name}_max.tif", projection)
 
 
 if __name__ == '__main__':

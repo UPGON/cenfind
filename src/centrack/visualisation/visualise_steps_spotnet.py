@@ -19,8 +19,8 @@ def main():
     dataset = Dataset(Path('/Users/buergy/Dropbox/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1'))
     field = Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_002')
     fov = Projection(dataset, field)
-    data = fov.data[2, :, :]
-    dna = fov.data[0, :, :]
+    data = fov.projection[2, :, :]
+    dna = fov.projection[0, :, :]
 
     percentile = .2
     width = 32

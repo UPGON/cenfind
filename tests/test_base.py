@@ -24,16 +24,16 @@ class TestData:
     def test_stack(self):
         assert self.stack.field.name == self.field_name
         assert self.stack.path == self.path_dataset / 'raw/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.ome.tif'
-        assert self.stack.data().ndim == 4
+        assert self.stack.projection().ndim == 4
         assert self.stack.project()[0].ndim == 3
 
     def test_projection(self):
         assert self.projection.name == 'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000_max'
         assert self.projection.field == self.field
         assert self.projection.path == self.path_dataset / 'projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000_max.tif'
-        assert self.projection.data.ndim == 3
+        assert self.projection.projection.ndim == 3
 
     def test_channel(self):
         assert self.channel.name == 'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000_max_C1'
-        assert self.channel.data.shape == (2048, 2048)
+        assert self.channel.projection.shape == (2048, 2048)
         assert self.dataset == self.dataset

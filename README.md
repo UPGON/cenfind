@@ -5,7 +5,7 @@ A command line interface to score centrioles in cells.
 ## Overview
 
 If you want to read about Centrack, head to the Introduction.
-If you want to process data head to Routine use.
+If you want to process projection head to Routine use.
 If you want to install centrack, head to Set up the environment for centrack
 
 ## Introduction

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import cv2
 import numpy as np
 import tifffile as tf
+from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 
 
@@ -237,6 +238,17 @@ def channels_combine(stack, channels=(1, 2, 3)):
     return cv2.convertScaleAbs(stack, alpha=255 / stack.max(initial=None))
 
 
+def draw_foci(data: np.ndarray, foci: np.ndarray) -> np.ndarray:
+    mask = np.zeros(data.shape, dtype='uint8')
+    for r, c in foci:
+        rr, cc = disk((r, c), 4)
+        try:
+            mask[rr, cc] = 250
+        except IndexError:
+            continue
+    return mask
+
+
 def mask_create_from_contours(mask, contours):
     """
     Label each blob using connectedComponents.
@@ -311,8 +323,8 @@ def generate_vignette(projection, marker_index: int, nuclei_index: int):
     :param marker_index:
     :return:
     """
-    layer_nuclei = projection.data[nuclei_index, :, :]
-    layer_marker = projection.data[marker_index, :, :]
+    layer_nuclei = projection.projection[nuclei_index, :, :]
+    layer_marker = projection.projection[marker_index, :, :]
 
     nuclei = _color_channel(layer_nuclei, (1, 0, 0), 'uint8')
     marker = _color_channel(layer_marker, (0, 1, 0), 'uint8')

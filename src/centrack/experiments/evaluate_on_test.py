@@ -26,8 +26,8 @@ def run_evaluation(path, model, cutoffs):
         channel_id = int(channel_id)
         fov = Projection(ds, Field(fov_name))
         channel = Channel(fov, channel_id)
-        h, w = channel.data.shape
-        data = channel.data.astype('uint16')
+        h, w = channel.projection.shape
+        data = channel.projection.astype('uint16')
 
         inp = np.zeros((2048, 2048), dtype='uint16')
         inp[:h, :w] = data

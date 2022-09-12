@@ -52,8 +52,9 @@ def main():
 
     scored = []
     for field in dataset.fields():
+        field = Field(field, dataset)
         for ch in args.channels:
-            score = score_fov(dataset, field,
+            score = score_fov(field=field,
                               nuclei_channel=args.channel_nuclei,
                               channel=ch,
                               model_foci=model_spotnet,

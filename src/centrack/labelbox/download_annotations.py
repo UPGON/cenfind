@@ -36,7 +36,7 @@ def main():
         path_annotations_centrioles.mkdir(exist_ok=True)
         path_annotations_cells.mkdir(exist_ok=True)
 
-        external_name = label.data.external_id
+        external_name = label.projection.external_id
         logger.debug('Processing %s / %s', ds, external_name)
 
         annotation_file = re.sub('.png$', '.txt', external_name)

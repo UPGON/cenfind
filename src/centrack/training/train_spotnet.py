@@ -7,7 +7,7 @@ import numpy as np
 from spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.model import SpotNet, Config
 
-from centrack.data.base import Dataset, Projection, Channel, Field
+from centrack.data.base import Dataset, Field
 
 config = Config(n_channel_in=1,
                 backbone='unet',
@@ -24,7 +24,7 @@ config = Config(n_channel_in=1,
                 spot_weight_decay=.5,
                 train_batch_size=2)
 
-transform = alb.Compose([
+transforms = alb.Compose([
     alb.ShiftScaleRotate(scale_limit=0.),
     alb.Flip(),
 ])
@@ -53,14 +53,11 @@ def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.
 
     fovs = dataset.splits_for(split)
 
-    for fov_name, channel_id in fovs:
-        fov_name = fov_name.replace('_max.tif', '')
-        field = Field(fov_name)
-        projection = Projection(dataset, field)
-        channel_id = int(channel_id)
-        channel = Channel(projection, channel_id)
-        data = channel.data
-        foci = channel.annotation()
+    for field, channel in fovs:
+        field = Field(field, dataset)
+        channel = int(channel)
+        data = field.channel(channel)
+        foci = field.annotation(channel)
         image = normalize_fast2d(data)
         mask = points_to_prob(foci, shape=image.shape, sigma=sigma)
 
@@ -82,7 +79,7 @@ def main():
 
     model = SpotNet(config, name=str(uuid.uuid4()), basedir='models/dev')
     dataset = Dataset(args.path)
-    train_x, train_y = load_pairs(dataset, split='train', transform=transform)
+    train_x, train_y = load_pairs(dataset, split='train', transform=transforms)
     test_x, test_y = load_pairs(dataset, split='test')
 
     model.train(train_x, train_y, validation_data=(test_x, test_y), epochs=100)
