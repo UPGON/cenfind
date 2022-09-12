@@ -1,13 +1,55 @@
+from pathlib import Path
 from typing import Any
 
 import cv2
 import numpy as np
 import pandas as pd
+from stardist.models import StarDist2D
 
+from centrack.data.base import Projection, Channel, Dataset, Field
 from centrack.visualisation.outline import (
     Centre,
     Contour
 )
+
+
+def score_fov(dataset: Dataset, field: Field,
+              model_nuclei: StarDist2D, model_foci: Path,
+              nuclei_channel: int, channel: int):
+    """
+    1. Detect foci in the given channels
+    2. Detect nuclei
+    3. Assign foci to nuclei
+    Return: dictionary of the record
+    :param channel:
+    :param nuclei_channel:
+    :param model_foci:
+    :param model_nuclei:
+    :param field:
+    :param dataset:
+    :return:
+    """
+
+    projection = Projection(dataset, field)
+
+    nuclei = Channel(projection, nuclei_channel)
+    centres, nuclei = nuclei.extract_nuclei(model_nuclei)
+
+    centrioles = Channel(projection, channel)
+    foci = centrioles.detect_centrioles(model=model_foci)
+
+    assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)
+
+    scored = []
+    for pair in assigned:
+        n, foci = pair
+        scored.append({'fov': projection.name,
+                       'channel': channel,
+                       'nucleus': n.centre.position,
+                       'score': len(foci),
+                       'is_full': full_in_field(n.centre.position, .05, centrioles.data)
+                       })
+    return scored
 
 
 def signed_distance(focus: Centre, nucleus: Contour) -> float:
