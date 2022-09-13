@@ -7,19 +7,17 @@ from typing import Tuple, List
 import cv2
 import numpy as np
 import pandas as pd
-from centrosome_analysis import centrosome_analysis_backend
+from centrosome_analysis import centrosome_analysis_backend as cab
 from csbdeep.utils import normalize
 from skimage.exposure import rescale_intensity
 from skimage.feature import blob_log
 from spotipy.model import SpotNet
-from spotipy.utils import normalize_fast2d
-from spotipy.utils import points_matching
+from spotipy.utils import normalize_fast2d, points_matching
 from stardist.models import StarDist2D
 
 from centrack.data.base import Dataset, Field
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
-from centrack.scoring.measure import _resize_image
-from centrack.scoring.measure import blob2point
+from centrack.scoring.measure import _resize_image, blob2point
 from centrack.visualisation.outline import Centre, Contour, draw_foci
 
 
@@ -32,7 +30,7 @@ def get_model(model):
     return SpotNet(None, name=path.name, basedir=str(path.parent))
 
 
-def log_skimage(data: Field, channel: int, **kwargs) -> list:
+def log_skimage(data: Field, channel: int) -> list:
     data = data.channel(channel)
     data = rescale_intensity(data, out_range=(0, 1))
     foci = blob_log(data, min_sigma=.5, max_sigma=5, num_sigma=10, threshold=.1)
@@ -41,7 +39,7 @@ def log_skimage(data: Field, channel: int, **kwargs) -> list:
     return res
 
 
-def simpleblob_cv2(data: Field, channel: int, **kwargs) -> list:
+def simpleblob_cv2(data: Field, channel: int) -> list:
     data = data.channel(channel)
     foci = rescale_intensity(data, out_range='uint8')
     params = cv2.SimpleBlobDetector_Params()
@@ -62,7 +60,7 @@ def simpleblob_cv2(data: Field, channel: int, **kwargs) -> list:
     return res
 
 
-def detect_centrioles(data, channel: int, model, prob_threshold=.5, min_distance=2) -> np.ndarray:
+def detect_centrioles(data: Field, channel: int, model, prob_threshold=.5, min_distance=2) -> np.ndarray:
     data = data.channel(channel)
     data = normalize_fast2d(data)
     model = get_model(model)
@@ -72,17 +70,20 @@ def detect_centrioles(data, channel: int, model, prob_threshold=.5, min_distance
     return points_preds[:, [1, 0]]
 
 
-def sankaran(data: np.ndarray, foci_model_file, **kwargs) -> np.ndarray:
-    data = data.data[1:, :, :]
-    foci_model = centrosome_analysis_backend.load_foci_model(foci_model_file=foci_model_file)
-    foci, foci_scores = centrosome_analysis_backend.run_detection_model(data, foci_model)
+def sankaran(data: Field, foci_model_file) -> np.ndarray:
+    data = data.projection[1:, :, :]
+    foci_model = cab.load_foci_model(foci_model_file=foci_model_file)
+    foci, foci_scores = cab.run_detection_model(data, foci_model)
     detections = foci[foci_scores > .99, :]
     detections = np.round(detections).astype(int)
     return detections
 
 
-def run_detection(method, data: Field, annotation: np.ndarray, tolerance, channel=None, model_path=None) -> Tuple[
-    np.ndarray, float]:
+def run_detection(method, data: Field,
+                  annotation: np.ndarray,
+                  tolerance,
+                  channel=None,
+                  model_path=None) -> Tuple[np.ndarray, float]:
     foci = method(data, foci_model_file=model_path, channel=channel)
     res = points_matching(annotation, foci, cutoff_distance=tolerance)
     f1 = np.round(res.f1, 3)
@@ -109,6 +110,7 @@ def extract_nuclei(data, model: StarDist2D = None, annotation=None) -> Tuple[Lis
 
     else:
         raise ValueError("Please provide either an annotation or a model")
+    
     labels_id = np.unique(nuclei_detected)
 
     cnts = []

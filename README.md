@@ -94,7 +94,42 @@ poetry install
 A common session involves running `squash` then `score`. Below, we
 describe each program, their input, the algorithm and the expected output.
 
-## Procedure
+## API
+
+Centrack consists of the `Dataset` and the `Field` classes.
+
+A Dataset represents a collection of related fields, i.e., same pixel size, same channels, same cell type.
+
+It should:
+
+- return the name
+- iterate over the fields,
+- construct the file name for the projections and the z-stacks
+- read the fields.txt
+- write the fields.txt file
+- set up the folders projections, predictions, visualisations and statistics
+- set and get the splits
+
+A Field represents a field of view and should:
+
+- construct file names for projections, annotation
+- get Dataset
+- load the projection as np.ndarray
+- load the channel as np.ndarray
+- load annotation as np.ndarray
+- load mask as np.ndarray
+
+Using those two objects, centrack should
+
+- detect centrioles (data, model) => points,
+- extract nuclei (data, model) => contours,
+- assign centrioles to nuclei (contours, points) => pairs
+- outline centrioles and nuclei (data, points) => image
+- create composite vignettes (data) => composite_image
+- flag partial nuclei (contours, tolerance) => contours
+- compare predictions with annotation (points, points) => metrics_namespace
+
+## Routines
 
 1. Group all the raw OME.TIFF files into one folder called `raw`. This helps keep the structure of the processed images
    clean.

@@ -4,9 +4,10 @@ import cv2
 import pandas as pd
 from dotenv import dotenv_values
 from tqdm import tqdm
-from centrack.data.base import Dataset, Projection, Channel, generate_vignette
+from centrack.data.base import Dataset, Field
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
 from centrack.scoring.measure import frac, full_in_field
+from centrack.visualisation.outline import create_vignette
 
 config = dotenv_values('.env')
 
@@ -26,31 +27,23 @@ def main():
     records = []
     for dataset in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset)
-        for field in tqdm(dataset.fields('_max.tif')):
-            projection = Projection(dataset, field)
-            channel = Channel(projection, 0)
-            annot_nuclei = channel.mask(0)
+        for field in tqdm(dataset.fields()):
+            projection = Field(field, dataset)
+            channel = field.channel(0)
+            annot_nuclei = field.mask()
+
             centres, contours = channel.extract_nuclei(annotation=annot_nuclei)
-            vignette = generate_vignette(projection, 1, 0)
-            # foci = channel.annotation()
-            # foci = [Centre(f, label='Focus') for f in foci]
-            # for focus in foci:
-            #     focus.draw(vignette)
+            vignette = create_vignette(projection, 1, 0)
             for centre, contour in zip(centres, contours):
                 is_full = full_in_field(centre.centre, .05, annot_nuclei)
                 color = (0, 0, 255)
                 if is_full:
                     color = (0, 255, 0)
-                records.append({'dataset': dataset.file_name,
+                records.append({'dataset': dataset.path.name,
                                 'field': field.name,
                                 'centre': centre.centre,
                                 'is_full': is_full})
-
-                # contour.draw(vignette, color=color)
-            #
-            # assigned = assign(foci, contours, -50)
-            # draw_annotation(vignette, assigned, foci, contours)
-
+                contour.draw(vignette, color=color)
             cv2.imwrite(f'out/checks/{field.name}.png', vignette)
     df = pd.DataFrame(records)
 

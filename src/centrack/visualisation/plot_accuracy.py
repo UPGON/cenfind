@@ -5,9 +5,7 @@ from matplotlib import pyplot as plt
 from centrack.data.base import extract_info
 from centrack.experiments.constants import datasets, pattern_dataset, protein_names, celltype_names
 
-font = {
-    'size': 6
-}
+font = {'size': 6}
 matplotlib.rc('font', **font)
 
 
@@ -18,7 +16,7 @@ def _setup_ax(ax):
     return ax
 
 
-def plot_setup_accuracy(ax, data, metadata, title, accuracy_thresholds=(0, .5, .75, .9, 1.)):
+def plot_one_dataset(ax, data, metadata, title, accuracy_thresholds=(0, .5, .75, .9, 1.)):
     """
     Plot the accuracy on the specified ax
     :param metadata:
@@ -49,7 +47,7 @@ def plot_setup_accuracy(ax, data, metadata, title, accuracy_thresholds=(0, .5, .
     return ax
 
 
-def plot_accuracy(performances: str, metadata: dict):
+def plot_many_datasets(performances: str, metadata: dict):
     data = pd.read_csv(performances)
     fig, axs = plt.subplots(nrows=1, ncols=len(datasets), figsize=(2 * len(datasets), 2), sharey=True)
     accuracy_thresholds = (0, .5, .75, .9, 1.)
@@ -58,14 +56,13 @@ def plot_accuracy(performances: str, metadata: dict):
         return x * 102.5
 
     for col, ds in enumerate(datasets):
-        print(ds)
         cell_type = metadata[ds]['cell_type']
         title = f"{celltype_names[cell_type]} {metadata[ds]['treatment'] or ''}"
         sub = data.loc[data['dataset'] == ds]
         ax = axs[col]
         ax2 = ax.secondary_xaxis("top", functions=(scaler, scaler))
         ax2.set_xlabel('[nm]')
-        plot_setup_accuracy(ax, sub, metadata[ds], title, accuracy_thresholds)
+        plot_one_dataset(ax, sub, metadata[ds], title, accuracy_thresholds)
     fig.tight_layout()
 
     return fig
@@ -78,7 +75,7 @@ def main():
     for dataset_name in datasets:
         metadata[dataset_name] = extract_info(pattern_dataset, dataset_name)
 
-    fig = plot_accuracy(path_perfs, metadata)
+    fig = plot_many_datasets(path_perfs, metadata)
     fig.savefig(f'out/accuracy_resolution_{model_name}.png', dpi=300)
 
 
