@@ -9,7 +9,7 @@ import numpy as np
 from spotipy.utils import points_matching
 
 from centrack.data.base import Dataset, Field
-from centrack.data.base import get_model
+from centrack.scoring.detectors import get_model
 from centrack.scoring.detectors import detect_centrioles
 
 logging.basicConfig(level=logging.INFO)
