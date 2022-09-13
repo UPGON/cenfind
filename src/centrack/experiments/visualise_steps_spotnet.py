@@ -7,8 +7,8 @@ from matplotlib_scalebar.scalebar import ScaleBar
 import cv2
 import numpy as np
 from skimage import exposure
-from centrack.visualisation.outline import to_8bit
-from centrack.data.base import Dataset, Projection, Field
+from centrack.core.outline import to_8bit
+from centrack.core.data import Dataset, Projection, Field
 
 plt.rcParams["font.family"] = "Helvetica"
 

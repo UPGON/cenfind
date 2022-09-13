@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2
 from tqdm import tqdm
 
-from centrack.data.base import Dataset, Projection, generate_vignette, Field
+from centrack.core.data import Dataset, Projection, generate_vignette, Field
 
 
 def main():

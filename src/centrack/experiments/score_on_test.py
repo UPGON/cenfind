@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from centrack.data.base import Dataset, Field, Projection, Channel
-from centrack.data.base import get_model
-from centrack.scoring.measure import assign
+from centrack.core.data import Dataset, Field, Projection, Channel
+from centrack.core.data import get_model
+from centrack.core.measure import assign
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
 from stardist.models import StarDist2D
 

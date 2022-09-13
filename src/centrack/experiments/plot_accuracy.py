@@ -2,7 +2,7 @@ import matplotlib
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from centrack.data.base import extract_info
+from centrack.core.data import extract_info
 from centrack.experiments.constants import datasets, pattern_dataset, protein_names, celltype_names
 
 font = {'size': 6}

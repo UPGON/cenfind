@@ -15,10 +15,10 @@ from spotipy.model import SpotNet
 from spotipy.utils import normalize_fast2d, points_matching
 from stardist.models import StarDist2D
 
-from centrack.data.base import Dataset, Field
+from centrack.core.data import Dataset, Field
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
-from centrack.scoring.measure import _resize_image, blob2point
-from centrack.visualisation.outline import Centre, Contour, draw_foci
+from centrack.core.measure import _resize_image, blob2point
+from centrack.core.outline import Centre, Contour, draw_foci
 
 
 @functools.lru_cache(maxsize=None)
@@ -110,7 +110,7 @@ def extract_nuclei(data, model: StarDist2D = None, annotation=None) -> Tuple[Lis
 
     else:
         raise ValueError("Please provide either an annotation or a model")
-    
+
     labels_id = np.unique(nuclei_detected)
 
     cnts = []

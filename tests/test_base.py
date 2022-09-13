@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from centrack.data.base import Dataset, Stack, Field, Projection, Channel
+from centrack.core.data import Dataset, Stack, Field, Projection, Channel
 
 
 class TestData:

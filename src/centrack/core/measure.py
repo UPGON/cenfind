@@ -1,13 +1,17 @@
+import logging
 from pathlib import Path
 from typing import Any
+from types import SimpleNamespace
 
 import cv2
 import numpy as np
 import pandas as pd
 from stardist.models import StarDist2D
 
-from centrack.data.base import Field
-from centrack.visualisation.outline import Contour, Centre
+from centrack.core.data import Field, Dataset
+from centrack.core.outline import Contour, Centre
+from centrack.core.detectors import detect_centrioles
+from spotipy.utils import points_matching
 
 
 def prob2img(data):
@@ -116,6 +120,64 @@ def full_in_field(coordinate, fraction, image) -> bool:
     if all([pad_lower < c < pad_upper for c in coordinate]):
         return True
     return False
+
+
+def metrics(field: Field,
+            channel: int,
+            annotation: np.ndarray,
+            predictions: np.ndarray,
+            tolerance: int) -> dict:
+    """
+    Compute the accuracy of the prediction on one field.
+    :param field:
+    :param channel:
+    :param annotation:
+    :param predictions:
+    :param tolerance:
+    :return: dictionary of fields
+    """
+    if all((len(predictions), len(annotation))) > 0:
+        res = points_matching(annotation[:, [1, 0]],
+                              predictions,
+                              cutoff_distance=tolerance)
+    else:
+        logging.warning('detected: %d; annotated: %d... Set precision and accuracy to zero' % (
+            len(predictions), len(predictions)))
+        res = SimpleNamespace()
+        res.precision = 0.
+        res.recall = 0.
+    perf = {
+        'dataset': field.dataset.path.name,
+        'field': field.name,
+        'channel': channel,
+        'n_actual': len(annotation),
+        'n_preds': len(predictions),
+        'tolerance': tolerance,
+        'precision': np.round(res.precision, 3),
+        'recall': np.round(res.recall, 3),
+        'f1': res.f1.round(3),
+    }
+    return perf
+
+
+def run_evaluation(dataset: Dataset, test_only, model, tolerances: list[int]) -> list:
+    if test_only:
+        fields = dataset.splits_for('test')
+    else:
+        fields_test = dataset.splits_for('test')
+        fields_train = dataset.splits_for('train')
+        fields = fields_train + fields_test
+
+    perfs = []
+    for field_name, channel in fields:
+        field = Field(field_name, dataset)
+        annotation = field.annotation(channel)
+        predictions = detect_centrioles(field, channel, model)
+
+        for tol in tolerances:
+            perf = metrics(field, channel, annotation, predictions, tol)
+            perfs.append(perf)
+    return perfs
 
 
 def score_summary(df):

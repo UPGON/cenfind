@@ -4,10 +4,10 @@ import cv2
 import pandas as pd
 from dotenv import dotenv_values
 from tqdm import tqdm
-from centrack.data.base import Dataset, Field
+from centrack.core.data import Dataset, Field
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
-from centrack.scoring.measure import frac, full_in_field
-from centrack.visualisation.outline import create_vignette
+from centrack.core.measure import frac, full_in_field
+from centrack.core.outline import create_vignette
 
 config = dotenv_values('.env')
 

@@ -5,10 +5,10 @@ from pathlib import Path
 import pandas as pd
 from stardist.models import StarDist2D
 
-from centrack.data.base import Dataset, Field
-from centrack.data.base import get_model
-from centrack.scoring.measure import score_fov
-from centrack.scoring.measure import score_summary
+from centrack.core.data import Dataset, Field
+from centrack.core.detectors import get_model
+from centrack.core.measure import score_fov
+from centrack.core.measure import score_summary
 
 logger_score = logging.getLogger()
 logger_score.setLevel(logging.INFO)

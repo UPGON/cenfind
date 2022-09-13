@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from centrack.data.base import Dataset
+from centrack.core.data import Dataset
 
 
 def get_args():
