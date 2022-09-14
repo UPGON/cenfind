@@ -29,7 +29,7 @@ def main():
     records = []
     for dataset in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset)
-        for field_name in tqdm(dataset.fields()):
+        for field_name in tqdm(dataset.pairs()):
             field = Field(field_name, dataset)
             mask = field.mask(0)
             centres, contours = extract_nuclei(field, 0, annotation=mask)

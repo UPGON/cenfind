@@ -24,7 +24,7 @@ def main():
     for dataset in datasets:
         path_dataset = PREFIX_REMOTE / dataset
         dataset = Dataset(path_dataset)
-        for field in tqdm(dataset.fields('_max.tif')):
+        for field in tqdm(dataset.pairs('_max.tif')):
             projection = Projection(dataset, field)
             nuclei = Channel(projection, 0)
             nuclei_mask = nuclei.mask(0)

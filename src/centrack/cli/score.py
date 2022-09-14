@@ -55,7 +55,7 @@ def main():
     model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
 
     scores = []
-    pbar = tqdm(dataset.fields())
+    pbar = tqdm(dataset.pairs())
     for field in pbar:
         pbar.set_description(f"{field}")
         field = Field(field, dataset)

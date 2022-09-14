@@ -2,58 +2,37 @@ import argparse
 import itertools
 import random
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any
 
 from centrack.core.data import Dataset
 
 
-def write_fields(dataset):
+def choose_channel(fields: list[str], channels) -> list[tuple[Any, Any]]:
+    """Assign channel to field."""
+    if len(fields) < len(channels):
+        raise ValueError('not all channels will be represented in the set')
+    channels = [(fov, channel)
+                for fov, channel in zip(fields, itertools.cycle(channels))]
+    return channels
+
+
+def split_pairs(fields: list[tuple[str, int]], p=.9) -> tuple[Any, Any]:
     """
-    Write field names to fields.txt.
+    Split a list of pairs (field, channel).
+
+    :param fields
+    :param p the train proportion, default to .9
+    :return train_split, test_split
     """
-    if (dataset.path / 'raw').exists():
-        folder = dataset.path / 'raw'
-    elif (dataset.path / 'projections').exists():
-        folder = dataset.path / 'projections'
-    else:
-        raise FileNotFoundError(dataset.path)
 
-    fields = []
-    for f in folder.iterdir():
-        if f.name.startswith('.'):
-            continue
-
-        fields.append(f.name.split('.')[0].rstrip('_max'))
-
-    with open(dataset.path / 'fields.txt', 'w') as f:
-        for field in fields:
-            f.write(field + '\n')
-
-
-def split_train_test(dataset, channels: List[int], p=.9) -> Tuple[List, List]:
-    """
-    Assign the FOV between train and test
-    :param channels:
-    :param p: the fraction of train examples, by default .9
-    :return: a tuple of lists
-    """
     random.seed(1993)
-    items = dataset.fields()
-    size = len(items)
+    size = len(fields)
     split_idx = int(p * size)
-    shuffled = random.sample(items, k=size)
+    shuffled = random.sample(fields, k=size)
     split_test = shuffled[split_idx:]
     split_train = shuffled[:split_idx]
 
-    train_pairs = [(fov, channel)
-                   for fov, channel in zip(split_train, itertools.cycle(channels))]
-    test_pairs = [(fov, channel)
-                  for fov, channel in zip(split_test, itertools.cycle(channels))]
-    return train_pairs, test_pairs
-
-
-# with open(self.path / 'fields.txt', 'r') as f:
-#     fields = [line.rstrip() for line in f.readlines()]
+    return split_train, split_test
 
 
 def get_args():
@@ -69,15 +48,17 @@ def main():
     args = get_args()
     path_dataset = args.path
     dataset = Dataset(path_dataset)
-
-    train_pairs, test_pairs = split_train_test(dataset, args.channels, p=.9)
+    fields = dataset.fields
+    train_fields, test_fields = split_pairs(fields, p=.9)
+    pairs_train = choose_channel(train_fields, args.channels)
+    pairs_test = choose_channel(test_fields, args.channels)
 
     with open(path_dataset / 'train.txt', 'w') as f:
-        for fov, channel in train_pairs:
+        for fov, channel in pairs_train:
             f.write(f"{fov},{channel}\n")
 
     with open(path_dataset / 'test.txt', 'w') as f:
-        for fov, channel in test_pairs:
+        for fov, channel in pairs_test:
             f.write(f"{fov},{channel}\n")
 
 

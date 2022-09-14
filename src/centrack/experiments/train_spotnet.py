@@ -1,5 +1,7 @@
 import argparse
+import contextlib
 import json
+import os
 import uuid
 import albumentations as alb
 import numpy as np
@@ -51,14 +53,15 @@ def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.
     channels = []
     masks = []
 
-    fovs = dataset.fields(split)
+    fovs = dataset.pairs(split)
 
     for field, channel in fovs:
         field = Field(field, dataset)
         channel = int(channel)
         data = field.channel(channel)
         foci = field.annotation(channel)
-        image = normalize_fast2d(data)
+        with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
+            image = normalize_fast2d(data)
         mask = points_to_prob(foci, shape=image.shape, sigma=sigma)
 
         if transform is not None:

@@ -76,7 +76,7 @@ def field_metrics(field: Field,
 
 
 def dataset_metrics(dataset: Dataset, split, model, tolerance) -> list:
-    fields = dataset.fields(split)
+    fields = dataset.pairs(split)
     perfs = []
     for field_name, channel in fields:
         field = Field(field_name, dataset)

@@ -39,6 +39,34 @@ class Dataset:
 
         self.statistics = self.path / 'statistics'
         self.statistics.mkdir(exist_ok=True)
+        self._write_fields()
+
+    def _write_fields(self):
+        """
+        Write field names to fields.txt.
+        """
+        if (self.path / 'raw').exists():
+            folder = self.path / 'raw'
+        elif (self.path / 'projections').exists():
+            folder = self.path / 'projections'
+        else:
+            raise FileNotFoundError(self.path)
+
+        fields = []
+        for f in folder.iterdir():
+            if f.name.startswith('.'):
+                continue
+            fields.append(f.name.split('.')[0].rstrip('_max'))
+
+        with open(self.path / 'fields.txt', 'w') as f:
+            for field in fields:
+                f.write(field + '\n')
+
+    @property
+    def fields(self):
+        fields_path = self.path / 'fields.txt'
+        with open(fields_path, 'r') as f:
+            return f.read().splitlines()
 
     def _read_split(self, split_type) -> List[Tuple[str, int]]:
         with open(self.path / f'{split_type}.txt', 'r') as f:
@@ -48,7 +76,7 @@ class Dataset:
 
         return files
 
-    def fields(self, split: str = None) -> List[Tuple[str, int]]:
+    def pairs(self, split: str = None) -> List[Tuple[str, int]]:
         """
         Fetch the fields of view for train or test
         :param split: all, test or train
