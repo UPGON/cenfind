@@ -18,7 +18,7 @@ def get_args():
     parser.add_argument('--model',
                         type=str,
                         help='Path to the model, e.g., <project>/models/dev/master')
-    parser.add_argument('--tolerances',
+    parser.add_argument('--tolerance',
                         type=int,
                         nargs='+',
                         help='Distance above which two points are deemed not matching')
@@ -30,13 +30,13 @@ def get_args():
 def main():
     args = get_args()
     model = get_model(args.model)
-    tolerances = list(range(6)) if args.tolerances is None else args.tolerances
+    tolerance = args.tolerance
     datasets = args.datasets
 
     performances = []
     for dataset_name in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset_name)
-        performance = dataset_metrics(dataset, test_only=True, model=model, tolerances=tolerances)
+        performance = dataset_metrics(dataset, test_only=True, model=model, tolerance=tolerance)
         performances.append(performance)
 
     performances_df = pd.DataFrame([s for p in performances for s in p])

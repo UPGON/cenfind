@@ -75,7 +75,7 @@ def field_metrics(field: Field,
     return perf
 
 
-def dataset_metrics(dataset: Dataset, test_only, model, tolerances: list[int]) -> list:
+def dataset_metrics(dataset: Dataset, test_only, model, tolerance) -> list:
     if test_only:
         fields = dataset.splits_for('test')
     else:
@@ -88,10 +88,8 @@ def dataset_metrics(dataset: Dataset, test_only, model, tolerances: list[int]) -
         field = Field(field_name, dataset)
         annotation = field.annotation(channel)
         predictions = detect_centrioles(field, channel, model)
-
-        for tol in tolerances:
-            perf = field_metrics(field, channel, annotation, predictions, tol)
-            perfs.append(perf)
+        perf = field_metrics(field, channel, annotation, predictions, tolerance)
+        perfs.append(perf)
     return perfs
 
 
