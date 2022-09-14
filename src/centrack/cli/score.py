@@ -9,8 +9,8 @@ from tqdm import tqdm
 
 from centrack.core.data import Dataset, Field
 from centrack.core.measure import get_model
-from centrack.core.measure import score_summary
-from centrack.core.measure import score_fov
+from centrack.core.measure import field_score_frequency
+from centrack.core.measure import field_score
 
 tf.get_logger().setLevel(logging.ERROR)
 
@@ -60,15 +60,12 @@ def main():
         pbar.set_description(f"{field}")
         field = Field(field, dataset)
         for ch in args.channels:
-            score = score_fov(field=field,
-                              nuclei_channel=args.channel_nuclei,
-                              channel=ch,
-                              model_foci=model_spotnet,
-                              model_nuclei=model_stardist)
+            score = field_score(field=field, model_nuclei=model_stardist, model_foci=model_spotnet,
+                                nuclei_channel=args.channel_nuclei, channel=ch)
             scores.append(score)
     flattened = [leaf for tree in scores for leaf in tree]
     scores_df = pd.DataFrame(flattened)
-    binned = score_summary(scores_df)
+    binned = field_score_frequency(scores_df)
     binned.to_csv(dataset.statistics / f'statistics.csv')
 
 

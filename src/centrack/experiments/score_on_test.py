@@ -5,7 +5,7 @@ import pandas as pd
 from stardist.models import StarDist2D
 
 from centrack.core.data import Dataset, Field
-from centrack.core.measure import score_fov, get_model
+from centrack.core.measure import field_score, get_model
 from centrack.experiments.constants import datasets, PREFIX_REMOTE
 
 stardist_model = StarDist2D.from_pretrained('2D_versatile_fluo')
@@ -34,11 +34,8 @@ def main():
         for fov_name, channel in test_files:
             channel = int(channel)
             field = Field(fov_name, dataset)
-            score = score_fov(field=field,
-                              nuclei_channel=args.channel_nuclei,
-                              channel=channel,
-                              model_foci=model_spotnet,
-                              model_nuclei=model_stardist)
+            score = field_score(field=field, model_nuclei=model_stardist, model_foci=model_spotnet,
+                                nuclei_channel=args.channel_nuclei, channel=channel)
             scored.append(score)
 
     scores = pd.DataFrame(scored)
