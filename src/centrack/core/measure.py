@@ -16,7 +16,7 @@ from centrack.core.outline import Centre
 
 def assign(foci: list, nuclei: list, vicinity: int) -> list[tuple[Any, list[Any]]]:
     """
-    Assign detected centrioles to the nearest nucleus
+    Assign centrioles to nuclei in one field
     :param foci
     :param nuclei
     :param vicinity: the distance in pixels, below which centrioles are assigned
@@ -75,14 +75,8 @@ def field_metrics(field: Field,
     return perf
 
 
-def dataset_metrics(dataset: Dataset, test_only, model, tolerance) -> list:
-    if test_only:
-        fields = dataset.splits_for('test')
-    else:
-        fields_test = dataset.splits_for('test')
-        fields_train = dataset.splits_for('train')
-        fields = fields_train + fields_test
-
+def dataset_metrics(dataset: Dataset, split, model, tolerance) -> list:
+    fields = dataset.fields(split)
     perfs = []
     for field_name, channel in fields:
         field = Field(field_name, dataset)

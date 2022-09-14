@@ -1,6 +1,4 @@
 import re
-import itertools
-import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Union
@@ -42,75 +40,25 @@ class Dataset:
         self.statistics = self.path / 'statistics'
         self.statistics.mkdir(exist_ok=True)
 
-    def splits_for(self, split_type: str) -> List[Tuple[str, int]]:
-        """
-        Fetch the fields of view for train or test
-        :param split_type:
-        :return: a list of tuples (fov name, channel id)
-        """
-        splits = self.path / f'{split_type}.txt'
-        if not splits.exists():
-            raise FileNotFoundError(f"{splits} not found. Run train_test.py")
-
-        with open(splits, 'r') as f:
+    def _read_split(self, split_type) -> List[Tuple[str, int]]:
+        with open(self.path / f'{split_type}.txt', 'r') as f:
             files = f.read().splitlines()
         files = [f.split(',') for f in files if f]
         files = [(str(f[0]), int(f[1])) for f in files]
+
         return files
 
-    def fields(self) -> List[str]:
+    def fields(self, split: str = None) -> List[Tuple[str, int]]:
         """
-        Read field names from fields.txt.
+        Fetch the fields of view for train or test
+        :param split: all, test or train
+        :return: a list of tuples (fov name, channel id)
         """
-        if not (self.path / 'fields.txt').exists():
-            self.write_fields()
-        with open(self.path / 'fields.txt', 'r') as f:
-            fields = [line.rstrip() for line in f.readlines()]
 
-        return [field for field in fields]
-
-    def write_fields(self):
-        """
-        Write field names to fields.txt.
-        """
-        if (self.path / 'raw').exists():
-            folder = self.path / 'raw'
-        elif (self.path / 'projections').exists():
-            folder = self.path / 'projections'
+        if split is None:
+            return self._read_split('train') + self._read_split('test')
         else:
-            raise FileNotFoundError(self.path)
-
-        fields = []
-        for f in folder.iterdir():
-            if f.name.startswith('.'):
-                continue
-
-            fields.append(f.name.split('.')[0].rstrip('_max'))
-
-        with open(self.path / 'fields.txt', 'w') as f:
-            for field in fields:
-                f.write(field + '\n')
-
-    def split_train_test(self, channels: List[int], p=.9) -> Tuple[List, List]:
-        """
-        Assign the FOV between train and test
-        :param channels:
-        :param p: the fraction of train examples, by default .9
-        :return: a tuple of lists
-        """
-        random.seed(1993)
-        items = self.fields()
-        size = len(items)
-        split_idx = int(p * size)
-        shuffled = random.sample(items, k=size)
-        split_test = shuffled[split_idx:]
-        split_train = shuffled[:split_idx]
-
-        train_pairs = [(fov, channel)
-                       for fov, channel in zip(split_train, itertools.cycle(channels))]
-        test_pairs = [(fov, channel)
-                      for fov, channel in zip(split_test, itertools.cycle(channels))]
-        return train_pairs, test_pairs
+            return self._read_split(split)
 
 
 @dataclass

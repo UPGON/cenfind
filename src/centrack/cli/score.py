@@ -8,7 +8,7 @@ from stardist.models import StarDist2D
 from tqdm import tqdm
 
 from centrack.core.data import Dataset, Field
-from centrack.core.measure import get_model
+from centrack.core.helpers import get_model
 from centrack.core.measure import field_score_frequency
 from centrack.core.measure import field_score
 

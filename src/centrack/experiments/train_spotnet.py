@@ -51,7 +51,7 @@ def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.
     channels = []
     masks = []
 
-    fovs = dataset.splits_for(split)
+    fovs = dataset.fields(split)
 
     for field, channel in fovs:
         field = Field(field, dataset)

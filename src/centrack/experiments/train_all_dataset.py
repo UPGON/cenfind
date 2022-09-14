@@ -31,6 +31,7 @@ def main():
 
     all_test_x = np.concatenate(all_test_x, axis=0)
     all_test_y = np.concatenate(all_test_y, axis=0)
+    
     time_stamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 
     model = SpotNet(config, name=time_stamp, basedir='models/dev')

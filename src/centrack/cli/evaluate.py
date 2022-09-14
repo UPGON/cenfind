@@ -4,9 +4,9 @@ from pathlib import Path
 import pandas as pd
 
 from centrack.core.data import Dataset
-from centrack.experiments.constants import PREFIX_REMOTE
-from centrack.experiments.compare_detectors import get_model
+from centrack.core.helpers import get_model
 from centrack.core.measure import dataset_metrics
+from centrack.experiments.constants import PREFIX_REMOTE
 
 
 def get_args():
@@ -36,7 +36,7 @@ def main():
     performances = []
     for dataset_name in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset_name)
-        performance = dataset_metrics(dataset, test_only=True, model=model, tolerance=tolerance)
+        performance = dataset_metrics(dataset, split=True, model=model, tolerance=tolerance)
         performances.append(performance)
 
     performances_df = pd.DataFrame([s for p in performances for s in p])
