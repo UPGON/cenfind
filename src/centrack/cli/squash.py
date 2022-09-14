@@ -22,8 +22,7 @@ def main():
 
     for field in tqdm(dataset.fields):
         field = Field(field, dataset)
-        stack = tf.imread(field.stack)
-        projection = stack.max(1)
+        projection = field.stack.max(1)
         tf.imwrite(dataset.projections / f"{field.name}_max.tif", projection)
 
 

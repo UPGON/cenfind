@@ -1,13 +1,15 @@
 import argparse
 from pathlib import Path
+
 import cv2
 import pandas as pd
 from dotenv import dotenv_values
 from tqdm import tqdm
+
 from centrack.core.data import Dataset, Field
-from centrack.experiments.constants import datasets, PREFIX_REMOTE
-from centrack.core.measure import frac, full_in_field
+from centrack.core.measure import frac, full_in_field, flag, extract_nuclei
 from centrack.core.outline import create_vignette
+from centrack.experiments.constants import datasets, PREFIX_REMOTE
 
 config = dotenv_values('.env')
 
@@ -27,23 +29,19 @@ def main():
     records = []
     for dataset in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset)
-        for field in tqdm(dataset.fields()):
-            projection = Field(field, dataset)
-            channel = field.channel(0)
-            annot_nuclei = field.mask()
-
-            centres, contours = channel.extract_nuclei(annotation=annot_nuclei)
-            vignette = create_vignette(projection, 1, 0)
+        for field_name in tqdm(dataset.fields()):
+            field = Field(field_name, dataset)
+            mask = field.mask(0)
+            centres, contours = extract_nuclei(field, 0, annotation=mask)
+            vignette = create_vignette(field, 1, 0)
             for centre, contour in zip(centres, contours):
-                is_full = full_in_field(centre.centre, .05, annot_nuclei)
-                color = (0, 0, 255)
-                if is_full:
-                    color = (0, 255, 0)
+                is_full = full_in_field(centre.centre, .05, mask)
                 records.append({'dataset': dataset.path.name,
                                 'field': field.name,
                                 'centre': centre.centre,
                                 'is_full': is_full})
-                contour.draw(vignette, color=color)
+                contour.draw(vignette, color=flag(is_full))
+
             cv2.imwrite(f'out/checks/{field.name}.png', vignette)
     df = pd.DataFrame(records)
 

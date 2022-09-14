@@ -119,10 +119,6 @@ class Field:
     dataset: Dataset
 
     @property
-    def dataset(self) -> Dataset:
-        return self.dataset
-
-    @property
     def stack(self) -> np.ndarray:
         return tf.imread(str(self.dataset.path / 'raw' / f"{self.name}.ome.tif"))
 
@@ -135,7 +131,7 @@ class Field:
 
     def annotation(self, channel) -> np.ndarray:
         name = f"{self.name}_max_C{channel}"
-        path_annotation = self.dataset.path / 'annotation' / 'centrioles' / f"{name}.txt"
+        path_annotation = self.dataset.path / 'annotations' / 'centrioles' / f"{name}.txt"
         if path_annotation.exists():
             annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=',')
             return annotation
@@ -143,8 +139,8 @@ class Field:
             raise FileNotFoundError(f"{path_annotation}")
 
     def mask(self, channel) -> np.ndarray:
-        nuclei_name = re.sub('_C\d', f'_C{channel}', self.name)
-        path_annotation = self.dataset.path / 'annotation' / 'cells' / f"{nuclei_name}.tif"
+        mask_name = f"{self.name}_max_C{channel}.tif"
+        path_annotation = self.dataset.path / 'annotations' / 'cells' / mask_name
         if path_annotation.exists():
             return tf.imread(str(path_annotation))
         else:

@@ -5,7 +5,7 @@ import pandas as pd
 
 from centrack.core.data import Dataset
 from centrack.experiments.constants import PREFIX_REMOTE
-from centrack.core.detectors import get_model
+from centrack.experiments.compare_detectors import get_model
 from centrack.core.measure import run_evaluation
 
 
@@ -15,7 +15,7 @@ def get_args():
                         type=Path,
                         nargs='+',
                         help='Path to the dataset folder, can be one or more')
-    parser.add_argument('model',
+    parser.add_argument('--model',
                         type=str,
                         help='Path to the model, e.g., <project>/models/dev/master')
     parser.add_argument('--tolerances',
@@ -36,7 +36,8 @@ def main():
     performances = []
     for dataset_name in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset_name)
-        performance = run_evaluation(dataset, test_only=True, model=model, tolerances=tolerances)
+        performance = run_evaluation(dataset, test_only=True, model=model,
+                                     tolerances=tolerances)
         performances.append(performance)
 
     performances_df = pd.DataFrame([s for p in performances for s in p])

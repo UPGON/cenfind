@@ -2,16 +2,17 @@ import argparse
 import logging
 from pathlib import Path
 
+import tensorflow as tf
 import pandas as pd
 from stardist.models import StarDist2D
+from tqdm import tqdm
 
 from centrack.core.data import Dataset, Field
-from centrack.core.detectors import get_model
-from centrack.core.measure import score_fov
+from centrack.core.measure import get_model
 from centrack.core.measure import score_summary
+from centrack.core.measure import score_fov
 
-logger_score = logging.getLogger()
-logger_score.setLevel(logging.INFO)
+tf.get_logger().setLevel(logging.ERROR)
 
 
 def get_args():
@@ -37,6 +38,9 @@ def get_args():
 
     args = parser.parse_args()
 
+    if args.channel_nuclei in set(args.channels):
+        raise ValueError('Nuclei channel cannot present in channels')
+
     if not args.model.exists():
         raise FileNotFoundError(f"{args.model} does not exist")
 
@@ -50,8 +54,10 @@ def main():
     model_spotnet = get_model(args.model)
     model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
 
-    scored = []
-    for field in dataset.fields():
+    scores = []
+    pbar = tqdm(dataset.fields())
+    for field in pbar:
+        pbar.set_description(f"{field}")
         field = Field(field, dataset)
         for ch in args.channels:
             score = score_fov(field=field,
@@ -59,10 +65,10 @@ def main():
                               channel=ch,
                               model_foci=model_spotnet,
                               model_nuclei=model_stardist)
-            scored.append(score)
-
-    scores = pd.DataFrame(scored)
-    binned = score_summary(scores)
+            scores.append(score)
+    flattened = [leaf for tree in scores for leaf in tree]
+    scores_df = pd.DataFrame(flattened)
+    binned = score_summary(scores_df)
     binned.to_csv(dataset.statistics / f'statistics.csv')
 
 
