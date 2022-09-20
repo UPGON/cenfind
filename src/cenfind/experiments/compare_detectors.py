@@ -1,10 +1,10 @@
 import cv2
 import pandas as pd
 
-from centrack.core.data import Field, Dataset
-from centrack.core.measure import run_detection, detect_centrioles, sankaran, log_skimage, simpleblob_cv2
-from centrack.core.outline import draw_foci
-from centrack.experiments.constants import datasets, PREFIX_REMOTE
+from cenfind.core.data import Field, Dataset
+from cenfind.core.measure import run_detection, detect_centrioles, sankaran, log_skimage, simpleblob_cv2
+from cenfind.core.outline import draw_foci
+from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 
 
 def main():

@@ -2,8 +2,8 @@ import matplotlib
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from centrack.core.data import extract_info
-from centrack.experiments.constants import datasets, pattern_dataset, protein_names, celltype_names
+from cenfind.core.data import extract_info
+from cenfind.experiments.constants import datasets, pattern_dataset, protein_names, celltype_names
 
 font = {'size': 6}
 matplotlib.rc('font', **font)

@@ -13,10 +13,10 @@ from spotipy.utils import normalize_fast2d
 from spotipy.utils import points_matching
 from stardist.models import StarDist2D
 
-from centrack.core.data import Field
-from centrack.core.helpers import blob2point
-from centrack.core.helpers import resize_image
-from centrack.core.outline import Centre, Contour
+from cenfind.core.data import Field
+from cenfind.core.helpers import blob2point
+from cenfind.core.helpers import resize_image
+from cenfind.core.outline import Centre, Contour
 
 
 def log_skimage(data: Field, channel: int) -> list:

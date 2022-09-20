@@ -6,7 +6,7 @@ from labelbox import (Client,
                       OntologyBuilder,
                       LabelingFrontend, )
 
-from centrack.core.data import Dataset
+from cenfind.core.data import Dataset
 
 
 def main():

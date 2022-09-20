@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2
 from spotipy.model import SpotNet
 
-from centrack.core.outline import Centre, Contour
+from cenfind.core.outline import Centre, Contour
 
 
 def full_in_field(coordinate, image, fraction) -> bool:

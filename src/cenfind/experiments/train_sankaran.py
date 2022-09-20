@@ -1,5 +1,5 @@
 from datetime import datetime
-from centrack.experiments.constants import PREFIX_REMOTE, datasets
+from cenfind.experiments.constants import PREFIX_REMOTE, datasets
 from centrosome_analysis.ml_foci_detect import train_model_fcn, FociDetector
 import torch
 

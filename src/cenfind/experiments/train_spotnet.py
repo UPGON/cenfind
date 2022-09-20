@@ -9,7 +9,7 @@ import numpy as np
 from spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.model import SpotNet, Config
 
-from centrack.core.data import Dataset, Field
+from cenfind.core.data import Dataset, Field
 
 config = Config(n_channel_in=1,
                 backbone='unet',

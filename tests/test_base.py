@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from centrack.core.data import Dataset, Field
+from cenfind.core.data import Dataset, Field
 
 
 class TestData:

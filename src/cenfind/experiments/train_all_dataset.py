@@ -4,9 +4,11 @@ from tqdm import tqdm
 import numpy as np
 from spotipy.model import SpotNet
 
-from centrack.core.data import Dataset
-from centrack.experiments.train_spotnet import load_pairs, config, transforms
-from centrack.experiments.constants import datasets, PREFIX_REMOTE
+from cenfind.core.data import Dataset
+from cenfind.experiments.train_spotnet import load_pairs, config, transforms
+from cenfind.experiments.constants import datasets, PREFIX_REMOTE
+
+shuffle = True
 
 
 def main():

@@ -1,9 +1,9 @@
 [tool.poetry]
-name = "centrack"
+name = "cenfind"
 version = "0.7.3"
 description = "Score centrioles in fluorescence images"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
-repository = "https://github.com/UPGON/centrack"
+repository = "https://github.com/UPGON/cenfind"
 readme = "README.md"
 keywords = ["microscopy", "scientific", "biology", "image-analysis"]
 license = "MIT"
@@ -26,11 +26,11 @@ stardist = "^0.8.3"
 #spotipy = { git = "ssh://git@github.com/maweigert/spotipy.git", branch = "main" }
 
 [tool.poetry.scripts]
-squash = "centrack.cli.squash:main"
-score = "centrack.cli.score:main"
-vignettes = "centrack.labelbox.vignettes:main"
-splits = "centrack.experiments.train_test:main"
-upload = "centrack.labelbox.upload_labels:main"
+squash = "cenfind.cli.squash:main"
+score = "cenfind.cli.score:main"
+vignettes = "cenfind.labelbox.vignettes:main"
+splits = "cenfind.experiments.train_test:main"
+upload = "cenfind.labelbox.upload_labels:main"
 
 [tool.poetry.dev-dependencies]
 

@@ -7,10 +7,10 @@ import pandas as pd
 from stardist.models import StarDist2D
 from tqdm import tqdm
 
-from centrack.core.data import Dataset, Field
-from centrack.core.helpers import get_model
-from centrack.core.measure import field_score_frequency
-from centrack.core.measure import field_score
+from cenfind.core.data import Dataset, Field
+from cenfind.core.helpers import get_model
+from cenfind.core.measure import field_score_frequency
+from cenfind.core.measure import field_score
 
 tf.get_logger().setLevel(logging.ERROR)
 

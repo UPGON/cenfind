@@ -8,10 +8,10 @@ from spotipy.model import SpotNet
 from spotipy.utils import points_matching
 from stardist.models import StarDist2D
 
-from centrack.core.data import Dataset, Field
-from centrack.core.detectors import detect_centrioles, extract_nuclei
-from centrack.core.helpers import signed_distance, full_in_field
-from centrack.core.outline import Centre
+from cenfind.core.data import Dataset, Field
+from cenfind.core.detectors import detect_centrioles, extract_nuclei
+from cenfind.core.helpers import signed_distance, full_in_field
+from cenfind.core.outline import Centre
 
 
 def assign(foci: list, nuclei: list, vicinity: int) -> list[tuple[Any, list[Any]]]:

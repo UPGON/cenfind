@@ -4,7 +4,7 @@ from pathlib import Path
 PREFIX_LOCAL = Path('/Users/buergy/Dropbox/epfl/datasets')
 PREFIX_REMOTE = Path('/data1/centrioles/')
 
-ROOT_DIR = Path('/home/buergy/projects/centrack')
+ROOT_DIR = Path('/home/buergy/projects/cenfind')
 datasets = [
     'RPE1wt_CEP63+CETN2+PCNT_1',
     'RPE1wt_CP110+GTU88+PCNT_2',

@@ -7,7 +7,7 @@ import numpy as np
 import tifffile as tf
 from dotenv import dotenv_values
 
-from centrack.experiments.constants import PREFIX_REMOTE
+from cenfind.experiments.constants import PREFIX_REMOTE
 
 config = dotenv_values('.env')
 

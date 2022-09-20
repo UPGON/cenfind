@@ -1,5 +1,5 @@
 from spotipy.utils import normalize_fast2d
-from centrack.cli.score import get_model
+from cenfind.cli.score import get_model
 from pathlib import Path
 from matplotlib import pyplot as plt
 from matplotlib import patches
@@ -7,8 +7,8 @@ from matplotlib_scalebar.scalebar import ScaleBar
 import cv2
 import numpy as np
 from skimage import exposure
-from centrack.core.outline import to_8bit
-from centrack.core.data import Dataset, Projection, Field
+from cenfind.core.outline import to_8bit
+from cenfind.core.data import Dataset, Projection, Field
 
 plt.rcParams["font.family"] = "Helvetica"
 

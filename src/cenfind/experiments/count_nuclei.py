@@ -6,10 +6,10 @@ import pandas as pd
 from dotenv import dotenv_values
 from tqdm import tqdm
 
-from centrack.core.data import Dataset, Field
-from centrack.core.measure import frac, full_in_field, flag, extract_nuclei
-from centrack.core.outline import create_vignette
-from centrack.experiments.constants import datasets, PREFIX_REMOTE
+from cenfind.core.data import Dataset, Field
+from cenfind.core.measure import frac, full_in_field, flag, extract_nuclei
+from cenfind.core.outline import create_vignette
+from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 
 config = dotenv_values('.env')
 

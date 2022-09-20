@@ -4,7 +4,7 @@ from pathlib import Path
 import tifffile as tf
 from tqdm import tqdm
 
-from centrack.core.data import Dataset, Field
+from cenfind.core.data import Dataset, Field
 
 
 def main():

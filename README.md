@@ -1,16 +1,16 @@
-# Centrack
+# cenfind
 
 A command line interface to score centrioles in cells.
 
 ## Overview
 
-If you want to read about Centrack, head to the Introduction.
+If you want to read about cenfind, head to the Introduction.
 If you want to process projection head to Routine use.
-If you want to install centrack, head to Set up the environment for centrack
+If you want to install cenfind, head to Set up the environment for cenfind
 
 ## Introduction
 
-Centrack is a command line interface to detect centrioles in immunofluorescence images of human cells.
+cenfind is a command line interface to detect centrioles in immunofluorescence images of human cells.
 Specifically, it orchestrates :
 
 - the z-max projection of the raw files,
@@ -21,20 +21,20 @@ Specifically, it orchestrates :
 
 ### Repository / Source code
 
-Eventually, centrack will be living on PyPI and will be installed using `pip install centrack`.
-However, currently, this method cannot be used as centrack is not publicly available.
-Therefore, it needs to be installed from the private GitHub repository (UPGON/centrack).
+Eventually, cenfind will be living on PyPI and will be installed using `pip install cenfind`.
+However, currently, this method cannot be used as cenfind is not publicly available.
+Therefore, it needs to be installed from the private GitHub repository (UPGON/cenfind).
 
-Centrack relies on the private dependency spotipy, which cannot be downloaded via pip normally repository. Thus, follow
+cenfind relies on the private dependency spotipy, which cannot be downloaded via pip normally repository. Thus, follow
 the instructions below.
 
 This situation is temporary and in the near future spotipy will become a
-simple dependency of centrack.
-Next, when both centrack and spotipy will be publicly available, centrack will be downloadable directly from PyPI.
+simple dependency of cenfind.
+Next, when both cenfind and spotipy will be publicly available, cenfind will be downloadable directly from PyPI.
 
 ## Installation
 
-! To isolate centrack from other projects, only run `pip install centrack`
+! To isolate cenfind from other projects, only run `pip install cenfind`
 within a virtual environment.
 
 1. Install python via pyenv
@@ -43,23 +43,23 @@ within a virtual environment.
 3. Create a virtual environment with:
 
 ```shell
-python3 -m venv venv-centrack
-source venv-centrack/bin/activate
+python3 -m venv venv-cenfind
+source venv-cenfind/bin/activate
 ```
 
-Your prompt should now be prepended with `(venv-centrack)`.
+Your prompt should now be prepended with `(venv-cenfind)`.
 
 Check that you're at the correct location (simple and recommended location
 is `cd ~`, i.e., your home folder).
 
-4. Download `centrack` with:
+4. Download `cenfind` with:
 
 ```shell
-git clone git@github.com:UPGON/centrack.git
-cd centrack
+git clone git@github.com:UPGON/cenfind.git
+cd cenfind
 ```
 
-5. As of now, you need to git clone the spotipy package in place in centrack/src/:
+5. As of now, you need to git clone the spotipy package in place in cenfind/src/:
    !!! You need to have access to this private repo; contact Leo for setting up the permission.
 
 ```shell
@@ -72,11 +72,11 @@ pip install -e spotipy/
    the command line, without the need to type the whole path.
 
 ```shell
-cd centrack
+cd cenfind
 poetry install
 ```
 
-7. Check that `centrack`'s programs are correctly installed:
+7. Check that `cenfind`'s programs are correctly installed:
 
 ```shell
 squash --help
@@ -96,7 +96,7 @@ describe each program, their input, the algorithm and the expected output.
 
 ## API
 
-Centrack consists of the `Dataset` and the `Field` classes.
+cenfind consists of the `Dataset` and the `Field` classes.
 
 A Dataset represents a collection of related fields, i.e., same pixel size, same channels, same cell type.
 
@@ -119,7 +119,7 @@ A Field represents a field of view and should:
 - load annotation as np.ndarray
 - load mask as np.ndarray
 
-Using those two objects, centrack should
+Using those two objects, cenfind should
 
 - detect centrioles (data, model) => points,
 - extract nuclei (data, model) => contours,
@@ -169,7 +169,7 @@ depth is unchanged (16bit) and no contrast adjustment is applied.
 
 However, projections files need to be converted into 8bit png files,
 prior to uploading onto Labelbox platform. This conversion is further explained in the tutorial "Experimenting and
-Extending centrack with new datasets"
+Extending cenfind with new datasets"
 
 ### Scoring the centrioles
 
@@ -187,7 +187,7 @@ nucleus is labelled with an index, while the background is set to 0.
 
 ## Requirements
 
-`centrack` assumes a fixed folder structure.
+`cenfind` assumes a fixed folder structure.
 Especially, the OME.tif files should be located under raw/
 
 ```text

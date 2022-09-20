@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from centrack.core.data import Dataset
-from centrack.core.helpers import get_model
-from centrack.core.measure import dataset_metrics
-from centrack.experiments.constants import PREFIX_REMOTE
+from cenfind.core.data import Dataset
+from cenfind.core.helpers import get_model
+from cenfind.core.measure import dataset_metrics
+from cenfind.experiments.constants import PREFIX_REMOTE
 
 
 def get_args():

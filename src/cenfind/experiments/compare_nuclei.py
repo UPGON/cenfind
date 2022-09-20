@@ -8,8 +8,8 @@ from tqdm import tqdm
 import numpy as np
 from spotipy.utils import points_matching
 
-from centrack.core.data import Dataset, Projection, Channel
-from centrack.experiments.constants import datasets, PREFIX_REMOTE
+from cenfind.core.data import Dataset, Projection, Channel
+from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 

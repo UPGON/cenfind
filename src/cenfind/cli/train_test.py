@@ -4,7 +4,7 @@ import random
 from pathlib import Path
 from typing import Any
 
-from centrack.core.data import Dataset
+from cenfind.core.data import Dataset
 
 
 def choose_channel(fields: list[str], channels) -> list[tuple[Any, Any]]:

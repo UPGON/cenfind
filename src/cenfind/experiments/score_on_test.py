@@ -4,9 +4,9 @@ from pathlib import Path
 import pandas as pd
 from stardist.models import StarDist2D
 
-from centrack.core.data import Dataset, Field
-from centrack.core.measure import field_score, get_model
-from centrack.experiments.constants import datasets, PREFIX_REMOTE
+from cenfind.core.data import Dataset, Field
+from cenfind.core.measure import field_score, get_model
+from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 
 stardist_model = StarDist2D.from_pretrained('2D_versatile_fluo')
 
