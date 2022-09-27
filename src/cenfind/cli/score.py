@@ -27,6 +27,7 @@ def get_args():
                         type=Path,
                         help='absolute path to the model folder')
 
+
     parser.add_argument('channel_nuclei',
                         type=int,
                         help='channel id for nuclei segmentation, e.g., 0 or 3')
@@ -36,6 +37,10 @@ def get_args():
                         type=int,
                         help='channels to analyse, e.g., 1 2 3')
 
+    parser.add_argument('projection_suffix',
+                        type=str,
+                        default='max',
+                        help='the suffix indicating projection, e.g., `max` or `Projected`')
     args = parser.parse_args()
 
     if args.channel_nuclei in set(args.channels):
@@ -50,17 +55,16 @@ def get_args():
 def main():
     args = get_args()
 
-    dataset = Dataset(args.path)
-    model_spotnet = get_model(args.model)
+    dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
     model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
 
     scores = []
     pbar = tqdm(dataset.pairs())
-    for field in pbar:
-        pbar.set_description(f"{field}")
-        field = Field(field, dataset)
+    for field_name, _ in pbar:
+        pbar.set_description(f"{field_name}")
+        field = Field(field_name, dataset)
         for ch in args.channels:
-            score = field_score(field=field, model_nuclei=model_stardist, model_foci=model_spotnet,
+            score = field_score(field=field, model_nuclei=model_stardist, model_foci=args.model,
                                 nuclei_channel=args.channel_nuclei, channel=ch)
             scores.append(score)
     flattened = [leaf for tree in scores for leaf in tree]

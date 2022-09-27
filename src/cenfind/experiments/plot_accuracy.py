@@ -8,6 +8,8 @@ from cenfind.experiments.constants import datasets, pattern_dataset, protein_nam
 font = {'size': 6}
 matplotlib.rc('font', **font)
 
+matplotlib.use("Agg")
+
 
 def _setup_ax(ax):
     ax.set_ylim(0, 1)
@@ -49,7 +51,7 @@ def plot_one_dataset(ax, data, metadata, title, accuracy_thresholds=(0, .5, .75,
 
 def plot_many_datasets(performances: str, metadata: dict):
     data = pd.read_csv(performances)
-    fig, axs = plt.subplots(nrows=1, ncols=len(datasets), figsize=(2 * len(datasets), 2), sharey=True)
+    fig, axs = plt.subplots(nrows=1, ncols=len(datasets), figsize=(2 * len(datasets), 2))
     accuracy_thresholds = (0, .5, .75, .9, 1.)
 
     def scaler(x):
@@ -69,7 +71,7 @@ def plot_many_datasets(performances: str, metadata: dict):
 
 
 def main():
-    model_name = '2022-09-05_09:19:37'
+    model_name = '20220921_170758unet'
     path_perfs = f'out/performances_{model_name}.csv'
     metadata = {}
     for dataset_name in datasets:

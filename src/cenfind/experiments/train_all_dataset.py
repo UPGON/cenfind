@@ -12,6 +12,7 @@ shuffle = True
 
 
 def main():
+
     path_datasets = [PREFIX_REMOTE / ds for ds in datasets]
     dss = [Dataset(path) for path in path_datasets]
 
@@ -37,7 +38,7 @@ def main():
 
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    model = SpotNet(config, name=time_stamp, basedir='models/dev')
+    model = SpotNet(config, name=time_stamp+"unet", basedir='models/dev')
     model.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=100)
 
     return 0

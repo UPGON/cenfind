@@ -2,24 +2,26 @@ import cv2
 import pandas as pd
 
 from cenfind.core.data import Field, Dataset
-from cenfind.core.measure import run_detection, detect_centrioles, sankaran, log_skimage, simpleblob_cv2
+from cenfind.core.detectors import run_detection, spotnet, sankaran, log_skimage, simpleblob_cv2
 from cenfind.core.outline import draw_foci
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 
+import os
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def main():
-    methods = [detect_centrioles, sankaran, log_skimage, simpleblob_cv2]
+    methods = [sankaran, log_skimage, simpleblob_cv2]
     model_paths = {
-        'sankaran': 'models/sankaran/dev/2022-09-05_09:23:45',
-        'spotnet': 'models/dev/2022-09-02_14:31:28',
+        'spotnet': 'models/dev/20220921_094752',
+        'sankaran': 'models/sankaran/dev/20220921_191227.pt',
         'log_skimage': None,
         'simpleblob_cv2': None,
     }
     perfs = []
     for ds_name in datasets:
         ds = Dataset(PREFIX_REMOTE / ds_name)
-        test_fields = ds.splits_for('test')
-        for field_name, channel in test_fields:
+        for field_name, channel in ds.pairs(split='test'):
+            print(field_name)
             field = Field(field_name, ds)
             vis = field.channel(channel)
             annotation = field.annotation(channel)

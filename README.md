@@ -1,41 +1,18 @@
 # cenfind
 
-A command line interface to score centrioles in cells.
-
-## Overview
-
-If you want to read about cenfind, head to the Introduction.
-If you want to process projection head to Routine use.
-If you want to install cenfind, head to Set up the environment for cenfind
+A command line interface to score cells for centrioles.
 
 ## Introduction
 
-cenfind is a command line interface to detect centrioles in immunofluorescence images of human cells.
-Specifically, it orchestrates :
+cenfind is a command line interface to detect and assigne centrioles in immunofluorescence images of human cells.
+Specifically, it orchestrates:
 
-- the z-max projection of the raw files,
-- the detection of centrioles
-- the detection of the nuclei
+- the z-max projection of the raw files;
+- the detection of centrioles;
+- the detection of the nuclei;
 - the assignment of the centrioles to the nearest nucleus.
-- the brightness of the detected centrioles
-
-### Repository / Source code
-
-Eventually, cenfind will be living on PyPI and will be installed using `pip install cenfind`.
-However, currently, this method cannot be used as cenfind is not publicly available.
-Therefore, it needs to be installed from the private GitHub repository (UPGON/cenfind).
-
-cenfind relies on the private dependency spotipy, which cannot be downloaded via pip normally repository. Thus, follow
-the instructions below.
-
-This situation is temporary and in the near future spotipy will become a
-simple dependency of cenfind.
-Next, when both cenfind and spotipy will be publicly available, cenfind will be downloadable directly from PyPI.
 
 ## Installation
-
-! To isolate cenfind from other projects, only run `pip install cenfind`
-within a virtual environment.
 
 1. Install python via pyenv
 2. Install poetry, system-wide with `pip install poetry`
@@ -59,7 +36,7 @@ git clone git@github.com:UPGON/cenfind.git
 cd cenfind
 ```
 
-5. As of now, you need to git clone the spotipy package in place in cenfind/src/:
+5. As of now, you need to install the spotipy package from the git repository https://github.com/maweigert/spotipy:
    !!! You need to have access to this private repo; contact Leo for setting up the permission.
 
 ```shell
@@ -68,7 +45,7 @@ git clone git@github.com:maweigert/spotipy.git
 pip install -e spotipy/
 ```
 
-6. Add the programs `squash` and `score` to the PATH so that they can be run from
+6. Add the programs `squash` and `score` to the PATH with the following commands, so that they can be run from
    the command line, without the need to type the whole path.
 
 ```shell
@@ -91,9 +68,6 @@ git pull
 poetry install
 ```
 
-A common session involves running `squash` then `score`. Below, we
-describe each program, their input, the algorithm and the expected output.
-
 ## API
 
 cenfind consists of the `Dataset` and the `Field` classes.
@@ -110,7 +84,7 @@ It should:
 - set up the folders projections, predictions, visualisations and statistics
 - set and get the splits
 
-A Field represents a field of view and should:
+A `Field` represents a field of view and should:
 
 - construct file names for projections, annotation
 - get Dataset
@@ -119,7 +93,7 @@ A Field represents a field of view and should:
 - load annotation as np.ndarray
 - load mask as np.ndarray
 
-Using those two objects, cenfind should
+Using those two objects, `cenfind` should
 
 - detect centrioles (data, model) => points,
 - extract nuclei (data, model) => contours,
@@ -131,11 +105,13 @@ Using those two objects, cenfind should
 
 ## Routines
 
+In order to score datasets for centrioles:
+
 1. Group all the raw OME.TIFF files into one folder called `raw`. This helps keep the structure of the processed images
    clean.
 2. Run `squash` with the argument of the path to the project folder and the suffix of the raw files. After running
-   the `squash`, a folder
-   called `projections` is created and contains the 4-d tiff files.
+   the `squash`, a folder called `projections` is created and contains the 4-d tiff files.
+3. Run train-test.py to create the fields of view list
 
 ```shell
 squash path/to/ds .ome.tif
@@ -144,17 +120,16 @@ squash path/to/ds .ome.tif
 3. Run `score` with the arguments source and the index of the nuclei channel (usually 0 or 3).
 
 ```shell
-score path/to/ds 0
+score path/to/ds path/to/model/ 0 1 2 3
 ```
 
 4. Check that the predictions are satisfactory by looking at the folder `outlines` and at the results/scores.csv.
 
 ### Squashing the stacks to projections
 
-`squash` expects two argument: a path to a dataset folder that contains a single folder
-called `raw/` and the type of raw images (.ome.tif, .stk). Inside raw, you have put all the folders that contains
-ome.tif
-files. These ome.tif files are fetched, squashed and saved to `projections/`, next to the `raw/` folder.
+`squash` expects two argument: a path to a dataset folder that contains a single folder called `raw/` and the type of
+raw images (.ome.tif, .stk). Inside raw, you have put all the folders that contains ome.tif files. These ome.tif files
+are fetched, squashed and saved to `projections/`, next to the `raw/` folder.
 
 The files are loaded using tifffile into the memory (intensive; as each file may
 be 4.2 GB in size). Each file as up to 5 dimensions (TCZYX) but so far only
@@ -171,19 +146,19 @@ However, projections files need to be converted into 8bit png files,
 prior to uploading onto Labelbox platform. This conversion is further explained in the tutorial "Experimenting and
 Extending cenfind with new datasets"
 
-### Scoring the centrioles
+### Scoring the cells
 
 The neural network SPOTNET is run on each centriolar channel and returns a list of the coordinates of the detected
-centrioles. The coordinates are represented as (row, col) with respect to the image dimensions.
-In parallel, the cells are located by segmenting the nuclei from the DAPI channel. Once the nuclei are segmented. Each
-centriole is assigned to the nearest nucleus but at most 50 px away.
+centrioles. The coordinates are represented as (row, col) with respect to the image dimensions. In parallel, the cells
+are located by segmenting the nuclei from the DAPI channel. Once the nuclei are segmented. Each centriole is assigned to
+the nearest nucleus but at most 50 px away.
 
 ### Saving the predictions
 
-When centrioles and nuclei are detected automatically, the results are called predictions. When the predictions are
-checked by an experimenter, they become annotations.
-Two prediction types are saved: the coordinates of the centrioles and the mask containing the nuclei, in which each
-nucleus is labelled with an index, while the background is set to 0.
+Once centrioles and nuclei are detected automatically, the results are called predictions. Once the predictions are
+checked by an experimenter, they are called annotations. Two prediction types are saved: the coordinates of the
+centrioles and the mask containing the nuclei, in which each nucleus is labelled with an index, while the background is
+set to 0.
 
 ## Requirements
 

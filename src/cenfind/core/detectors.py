@@ -1,7 +1,9 @@
 import contextlib
 import os
+from pathlib import Path
 from typing import Tuple, List
 
+import torch
 import cv2
 import numpy as np
 from centrosome_analysis import centrosome_analysis_backend as cab
@@ -14,12 +16,12 @@ from spotipy.utils import points_matching
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Field
-from cenfind.core.helpers import blob2point
+from cenfind.core.helpers import blob2point, get_model
 from cenfind.core.helpers import resize_image
 from cenfind.core.outline import Centre, Contour
 
 
-def log_skimage(data: Field, channel: int) -> list:
+def log_skimage(data: Field, channel: int, **kwargs) -> list:
     data = data.channel(channel)
     data = rescale_intensity(data, out_range=(0, 1))
     foci = blob_log(data, min_sigma=.5, max_sigma=5, num_sigma=10, threshold=.1)
@@ -28,7 +30,7 @@ def log_skimage(data: Field, channel: int) -> list:
     return res
 
 
-def simpleblob_cv2(data: Field, channel: int) -> list:
+def simpleblob_cv2(data: Field, channel: int, **kwargs) -> list:
     data = data.channel(channel)
     foci = rescale_intensity(data, out_range='uint8')
     params = cv2.SimpleBlobDetector_Params()
@@ -49,7 +51,12 @@ def simpleblob_cv2(data: Field, channel: int) -> list:
     return res
 
 
-def detect_centrioles(data: Field, channel: int, model: SpotNet, prob_threshold=.5, min_distance=2) -> np.ndarray:
+def spotnet(data: Field,
+            foci_model_file: Path,
+            channel: int,
+            prob_threshold=.5,
+            min_distance=2, **kwargs) -> np.ndarray:
+    model = get_model(foci_model_file)
     data = data.channel(channel)
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         data = normalize_fast2d(data)
@@ -59,10 +66,11 @@ def detect_centrioles(data: Field, channel: int, model: SpotNet, prob_threshold=
     return points_preds[:, [1, 0]]
 
 
-def sankaran(data: Field, foci_model_file) -> np.ndarray:
+def sankaran(data: Field, foci_model_file, **kwargs) -> np.ndarray:
     data = data.projection[1:, :, :]
-    foci_model = cab.load_foci_model(foci_model_file=foci_model_file)
-    foci, foci_scores = cab.run_detection_model(data, foci_model)
+    with torch.no_grad():
+        foci_model = cab.load_foci_model(foci_model_file=foci_model_file)
+        foci, foci_scores = cab.run_detection_model(data, foci_model)
     detections = foci[foci_scores > .99, :]
     detections = np.round(detections).astype(int)
     return detections

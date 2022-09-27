@@ -22,6 +22,7 @@ class Dataset:
     """
     path: Union[str, Path]
     image_type: str = '.ome.tif'
+    projection_suffix: str = 'max'
 
     def __post_init__(self):
         self.path = Path(self.path)
@@ -56,7 +57,7 @@ class Dataset:
         for f in folder.iterdir():
             if f.name.startswith('.'):
                 continue
-            fields.append(f.name.split('.')[0].rstrip('_max'))
+            fields.append(f.name.split('.')[0].rstrip(f'_{self.projection_suffix}'))
 
         with open(self.path / 'fields.txt', 'w') as f:
             for field in fields:
@@ -100,13 +101,13 @@ class Field:
 
     @property
     def projection(self) -> np.ndarray:
-        return tf.imread(str(self.dataset.path / 'projections' / f"{self.name}_max.tif"))
+        return tf.imread(str(self.dataset.path / 'projections' / f"{self.name}_{self.dataset.projection_suffix}.tif"))
 
     def channel(self, channel: int) -> np.ndarray:
         return self.projection[channel, :, :]
 
     def annotation(self, channel) -> np.ndarray:
-        name = f"{self.name}_max_C{channel}"
+        name = f"{self.name}_{self.dataset.projection_suffix}_C{channel}"
         path_annotation = self.dataset.path / 'annotations' / 'centrioles' / f"{name}.txt"
         if path_annotation.exists():
             annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=',')
@@ -115,7 +116,7 @@ class Field:
             raise FileNotFoundError(f"{path_annotation}")
 
     def mask(self, channel) -> np.ndarray:
-        mask_name = f"{self.name}_max_C{channel}.tif"
+        mask_name = f"{self.name}_{self.dataset.projection_suffix}_C{channel}.tif"
         path_annotation = self.dataset.path / 'annotations' / 'cells' / mask_name
         if path_annotation.exists():
             return tf.imread(str(path_annotation))

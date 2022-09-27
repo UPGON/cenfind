@@ -1,6 +1,7 @@
 import logging
 from types import SimpleNamespace
 from typing import Any
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -9,7 +10,7 @@ from spotipy.utils import points_matching
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Dataset, Field
-from cenfind.core.detectors import detect_centrioles, extract_nuclei
+from cenfind.core.detectors import spotnet, extract_nuclei
 from cenfind.core.helpers import signed_distance, full_in_field
 from cenfind.core.outline import Centre
 
@@ -52,7 +53,7 @@ def field_metrics(field: Field,
     :return: dictionary of fields
     """
     if all((len(predictions), len(annotation))) > 0:
-        res = points_matching(annotation[:, [1, 0]],
+        res = points_matching(annotation[:, [0, 1]],
                               predictions,
                               cutoff_distance=tolerance)
     else:
@@ -70,7 +71,7 @@ def field_metrics(field: Field,
         'tolerance': tolerance,
         'precision': np.round(res.precision, 3),
         'recall': np.round(res.recall, 3),
-        'f1': res.f1.round(3),
+        'f1': np.round(res.f1, 3),
     }
     return perf
 
@@ -81,7 +82,7 @@ def dataset_metrics(dataset: Dataset, split, model, tolerance) -> list:
     for field_name, channel in fields:
         field = Field(field_name, dataset)
         annotation = field.annotation(channel)
-        predictions = detect_centrioles(field, channel, model)
+        predictions = spotnet(field, model, channel)
         perf = field_metrics(field, channel, annotation, predictions, tolerance)
         perfs.append(perf)
     return perfs
@@ -89,7 +90,7 @@ def dataset_metrics(dataset: Dataset, split, model, tolerance) -> list:
 
 def field_score(field: Field,
                 model_nuclei: StarDist2D,
-                model_foci: SpotNet,
+                model_foci: Path,
                 nuclei_channel: int,
                 channel: int) -> list:
     """
@@ -106,7 +107,7 @@ def field_score(field: Field,
     """
 
     centres, nuclei = extract_nuclei(field, nuclei_channel, model_nuclei)
-    foci = detect_centrioles(data=field, channel=channel, model=model_foci)
+    foci = spotnet(data=field, foci_model_file=model_foci, channel=channel)
     foci = [Centre((y, x), f_id, 'Centriole') for f_id, (x, y) in enumerate(foci)]
 
     assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)

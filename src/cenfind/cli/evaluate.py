@@ -2,11 +2,14 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
-
+import tensorflow as tf
 from cenfind.core.data import Dataset
 from cenfind.core.helpers import get_model
 from cenfind.core.measure import dataset_metrics
 from cenfind.experiments.constants import PREFIX_REMOTE
+from tqdm import tqdm
+
+tf.get_logger().setLevel('ERROR')
 
 
 def get_args():
@@ -16,7 +19,7 @@ def get_args():
                         nargs='+',
                         help='Path to the dataset folder, can be one or more')
     parser.add_argument('--model',
-                        type=str,
+                        type=Path,
                         help='Path to the model, e.g., <project>/models/dev/master')
     parser.add_argument('--tolerance',
                         type=int,
@@ -34,16 +37,19 @@ def main():
     datasets = args.datasets
 
     performances = []
-    for dataset_name in datasets:
+    p_bar = tqdm(datasets)
+    for dataset_name in p_bar:
         dataset = Dataset(PREFIX_REMOTE / dataset_name)
-        performance = dataset_metrics(dataset, split=True, model=model, tolerance=tolerance)
-        performances.append(performance)
+        for tol in tolerance:
+            p_bar.set_postfix({"tolerance": tol})
+            performance = dataset_metrics(dataset, split='test', model=model, tolerance=tol)
+            performances.append(performance)
 
     performances_df = pd.DataFrame([s for p in performances for s in p])
 
     path_out = Path('out')
     performances_df = performances_df.set_index('field')
-    performances_df.to_csv(path_out / f'performances_{args.model}.csv')
+    performances_df.to_csv(path_out / f'performances_{args.model.name}.csv')
 
 
 if __name__ == '__main__':
