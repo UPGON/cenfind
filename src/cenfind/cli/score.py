@@ -2,15 +2,14 @@ import argparse
 import logging
 from pathlib import Path
 
-import tensorflow as tf
 import pandas as pd
+import tensorflow as tf
 from stardist.models import StarDist2D
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset, Field
-from cenfind.core.helpers import get_model
-from cenfind.core.measure import field_score_frequency
 from cenfind.core.measure import field_score
+from cenfind.core.measure import field_score_frequency
 
 tf.get_logger().setLevel(logging.ERROR)
 
@@ -67,10 +66,14 @@ def main():
             score = field_score(field=field, model_nuclei=model_stardist, model_foci=args.model,
                                 nuclei_channel=args.channel_nuclei, channel=ch)
             scores.append(score)
+
     flattened = [leaf for tree in scores for leaf in tree]
+
     scores_df = pd.DataFrame(flattened)
+    scores_df.to_csv(dataset.statistics / f'scores_df.tsv', sep='\t', index=False)
+
     binned = field_score_frequency(scores_df)
-    binned.to_csv(dataset.statistics / f'statistics.csv')
+    binned.to_csv(dataset.statistics / f'statistics.tsv', sep='\t', index=False)
 
 
 if __name__ == '__main__':

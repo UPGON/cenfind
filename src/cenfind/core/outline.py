@@ -6,6 +6,8 @@ import numpy as np
 from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 
+from cenfind.core.data import Field
+
 
 @dataclass(eq=True, frozen=True)
 class ROI(ABC):
@@ -108,25 +110,25 @@ def _color_channel(data, color, out_range):
     return res
 
 
-def create_vignette(projection, marker_index: int, nuclei_index: int):
+def create_vignette(field: Field, marker_index: int, nuclei_index: int):
     """
     Normalise all markers
     Represent them as blue
     Highlight the channel in green
-    :param projection:
+    :param field:
     :param nuclei_index:
     :param marker_index:
     :return:
     """
-    layer_nuclei = projection.projection[nuclei_index, :, :]
-    layer_marker = projection.projection[marker_index, :, :]
+    layer_nuclei = field.channel(nuclei_index)
+    layer_marker = field.channel(marker_index)
 
     nuclei = _color_channel(layer_nuclei, (1, 0, 0), 'uint8')
     marker = _color_channel(layer_marker, (0, 1, 0), 'uint8')
 
-    res = cv2.addWeighted(marker, 1, nuclei, .2, 50)
-    res = cv2.putText(res, f"{projection.name} {marker_index}",
-                      (5, 20), cv2.FONT_HERSHEY_SIMPLEX,
+    res = cv2.addWeighted(marker, 1, nuclei, .5, 0)
+    res = cv2.putText(res, f"{field.name} {marker_index}",
+                      (100, 100), cv2.FONT_HERSHEY_SIMPLEX,
                       .8, (255, 255, 255), 1, cv2.LINE_AA)
 
     return res

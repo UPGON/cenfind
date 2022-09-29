@@ -97,13 +97,12 @@ def field_score(field: Field,
     1. Detect foci in the given channels
     2. Detect nuclei
     3. Assign foci to nuclei
-    Return: dictionary of the record
     :param channel:
     :param nuclei_channel:
     :param model_foci:
     :param model_nuclei:
     :param field:
-    :return:
+    :return: dictionary of the record
     """
 
     centres, nuclei = extract_nuclei(field, nuclei_channel, model_nuclei)
@@ -141,9 +140,9 @@ def field_score_frequency(df):
               .groupby(['fov', 'channel'])
               .value_counts()
               .sort_index()
-              .reset_index())
+              .reset_index(drop=True))
 
     result = (result.rename({'level_2': 'score_cat',
-                             'score': 'freq_abs'}, axis=1)
+                             'score': 'freq_abs'})
               .pivot(index=['fov', 'channel'], columns='score_cat'))
     return result
