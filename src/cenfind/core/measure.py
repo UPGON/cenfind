@@ -92,7 +92,7 @@ def field_score(field: Field,
                 model_nuclei: StarDist2D,
                 model_foci: Path,
                 nuclei_channel: int,
-                channel: int) -> list:
+                channel: int) -> (np.ndarray, list):
     """
     1. Detect foci in the given channels
     2. Detect nuclei
@@ -107,20 +107,20 @@ def field_score(field: Field,
 
     centres, nuclei = extract_nuclei(field, nuclei_channel, model_nuclei)
     foci = spotnet(data=field, foci_model_file=model_foci, channel=channel)
-    foci = [Centre((y, x), f_id, 'Centriole') for f_id, (x, y) in enumerate(foci)]
+    foci = [Centre((x, y), f_id, 'Centriole') for f_id, (x, y) in enumerate(foci)]
 
     assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)
 
     scores = []
     for pair in assigned:
-        n, foci = pair
+        n, _foci = pair
         scores.append({'fov': field.name,
                        'channel': channel,
                        'nucleus': n.centre.position,
-                       'score': len(foci),
+                       'score': len(_foci),
                        'is_full': full_in_field(n.centre.position, field.projection, .05)
                        })
-    return scores
+    return foci, scores
 
 
 def field_score_frequency(df):

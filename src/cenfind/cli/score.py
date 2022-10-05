@@ -3,15 +3,19 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-import tensorflow as tf
+# import tensorflow as tf
 from stardist.models import StarDist2D
 from tqdm import tqdm
+import tifffile as tf
 
 from cenfind.core.data import Dataset, Field
 from cenfind.core.measure import field_score
 from cenfind.core.measure import field_score_frequency
+from cenfind.core.outline import draw_foci, create_vignette
 
-tf.get_logger().setLevel(logging.ERROR)
+# tf.get_logger().setLevel(logging.ERROR)
+# physical_devices = tf.config.experimental.list_physical_devices('GPU')
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 
 def get_args():
@@ -53,6 +57,7 @@ def get_args():
 
 def main():
     args = get_args()
+    visualisation = True
 
     dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
     model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
@@ -63,9 +68,15 @@ def main():
         pbar.set_description(f"{field_name}")
         field = Field(field_name, dataset)
         for ch in args.channels:
-            score = field_score(field=field, model_nuclei=model_stardist, model_foci=args.model,
+            foci, score = field_score(field=field, model_nuclei=model_stardist, model_foci=args.model,
                                 nuclei_channel=args.channel_nuclei, channel=ch)
             scores.append(score)
+
+            if visualisation:
+                background = create_vignette(field, marker_index=ch, nuclei_index=0)
+                for focus in foci:
+                    background = focus.draw(background)
+                tf.imwrite(args.path / 'visualisations' / f"{field.name}_pred.png", background)
 
     flattened = [leaf for tree in scores for leaf in tree]
 
