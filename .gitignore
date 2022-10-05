@@ -24,4 +24,5 @@ models/
 *.docx
 *.out
 *.tif
+*.tsv
 /src/centrosome_analysis/
