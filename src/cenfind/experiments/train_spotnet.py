@@ -17,7 +17,7 @@ config = Config(n_channel_in=1,
                 unet_pool=4,
                 unet_n_filter_base=64,
                 spot_weight=40,
-                multiscale=False,
+                multiscale=True,
                 train_learning_rate=3e-4,
                 train_foreground_prob=1,
                 train_batch_norm=False,
@@ -62,7 +62,7 @@ def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.
         foci = field.annotation(channel)
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
             image = normalize_fast2d(data)
-        mask = points_to_prob(foci, shape=image.shape, sigma=sigma)
+        mask = points_to_prob(foci[:, [1, 0]], shape=image.shape, sigma=sigma) # because it works with x, y
 
         if transform is not None:
             transformed = transform(image=image, mask=mask)

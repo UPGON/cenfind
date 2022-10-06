@@ -56,6 +56,16 @@ def spotnet(data: Field,
             channel: int,
             prob_threshold=.5,
             min_distance=2, **kwargs) -> np.ndarray:
+    """
+    Detect centrioles as row, col, row major
+    :param data:
+    :param foci_model_file:
+    :param channel:
+    :param prob_threshold:
+    :param min_distance:
+    :param kwargs:
+    :return:
+    """
     model = get_model(foci_model_file)
     data = data.channel(channel)
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
@@ -63,7 +73,7 @@ def spotnet(data: Field,
         mask_preds, points_preds = model.predict(data,
                                                  prob_thresh=prob_threshold,
                                                  min_distance=min_distance, verbose=False)
-    return points_preds[:, [1, 0]]
+    return points_preds
 
 
 def sankaran(data: Field, foci_model_file, **kwargs) -> np.ndarray:

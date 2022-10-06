@@ -1,17 +1,20 @@
 import argparse
-import logging
 from pathlib import Path
 
+import cv2
 import pandas as pd
-# import tensorflow as tf
+import tifffile as tf
+import tensorflow
 from stardist.models import StarDist2D
 from tqdm import tqdm
-import tifffile as tf
 
 from cenfind.core.data import Dataset, Field
 from cenfind.core.measure import field_score
 from cenfind.core.measure import field_score_frequency
-from cenfind.core.outline import draw_foci, create_vignette
+from cenfind.core.outline import create_vignette
+
+## GLOBAL SEED ##
+tensorflow.random.set_seed(3)
 
 # tf.get_logger().setLevel(logging.ERROR)
 # physical_devices = tf.config.experimental.list_physical_devices('GPU')
@@ -29,7 +32,6 @@ def get_args():
     parser.add_argument('model',
                         type=Path,
                         help='absolute path to the model folder')
-
 
     parser.add_argument('channel_nuclei',
                         type=int,
@@ -68,15 +70,23 @@ def main():
         pbar.set_description(f"{field_name}")
         field = Field(field_name, dataset)
         for ch in args.channels:
-            foci, score = field_score(field=field, model_nuclei=model_stardist, model_foci=args.model,
-                                nuclei_channel=args.channel_nuclei, channel=ch)
+            foci, nuclei, assigned, score = field_score(field=field, model_nuclei=model_stardist, model_foci=args.model,
+                                                        nuclei_channel=args.channel_nuclei, channel=ch)
             scores.append(score)
 
             if visualisation:
                 background = create_vignette(field, marker_index=ch, nuclei_index=0)
                 for focus in foci:
                     background = focus.draw(background)
-                tf.imwrite(args.path / 'visualisations' / f"{field.name}_pred.png", background)
+                for nucleus in nuclei:
+                    background = nucleus.draw(background)
+                for n_pos, c_pos in assigned:
+                    for sub_c in c_pos:
+                        if sub_c:
+
+                            cv2.arrowedLine(background, sub_c.to_cv2(), n_pos.centre.to_cv2(), color=(0, 255, 0),
+                                            thickness=1)
+                tf.imwrite(args.path / 'visualisations' / f"{field.name}_C{ch}_pred.png", background)
 
     flattened = [leaf for tree in scores for leaf in tree]
 

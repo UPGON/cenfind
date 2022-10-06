@@ -53,7 +53,7 @@ def field_metrics(field: Field,
     :return: dictionary of fields
     """
     if all((len(predictions), len(annotation))) > 0:
-        res = points_matching(annotation[:, [0, 1]],
+        res = points_matching(annotation,
                               predictions,
                               cutoff_distance=tolerance)
     else:
@@ -62,6 +62,7 @@ def field_metrics(field: Field,
         res = SimpleNamespace()
         res.precision = 0.
         res.recall = 0.
+        res.f1 = 0.
     perf = {
         'dataset': field.dataset.path.name,
         'field': field.name,
@@ -76,7 +77,7 @@ def field_metrics(field: Field,
     return perf
 
 
-def dataset_metrics(dataset: Dataset, split, model, tolerance) -> list:
+def dataset_metrics(dataset: Dataset, split: str, model: Path, tolerance) -> list:
     fields = dataset.pairs(split)
     perfs = []
     for field_name, channel in fields:
@@ -102,12 +103,12 @@ def field_score(field: Field,
     :param model_foci:
     :param model_nuclei:
     :param field:
-    :return: dictionary of the record
+    :return: list(foci, nuclei, scores)
     """
 
     centres, nuclei = extract_nuclei(field, nuclei_channel, model_nuclei)
     foci = spotnet(data=field, foci_model_file=model_foci, channel=channel)
-    foci = [Centre((x, y), f_id, 'Centriole') for f_id, (x, y) in enumerate(foci)]
+    foci = [Centre((r, c), f_id, 'Centriole') for f_id, (r, c) in enumerate(foci)]
 
     assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)
 
@@ -120,7 +121,7 @@ def field_score(field: Field,
                        'score': len(_foci),
                        'is_full': full_in_field(n.centre.position, field.projection, .05)
                        })
-    return foci, scores
+    return foci, nuclei, assigned, scores
 
 
 def field_score_frequency(df):
@@ -135,14 +136,15 @@ def field_score_frequency(df):
     df = df.set_index(['fov', 'channel'])
     result = pd.cut(df['score'], cuts, right=False,
                     labels=labels, include_lowest=True)
-
     result = (result
               .groupby(['fov', 'channel'])
               .value_counts()
-              .sort_index()
-              .reset_index(drop=True))
+              )
+    result.name = 'freq_abs'
+    result = (result.sort_index()
+              .reset_index()
+              )
+    result = result.rename({'score': 'score_cat'}, axis=1)
 
-    result = (result.rename({'level_2': 'score_cat',
-                             'score': 'freq_abs'})
-              .pivot(index=['fov', 'channel'], columns='score_cat'))
+    result = result.pivot(index=['fov', 'channel'], columns='score_cat')
     return result

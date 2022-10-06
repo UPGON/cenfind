@@ -107,11 +107,18 @@ class Field:
         return self.projection[channel, :, :]
 
     def annotation(self, channel) -> np.ndarray:
+        """
+        Load annotation file from text file given channel
+        loaded as row col, row major.
+        ! the text format is x, y; origin at top left;
+        :param channel:
+        :return:
+        """
         name = f"{self.name}_{self.dataset.projection_suffix}_C{channel}"
         path_annotation = self.dataset.path / 'annotations' / 'centrioles' / f"{name}.txt"
         if path_annotation.exists():
             annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=',')
-            return annotation
+            return annotation[:, [1, 0]]
         else:
             raise FileNotFoundError(f"{path_annotation}")
 

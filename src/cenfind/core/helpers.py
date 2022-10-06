@@ -22,8 +22,9 @@ def flag(is_full: bool) -> tuple:
 
 def signed_distance(focus: Centre, nucleus: Contour) -> float:
     """Wrapper for the opencv PolygonTest"""
+
     result = cv2.pointPolygonTest(nucleus.contour,
-                                  focus.centre,
+                                  focus.to_cv2(),
                                   measureDist=True)
     return result
 
@@ -33,7 +34,7 @@ def frac(x):
 
 
 def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
-    res = tuple(int(c) for c in keypoint.pt)
+    res = (int(keypoint.pt[1]), int(keypoint.pt[0]))
     return res
 
 
