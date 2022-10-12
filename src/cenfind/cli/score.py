@@ -94,7 +94,7 @@ def main():
     scores_df.to_csv(dataset.statistics / f'scores_df.tsv', sep='\t', index=False)
 
     binned = field_score_frequency(scores_df)
-    binned.to_csv(dataset.statistics / f'statistics.tsv', sep='\t', index=False)
+    binned.to_csv(dataset.statistics / f'statistics.tsv', sep='\t', index=True)
 
 
 if __name__ == '__main__':
