@@ -69,25 +69,27 @@ class Dataset:
         with open(fields_path, 'r') as f:
             return f.read().splitlines()
 
-    def _read_split(self, split_type) -> List[Tuple[str, int]]:
+    def _read_split(self, split_type, channel_id=None) -> List[Tuple[str, int]]:
         with open(self.path / f'{split_type}.txt', 'r') as f:
             files = f.read().splitlines()
         files = [f.split(',') for f in files if f]
-        files = [(str(f[0]), int(f[1])) for f in files]
+        if channel_id:
+            return [(str(f[0]), channel_id) for f in files]
+        else:
+            return [(str(f[0]), int(f[1])) for f in files]
 
-        return files
-
-    def pairs(self, split: str = None) -> List[Tuple[str, int]]:
+    def pairs(self, split: str = None, channel_id: int = None) -> List[Tuple[str, int]]:
         """
         Fetch the fields of view for train or test
+        :param channel_id:
         :param split: all, test or train
         :return: a list of tuples (fov name, channel id)
         """
 
         if split is None:
-            return self._read_split('train') + self._read_split('test')
+            return self._read_split('train', channel_id) + self._read_split('test', channel_id)
         else:
-            return self._read_split(split)
+            return self._read_split(split, channel_id)
 
 
 @dataclass

@@ -16,13 +16,14 @@ def main():
                         type=str,
                         default='max',
                         help='the suffix indicating projection, e.g., `max` or `Projected`')
+    parser.add_argument('--channel_index', type=int, help="the index of the channel (often, 1)")
     args = parser.parse_args()
 
     dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
     path_vignettes = Path(dataset.path / 'vignettes')
     path_vignettes.mkdir(exist_ok=True)
 
-    pbar = tqdm(dataset.pairs())
+    pbar = tqdm(dataset.pairs(channel_id=args.channel_index))
     for fov_name, channel_id in pbar:
         pbar.set_description(f"{fov_name}: {channel_id}")
         field = Field(fov_name, dataset)
