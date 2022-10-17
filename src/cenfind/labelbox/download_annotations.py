@@ -40,21 +40,27 @@ def main():
 
         external_name = label.data.external_id
         logger.debug('Processing %s / %s', ds, external_name)
+        if external_name.endswith(".png"):
+            annotation_name = re.sub('.png$', '.txt', external_name)
+            mask_name = re.sub('C\d.png$', '_max_C0.tif', external_name)
+        else:
+            annotation_name = f"{external_name}_max_C1.txt"
+            mask_name = f"{external_name}_max_C0.tif"
 
-        annotation_file = re.sub('.png$', '.txt', external_name)
-        mask_name = re.sub('C\d.png$', 'C0.tif', external_name)
-
-        foci_in_label = [lab for lab in label.annotations if lab.name == 'Centriole']
-
-        with open(path_annotations_centrioles / annotation_file, 'w') as f:
-            for lab in foci_in_label:
-                logger.info('Adding point')
-                # the coordinates in labelbox are (x, y) and start
-                # in the top left corner;
-                # thus, they correspond to (col, row).
-                x = int(lab.value.x)
-                y = int(lab.value.y)
-                f.write(f"{x},{y}\n")
+        if not (path_annotations_centrioles / annotation_name).exists():
+            print('annotation does not exist')
+            foci_in_label = [lab for lab in label.annotations if lab.name == 'Centriole']
+            with open(path_annotations_centrioles / annotation_name, 'w') as f:
+                for lab in foci_in_label:
+                    logger.info('Adding point')
+                    # the coordinates in labelbox are (x, y) and start
+                    # in the top left corner;
+                    # thus, they correspond to (col, row).
+                    x = int(lab.value.x)
+                    y = int(lab.value.y)
+                    f.write(f"{x},{y}\n")
+        else:
+            print('exists')
 
         if (path_annotations_cells / mask_name).exists():
             logger.info("%s already exists; skipping..." % mask_name)
