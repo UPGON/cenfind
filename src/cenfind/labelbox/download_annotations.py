@@ -21,11 +21,13 @@ def main():
     logger.addHandler(ch)
 
     lb = labelbox.Client(api_key=config['LABELBOX_API_KEY'])
-    project = lb.get_project(config['PROJECT_CENTRIOLES'])
+    project = lb.get_project(config['PROJECT_CENTRIOLES_C1'])
     labels = project.label_generator()
 
     for label in tqdm(labels):
         ds = label.extra['Dataset Name']
+        if ds == 'all_channel_1':
+            ds = "_".join(label.data.external_id.split("_")[:3])
         path_dataset = PREFIX_REMOTE / ds
 
         path_annotations = path_dataset / 'annotations'
@@ -36,7 +38,7 @@ def main():
         path_annotations_centrioles.mkdir(exist_ok=True)
         path_annotations_cells.mkdir(exist_ok=True)
 
-        external_name = label.projection.external_id
+        external_name = label.data.external_id
         logger.debug('Processing %s / %s', ds, external_name)
 
         annotation_file = re.sub('.png$', '.txt', external_name)
@@ -59,6 +61,9 @@ def main():
             continue
 
         nuclei_in_label = [lab for lab in label.annotations if lab.name == 'Nucleus']
+        if len(nuclei_in_label) == 0:
+            logger.warning("No nucleus found in %s" % external_name)
+            continue
         mask_shape = nuclei_in_label[0].value.mask.value.shape
         logger.debug('mask shape: %s' % str(mask_shape))
         res = np.zeros(mask_shape[:2], dtype='uint16')
