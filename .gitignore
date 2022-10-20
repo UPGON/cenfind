@@ -18,6 +18,8 @@ models/
 
 *.idlk
 *.h5
+*.pt
+*.ckpt
 *.json
 *.pdf
 *.indd
