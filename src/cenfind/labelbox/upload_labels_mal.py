@@ -4,6 +4,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from dotenv import dotenv_values
+from labelbox.exceptions import ResourceNotFoundError
 from labelbox import (Client,
                       MediaType,
                       )
@@ -26,13 +27,19 @@ def main():
     config = dotenv_values('.env')
     client = Client(api_key=config['LABELBOX_API_KEY'])
 
-    project_name = 'test_mal_project'
-    dataset_name = 'all_channel_1'
+    project_name = 'project_centrioles_c1'
+    project_id = config['PROJECT_CENTRIOLES_C1']
     ontology_id = 'cl6gk46xv4wjc07yt4kyygxh1'
-    channel_id = 1
+    channel_id = 3
 
-    project = client.create_project(name=project_name, media_type=MediaType.Image)
-    ontology_setup(client, project, ontology_id=ontology_id)
+    try:
+        project = client.get_project(project_id)
+    except ResourceNotFoundError:
+        print('Project not existing, creating one...')
+        project = client.create_project(name=project_name, media_type=MediaType.Image)
+        ontology_setup(client, project, ontology_id=ontology_id)
+
+    dataset_name = f'all_channel_{channel_id}'
     dataset = client.create_dataset(name=dataset_name, iam_integration=None)
     project.datasets.connect(dataset)
 
@@ -42,11 +49,10 @@ def main():
         for field_name in ds.fields:
             field = Field(field_name, ds)
             predictions = spotnet(field, foci_model, channel_id)
-            # predictions = np.random.randint(100, 500, (4, 2))
-            vignette_path = str(ds.path / 'vignettes' / f"{field_name}_max_C{channel_id}.png")
-            image = cv2.imread(vignette_path)
+            vignette_path = ds.path / 'vignettes' / f"{field_name}_max_C{channel_id}.png"
+            image = cv2.imread(str(vignette_path))
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            labels.append(label_create(image, predictions, field.name))
+            labels.append(label_create(image, predictions, vignette_path.name))
 
     mal_label_list = labels_list_create(labels)
     task = task_prepare(client, project, dataset, mal_label_list)

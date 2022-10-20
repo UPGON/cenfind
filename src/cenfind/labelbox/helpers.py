@@ -75,7 +75,7 @@ def task_prepare(client, project, dataset, labels_list):
     upload_job = MALPredictionImport.create_from_objects(
         client=client,
         project_id=project.uid,
-        name="mal_job",
+        name=f'upload-job-{uuid.uuid4()}',
         predictions=mal_ndjson)
 
     return upload_job

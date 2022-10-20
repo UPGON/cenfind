@@ -23,10 +23,12 @@ def main():
     lb = labelbox.Client(api_key=config['LABELBOX_API_KEY'])
     project = lb.get_project(config['PROJECT_CENTRIOLES_C1'])
     labels = project.label_generator()
+    channel_id = 3
+    single_channel_name = f'all_channel_{channel_id}'
 
     for label in tqdm(labels):
         ds = label.extra['Dataset Name']
-        if ds == 'all_channel_1':
+        if ds == single_channel_name:
             ds = "_".join(label.data.external_id.split("_")[:3])
         path_dataset = PREFIX_REMOTE / ds
 
@@ -44,7 +46,7 @@ def main():
             annotation_name = re.sub('.png$', '.txt', external_name)
             mask_name = re.sub('C\d.png$', '_max_C0.tif', external_name)
         else:
-            annotation_name = f"{external_name}_max_C1.txt"
+            annotation_name = f"{external_name}_max_C{channel_id}.txt"
             mask_name = f"{external_name}_max_C0.tif"
 
         if not (path_annotations_centrioles / annotation_name).exists():
