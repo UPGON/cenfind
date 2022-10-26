@@ -123,7 +123,7 @@ squash path/to/ds .ome.tif
 3. Run `score` with the arguments source and the index of the nuclei channel (usually 0 or 3).
 
 ```shell
-score path/to/ds path/to/model/ 0 1 2 3
+score /path/to/dataset ./model/master/ 4 1 2 3 --projection_suffix '_max'
 ```
 
 4. Check that the predictions are satisfactory by looking at the folder `outlines` and at the results/scores.csv.
@@ -136,11 +136,11 @@ are fetched, squashed and saved to `projections/`, next to the `raw/` folder.
 
 The files are loaded using tifffile into the memory (intensive; as each file may
 be 4.2 GB in size). Each file as up to 5 dimensions (TCZYX) but so far only
-CZYX are supported by squash. The first step is to figure out the position
-of the Z-axis. Once this has been determined, the array is max-projected
+CZYX and ZCYX are supported by squash. The first step is to figure out the position
+of the Z-axis. Once this is determined, the array is max-projected
 along the z-axis and the file is saved under projections/filename_max.tif,
-where filename is extracted from the original filename. This operation is
-repeated for each file in raw.
+where 'filename' is extracted from the original filename. This operation is
+repeated for each file in `raw/`.
 
 No further preprocessing is applied to the projections, for instance the bit
 depth is unchanged (16bit) and no contrast adjustment is applied.
