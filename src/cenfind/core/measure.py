@@ -5,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from spotipy.model import SpotNet
 from spotipy.utils import points_matching
 from stardist.models import StarDist2D
 
@@ -42,9 +41,11 @@ def field_metrics(field: Field,
                   channel: int,
                   annotation: np.ndarray,
                   predictions: np.ndarray,
-                  tolerance: int) -> dict:
+                  tolerance: int,
+                  threshold: float) -> dict:
     """
     Compute the accuracy of the prediction on one field.
+    :param threshold:
     :param field:
     :param channel:
     :param annotation:
@@ -57,19 +58,26 @@ def field_metrics(field: Field,
                               predictions,
                               cutoff_distance=tolerance)
     else:
-        logging.warning('detected: %d; annotated: %d... Set precision and accuracy to zero' % (
-            len(predictions), len(predictions)))
+        logging.warning('threshold: %f; detected: %d; annotated: %d... Set precision and accuracy to zero' % (
+            threshold, len(predictions), len(annotation)))
         res = SimpleNamespace()
         res.precision = 0.
         res.recall = 0.
         res.f1 = 0.
+        res.tp = 0,
+        res.fp = 0,
+        res.fn = 0
     perf = {
         'dataset': field.dataset.path.name,
         'field': field.name,
         'channel': channel,
         'n_actual': len(annotation),
         'n_preds': len(predictions),
+        'threshold': threshold,
         'tolerance': tolerance,
+        'tp': res.tp[0] if type(res.tp) == tuple else res.tp,
+        'fp': res.fp[0] if type(res.fp) == tuple else res.fp,
+        'fn': res.fn[0] if type(res.fn) == tuple else res.fn,
         'precision': np.round(res.precision, 3),
         'recall': np.round(res.recall, 3),
         'f1': np.round(res.f1, 3),
@@ -77,16 +85,18 @@ def field_metrics(field: Field,
     return perf
 
 
-def dataset_metrics(dataset: Dataset, split: str, model: Path, tolerance) -> list:
+def dataset_metrics(dataset: Dataset, split: str, model: Path, tolerance, threshold) -> tuple[dict, list]:
     fields = dataset.pairs(split)
     perfs = []
+    prob_maps = {}
     for field_name, channel in fields:
         field = Field(field_name, dataset)
         annotation = field.annotation(channel)
-        predictions = spotnet(field, model, channel)
-        perf = field_metrics(field, channel, annotation, predictions, tolerance)
+        prob_map, predictions = spotnet(field, model, channel, prob_threshold=threshold)
+        perf = field_metrics(field, channel, annotation, predictions, tolerance, threshold=threshold)
         perfs.append(perf)
-    return perfs
+        prob_maps[field_name] = prob_map
+    return prob_maps, perfs
 
 
 def field_score(field: Field,
@@ -107,7 +117,7 @@ def field_score(field: Field,
     """
 
     centres, nuclei = extract_nuclei(field, nuclei_channel, model_nuclei)
-    foci = spotnet(data=field, foci_model_file=model_foci, channel=channel)
+    prob_map, foci = spotnet(data=field, foci_model_file=model_foci, channel=channel)
     foci = [Centre((r, c), f_id, 'Centriole') for f_id, (r, c) in enumerate(foci)]
 
     assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)

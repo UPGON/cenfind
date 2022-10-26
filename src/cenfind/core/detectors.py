@@ -55,7 +55,7 @@ def spotnet(data: Field,
             foci_model_file: Path,
             channel: int,
             prob_threshold=.5,
-            min_distance=2, **kwargs) -> np.ndarray:
+            min_distance=2, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
     """
     Detect centrioles as row, col, row major
     :param data:
@@ -73,7 +73,7 @@ def spotnet(data: Field,
         mask_preds, points_preds = model.predict(data,
                                                  prob_thresh=prob_threshold,
                                                  min_distance=min_distance, verbose=False)
-    return points_preds
+    return mask_preds, points_preds
 
 
 def sankaran(data: Field, foci_model_file, **kwargs) -> np.ndarray:

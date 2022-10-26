@@ -44,8 +44,8 @@ def get_args():
     parser.add_argument('--unique', type=bool, default=False)
     parser.add_argument('--projection_suffix',
                         type=str,
-                        default='max',
-                        help='the suffix indicating projection, e.g., `max` or `Projected`')
+                        default='_max',
+                        help='the suffix indicating projection, e.g., `_max` or `Projected`')
 
     args = parser.parse_args()
 
@@ -58,8 +58,8 @@ def main():
     dataset = Dataset(path_dataset, projection_suffix=args.projection_suffix)
     fields = dataset.fields
     train_fields, test_fields = split_pairs(fields, p=.9)
-    pairs_train = choose_channel(train_fields, args.channels)
-    pairs_test = choose_channel(test_fields, args.channels)
+    pairs_train = choose_channel(train_fields, args.channels, unique=args.unique)
+    pairs_test = choose_channel(test_fields, args.channels, unique=args.unique)
 
     with open(path_dataset / 'train.txt', 'w') as f:
         for fov, channel in pairs_train:

@@ -11,7 +11,6 @@ datasets = [
     'RPE1wt_CEP152+GTU88+PCNT_1',
     'U2OS_CEP63+SAS6+PCNT_1',
     'RPE1p53+Cnone_CEP63+CETN2+PCNT_1',
-
 ]
 
 protein_positions = {

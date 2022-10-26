@@ -42,10 +42,10 @@ def get_args():
                         type=int,
                         help='channels to analyse, e.g., 1 2 3')
 
-    parser.add_argument('projection_suffix',
+    parser.add_argument('--projection_suffix',
                         type=str,
-                        default='max',
-                        help='the suffix indicating projection, e.g., `max` or `Projected`')
+                        default='',
+                        help='the suffix indicating projection, e.g., `_max` or `_Projected`, if not specified set to empty')
     args = parser.parse_args()
 
     if args.channel_nuclei in set(args.channels):

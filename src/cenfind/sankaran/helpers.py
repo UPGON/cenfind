@@ -63,3 +63,38 @@ def read_txt(path):
     with open(path, 'r') as f:
         lines = f.readlines()
     return lines
+
+
+def compute_metrics(annotation: np.ndarray, predictions: np.ndarray, tolerance: float, allow_duplicates):
+    dist = pairwise_distances(annotation, predictions)
+
+    min_dist = np.min(dist, axis=0)
+    arg_min_dist = np.argmin(dist, axis=0)
+    labels = min_dist < tolerance
+    arg_min_dist[~labels] = -1
+
+    if not allow_duplicates:
+        for i in range(arg_min_dist.size):
+            if i > 0:
+                if arg_min_dist[i] in arg_min_dist[:i].tolist():
+                    labels[i] = False
+                    arg_min_dist[i] = -1
+
+    return labels
+
+
+def evaluate_PR(scores, labels, idsdet, total):
+    scores = np.array(scores)
+    labels = np.array(labels)
+    idx = np.argsort(-scores)
+    labels = labels[idx]
+    idsdet = [idsdet[i] for i in idx]
+    tp = np.cumsum(labels).astype(float)
+    fp = np.cumsum(~labels).astype(float)
+    prec = tp / (tp + fp)
+    rec = np.zeros_like(prec)
+    for i in range(prec.size):
+        idsdet2 = [x for j, x in enumerate(idsdet[:(i + 1)]) if x[1] != -1]
+        idsdet2 = list(set(idsdet2))
+        rec[i] = len(idsdet2) / float(total)
+    return prec, rec
