@@ -40,10 +40,8 @@ poetry shell
 ```
 Your prompt should now be prepended with `(cenfind-py3.9)`.
 
- 6. Add manually the package spotipy
-```shell
-pip install -e ../spotipy/
-```
+Note: if your python version is not supported, install the one recommended with pyenv, the set it up and run `poetry env use $(which python)`. Then, repeat the step.
+
 
 6. Add the programs `squash` and `score` to the PATH with the following commands, so that they can be run from
    the command line, without the need to type the whole path.
@@ -52,6 +50,11 @@ pip install -e ../spotipy/
 poetry install
 ```
 
+
+6. Add manually the package spotipy
+```shell
+pip install -e ../spotipy/
+```
 
 7. Check that `cenfind`'s programs are correctly installed:
 
