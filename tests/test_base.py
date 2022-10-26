@@ -17,14 +17,18 @@ class TestData:
 
     def test_dataset(self):
         assert self.dataset.path == self.path_dataset
-        assert self.dataset.pairs() == ['RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002',
-                                        'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000']
+        assert self.dataset.pairs() == [('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000', 1),
+                                        ('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002', 1)]
 
     def test_stack(self):
         assert self.stack.ndim == 4
 
     def test_projection(self):
         assert self.projection.ndim == 3
+
+    def test_squash(self):
+        projected = self.stack.max(1)
+        assert projected.shape == (4, 2048, 2048)
 
     def test_channel(self):
         assert self.channel.shape == (2048, 2048)

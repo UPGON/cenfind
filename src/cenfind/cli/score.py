@@ -23,7 +23,7 @@ tensorflow.random.set_seed(3)
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description='CENTRACK: Automatic centriole scoring')
+        description='CENFIND: Automatic centriole scoring')
 
     parser.add_argument('path',
                         type=Path,

@@ -15,16 +15,8 @@ Specifically, it orchestrates:
 ## Installation
 
 1. Install python via pyenv
-2. Install poetry, system-wide with `pip install poetry`
-
-3. Create a virtual environment with:
-
-```shell
-python3 -m venv venv-cenfind
-source venv-cenfind/bin/activate
-```
-
-Your prompt should now be prepended with `(venv-cenfind)`.
+2. Download and set up 3.9.5 as local version
+3. Install poetry, system-wide with `pip install poetry`
 
 Check that you're at the correct location (simple and recommended location
 is `cd ~`, i.e., your home folder).
@@ -33,25 +25,33 @@ is `cd ~`, i.e., your home folder).
 
 ```shell
 git clone git@github.com:UPGON/cenfind.git
-cd cenfind
+git clone git@github.com:maweigert/spotipy.git
 ```
 
 5. As of now, you need to install the spotipy package from the git repository https://github.com/maweigert/spotipy:
    !!! You need to have access to this private repo; contact Leo for setting up the permission.
 
 ```shell
-cd ..
-git clone git@github.com:maweigert/spotipy.git
-pip install -e spotipy/
+cd cenfind
+```
+6. Activate the virtual environment using poetry
+```shell
+poetry shell
+```
+Your prompt should now be prepended with `(cenfind-py3.9)`.
+
+ 6. Add manually the package spotipy
+```shell
+pip install -e ../spotipy/
 ```
 
 6. Add the programs `squash` and `score` to the PATH with the following commands, so that they can be run from
    the command line, without the need to type the whole path.
 
 ```shell
-cd cenfind
 poetry install
 ```
+
 
 7. Check that `cenfind`'s programs are correctly installed:
 

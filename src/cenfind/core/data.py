@@ -99,11 +99,17 @@ class Field:
 
     @property
     def stack(self) -> np.ndarray:
-        return tf.imread(str(self.dataset.path / 'raw' / f"{self.name}.ome.tif"))
+        data = tf.imread(str(self.dataset.path / 'raw' / f"{self.name}.ome.tif"))
+        axes_order = self._axes_order()
+        if axes_order == "ZCYX":
+            data = np.swapaxes(data, 0, 1)
+        return data
 
     @property
     def projection(self) -> np.ndarray:
-        return tf.imread(str(self.dataset.path / 'projections' / f"{self.name}{self.dataset.projection_suffix}.tif"))
+        path_projection = self.dataset.path / 'projections' / f"{self.name}{self.dataset.projection_suffix}.tif"
+
+        return tf.imread(str(path_projection))
 
     def channel(self, channel: int) -> np.ndarray:
         return self.projection[channel, :, :]
@@ -131,3 +137,17 @@ class Field:
             return tf.imread(str(path_annotation))
         else:
             raise FileNotFoundError(path_annotation)
+
+    def _axes_order(self) -> str:
+        """
+        Return a string of the form 'ZYCX' or 'CZYX'
+        :return:
+        """
+        path_raw = str(self.dataset.path / 'raw' / f"{self.name}.ome.tif")
+        with tf.TiffFile(path_raw) as tif:
+            try:
+                order = tif.series[0].axes
+            except ValueError(f"Could not retrieve metadata for axes order for {path_raw}"):
+                order = None
+
+        return order
