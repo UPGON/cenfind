@@ -2,7 +2,6 @@ import argparse
 from pathlib import Path
 
 from cenfind.core.data import Dataset
-from cenfind.core.helpers import choose_channel, split_pairs
 
 
 def get_args():
@@ -23,19 +22,16 @@ def main():
     args = get_args()
     path_dataset = args.path
     dataset = Dataset(path_dataset, projection_suffix=args.projection_suffix)
-    fields = dataset.fields
 
-    train_fields, test_fields = split_pairs(fields, p=.9)
-    pairs_train = choose_channel(train_fields, args.channels)
-    pairs_test = choose_channel(test_fields, args.channels)
+    dataset.projections.mkdir(exist_ok=True)
+    dataset.predictions.mkdir(exist_ok=True)
+    dataset.visualisation.mkdir(exist_ok=True)
+    dataset.statistics.mkdir(exist_ok=True)
+    dataset.vignettes.mkdir(exist_ok=True)
+    dataset.write_fields()
+    dataset.write_train_test(args.channels)
 
-    with open(path_dataset / 'train.txt', 'w') as f:
-        for fov, channel in pairs_train:
-            f.write(f"{fov},{channel}\n")
 
-    with open(path_dataset / 'test.txt', 'w') as f:
-        for fov, channel in pairs_test:
-            f.write(f"{fov},{channel}\n")
 
 
 if __name__ == '__main__':

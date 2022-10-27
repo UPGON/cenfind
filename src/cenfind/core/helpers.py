@@ -59,28 +59,3 @@ def resize_image(data):
                               fx=1, fy=1,
                               interpolation=cv2.INTER_NEAREST)
     return data_resized
-
-
-def choose_channel(fields: list[str], channels) -> list[tuple[Any, Any]]:
-    """Assign channel to field."""
-
-    return [(fov, channel) for fov, channel in itertools.product(fields, channels)]
-
-
-def split_pairs(fields: list[tuple[str, int]], p=.9) -> tuple[Any, Any]:
-    """
-    Split a list of pairs (field, channel).
-
-    :param fields
-    :param p the train proportion, default to .9
-    :return train_split, test_split
-    """
-
-    random.seed(1993)
-    size = len(fields)
-    split_idx = int(p * size)
-    shuffled = random.sample(fields, k=size)
-    split_test = shuffled[split_idx:]
-    split_train = shuffled[:split_idx]
-
-    return split_train, split_test

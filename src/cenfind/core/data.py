@@ -1,10 +1,13 @@
+import itertools
+import random
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Type, List, Tuple, Union
 
 import numpy as np
 import tifffile as tf
+from tqdm import tqdm
 
 
 def extract_info(pattern: re, dataset_name: str):
@@ -14,10 +17,11 @@ def extract_info(pattern: re, dataset_name: str):
 
     return res
 
+
 @dataclass
 class Field:
     name: str
-    dataset: Dataset
+    dataset: 'Dataset'
 
     @property
     def stack(self) -> np.ndarray:
@@ -74,6 +78,34 @@ class Field:
 
         return order
 
+
+#
+#
+def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Type[Field], int]]:
+    """Assign channel to field."""
+
+    return [(Field, int(channel)) for field, channel in itertools.product(fields, channels)]
+
+
+def split_pairs(fields: list[Field], p=.9) -> tuple[list[Field], list[Field]]:
+    """
+    Split a list of pairs (field, channel).
+
+    :param fields
+    :param p the train proportion, default to .9
+    :return train_split, test_split
+    """
+
+    random.seed(1993)
+    size = len(fields)
+    split_idx = int(p * size)
+    shuffled = random.sample(fields, k=size)
+    split_test = shuffled[split_idx:]
+    split_train = shuffled[:split_idx]
+
+    return split_train, split_test
+
+
 @dataclass
 class Dataset:
     """
@@ -94,14 +126,6 @@ class Dataset:
         self.statistics = self.path / 'statistics'
         self.vignettes = self.path / 'vignettes'
 
-    def setup(self):
-        self.projections.mkdir(exist_ok=True)
-        self.predictions.mkdir(exist_ok=True)
-        self.visualisation.mkdir(exist_ok=True)
-        self.statistics.mkdir(exist_ok=True)
-        self.vignettes.mkdir(exist_ok=True)
-        self.write_fields()
-
     @property
     def fields(self):
         fields_path = self.path / 'fields.txt'
@@ -109,7 +133,7 @@ class Dataset:
             fields_list = f.read().splitlines()
         return [Field(field_path, self) for field_path in fields_list]
 
-    def pairs(self, split: str = None, channel_id: int = None) -> List[Tuple[Field, int]]:
+    def pairs(self, split: str = None, channel_id: int = None) -> List[Tuple['Field', int]]:
         """
         Fetch the fields of view for train or test
         :param channel_id:
@@ -118,9 +142,9 @@ class Dataset:
         """
 
         if split is None:
-            return self._read_split('train', channel_id) + self._read_split('test', channel_id)
+            return self.read_split('train', channel_id) + self.read_split('test', channel_id)
         else:
-            return self._read_split(split, channel_id)
+            return self.read_split(split, channel_id)
 
     def write_fields(self):
         """
@@ -143,7 +167,25 @@ class Dataset:
             for field in fields:
                 f.write(field + '\n')
 
-    def _read_split(self, split_type, channel_id=None) -> List[Tuple[Field, int]]:
+    def write_projections(self, axis=1):
+        for field in tqdm(self.fields):
+            projection = field.stack.max(axis)
+            tf.imwrite(self.projections / f"{field.name}_max.tif", projection)
+
+    def write_train_test(self, channels: list):
+        train_fields, test_fields = split_pairs(self.fields, p=.9)
+        pairs_train = choose_channel(train_fields, channels)
+        pairs_test = choose_channel(test_fields, channels)
+
+        with open(self.path / 'train.txt', 'w') as f:
+            for fov, channel in pairs_train:
+                f.write(f"{fov},{channel}\n")
+
+        with open(self.path / 'test.txt', 'w') as f:
+            for fov, channel in pairs_test:
+                f.write(f"{fov},{channel}\n")
+
+    def read_split(self, split_type, channel_id=None) -> List[Tuple[Field, int]]:
         with open(self.path / f'{split_type}.txt', 'r') as f:
             files = f.read().splitlines()
 
