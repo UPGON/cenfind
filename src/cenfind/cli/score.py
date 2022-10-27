@@ -44,8 +44,8 @@ def get_args():
 
     parser.add_argument('--projection_suffix',
                         type=str,
-                        default='',
-                        help='the suffix indicating projection, e.g., `_max` or `_Projected`, if not specified set to empty')
+                        default='_max',
+                        help='the suffix indicating projection, e.g., `_max` or `_Projected`, if not specified, set to _max')
     args = parser.parse_args()
 
     if args.channel_nuclei in set(args.channels):
@@ -72,6 +72,7 @@ def main():
         for ch in args.channels:
             foci, nuclei, assigned, score = field_score(field=field, model_nuclei=model_stardist, model_foci=args.model,
                                                         nuclei_channel=args.channel_nuclei, channel=ch)
+            pbar.set_postfix({'nuclei': len(nuclei), 'foci': len(foci)})
             scores.append(score)
 
             if visualisation:
