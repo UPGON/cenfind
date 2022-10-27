@@ -81,10 +81,6 @@ class Field:
 
 #
 #
-def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Type[Field], int]]:
-    """Assign channel to field."""
-
-    return [(Field, int(channel)) for field, channel in itertools.product(fields, channels)]
 
 
 def split_pairs(fields: list[Field], p=.9) -> tuple[list[Field], list[Field]]:
@@ -105,6 +101,10 @@ def split_pairs(fields: list[Field], p=.9) -> tuple[list[Field], list[Field]]:
 
     return split_train, split_test
 
+def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
+    """Assign channel to field."""
+
+    return [(field, int(channel)) for field, channel in itertools.product(fields, channels)]
 
 @dataclass
 class Dataset:
@@ -172,6 +172,7 @@ class Dataset:
             projection = field.stack.max(axis)
             tf.imwrite(self.projections / f"{field.name}_max.tif", projection)
 
+
     def write_train_test(self, channels: list):
         train_fields, test_fields = split_pairs(self.fields, p=.9)
         pairs_train = choose_channel(train_fields, channels)
@@ -179,11 +180,11 @@ class Dataset:
 
         with open(self.path / 'train.txt', 'w') as f:
             for fov, channel in pairs_train:
-                f.write(f"{fov},{channel}\n")
+                f.write(f"{fov.name},{channel}\n")
 
         with open(self.path / 'test.txt', 'w') as f:
             for fov, channel in pairs_test:
-                f.write(f"{fov},{channel}\n")
+                f.write(f"{fov.name},{channel}\n")
 
     def read_split(self, split_type, channel_id=None) -> List[Tuple[Field, int]]:
         with open(self.path / f'{split_type}.txt', 'r') as f:
@@ -191,6 +192,6 @@ class Dataset:
 
         files = [f.split(',') for f in files if f]
         if channel_id:
-            return [(Field(f[0], self), int(channel_id)) for f in files]
+            return [(Field(str(f[0]), self), int(channel_id)) for f in files]
         else:
-            return [(Field(f[0], self), int(f[1])) for f in files]
+            return [(Field(str(f[0]), self), int(f[1])) for f in files]
