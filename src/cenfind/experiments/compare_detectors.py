@@ -2,7 +2,7 @@ import cv2
 import pandas as pd
 
 from cenfind.core.data import Field, Dataset
-from cenfind.core.detectors import run_detection, spotnet, sankaran, log_skimage, simpleblob_cv2
+from cenfind.core.detectors import run_detection, spotnet, log_skimage, simpleblob_cv2
 from cenfind.core.outline import draw_foci
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 
@@ -10,10 +10,10 @@ import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def main():
-    methods = [sankaran, log_skimage, simpleblob_cv2]
+    methods = [spotnet, log_skimage, simpleblob_cv2]
     model_paths = {
-        'spotnet': 'models/dev/20220921_094752',
-        'sankaran': 'models/sankaran/dev/20220921_191227.pt',
+        'spotnet': 'model/master',
+        # 'sankaran': 'models/sankaran/dev/20220921_191227.pt',
         'log_skimage': None,
         'simpleblob_cv2': None,
     }

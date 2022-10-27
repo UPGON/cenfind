@@ -92,6 +92,8 @@ def run_detection(method, data: Field,
                   channel=None,
                   model_path=None) -> Tuple[np.ndarray, float]:
     foci = method(data, foci_model_file=model_path, channel=channel)
+    if type(foci) == tuple:
+        prob_map, foci = foci
     res = points_matching(annotation, foci, cutoff_distance=tolerance)
     f1 = np.round(res.f1, 3)
     return foci, f1
