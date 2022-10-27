@@ -28,8 +28,8 @@ stardist = "^0.8.3"
 [tool.poetry.scripts]
 squash = "cenfind.cli.squash:main"
 score = "cenfind.cli.score:main"
+setup = "cenfind.cli.prepare:main"
 vignettes = "cenfind.labelbox.vignettes:main"
-splits = "cenfind.experiments.train_test:main"
 upload = "cenfind.labelbox.upload_labels:main"
 
 [tool.poetry.dev-dependencies]

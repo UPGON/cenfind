@@ -20,7 +20,7 @@ def main():
     path_dataset = args.source
     dataset = Dataset(path_dataset)
 
-    for field in tqdm(dataset.pairs()):
+    for field in tqdm(dataset.fields):
         field = Field(field, dataset)
         projection = field.stack.max(1)
         tf.imwrite(dataset.projections / f"{field.name}_max.tif", projection)

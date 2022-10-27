@@ -7,15 +7,10 @@ from typing import Any
 from cenfind.core.data import Dataset
 
 
-def choose_channel(fields: list[str], channels, unique=False) -> list[tuple[Any, Any]]:
+def choose_channel(fields: list[str], channels) -> list[tuple[Any, Any]]:
     """Assign channel to field."""
-    if len(fields) < len(channels):
-        raise ValueError('not all channels will be represented in the set')
-    if unique:
-        return [(fov, channel)
-                for fov, channel in zip(fields, itertools.cycle(channels))]
-    else:
-        return [(fov, channel) for fov, channel in itertools.product(fields, channels)]
+
+    return [(fov, channel) for fov, channel in itertools.product(fields, channels)]
 
 
 def split_pairs(fields: list[tuple[str, int]], p=.9) -> tuple[Any, Any]:
@@ -41,11 +36,10 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('path', type=Path)
     parser.add_argument('channels', type=int, nargs='+')
-    parser.add_argument('--unique', type=bool, default=False)
     parser.add_argument('--projection_suffix',
                         type=str,
                         default='_max',
-                        help='the suffix indicating projection, e.g., `_max` or `Projected`')
+                        help='the suffix indicating projection, e.g., `_max` (default) or `Projected`')
 
     args = parser.parse_args()
 
@@ -58,8 +52,8 @@ def main():
     dataset = Dataset(path_dataset, projection_suffix=args.projection_suffix)
     fields = dataset.fields
     train_fields, test_fields = split_pairs(fields, p=.9)
-    pairs_train = choose_channel(train_fields, args.channels, unique=args.unique)
-    pairs_test = choose_channel(test_fields, args.channels, unique=args.unique)
+    pairs_train = choose_channel(train_fields, args.channels)
+    pairs_test = choose_channel(test_fields, args.channels)
 
     with open(path_dataset / 'train.txt', 'w') as f:
         for fov, channel in pairs_train:
