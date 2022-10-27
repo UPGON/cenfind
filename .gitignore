@@ -17,6 +17,7 @@ out/
 data/
 models/*
 !models/master/
+/src/centrosome_analysis/
 
 *.idlk
 *.pt
@@ -27,4 +28,3 @@ models/*
 *.out
 *.tif
 *.tsv
-/src/centrosome_analysis/
