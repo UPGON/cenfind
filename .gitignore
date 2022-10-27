@@ -9,12 +9,14 @@ poetry.lock
 __pycache__/
 
 venv/
+.venv/
 docs/
 dist/
 logs/
 out/
 data/
-models/
+models/*
+!models/master/
 
 *.idlk
 *.pt

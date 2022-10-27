@@ -24,6 +24,7 @@ scipy = "^1.7.1"
 csbdeep = "^0.6.3"
 stardist = "^0.8.3"
 #spotipy = { git = "ssh://git@github.com/maweigert/spotipy.git", branch = "main" }
+scikit-learn = "^1.1.3"
 
 [tool.poetry.scripts]
 squash = "cenfind.cli.squash:main"
@@ -33,6 +34,9 @@ vignettes = "cenfind.labelbox.vignettes:main"
 upload = "cenfind.labelbox.upload_labels:main"
 
 [tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
+albumentations = "^1.3.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,35 +1,8 @@
 import argparse
-import itertools
-import random
 from pathlib import Path
-from typing import Any
 
 from cenfind.core.data import Dataset
-
-
-def choose_channel(fields: list[str], channels) -> list[tuple[Any, Any]]:
-    """Assign channel to field."""
-
-    return [(fov, channel) for fov, channel in itertools.product(fields, channels)]
-
-
-def split_pairs(fields: list[tuple[str, int]], p=.9) -> tuple[Any, Any]:
-    """
-    Split a list of pairs (field, channel).
-
-    :param fields
-    :param p the train proportion, default to .9
-    :return train_split, test_split
-    """
-
-    random.seed(1993)
-    size = len(fields)
-    split_idx = int(p * size)
-    shuffled = random.sample(fields, k=size)
-    split_test = shuffled[split_idx:]
-    split_train = shuffled[:split_idx]
-
-    return split_train, split_test
+from cenfind.core.helpers import choose_channel, split_pairs
 
 
 def get_args():
@@ -51,6 +24,7 @@ def main():
     path_dataset = args.path
     dataset = Dataset(path_dataset, projection_suffix=args.projection_suffix)
     fields = dataset.fields
+
     train_fields, test_fields = split_pairs(fields, p=.9)
     pairs_train = choose_channel(train_fields, args.channels)
     pairs_test = choose_channel(test_fields, args.channels)

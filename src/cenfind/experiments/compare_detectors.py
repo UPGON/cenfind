@@ -2,12 +2,10 @@ import cv2
 import pandas as pd
 
 from cenfind.core.data import Field, Dataset
-from cenfind.core.detectors import run_detection, spotnet, log_skimage, simpleblob_cv2
+from cenfind.core.detectors import spotnet
+from cenfind.experiments.detectors_other import run_detection, log_skimage, simpleblob_cv2
 from cenfind.core.outline import draw_foci
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
-
-import os
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def main():
     methods = [spotnet, log_skimage, simpleblob_cv2]
