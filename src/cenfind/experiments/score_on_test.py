@@ -29,7 +29,7 @@ def main():
     for dataset_name in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset_name)
         dataset.visualisation.mkdir(exist_ok=True)
-        test_files = dataset.splits_for('test')
+        test_files = dataset.pairs('test')
 
         for fov_name, channel in test_files:
             channel = int(channel)

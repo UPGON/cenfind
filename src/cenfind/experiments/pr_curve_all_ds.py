@@ -10,7 +10,7 @@ def recall(x):
     return x['tp'] / (x['tp'] + x['fn'])
 
 def main():
-    path_data = ROOT_DIR / 'out/performances_20221006_130126.csv'
+    path_data = ROOT_DIR / 'out/performances_master.csv'
     data = pd.read_csv(path_data)
     data = data.drop(['precision', 'recall', 'f1'], axis=1)
     grouped = data.groupby('threshold')[['tp', 'fp', 'fn']].sum()

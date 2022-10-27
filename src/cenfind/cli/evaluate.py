@@ -45,8 +45,8 @@ def main():
         datasets = std_ds
     else:
         datasets = args.datasets
-    # th_range = [.1, .2, .3, .4, .5, .6, .7, .8, .9, .95]
-    th_range = [round(i, 3) for i in np.random.uniform(size=50)]
+    th_range = [.1, .2, .3, .4, .5, .6, .7, .8, .9, .95]
+    # th_range = [round(i, 3) for i in np.random.uniform(size=50)]
     performances = []
     p_bar = tqdm(datasets)
     for dataset_name in p_bar:
