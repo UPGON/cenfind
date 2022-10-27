@@ -6,7 +6,7 @@ import pandas as pd
 from dotenv import dotenv_values
 from tqdm import tqdm
 
-from cenfind.core.data import Dataset, Field
+from cenfind.core.data import Dataset
 from cenfind.core.measure import full_in_field, extract_nuclei
 from cenfind.core.helpers import frac, flag
 from cenfind.core.outline import create_vignette
@@ -30,8 +30,7 @@ def main():
     records = []
     for dataset in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset)
-        for field_name in tqdm(dataset.pairs()):
-            field = Field(field_name, dataset)
+        for field, channel in tqdm(dataset.pairs()):
             mask = field.mask(0)
             centres, contours = extract_nuclei(field, 0, annotation=mask)
             vignette = create_vignette(field, 1, 0)

@@ -86,16 +86,14 @@ def field_metrics(field: Field,
 
 
 def dataset_metrics(dataset: Dataset, split: str, model: Path, tolerance, threshold) -> tuple[dict, list]:
-    fields = dataset.pairs(split)
     perfs = []
     prob_maps = {}
-    for field_name, channel in fields:
-        field = Field(field_name, dataset)
+    for field, channel in dataset.pairs(split):
         annotation = field.annotation(channel)
         prob_map, predictions = spotnet(field, model, channel, prob_threshold=threshold)
         perf = field_metrics(field, channel, annotation, predictions, tolerance, threshold=threshold)
         perfs.append(perf)
-        prob_maps[field_name] = prob_map
+        prob_maps[field.name] = prob_map
     return prob_maps, perfs
 
 

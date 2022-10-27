@@ -14,84 +14,6 @@ def extract_info(pattern: re, dataset_name: str):
 
     return res
 
-
-@dataclass
-class Dataset:
-    """
-    Represents a dataset structure
-    """
-    path: Union[str, Path]
-    image_type: str = '.ome.tif'
-    projection_suffix: str = '_max'
-
-    def __post_init__(self):
-        self.path = Path(self.path)
-        if not self.path.exists():
-            raise FileNotFoundError(self.path)
-
-        self.projections = self.path / 'projections'
-        self.projections.mkdir(exist_ok=True)
-
-        self.predictions = self.path / 'predictions'
-        self.predictions.mkdir(exist_ok=True)
-
-        self.visualisation = self.path / 'visualisations'
-        self.visualisation.mkdir(exist_ok=True)
-
-        self.statistics = self.path / 'statistics'
-        self.statistics.mkdir(exist_ok=True)
-        self._write_fields()
-
-    def _write_fields(self):
-        """
-        Write field names to fields.txt.
-        """
-        if (self.path / 'raw').exists():
-            folder = self.path / 'raw'
-        elif (self.path / 'projections').exists():
-            folder = self.path / 'projections'
-        else:
-            raise FileNotFoundError(self.path)
-
-        fields = []
-        for f in folder.iterdir():
-            if f.name.startswith('.'):
-                continue
-            fields.append(f.name.split('.')[0].rstrip(self.projection_suffix))
-
-        with open(self.path / 'fields.txt', 'w') as f:
-            for field in fields:
-                f.write(field + '\n')
-
-    @property
-    def fields(self):
-        fields_path = self.path / 'fields.txt'
-        with open(fields_path, 'r') as f:
-            return f.read().splitlines()
-
-    def _read_split(self, split_type, channel_id=None) -> List[Tuple[str, int]]:
-        with open(self.path / f'{split_type}.txt', 'r') as f:
-            files = f.read().splitlines()
-        files = [f.split(',') for f in files if f]
-        if channel_id:
-            return [(str(f[0]), channel_id) for f in files]
-        else:
-            return [(str(f[0]), int(f[1])) for f in files]
-
-    def pairs(self, split: str = None, channel_id: int = None) -> List[Tuple[str, int]]:
-        """
-        Fetch the fields of view for train or test
-        :param channel_id:
-        :param split: all, test or train
-        :return: a list of tuples (fov name, channel id)
-        """
-
-        if split is None:
-            return self._read_split('train', channel_id) + self._read_split('test', channel_id)
-        else:
-            return self._read_split(split, channel_id)
-
-
 @dataclass
 class Field:
     name: str
@@ -151,3 +73,82 @@ class Field:
                 order = None
 
         return order
+
+@dataclass
+class Dataset:
+    """
+    Represent a dataset structure
+    """
+    path: Union[str, Path]
+    image_type: str = '.ome.tif'
+    projection_suffix: str = '_max'
+
+    def __post_init__(self):
+        self.path = Path(self.path)
+        if not self.path.exists():
+            raise FileNotFoundError(self.path)
+        self.raw = self.path / 'raw'
+        self.projections = self.path / 'projections'
+        self.predictions = self.path / 'predictions'
+        self.visualisation = self.path / 'visualisations'
+        self.statistics = self.path / 'statistics'
+        self.vignettes = self.path / 'vignettes'
+
+    def setup(self):
+        self.projections.mkdir(exist_ok=True)
+        self.predictions.mkdir(exist_ok=True)
+        self.visualisation.mkdir(exist_ok=True)
+        self.statistics.mkdir(exist_ok=True)
+        self.vignettes.mkdir(exist_ok=True)
+        self.write_fields()
+
+    @property
+    def fields(self):
+        fields_path = self.path / 'fields.txt'
+        with open(fields_path, 'r') as f:
+            fields_list = f.read().splitlines()
+        return [Field(field_path, self) for field_path in fields_list]
+
+    def pairs(self, split: str = None, channel_id: int = None) -> List[Tuple[Field, int]]:
+        """
+        Fetch the fields of view for train or test
+        :param channel_id:
+        :param split: all, test or train
+        :return: a list of tuples (fov name, channel id)
+        """
+
+        if split is None:
+            return self._read_split('train', channel_id) + self._read_split('test', channel_id)
+        else:
+            return self._read_split(split, channel_id)
+
+    def write_fields(self):
+        """
+        Write field names to fields.txt.
+        """
+        if (self.path / 'raw').exists():
+            folder = self.path / 'raw'
+        elif (self.path / 'projections').exists():
+            folder = self.path / 'projections'
+        else:
+            raise FileNotFoundError(self.path)
+
+        fields = []
+        for f in folder.iterdir():
+            if f.name.startswith('.'):
+                continue
+            fields.append(f.name.split('.')[0].rstrip(self.projection_suffix))
+
+        with open(self.path / 'fields.txt', 'w') as f:
+            for field in fields:
+                f.write(field + '\n')
+
+    def _read_split(self, split_type, channel_id=None) -> List[Tuple[Field, int]]:
+        with open(self.path / f'{split_type}.txt', 'r') as f:
+            files = f.read().splitlines()
+
+        files = [f.split(',') for f in files if f]
+        if channel_id:
+            return [(Field(f[0], self), int(channel_id)) for f in files]
+        else:
+            return [(Field(f[0], self), int(f[1])) for f in files]

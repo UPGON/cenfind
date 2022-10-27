@@ -9,7 +9,7 @@ import numpy as np
 from spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.model import SpotNet, Config
 
-from cenfind.core.data import Dataset, Field
+from cenfind.core.data import Dataset
 
 config = Config(n_channel_in=1,
                 backbone='unet',
@@ -53,11 +53,7 @@ def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.
     channels = []
     masks = []
 
-    fovs = dataset.pairs(split)
-
-    for field, channel in fovs:
-        field = Field(field, dataset)
-        channel = int(channel)
+    for field, channel in dataset.pairs(split):
         data = field.channel(channel)
         foci = field.annotation(channel)
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):

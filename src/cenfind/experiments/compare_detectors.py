@@ -18,9 +18,7 @@ def main():
     perfs = []
     for ds_name in datasets:
         ds = Dataset(PREFIX_REMOTE / ds_name)
-        for field_name, channel in ds.pairs(split='test'):
-            print(field_name)
-            field = Field(field_name, ds)
+        for field, channel in ds.pairs(split='test'):
             vis = field.channel(channel)
             annotation = field.annotation(channel)
 
@@ -28,7 +26,7 @@ def main():
                 model_path = model_paths[method.__name__]
                 foci, f1 = run_detection(method, field, annotation=annotation, channel=channel,
                                          model_path=model_path, tolerance=3)
-                print(f"{field_name} using {method.__name__}: F1={f1}")
+                print(f"{field.name} using {method.__name__}: F1={f1}")
 
                 perf = {'field': field.name,
                         'channel': channel,

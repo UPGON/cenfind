@@ -17,8 +17,8 @@ class TestData:
 
     def test_dataset(self):
         assert self.dataset.path == self.path_dataset
-        assert self.dataset.pairs() == [('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000', 1),
-                                        ('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002', 1)]
+        assert self.dataset.pairs() == [(Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000', self.dataset), 1),
+                                        (Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002', self.dataset), 1)]
 
     def test_stack(self):
         assert self.stack.ndim == 4
