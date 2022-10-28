@@ -10,7 +10,7 @@ from labelbox import (Client,
                       )
 
 from cenfind.core.data import Dataset, Field
-from cenfind.core.detectors import spotnet
+from cenfind.core.detectors import extract_foci
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 from cenfind.labelbox.helpers import (ontology_setup,
                                       label_create,
@@ -48,7 +48,7 @@ def main():
         ds = Dataset(PREFIX_REMOTE / _ds)
         for field_name in ds.fields:
             field = Field(field_name, ds)
-            predictions = spotnet(field, foci_model, channel_id)
+            predictions = extract_foci(field, foci_model, channel_id)
             vignette_path = ds.path / 'vignettes' / f"{field_name}_max_C{channel_id}.png"
             image = cv2.imread(str(vignette_path))
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

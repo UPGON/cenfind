@@ -3,9 +3,7 @@ from pathlib import Path
 
 import cv2
 from spotipy.model import SpotNet
-import itertools
-import random
-from typing import Any
+
 from cenfind.core.outline import Centre, Contour
 
 

@@ -79,33 +79,6 @@ class Field:
         return order
 
 
-#
-#
-
-
-def split_pairs(fields: list[Field], p=.9) -> tuple[list[Field], list[Field]]:
-    """
-    Split a list of pairs (field, channel).
-
-    :param fields
-    :param p the train proportion, default to .9
-    :return train_split, test_split
-    """
-
-    random.seed(1993)
-    size = len(fields)
-    split_idx = int(p * size)
-    shuffled = random.sample(fields, k=size)
-    split_test = shuffled[split_idx:]
-    split_train = shuffled[:split_idx]
-
-    return split_train, split_test
-
-def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
-    """Assign channel to field."""
-
-    return [(field, int(channel)) for field, channel in itertools.product(fields, channels)]
-
 @dataclass
 class Dataset:
     """
@@ -172,7 +145,6 @@ class Dataset:
             projection = field.stack.max(axis)
             tf.imwrite(self.projections / f"{field.name}_max.tif", projection)
 
-
     def write_train_test(self, channels: list):
         train_fields, test_fields = split_pairs(self.fields, p=.9)
         pairs_train = choose_channel(train_fields, channels)
@@ -195,3 +167,28 @@ class Dataset:
             return [(Field(str(f[0]), self), int(channel_id)) for f in files]
         else:
             return [(Field(str(f[0]), self), int(f[1])) for f in files]
+
+
+def split_pairs(fields: list[Field], p=.9) -> tuple[list[Field], list[Field]]:
+    """
+    Split a list of pairs (field, channel).
+
+    :param fields
+    :param p the train proportion, default to .9
+    :return train_split, test_split
+    """
+
+    random.seed(1993)
+    size = len(fields)
+    split_idx = int(p * size)
+    shuffled = random.sample(fields, k=size)
+    split_test = shuffled[split_idx:]
+    split_train = shuffled[:split_idx]
+
+    return split_train, split_test
+
+
+def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
+    """Assign channel to field."""
+
+    return [(field, int(channel)) for field, channel in itertools.product(fields, channels)]

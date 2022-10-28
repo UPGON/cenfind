@@ -15,7 +15,7 @@ from cenfind.core.helpers import resize_image
 from cenfind.core.outline import Centre, Contour
 
 
-def spotnet(data: Field,
+def extract_foci(data: Field,
             foci_model_file: Path,
             channel: int,
             prob_threshold=.5,

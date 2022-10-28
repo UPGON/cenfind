@@ -9,7 +9,7 @@ from spotipy.utils import points_matching
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Dataset, Field
-from cenfind.core.detectors import spotnet, extract_nuclei
+from cenfind.core.detectors import extract_foci, extract_nuclei
 from cenfind.core.helpers import signed_distance, full_in_field
 from cenfind.core.outline import Centre
 
@@ -36,6 +36,39 @@ def assign(foci: list, nuclei: list, vicinity: int) -> list[tuple[Any, list[Any]
 
     return pairs
 
+def field_score(field: Field,
+                model_nuclei: StarDist2D,
+                model_foci: Path,
+                nuclei_channel: int,
+                channel: int) -> (np.ndarray, list):
+    """
+    1. Detect foci in the given channels
+    2. Detect nuclei
+    3. Assign foci to nuclei
+    :param channel:
+    :param nuclei_channel:
+    :param model_foci:
+    :param model_nuclei:
+    :param field:
+    :return: list(foci, nuclei, scores)
+    """
+
+    centres, nuclei = extract_nuclei(field, nuclei_channel, model_nuclei)
+    prob_map, foci = extract_foci(data=field, foci_model_file=model_foci, channel=channel)
+    foci = [Centre((r, c), f_id, 'Centriole') for f_id, (r, c) in enumerate(foci)]
+
+    assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)
+
+    scores = []
+    for pair in assigned:
+        n, _foci = pair
+        scores.append({'fov': field.name,
+                       'channel': channel,
+                       'nucleus': n.centre.position,
+                       'score': len(_foci),
+                       'is_full': full_in_field(n.centre.position, field.projection, .05)
+                       })
+    return foci, nuclei, assigned, scores
 
 def field_metrics(field: Field,
                   channel: int,
@@ -90,46 +123,14 @@ def dataset_metrics(dataset: Dataset, split: str, model: Path, tolerance, thresh
     prob_maps = {}
     for field, channel in dataset.pairs(split):
         annotation = field.annotation(channel)
-        prob_map, predictions = spotnet(field, model, channel, prob_threshold=threshold)
+        prob_map, predictions = extract_foci(field, model, channel, prob_threshold=threshold)
         perf = field_metrics(field, channel, annotation, predictions, tolerance, threshold=threshold)
         perfs.append(perf)
         prob_maps[field.name] = prob_map
     return prob_maps, perfs
 
 
-def field_score(field: Field,
-                model_nuclei: StarDist2D,
-                model_foci: Path,
-                nuclei_channel: int,
-                channel: int) -> (np.ndarray, list):
-    """
-    1. Detect foci in the given channels
-    2. Detect nuclei
-    3. Assign foci to nuclei
-    :param channel:
-    :param nuclei_channel:
-    :param model_foci:
-    :param model_nuclei:
-    :param field:
-    :return: list(foci, nuclei, scores)
-    """
 
-    centres, nuclei = extract_nuclei(field, nuclei_channel, model_nuclei)
-    prob_map, foci = spotnet(data=field, foci_model_file=model_foci, channel=channel)
-    foci = [Centre((r, c), f_id, 'Centriole') for f_id, (r, c) in enumerate(foci)]
-
-    assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)
-
-    scores = []
-    for pair in assigned:
-        n, _foci = pair
-        scores.append({'fov': field.name,
-                       'channel': channel,
-                       'nucleus': n.centre.position,
-                       'score': len(_foci),
-                       'is_full': full_in_field(n.centre.position, field.projection, .05)
-                       })
-    return foci, nuclei, assigned, scores
 
 
 def field_score_frequency(df):
