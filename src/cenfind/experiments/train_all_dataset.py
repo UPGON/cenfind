@@ -6,16 +6,16 @@ from spotipy.model import SpotNet
 import tensorflow as tf
 
 from cenfind.core.data import Dataset
-from cenfind.experiments.train_spotnet import load_pairs, config, transforms
+from cenfind.experiments.train_spotnet import load_pairs, config_unet, config_multiscale, transforms
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 
 shuffle = True
 
-## GLOBAL SEED ##
+# GLOBAL SEED
 tf.random.set_seed(3)
 
-def main():
 
+def main():
     path_datasets = [PREFIX_REMOTE / ds for ds in datasets]
     dss = [Dataset(path) for path in path_datasets]
 
@@ -41,9 +41,11 @@ def main():
 
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    model = SpotNet(config, name=time_stamp, basedir='models/dev')
-    model.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=100)
+    model_unet = SpotNet(config_unet, name=time_stamp, basedir='models/dev/unet')
+    model_unet.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=100)
 
+    model_multiscale = SpotNet(config_multiscale, name=time_stamp, basedir='models/dev/multiscale')
+    model_multiscale.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=100)
     return 0
 
 

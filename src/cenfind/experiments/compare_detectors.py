@@ -1,11 +1,12 @@
 import cv2
 import pandas as pd
 
-from cenfind.core.data import Field, Dataset
+from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_foci
-from cenfind.experiments.detectors_other import run_detection, log_skimage, simpleblob_cv2
 from cenfind.core.outline import draw_foci
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
+from cenfind.experiments.detectors_other import run_detection, log_skimage, simpleblob_cv2
+
 
 def main():
     methods = [extract_foci, log_skimage, simpleblob_cv2]
