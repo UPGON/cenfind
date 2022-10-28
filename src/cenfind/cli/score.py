@@ -8,7 +8,7 @@ import tensorflow
 from stardist.models import StarDist2D
 from tqdm import tqdm
 
-from cenfind.core.data import Dataset, Field
+from cenfind.core.data import Dataset
 from cenfind.core.measure import field_score
 from cenfind.core.measure import field_score_frequency
 from cenfind.core.outline import create_vignette

@@ -32,7 +32,5 @@ def main():
     dataset.write_train_test(args.channels)
 
 
-
-
 if __name__ == '__main__':
     main()
