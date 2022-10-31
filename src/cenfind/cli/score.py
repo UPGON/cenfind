@@ -2,19 +2,22 @@ import argparse
 from pathlib import Path
 
 import cv2
+import numpy as np
 import pandas as pd
-import tifffile as tf
 import tensorflow
+import tifffile as tf
 from stardist.models import StarDist2D
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
 from cenfind.core.measure import field_score
 from cenfind.core.measure import field_score_frequency
+from cenfind.core.outline import Centre
 from cenfind.core.outline import create_vignette
 
 ## GLOBAL SEED ##
 tensorflow.random.set_seed(3)
+
 
 # tf.get_logger().setLevel(logging.ERROR)
 # physical_devices = tf.config.experimental.list_physical_devices('GPU')
@@ -57,6 +60,10 @@ def get_args():
     return args
 
 
+def save_foci(foci_list: list[Centre], dst: str) -> None:
+    array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
+    np.savetxt(dst, array, delimiter=',', fmt='%u')
+
 
 def main():
     args = get_args()
@@ -75,7 +82,8 @@ def main():
                                                         model_foci=args.model,
                                                         nuclei_channel=args.channel_nuclei,
                                                         channel=ch)
-
+            predictions_path = dataset.predictions / 'centrioles' / f"{field.name}{args.projection_suffix}_C{ch}.txt"
+            save_foci(foci, predictions_path)
 
             pbar.set_postfix({'nuclei': len(nuclei), 'foci': len(foci)})
             scores.append(score)
@@ -89,7 +97,6 @@ def main():
                 for n_pos, c_pos in assigned:
                     for sub_c in c_pos:
                         if sub_c:
-
                             cv2.arrowedLine(background, sub_c.to_cv2(), n_pos.centre.to_cv2(), color=(0, 255, 0),
                                             thickness=1)
                 tf.imwrite(args.path / 'visualisations' / f"{field.name}_C{ch}_pred.png", background)

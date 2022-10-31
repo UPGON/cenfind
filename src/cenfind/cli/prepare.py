@@ -44,6 +44,8 @@ def main():
     logger.info('Prediction folder created')
 
     dataset.predictions.mkdir(exist_ok=True)
+    (dataset.predictions / 'centrioles').mkdir(exist_ok=True)
+    (dataset.predictions / 'nuclei').mkdir(exist_ok=True)
     logger.info('Prediction folder created')
     dataset.statistics.mkdir(exist_ok=True)
     logger.info('Statistics folder created')

@@ -152,7 +152,7 @@ def field_score_frequency(df):
     result = (result.sort_index()
               .reset_index()
               )
-    result = result.rename({'score': 'score_cat'}, axis=1)
+    result = result.rename({'level_2': 'score_cat'}, axis=1)
 
     result = result.pivot(index=['fov', 'channel'], columns='score_cat')
     return result

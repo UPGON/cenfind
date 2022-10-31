@@ -12,33 +12,33 @@ from spotipy.model import SpotNet, Config
 from cenfind.core.data import Dataset
 
 config_unet = Config(n_channel_in=1,
-                backbone='unet',
-                unet_n_depth=3,
-                unet_pool=4,
-                unet_n_filter_base=64,
-                spot_weight=40,
-                multiscale=False,
-                train_learning_rate=3e-4,
-                train_foreground_prob=1,
-                train_batch_norm=False,
-                train_multiscale_loss_decay_exponent=1,
-                train_patch_size=(512, 512),
-                spot_weight_decay=.5,
-                train_batch_size=2)
+                     backbone='unet',
+                     unet_n_depth=3,
+                     unet_pool=4,
+                     unet_n_filter_base=64,
+                     spot_weight=40,
+                     multiscale=False,
+                     train_learning_rate=3e-4,
+                     train_foreground_prob=1,
+                     train_batch_norm=False,
+                     train_multiscale_loss_decay_exponent=1,
+                     train_patch_size=(512, 512),
+                     spot_weight_decay=.5,
+                     train_batch_size=2)
 config_multiscale = Config(n_channel_in=1,
-                backbone='unet',
-                unet_n_depth=3,
-                unet_pool=4,
-                unet_n_filter_base=64,
-                spot_weight=40,
-                multiscale=True,
-                train_learning_rate=3e-4,
-                train_foreground_prob=1,
-                train_batch_norm=False,
-                train_multiscale_loss_decay_exponent=1,
-                train_patch_size=(512, 512),
-                spot_weight_decay=.5,
-                train_batch_size=2)
+                           backbone='unet',
+                           unet_n_depth=3,
+                           unet_pool=4,
+                           unet_n_filter_base=64,
+                           spot_weight=40,
+                           multiscale=True,
+                           train_learning_rate=3e-4,
+                           train_foreground_prob=1,
+                           train_batch_norm=False,
+                           train_multiscale_loss_decay_exponent=1,
+                           train_patch_size=(512, 512),
+                           spot_weight_decay=.5,
+                           train_batch_size=2)
 
 transforms = alb.Compose([
     alb.ShiftScaleRotate(scale_limit=0.),
@@ -72,7 +72,7 @@ def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.
         foci = field.annotation(channel)
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
             image = normalize_fast2d(data)
-        mask = points_to_prob(foci[:, [1, 0]], shape=image.shape, sigma=sigma) # because it works with x, y
+        mask = points_to_prob(foci[:, [1, 0]], shape=image.shape, sigma=sigma)  # because it works with x, y
 
         if transform is not None:
             transformed = transform(image=image, mask=mask)
