@@ -13,8 +13,8 @@ from cenfind.core.helpers import blob2point
 def log_skimage(data: Field, channel: int, **kwargs) -> list:
     data = data.channel(channel)
     data = rescale_intensity(data, out_range=(0, 1))
-    foci = blob_log(data, min_sigma=.5, max_sigma=5, num_sigma=10, threshold=.1)
-    res = [(int(c), int(r)) for r, c, _ in foci]
+    foci = blob_log(data, min_sigma=1, max_sigma=2, num_sigma=10, threshold=.1)
+    res = [(int(r), int(c)) for r, c, _ in foci]
 
     return res
 

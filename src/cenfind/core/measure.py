@@ -36,6 +36,7 @@ def assign(foci: list, nuclei: list, vicinity: int) -> list[tuple[Any, list[Any]
 
     return pairs
 
+
 def field_score(field: Field,
                 model_nuclei: StarDist2D,
                 model_foci: Path,
@@ -50,7 +51,7 @@ def field_score(field: Field,
     :param model_foci:
     :param model_nuclei:
     :param field:
-    :return: list(foci, nuclei, scores)
+    :return: list(foci, nuclei, assigned, scores)
     """
 
     centres, nuclei = extract_nuclei(field, nuclei_channel, model_nuclei)
@@ -69,6 +70,7 @@ def field_score(field: Field,
                        'is_full': full_in_field(n.centre.position, field.projection, .05)
                        })
     return foci, nuclei, assigned, scores
+
 
 def field_metrics(field: Field,
                   channel: int,
@@ -128,9 +130,6 @@ def dataset_metrics(dataset: Dataset, split: str, model: Path, tolerance, thresh
         perfs.append(perf)
         prob_maps[field.name] = prob_map
     return prob_maps, perfs
-
-
-
 
 
 def field_score_frequency(df):

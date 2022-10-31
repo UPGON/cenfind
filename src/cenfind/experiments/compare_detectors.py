@@ -9,13 +9,12 @@ from cenfind.experiments.detectors_other import run_detection, log_skimage, simp
 
 
 def main():
-    methods = [extract_foci, log_skimage, simpleblob_cv2]
-    model_paths = {
-        'spotnet': 'model/master',
-        # 'sankaran': 'models/sankaran/dev/20220921_191227.pt',
-        'log_skimage': None,
-        'simpleblob_cv2': None,
-    }
+    methods = [
+        ['unet', extract_foci, 'models/dev/unet/20221028_123249'],
+        ['multiscale', extract_foci, 'models/dev/multiscale/20221028_133231'],
+        ['log_skimage', log_skimage, None],
+        ['simpleblob_cv2', simpleblob_cv2, None],
+    ]
     perfs = []
     for ds_name in datasets:
         ds = Dataset(PREFIX_REMOTE / ds_name)
@@ -23,22 +22,26 @@ def main():
             vis = field.channel(channel)
             annotation = field.annotation(channel)
 
-            for method in methods:
-                model_path = model_paths[method.__name__]
+            for name, method, model_path in methods:
                 foci, f1 = run_detection(method, field, annotation=annotation, channel=channel,
                                          model_path=model_path, tolerance=3)
-                print(f"{field.name} using {method.__name__}: F1={f1}")
+                print(f"{field.name} using {name}: F1={f1} (foci detected: {len(foci)})")
 
-                perf = {'field': field.name,
+                perf = {'dataset': field.dataset.path.name,
+                        'field': field.name,
                         'channel': channel,
-                        'method': method.__name__,
-                        'f1': f1}
+                        'method': name,
+                        'f1': round(f1, 3)}
                 perfs.append(perf)
 
                 mask = draw_foci(vis, foci)
-                cv2.imwrite(f'out/images/{field.name}_max_C{channel}_preds_{method.__name__}.png', mask)
+                cv2.imwrite(f'out/images/{field.name}_max_C{channel}_preds_{name}.png', mask)
 
-    pd.DataFrame(perfs).to_csv(f'out/perfs_blobdetectors.csv')
+    perfs_df = pd.DataFrame(perfs)
+    perfs_df.to_csv(f'out/perfs_blobdetectors.csv')
+
+    summary = perfs_df.groupby('method')['f1'].agg(['mean', 'std']).round(3)
+    summary.to_csv(f'out/perfs_blobdetectors_summary.csv')
 
 
 if __name__ == '__main__':

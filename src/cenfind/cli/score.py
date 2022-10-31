@@ -57,6 +57,7 @@ def get_args():
     return args
 
 
+
 def main():
     args = get_args()
     visualisation = True
@@ -69,8 +70,13 @@ def main():
     for field, _ in pbar:
         pbar.set_description(f"{field.name}")
         for ch in args.channels:
-            foci, nuclei, assigned, score = field_score(field=field, model_nuclei=model_stardist, model_foci=args.model,
-                                                        nuclei_channel=args.channel_nuclei, channel=ch)
+            foci, nuclei, assigned, score = field_score(field=field,
+                                                        model_nuclei=model_stardist,
+                                                        model_foci=args.model,
+                                                        nuclei_channel=args.channel_nuclei,
+                                                        channel=ch)
+
+
             pbar.set_postfix({'nuclei': len(nuclei), 'foci': len(foci)})
             scores.append(score)
 
