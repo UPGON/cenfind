@@ -6,12 +6,18 @@ import numpy as np
 def fraction_zero(x):
     return x['0'] / x[list('01234+')].sum()
 
-def main():
-    data = pd.read_csv('/data1/centrioles/20221019_ZScore_60X_EtOHvsFA_1/statistics/statistics.tsv', sep='\t', header=[0, 1, 2])
+def prepare_data(path):
+    data = pd.read_csv('', sep='\t', header=[0, 1, 2])
     data.columns = ['fov', 'channel', '0', '1', '2', '3', '4', '+']
     data[['well', 'field']] = data['fov'].str.split('_', expand=True)
     data = data.set_index(['well', 'field', 'channel'])
     data = data.drop(['fov'], axis=1)
+    return data
+
+def main():
+    path = '/data1/centrioles/20221019_ZScore_60X_EtOHvsFA_1/statistics/statistics.tsv'
+    data = prepare_data(path)
+
     rows, cols = (8, 12)
     summed = data.groupby(['well', 'channel']).sum()
     summed['frac_zero'] = summed.apply(fraction_zero, axis=1)
