@@ -1,4 +1,5 @@
 import argparse
+import logging
 from pathlib import Path
 
 import cv2
@@ -23,6 +24,12 @@ tensorflow.random.set_seed(3)
 # physical_devices = tf.config.experimental.list_physical_devices('GPU')
 # tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger = logging.getLogger(__name__)
+logger.addHandler(ch)
 
 def get_args():
     parser = argparse.ArgumentParser(
