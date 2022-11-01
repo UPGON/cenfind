@@ -1,9 +1,13 @@
-import pandas as pd
-from cenfind.core.measure import field_score_frequency
+import numpy as np
 
-def test_field_score():
-    print(9)
-    scores = pd.read_csv('scores/scores_df.tsv', sep='\t')
-    binned = field_score_frequency(scores)
+from cenfind.core.outline import Centre
+from cenfind.cli.score import save_foci
 
-    print(0)
+def test_save_foci():
+    foci_list = [Centre((x, y)) for x, y in np.random.randint(1, 10, size=(10, 2))]
+    assert len(foci_list) == 10
+    save_foci(foci_list, './saved_foci.tsv')
+
+    foci_list_empty = []
+    assert len(foci_list_empty) == 0
+    save_foci(foci_list_empty, './foci_list_empty.tsv')
