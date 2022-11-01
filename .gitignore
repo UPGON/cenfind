@@ -15,10 +15,8 @@ dist/
 logs/
 out/
 data/
-!models/
-models/*/
+models/*
 !models/master/
-!models/dev/
 /src/centrosome_analysis/
 
 *.idlk
