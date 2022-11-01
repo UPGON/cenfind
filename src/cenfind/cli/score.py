@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+import logging
 
 import cv2
 import numpy as np
@@ -23,6 +24,12 @@ tensorflow.random.set_seed(3)
 # physical_devices = tf.config.experimental.list_physical_devices('GPU')
 # tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger = logging.getLogger(__name__)
+logger.addHandler(ch)
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -61,7 +68,11 @@ def get_args():
 
 
 def save_foci(foci_list: list[Centre], dst: str) -> None:
-    array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
+    if len(foci_list) == 0:
+        array = np.array([])
+        logger.info('No centriole detected')
+    else:
+        array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
     np.savetxt(dst, array, delimiter=',', fmt='%u')
 
 
@@ -76,20 +87,19 @@ def main():
     pbar = tqdm(dataset.pairs())
     for field, _ in pbar:
         pbar.set_description(f"{field.name}")
-        for ch in args.channels:
+        for channel in args.channels:
             foci, nuclei, assigned, score = field_score(field=field,
                                                         model_nuclei=model_stardist,
                                                         model_foci=args.model,
                                                         nuclei_channel=args.channel_nuclei,
-                                                        channel=ch)
-            predictions_path = dataset.predictions / 'centrioles' / f"{field.name}{args.projection_suffix}_C{ch}.txt"
-            save_foci(foci, predictions_path)
-
+                                                        channel=channel)
+            predictions_path = dataset.predictions / 'centrioles' / f"{field.name}{args.projection_suffix}_C{channel}.txt"
             pbar.set_postfix({'nuclei': len(nuclei), 'foci': len(foci)})
             scores.append(score)
+            save_foci(foci, predictions_path)
 
             if visualisation:
-                background = create_vignette(field, marker_index=ch, nuclei_index=0)
+                background = create_vignette(field, marker_index=channel, nuclei_index=0)
                 for focus in foci:
                     background = focus.draw(background)
                 for nucleus in nuclei:
@@ -99,7 +109,7 @@ def main():
                         if sub_c:
                             cv2.arrowedLine(background, sub_c.to_cv2(), n_pos.centre.to_cv2(), color=(0, 255, 0),
                                             thickness=1)
-                tf.imwrite(args.path / 'visualisations' / f"{field.name}_C{ch}_pred.png", background)
+                tf.imwrite(args.path / 'visualisations' / f"{field.name}_C{channel}_pred.png", background)
 
     flattened = [leaf for tree in scores for leaf in tree]
 
