@@ -52,6 +52,10 @@ def get_args():
                         type=int,
                         help='channels to analyse, e.g., 1 2 3')
 
+    parser.add_argument('factor',
+                        type=int,
+                        help='factor to use: given a 2048x2048 image, if 63x: 256; if 20x: 2048')
+
     parser.add_argument('--projection_suffix',
                         type=str,
                         default='_max',
@@ -93,6 +97,7 @@ def main():
                                                         model_nuclei=model_stardist,
                                                         model_foci=args.model,
                                                         nuclei_channel=args.channel_nuclei,
+                                                        factor=args.factor,
                                                         channel=ch)
             predictions_path = dataset.predictions / 'centrioles' / f"{field.name}{args.projection_suffix}_C{ch}.txt"
             save_foci(foci, predictions_path)
@@ -101,11 +106,11 @@ def main():
             scores.append(score)
 
             if visualisation:
-                background = create_vignette(field, marker_index=ch, nuclei_index=0)
+                background = create_vignette(field, marker_index=ch, nuclei_index=args.channel_nuclei)
                 for focus in foci:
-                    background = focus.draw(background)
+                    background = focus.draw(background, annotation=False)
                 for nucleus in nuclei:
-                    background = nucleus.draw(background)
+                    background = nucleus.draw(background, annotation=False)
                 for n_pos, c_pos in assigned:
                     for sub_c in c_pos:
                         if sub_c:

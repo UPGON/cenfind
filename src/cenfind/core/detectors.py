@@ -43,7 +43,11 @@ def extract_foci(data: Field,
 
 
 
-def extract_nuclei(field: Field, channel: int, model: StarDist2D = None, annotation=None) -> Tuple[
+def extract_nuclei(field: Field,
+                   channel: int,
+                   factor: int,
+                   model: StarDist2D = None,
+                   annotation=None) -> Tuple[
     List[Centre], List[Contour]]:
     """
     Extract the nuclei from the nuclei image
@@ -58,7 +62,7 @@ def extract_nuclei(field: Field, channel: int, model: StarDist2D = None, annotat
         nuclei_detected = annotation
     elif model is not None:
         data = field.channel(channel)
-        data_resized = resize_image(data)
+        data_resized = resize_image(data, factor)
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
             labels, coords = model.predict_instances(normalize(data_resized))
         nuclei_detected = cv2.resize(labels, dsize=data.shape,

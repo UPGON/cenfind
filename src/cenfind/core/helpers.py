@@ -47,9 +47,9 @@ def get_model(model):
     return SpotNet(None, name=path.name, basedir=str(path.parent))
 
 
-def resize_image(data):
+def resize_image(data, factor=256):
     height, width = data.shape
-    shrinkage_factor = int(height // 256)
+    shrinkage_factor = int(height // factor)
     height_scaled = int(height // shrinkage_factor)
     width_scaled = int(width // shrinkage_factor)
     data_resized = cv2.resize(data,

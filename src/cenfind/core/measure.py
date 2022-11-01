@@ -41,6 +41,7 @@ def field_score(field: Field,
                 model_nuclei: StarDist2D,
                 model_foci: Path,
                 nuclei_channel: int,
+                factor,
                 channel: int) -> (np.ndarray, list):
     """
     1. Detect foci in the given channels
@@ -54,7 +55,7 @@ def field_score(field: Field,
     :return: list(foci, nuclei, assigned, scores)
     """
 
-    centres, nuclei = extract_nuclei(field, nuclei_channel, model_nuclei)
+    centres, nuclei = extract_nuclei(field, nuclei_channel, factor, model_nuclei)
     prob_map, foci = extract_foci(data=field, foci_model_file=model_foci, channel=channel)
     foci = [Centre((r, c), f_id, 'Centriole') for f_id, (r, c) in enumerate(foci)]
 
