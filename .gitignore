@@ -17,6 +17,7 @@ out/
 data/
 models/*
 !models/master/
+!models/dev/20221006_130126
 /src/centrosome_analysis/
 
 *.idlk
