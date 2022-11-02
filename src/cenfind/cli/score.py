@@ -77,7 +77,7 @@ def save_foci(foci_list: list[Centre], dst: str) -> None:
         logger.info('No centriole detected')
     else:
         array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
-    np.savetxt(dst, array, delimiter=',', fmt='%u')
+    np.savetxt(dst, array[:, [1, 0]], delimiter=',', fmt='%u')
 
 
 
