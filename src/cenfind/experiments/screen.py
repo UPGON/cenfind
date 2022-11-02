@@ -1,12 +1,15 @@
+import itertools as it
+
+import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-import itertools as it
-import numpy as np
+
 
 def str_to_tuple(position):
     row = ord(position[:1].upper()) - 65
     col = int(position[1:])
     return row, col
+
 
 def fraction_zero(x):
     return x['0'] / x[list('01234+')].sum()
@@ -33,8 +36,8 @@ def plot_layout(data, channel, ax, vmin, vmax):
     rows, cols = data.shape
     ax.set_title(f"Channel {channel}")
     ax.imshow(data, cmap='cividis', vmin=vmin, vmax=vmax)
-    rows_labels =list('abcdefgh'.upper())
-    cols_labels = [str(i+1) for i in range(cols)]
+    rows_labels = list('abcdefgh'.upper())
+    cols_labels = [str(i + 1) for i in range(cols)]
     ax.set_xticks(np.arange(cols), labels=cols_labels)
     ax.set_yticks(np.arange(rows), labels=rows_labels)
 
@@ -52,6 +55,7 @@ def reshape_data(data, channel, shape):
             .to_numpy()
             .reshape(rows, cols))
 
+
 def generate_figure(data, vmin, vmax):
     shape = (8, 12)
     channels = data['channel'].unique()
@@ -64,6 +68,7 @@ def generate_figure(data, vmin, vmax):
     fig.suptitle('Fraction of centriole-free cells')
     fig.tight_layout()
     return fig
+
 
 def main():
     path = '/data1/centrioles/20221019_ZScore_60X_EtOHvsFA_1/statistics/statistics.tsv'

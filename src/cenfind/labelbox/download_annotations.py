@@ -1,11 +1,12 @@
-import re
 import logging
+import re
+
 import PIL
-from tqdm import tqdm
 import labelbox
 import numpy as np
 import tifffile as tf
 from dotenv import dotenv_values
+from tqdm import tqdm
 
 from cenfind.experiments.constants import PREFIX_REMOTE
 

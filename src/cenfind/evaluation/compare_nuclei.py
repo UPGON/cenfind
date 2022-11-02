@@ -1,14 +1,13 @@
 import logging
 import os
 
+import numpy as np
 import pandas as pd
+from spotipy.utils import points_matching
 from stardist.models import StarDist2D
 from tqdm import tqdm
 
-import numpy as np
-from spotipy.utils import points_matching
-
-from cenfind.core.data import Dataset, Field
+from cenfind.core.data import Dataset
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"

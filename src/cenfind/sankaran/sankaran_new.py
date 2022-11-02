@@ -5,9 +5,9 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader
 
 from cenfind.core.data import Dataset as Cenfind_dataset
+from cenfind.sankaran.datasets import FociDatasetSankaran
 from cenfind.sankaran.helpers import (compute_focal_loss_weights)
 from cenfind.sankaran.models import MultiChannelCombinedScorer
-from cenfind.sankaran.datasets import FociDatasetSankaran
 
 transforms = alb.Compose([
     alb.ShiftScaleRotate(scale_limit=0.),

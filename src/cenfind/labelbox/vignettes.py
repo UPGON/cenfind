@@ -7,8 +7,8 @@ from tqdm import tqdm
 from cenfind.core.data import Dataset
 from cenfind.core.outline import create_vignette
 
-def get_args():
 
+def get_args():
     parser = argparse.ArgumentParser(description="VIGNETTE: create png version of channel+nuclei for annotation tool")
     parser.add_argument('path', type=Path, help="the path to the dataset")
     parser.add_argument('nuclei_index', type=int, help="the index of the nuclei (often, 0 or 3, first or last)")
@@ -19,8 +19,8 @@ def get_args():
     parser.add_argument('--channel_index', type=int, help="the index of the channel (often, 1)")
     return parser.parse_args()
 
-def main():
 
+def main():
     args = get_args()
 
     dataset = Dataset(args.path, projection_suffix=args.projection_suffix)

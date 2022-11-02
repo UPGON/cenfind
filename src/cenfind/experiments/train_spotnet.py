@@ -3,11 +3,11 @@ import contextlib
 import json
 import os
 import uuid
+
 import albumentations as alb
 import numpy as np
-
-from spotipy.utils import points_to_prob, normalize_fast2d
 from spotipy.model import SpotNet, Config
+from spotipy.utils import points_to_prob, normalize_fast2d
 
 from cenfind.core.data import Dataset
 

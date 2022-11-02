@@ -1,5 +1,5 @@
 from spotipy.utils import normalize_fast2d
-from cenfind.cli.score import get_model
+from cenfind.core.detectors import get_model
 from pathlib import Path
 from matplotlib import pyplot as plt
 from matplotlib import patches
@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from skimage import exposure
 from cenfind.core.outline import to_8bit
-from cenfind.core.data import Dataset, Projection, Field
+from cenfind.core.data import Dataset, Field
 
 plt.rcParams["font.family"] = "Helvetica"
 
@@ -17,10 +17,9 @@ def main():
     model = get_model('models/dev/5785b6d9-f09b-4486-af65-0a923c8ae533')
 
     dataset = Dataset(Path('/Users/buergy/Dropbox/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1'))
-    field = Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_002')
-    fov = Projection(dataset, field)
-    data = fov.projection[2, :, :]
-    dna = fov.projection[0, :, :]
+    field = Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_002', dataset)
+    data = field.projection[2, :, :]
+    dna = field.projection[0, :, :]
 
     percentile = .2
     width = 32

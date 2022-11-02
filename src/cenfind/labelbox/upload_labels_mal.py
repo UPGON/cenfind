@@ -2,12 +2,11 @@ import logging
 from pathlib import Path
 
 import cv2
-import numpy as np
 from dotenv import dotenv_values
-from labelbox.exceptions import ResourceNotFoundError
 from labelbox import (Client,
                       MediaType,
                       )
+from labelbox.exceptions import ResourceNotFoundError
 
 from cenfind.core.data import Dataset, Field
 from cenfind.core.detectors import extract_foci

@@ -5,7 +5,8 @@ import pandas as pd
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Dataset, Field
-from cenfind.core.measure import field_score, get_model
+from cenfind.core.measure import field_score
+from cenfind.core.detectors import get_model
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 
 stardist_model = StarDist2D.from_pretrained('2D_versatile_fluo')
@@ -29,13 +30,12 @@ def main():
     for dataset_name in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset_name)
         dataset.visualisation.mkdir(exist_ok=True)
-        test_files = dataset.splits_for('test')
+        test_files = dataset.pairs('test')
 
-        for fov_name, channel in test_files:
+        for field, channel in test_files:
             channel = int(channel)
-            field = Field(fov_name, dataset)
             score = field_score(field=field, model_nuclei=model_stardist, model_foci=model_spotnet,
-                                nuclei_channel=args.channel_nuclei, channel=channel)
+                                nuclei_channel=args.channel_nuclei, channel=channel, factor=256)
             scored.append(score)
 
     scores = pd.DataFrame(scored)

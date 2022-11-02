@@ -1,7 +1,8 @@
 import numpy as np
 
-from cenfind.core.outline import Centre
 from cenfind.cli.score import save_foci
+from cenfind.core.outline import Centre
+
 
 def test_save_foci():
     foci_list = [Centre((x, y)) for x, y in np.random.randint(1, 10, size=(10, 2))]

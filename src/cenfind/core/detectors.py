@@ -16,10 +16,10 @@ from cenfind.core.outline import Centre, Contour
 
 
 def extract_foci(data: Field,
-            foci_model_file: Path,
-            channel: int,
-            prob_threshold=.5,
-            min_distance=2, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
+                 foci_model_file: Path,
+                 channel: int,
+                 prob_threshold=.5,
+                 min_distance=2, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
     """
     Detect centrioles as row, col, row major
     :param data:
@@ -38,9 +38,6 @@ def extract_foci(data: Field,
                                                  prob_thresh=prob_threshold,
                                                  min_distance=min_distance, verbose=False)
     return mask_preds, points_preds
-
-
-
 
 
 def extract_nuclei(field: Field,

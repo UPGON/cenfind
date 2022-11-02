@@ -2,12 +2,17 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from cenfind.experiments.constants import ROOT_DIR
-pd.options.display.max_columns =50
+
+pd.options.display.max_columns = 50
+
 
 def precision(x):
     return x['tp'] / (x['tp'] + x['fp'])
+
+
 def recall(x):
     return x['tp'] / (x['tp'] + x['fn'])
+
 
 def main():
     path_data = ROOT_DIR / 'out/performances_master.csv'
@@ -25,7 +30,7 @@ def main():
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 5))
     ax.scatter(grouped['recall'], grouped['precision'], marker='.', color='blue',
-            alpha=grouped['threshold'].to_numpy())
+               alpha=grouped['threshold'].to_numpy())
     ax.spines.right.set_visible(False)
     ax.spines.top.set_visible(False)
     ax.set_xlim(0, 1)
@@ -34,6 +39,7 @@ def main():
     ax.set_ylabel('precision')
     ax.set_title("PR Curve\nall DS; any channel")
     fig.savefig(ROOT_DIR / f'out/checks/precision_recall_all.png', dpi=300)
+
 
 if __name__ == '__main__':
     main()

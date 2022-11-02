@@ -19,17 +19,13 @@ from cenfind.core.outline import create_vignette
 ## GLOBAL SEED ##
 tensorflow.random.set_seed(3)
 
-
-# tf.get_logger().setLevel(logging.ERROR)
-# physical_devices = tf.config.experimental.list_physical_devices('GPU')
-# tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 logger = logging.getLogger(__name__)
 logger.addHandler(ch)
+
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -78,7 +74,6 @@ def save_foci(foci_list: list[Centre], dst: str) -> None:
     else:
         array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
     np.savetxt(dst, array[:, [1, 0]], delimiter=',', fmt='%u')
-
 
 
 def main():
