@@ -43,6 +43,7 @@ config_multiscale = Config(n_channel_in=1,
 transforms = alb.Compose([
     alb.ShiftScaleRotate(scale_limit=0.),
     alb.Flip(),
+    alb.RandomBrightnessContrast(always_apply=True)
 ])
 
 
@@ -90,7 +91,7 @@ def main():
     parser.add_argument('path', type=str, help='The path to the dataset')
     args = parser.parse_args()
 
-    model = SpotNet(config, name=str(uuid.uuid4()), basedir='models/dev')
+    model = SpotNet(config_multiscale, name=str(uuid.uuid4()), basedir='models/dev')
     dataset = Dataset(args.path)
     train_x, train_y = load_pairs(dataset, split='train', transform=transforms)
     test_x, test_y = load_pairs(dataset, split='test')
