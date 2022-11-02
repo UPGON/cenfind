@@ -98,7 +98,7 @@ def main():
                                                         model_foci=args.model,
                                                         nuclei_channel=args.channel_nuclei,
                                                         factor=args.factor,
-                                                        vicinity=-15,
+                                                        vicinity=args.vicinity,
                                                         channel=ch)
             predictions_path = dataset.predictions / 'centrioles' / f"{field.name}{args.projection_suffix}_C{ch}.txt"
             save_foci(foci, predictions_path)
