@@ -51,6 +51,10 @@ def get_args():
     parser.add_argument('factor',
                         type=int,
                         help='factor to use: given a 2048x2048 image, if 63x: 256; if 20x: 2048')
+    parser.add_argument('--vicinity',
+                        type=int,
+                        default=-50,
+                        help='distance threshold in pixel')
 
     parser.add_argument('--projection_suffix',
                         type=str,
@@ -93,6 +97,7 @@ def main():
                                                         model_foci=args.model,
                                                         nuclei_channel=args.channel_nuclei,
                                                         factor=args.factor,
+                                                        vicinity=-15,
                                                         channel=ch)
             predictions_path = dataset.predictions / 'centrioles' / f"{field.name}{args.projection_suffix}_C{ch}.txt"
             save_foci(foci, predictions_path)

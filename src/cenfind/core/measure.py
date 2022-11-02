@@ -44,6 +44,7 @@ def field_score(field: Field,
                 model_foci: Path,
                 nuclei_channel: int,
                 factor,
+                vicinity,
                 channel: int) -> (np.ndarray, list):
     """
     1. Detect foci in the given channels
