@@ -22,7 +22,7 @@ def main():
     logger.addHandler(ch)
 
     lb = labelbox.Client(api_key=config['LABELBOX_API_KEY'])
-    project = lb.get_project(config['PROJECT_CENTRIOLES_C1'])
+    project = lb.get_project(config['PROJECT_CENTRIOLES'])
     labels = project.label_generator()
     channel_id = 3
     single_channel_name = f'all_channel_{channel_id}'
