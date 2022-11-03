@@ -40,8 +40,14 @@ def main():
     dataset.write_fields()
     logger.info('Prediction folder created')
 
-    dataset.write_train_test(args.channels)
-    logger.info('Prediction folder created')
+    if not (dataset.path / 'test.txt').exists():
+        answer = input('Do you want to overwrite the train/test.txt? [yn]')
+        if answer == 'y':
+            dataset.write_train_test(args.channels)
+            logger.info('Prediction folder created')
+    else:
+        logger.info('Train / test already existing')
+
 
     dataset.predictions.mkdir(exist_ok=True)
     (dataset.predictions / 'centrioles').mkdir(exist_ok=True)
