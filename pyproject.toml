@@ -27,9 +27,10 @@ stardist = "^0.8.3"
 scikit-learn = "^1.1.3"
 
 [tool.poetry.scripts]
+prepare = "cenfind.cli.prepare:main"
 squash = "cenfind.cli.squash:main"
 score = "cenfind.cli.score:main"
-setup = "cenfind.cli.prepare:main"
+evaluate = "cenfind.cli.evaluate:main"
 vignettes = "cenfind.labelbox.vignettes:main"
 upload = "cenfind.labelbox.upload_labels:main"
 
