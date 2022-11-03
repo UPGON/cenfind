@@ -21,14 +21,20 @@ def get_args():
     parser.add_argument('model',
                         type=Path,
                         help='Path to the model, e.g., <project>/models/master')
+    parser.add_argument('dst',
+                        type=Path,
+                        help='Path to the destination file')
     parser.add_argument('--datasets',
                         type=Path,
                         nargs='+',
-                        help='Path to the dataset folder, can be one or more')
+                        help='Path to the dataset folder, can be one or more, if not provided, fall back to use the standard datasets')
     parser.add_argument('--tolerance',
                         type=int,
                         nargs='+',
                         help='Distance above which two points are deemed not matching')
+    parser.add_argument('--thresholds',
+                        action='store_true',
+                        help='Probability cutoff, if set, evaluate over [0, .95]')
     args = parser.parse_args()
 
     return args
@@ -37,33 +43,51 @@ def get_args():
 def main():
     args = get_args()
     tolerance = args.tolerance
+    _thresholds = args.thresholds
+    dst = Path(args.dst)
+    while dst.exists():
+        answer = input(f'Do you want to overwrite {dst}? [yn]')
+        if answer == 'n':
+            dst = input('Please enter the destination path: ')
+            dst = Path(dst)
 
-    if len(tolerance) > 1:
-        tolerance = np.linspace(tolerance[0], tolerance[1], 10)
+    if len(tolerance) == 2:
+        lower, upper = tolerance
+        num = 10
+        tolerance = np.linspace(lower, upper, num, endpoint=True).round(int(np.log10(num)))
+
+    if _thresholds:
+        thresholds = np.linspace(0, 1, 10, endpoint=False).round(1)
+        thresholds = np.append(thresholds, .95)
+    else:
+        thresholds = [.5]
 
     if args.datasets is None:
         datasets = std_ds
     else:
         datasets = args.datasets
-    th_range = [.1, .2, .3, .4, .5, .6, .7, .8, .9, .95]
-    # th_range = [round(i, 3) for i in np.random.uniform(size=50)]
+
+    datasets = [Dataset(PREFIX_REMOTE / d) for d in datasets]
+
     performances = []
     p_bar = tqdm(datasets)
-    for dataset_name in p_bar:
-        dataset = Dataset(PREFIX_REMOTE / dataset_name)
-        p_bar.set_description(dataset_name)
+    for dataset in p_bar:
+        p_bar.set_description(dataset.path.name)
         for tol in tolerance:
-            for th in th_range:
-                p_bar.set_postfix({"tolerance": tol, "threshold": th})
-                prob_maps, performance = dataset_metrics(dataset, split='test', model=args.model, tolerance=tol,
+            for th in thresholds:
+                prob_maps, performance = dataset_metrics(dataset,
+                                                         split='test',
+                                                         model=args.model,
+                                                         tolerance=tol,
                                                          threshold=th)
                 performances.append(performance)
+                p_bar.set_postfix({"tolerance": tol,
+                                   "threshold": th,
+                                   "performance peek": performance[0]['f1']})
 
     performances_df = pd.DataFrame([s for p in performances for s in p])
-
-    path_out = Path('out')
     performances_df = performances_df.set_index('field')
-    performances_df.to_csv(path_out / f'performances_{args.model.name}.csv')
+    performances_df.to_csv(dst)
 
 
 if __name__ == '__main__':
