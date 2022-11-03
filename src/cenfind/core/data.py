@@ -11,11 +11,12 @@ from tqdm import tqdm
 
 
 def extract_info(pattern: re, dataset_name: str):
-    res = re.match(pattern, dataset_name).groupdict()
-    markers = res['markers'].split('+')
-    res['markers'] = tuple(markers)
+    res = re.match(pattern, dataset_name)
+    res_dict = res.groupdict()
+    markers = res_dict['markers'].split('+')
+    res_dict['markers'] = tuple(markers)
 
-    return res
+    return res_dict
 
 
 @dataclass
