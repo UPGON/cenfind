@@ -43,4 +43,4 @@ celltype_names = {
 }
 
 pattern_dataset = re.compile(
-    "(?P<cell_type>[a-zA-Z0-9.-]+)(_(?P<treatment>\w+))?_(?P<markers>[\w+]+)_(?P<replicate>\d)")
+    "(?P<cell_type>[a-zA-Z0-9.-]+)([+_](?P<treatment>\w+))?_(?P<markers>[\w+]+)_(?P<replicate>\d)")

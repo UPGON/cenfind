@@ -71,7 +71,7 @@ def plot_many_datasets(performances: str, metadata: dict):
 
 
 def main():
-    model_name = '20221006_130126'
+    model_name = '20221103_112531'
     path_perfs = f'out/performances_{model_name}.csv'
     metadata = {}
     for dataset_name in datasets:
