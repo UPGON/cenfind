@@ -3,7 +3,7 @@ import random
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Type, List, Tuple, Union
+from typing import List, Tuple, Union
 
 import numpy as np
 import tifffile as tf

@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 import torch.nn as nn
 
@@ -29,6 +28,7 @@ class FociDetector(nn.Module):
 
     def forward(self, x):
         return self.net(x)
+
 
 if __name__ == '__main__':
     x = torch.rand((1, 1, 2048, 2048))

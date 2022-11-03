@@ -4,12 +4,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import tifffile
+from tqdm import tqdm
+
 from cenfind.core.data import Dataset
 from cenfind.core.measure import dataset_metrics
 from cenfind.experiments.constants import PREFIX_REMOTE
 from cenfind.experiments.constants import datasets as std_ds
-from tqdm import tqdm
 
 tf.get_logger().setLevel('ERROR')
 ## GLOBAL SEED ##
@@ -20,7 +20,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('model',
                         type=Path,
-                        help='Path to the model, e.g., <project>/models/dev/master')
+                        help='Path to the model, e.g., <project>/models/master')
     parser.add_argument('--datasets',
                         type=Path,
                         nargs='+',

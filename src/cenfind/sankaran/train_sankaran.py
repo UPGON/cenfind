@@ -1,7 +1,9 @@
 from datetime import datetime
-from cenfind.experiments.constants import PREFIX_REMOTE, datasets
-from centrosome_analysis.ml_foci_detect import train_model_fcn, FociDetector, MultiChannelCombinedScorer
+
 import torch
+from centrosome_analysis.ml_foci_detect import train_model_fcn, FociDetector
+
+from cenfind.experiments.constants import PREFIX_REMOTE, datasets
 
 
 def main():
@@ -29,7 +31,6 @@ def main():
     # model_multi = MultiChannelCombinedScorer()
     # fit_multi = train_model_fcn(model_multi, train_files=train_files, need_sigmoid=True, num_epochs=100)
     # torch.save(fit_multi.state_dict(), f'models/sankaran/dev/{time_stamp}_multi')
-
 
 
 if __name__ == '__main__':

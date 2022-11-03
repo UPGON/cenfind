@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from tqdm import tqdm
 import numpy as np
-from spotipy.model import SpotNet
 import tensorflow as tf
+from spotipy.model import SpotNet
+from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.experiments.train_spotnet import load_pairs, config_unet, config_multiscale, transforms
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
+from cenfind.experiments.train_spotnet import load_pairs, config_unet, config_multiscale, transforms
 
 shuffle = True
 

@@ -1,7 +1,7 @@
 import logging
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -25,13 +25,15 @@ def assign(foci: list, nuclei: list, vicinity: int) -> list[tuple[Any, list[Any]
     """
     pairs = []
     _nuclei = nuclei.copy()
+    foci_free = foci.copy()
     while _nuclei:
         n = _nuclei.pop()
         assigned = []
-        for f in foci:
+        for f in foci_free:
             distance = signed_distance(f, n)
             if distance > vicinity:
                 assigned.append(f)
+                foci_free.remove(f)
         pairs.append((n, assigned))
 
     return pairs
@@ -42,6 +44,7 @@ def field_score(field: Field,
                 model_foci: Path,
                 nuclei_channel: int,
                 factor,
+                vicinity,
                 channel: int) -> (np.ndarray, list):
     """
     1. Detect foci in the given channels
@@ -59,7 +62,7 @@ def field_score(field: Field,
     prob_map, foci = extract_foci(data=field, foci_model_file=model_foci, channel=channel)
     foci = [Centre((r, c), f_id, 'Centriole') for f_id, (r, c) in enumerate(foci)]
 
-    assigned = assign(foci=foci, nuclei=nuclei, vicinity=-50)
+    assigned = assign(foci=foci, nuclei=nuclei, vicinity=vicinity)
 
     scores = []
     for pair in assigned:

@@ -2,10 +2,7 @@ import argparse
 from pathlib import Path
 
 from dotenv import dotenv_values
-from labelbox import (Client,
-                      OntologyBuilder,
-                      LabelingFrontend,
-                      )
+from labelbox import Client
 
 from cenfind.core.data import Dataset
 
