@@ -8,6 +8,7 @@ import albumentations as alb
 import numpy as np
 from spotipy.model import SpotNet, Config
 from spotipy.utils import points_to_prob, normalize_fast2d
+from tqdm import tqdm
 
 from cenfind.core.data import Dataset
 
@@ -84,6 +85,30 @@ def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.
         masks.append(mask)
 
     return np.stack(channels), np.stack(masks)
+
+
+def fetch_all_fields(datasets: list[Dataset]):
+    all_train_x = []
+    all_train_y = []
+
+    all_test_x = []
+    all_test_y = []
+
+    for ds in tqdm(datasets):
+        train_x, train_y = load_pairs(ds, split='train', transform=transforms)
+        test_x, test_y = load_pairs(ds, split='test')
+        all_train_x.append(train_x)
+        all_train_y.append(train_y)
+        all_test_x.append(test_x)
+        all_test_y.append(test_y)
+
+    all_train_x = np.concatenate(all_train_x, axis=0)
+    all_train_y = np.concatenate(all_train_y, axis=0)
+
+    all_test_x = np.concatenate(all_test_x, axis=0)
+    all_test_y = np.concatenate(all_test_y, axis=0)
+
+    return all_train_x, all_train_y, all_test_x, all_test_y
 
 
 def main():
