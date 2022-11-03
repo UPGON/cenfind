@@ -61,15 +61,8 @@ def labels_list_create(labels):
 def task_prepare(client, project, dataset, labels_list):
     signer = lambda _bytes: client.upload_data(content=_bytes, sign=True)
 
-    labels_list.assign_feature_schema_ids(OntologyBuilder.from_project(project))
+    # labels_list.assign_feature_schema_ids(OntologyBuilder.from_project(project))
     labels_list.add_to_dataset(dataset, signer)
-
-    # ndjsons = list(NDJsonConverter.serialize(labels_list))
-    # task = project.upload_annotations(
-    #     name=f'upload-job-{uuid.uuid4()}',
-    #     annotations=ndjsons,
-    #     validate=True
-    # )
 
     mal_ndjson = list(NDJsonConverter.serialize(labels_list))
     upload_job = MALPredictionImport.create_from_objects(
