@@ -44,7 +44,8 @@ config_multiscale = Config(n_channel_in=1,
 transforms = alb.Compose([
     alb.ShiftScaleRotate(scale_limit=0.),
     alb.Flip(),
-    alb.RandomBrightnessContrast(always_apply=True)
+    alb.RandomBrightnessContrast(always_apply=True),
+    alb.RandomGamma(),
 ])
 
 
