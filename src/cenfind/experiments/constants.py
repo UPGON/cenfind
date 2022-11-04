@@ -1,6 +1,8 @@
 import re
 from pathlib import Path
 
+import pandas as pd
+
 PREFIX_LOCAL = Path('/Users/buergy/Dropbox/epfl/datasets')
 PREFIX_REMOTE = Path('/data1/centrioles/')
 
@@ -19,7 +21,6 @@ protein_positions = {
     'RPE1wt_CEP152+GTU88+PCNT_1': ('DAPI', 'CEP152', 'GTU88', 'PCNT'),
     'U2OS_CEP63+SAS6+PCNT_1': ('DAPI', 'CEP63', 'SAS6', 'PCNT'),
     'RPE1p53+Cnone_CEP63+CETN2+PCNT_1': ('DAPI', 'CEP63', 'CETN2', 'PCNT'),
-    'U2OSwt_siNC2h_AcTub+Plk4+STIL_1': ('AcTub', 'Plk4', 'STIL'),
 }
 
 protein_names = {
@@ -44,3 +45,14 @@ celltype_names = {
 
 pattern_dataset = re.compile(
     "(?P<cell_type>[a-zA-Z0-9.-]+)([+_](?P<treatment>\w+))?_(?P<markers>[\w+]+)_(?P<replicate>\d)")
+
+if __name__ == '__main__':
+    datasets = pd.DataFrame(datasets)
+    cell_types = pd.DataFrame().from_dict(celltype_names, orient='index')
+    protein_positions = pd.DataFrame().from_dict(protein_positions, orient='index')
+    proteins_names = pd.DataFrame.from_dict(protein_names, orient='index')
+
+    datasets.to_csv('data/datasets.tsv', sep='\t')
+    protein_positions.to_csv('data/protein_positions.tsv', sep='\t')
+    proteins_names.to_csv('data/proteins_names.tsv', sep='\t')
+    cell_types.to_csv('data/cell_types.tsv', sep='\t')

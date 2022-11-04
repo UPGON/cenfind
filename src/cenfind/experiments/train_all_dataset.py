@@ -22,7 +22,7 @@ def main():
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     model_multiscale = SpotNet(config_multiscale, name=time_stamp, basedir='models/dev/multiscale')
-    model_multiscale.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=400)
+    model_multiscale.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=100)
     return 0
 
 
