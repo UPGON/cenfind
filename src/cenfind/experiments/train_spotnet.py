@@ -14,6 +14,7 @@ from cenfind.core.data import Dataset
 
 config_unet = Config(n_channel_in=1,
                      backbone='unet',
+                     mode='mae',
                      unet_n_depth=3,
                      unet_pool=4,
                      unet_n_filter_base=64,
@@ -28,6 +29,7 @@ config_unet = Config(n_channel_in=1,
                      train_batch_size=2)
 config_multiscale = Config(n_channel_in=1,
                            backbone='unet',
+                           mode='mae',
                            unet_n_depth=3,
                            unet_pool=4,
                            unet_n_filter_base=64,

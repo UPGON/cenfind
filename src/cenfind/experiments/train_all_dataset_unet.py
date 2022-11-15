@@ -22,7 +22,7 @@ def main():
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     model_unet = SpotNet(config_unet, name=time_stamp, basedir='models/dev/unet')
-    model_unet.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=100)
+    model_unet.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=30)
 
     return 0
 
