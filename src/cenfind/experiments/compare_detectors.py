@@ -10,8 +10,8 @@ from cenfind.experiments.detectors_other import run_detection, log_skimage, simp
 
 def main():
     methods = [
-        ['unet', extract_foci, 'models/dev/unet/20221028_123249'],
-        ['multiscale', extract_foci, 'models/dev/multiscale/20221028_133231'],
+        ['unet', extract_foci, 'models/dev/unet/20221114_193421'],
+        ['multiscale', extract_foci, 'models/dev/multiscale/20221115_071832'],
         ['log_skimage', log_skimage, None],
         ['simpleblob_cv2', simpleblob_cv2, None],
     ]
@@ -41,6 +41,9 @@ def main():
     perfs_df.to_csv(f'out/perfs_blobdetectors.csv')
 
     summary = perfs_df.groupby('method')['f1'].agg(['mean', 'std']).round(3)
+    summary = summary.reset_index()
+    summary['F1 (mean ± st. dev.)'] = summary['mean'].astype(str) + '±' + summary['std'].astype(str)
+    summary.columns = ['Method', 'F1', 'Standard deviation', 'F1 (mean ± st. dev.)']
     summary.to_csv(f'out/perfs_blobdetectors_summary.csv')
 
 

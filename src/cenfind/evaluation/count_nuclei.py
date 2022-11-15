@@ -1,13 +1,10 @@
-import argparse
-from pathlib import Path
-
 import cv2
 import pandas as pd
 from dotenv import dotenv_values
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.core.helpers import frac, flag
+from cenfind.core.helpers import flag
 from cenfind.core.measure import full_in_field, extract_nuclei
 from cenfind.core.outline import create_vignette
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
@@ -21,21 +18,15 @@ pd.set_option('display.max_colwidth', None)
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--destination', type=str, default=None)
-    args = parser.parse_args()
-
-    statistics_path = Path(args.destination)
-
     records = []
     for dataset in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset)
-        for field, channel in tqdm(dataset.pairs()):
+        for field in tqdm(dataset.fields):
             mask = field.mask(0)
-            centres, contours = extract_nuclei(field, 0, annotation=mask)
+            centres, contours = extract_nuclei(field, 0, annotation=mask, factor=256)
             vignette = create_vignette(field, 1, 0)
             for centre, contour in zip(centres, contours):
-                is_full = full_in_field(centre.centre, .05, mask)
+                is_full = full_in_field(centre.centre, mask, .05)
                 records.append({'dataset': dataset.path.name,
                                 'field': field.name,
                                 'centre': centre.centre,
@@ -45,8 +36,10 @@ def main():
             cv2.imwrite(f'out/checks/{field.name}.png', vignette)
     df = pd.DataFrame(records)
 
-    summary = df.groupby(['dataset'])['is_full'].agg(['count', sum, frac])
-    summary.to_csv(statistics_path)
+    summary = df.groupby(['dataset'])['is_full'].agg(['count', sum])
+    summary = summary.reset_index()
+    summary.columns = ['Dataset', 'Nuclei detected', 'Nuclei full']
+    summary.to_csv('out/nuclei_counts.csv')
 
 
 if __name__ == '__main__':
