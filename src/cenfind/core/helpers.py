@@ -8,7 +8,7 @@ from cenfind.core.outline import Centre, Contour
 
 
 def full_in_field(coordinate, image, fraction) -> bool:
-    _, h, w = image.shape
+    h, w = image.shape
     pad_lower = int(fraction * h)
     pad_upper = h - pad_lower
     if all([pad_lower < c < pad_upper for c in coordinate]):
@@ -17,7 +17,7 @@ def full_in_field(coordinate, image, fraction) -> bool:
 
 
 def flag(is_full: bool) -> tuple:
-    return (0, 0, 255) if is_full else (0, 255, 0)
+    return (0, 255, 0) if is_full else (0, 0, 255)
 
 
 def signed_distance(focus: Centre, nucleus: Contour) -> float:
