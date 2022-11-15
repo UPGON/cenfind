@@ -15,7 +15,7 @@ def recall(x):
 
 
 def main():
-    path_data = ROOT_DIR / 'out/performances_master.csv'
+    path_data = ROOT_DIR / 'out/perfs_20221104_091152.csv'
     data = pd.read_csv(path_data)
     data = data.drop(['precision', 'recall', 'f1'], axis=1)
     grouped = data.groupby('threshold')[['tp', 'fp', 'fn']].sum()

@@ -49,7 +49,7 @@ def plot_one_dataset(ax, data, metadata, title, accuracy_thresholds=(0, .5, .75,
     return ax
 
 
-def plot_many_datasets(performances: str, metadata: dict):
+def plot_many_datasets(performances: str, metadata: dict, threshold=.5):
     data = pd.read_csv(performances)
     fig, axs = plt.subplots(nrows=1, ncols=len(datasets), figsize=(2 * len(datasets), 2))
     accuracy_thresholds = (0, .5, .75, .9, 1.)
@@ -60,7 +60,7 @@ def plot_many_datasets(performances: str, metadata: dict):
     for col, ds in enumerate(datasets):
         cell_type = metadata[ds]['cell_type']
         title = f"{celltype_names[cell_type]} {metadata[ds]['treatment'] or ''}"
-        sub = data.loc[data['dataset'] == ds]
+        sub = data.loc[(data['dataset'] == ds) & (data['threshold'] == threshold)]
         ax = axs[col]
         ax2 = ax.secondary_xaxis("top", functions=(scaler, scaler))
         ax2.set_xlabel('[nm]')
@@ -71,8 +71,8 @@ def plot_many_datasets(performances: str, metadata: dict):
 
 
 def main():
-    model_name = '20221103_112531'
-    path_perfs = f'out/performances_{model_name}.csv'
+    model_name = '20221104_091152'
+    path_perfs = f'out/perfs_{model_name}.csv'
     metadata = {}
     for dataset_name in datasets:
         metadata[dataset_name] = extract_info(pattern_dataset, dataset_name)
