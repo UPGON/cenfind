@@ -46,15 +46,16 @@ def main():
     _thresholds = args.thresholds
     dst = Path(args.dst)
     while dst.exists():
-        answer = input(f'Do you want to overwrite {dst}? [yn]')
+        answer = input(f'Do you want to overwrite {dst}? [yn]: ')
+        if answer == 'y':
+            break
         if answer == 'n':
             dst = input('Please enter the destination path: ')
             dst = Path(dst)
 
     if len(tolerance) == 2:
         lower, upper = tolerance
-        num = 10
-        tolerance = np.linspace(lower, upper, num, endpoint=True).round(int(np.log10(num)))
+        tolerance = list(range(lower, upper + 1))
 
     if _thresholds:
         thresholds = np.linspace(0, 1, 10, endpoint=False).round(1)
@@ -66,6 +67,8 @@ def main():
         datasets = std_ds
     else:
         datasets = args.datasets
+
+    print(tolerance)
 
     datasets = [Dataset(PREFIX_REMOTE / d) for d in datasets]
 
