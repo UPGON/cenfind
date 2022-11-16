@@ -88,6 +88,7 @@ class Dataset:
     path: Union[str, Path]
     image_type: str = '.ome.tif'
     projection_suffix: str = '_max'
+    pixel_size: float = .1025
 
     def __post_init__(self):
         self.path = Path(self.path)
