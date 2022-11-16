@@ -47,7 +47,7 @@ transforms = alb.Compose([
     alb.ShiftScaleRotate(scale_limit=0.),
     alb.Flip(),
     alb.RandomBrightnessContrast(always_apply=True),
-    alb.RandomGamma(),
+    alb.RandomGamma()
 ])
 
 

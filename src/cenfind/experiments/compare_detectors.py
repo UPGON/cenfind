@@ -10,8 +10,8 @@ from cenfind.experiments.detectors_other import run_detection, log_skimage, simp
 
 def main():
     methods = [
-        ['unet', extract_foci, 'models/dev/unet/20221114_193421'],
-        ['multiscale', extract_foci, 'models/dev/multiscale/20221115_130248'],
+        ['unet', extract_foci, 'models/dev/unet/20221116_144947'],
+        ['multiscale', extract_foci, 'models/dev/multiscale/20221116_132747'],
         ['log_skimage', log_skimage, None],
         ['simpleblob_cv2', simpleblob_cv2, None],
     ]

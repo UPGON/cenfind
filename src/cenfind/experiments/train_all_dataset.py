@@ -1,17 +1,18 @@
-from datetime import datetime
+from numpy.random import seed
+
+seed(1)
 
 import tensorflow as tf
+
+tf.random.set_seed(2)
+
+from datetime import datetime
+
 from spotipy.model import SpotNet
 
 from cenfind.core.data import Dataset
 from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 from cenfind.experiments.train_spotnet import config_multiscale, fetch_all_fields
-
-shuffle = True
-
-# GLOBAL SEED
-tf.random.set_seed(3)
-
 
 def main():
     path_datasets = [PREFIX_REMOTE / ds for ds in datasets]
@@ -22,7 +23,7 @@ def main():
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     model_multiscale = SpotNet(config_multiscale, name=time_stamp, basedir='models/dev/multiscale')
-    model_multiscale.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=400)
+    model_multiscale.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=100)
     return 0
 
 
