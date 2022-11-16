@@ -7,8 +7,8 @@ from spotipy.model import SpotNet
 from cenfind.core.outline import Centre, Contour
 
 
-def full_in_field(coordinate, image, fraction) -> bool:
-    h, w = image.shape
+def full_in_field(coordinate, image_shape, fraction) -> bool:
+    h, w = image_shape
     pad_lower = int(fraction * h)
     pad_upper = h - pad_lower
     if all([pad_lower < c < pad_upper for c in coordinate]):

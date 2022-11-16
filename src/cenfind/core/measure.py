@@ -1,40 +1,84 @@
 import logging
+from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
 import numpy as np
 import pandas as pd
+from skimage.measure import label, regionprops
 from spotipy.utils import points_matching
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Dataset, Field
 from cenfind.core.detectors import extract_foci, extract_nuclei
 from cenfind.core.helpers import signed_distance, full_in_field
-from cenfind.core.outline import Centre
+from cenfind.core.outline import Centre, draw_foci
 
 
-def assign(foci: list, nuclei: list, vicinity: int) -> list[tuple[Any, list[Any]]]:
+def infer_centrosomes(foci: list, img_shape: tuple, distance=.6) -> list:
+    """
+    Add centrosome to a list of foci.
+    Args:
+        foci:
+        img_shape:
+        distance: twice the inter-centriole distance in micrometres (2 x .3 um)
+
+    Returns:
+
+    """
+    _foci = foci.copy()
+
+    centrosomes_mask = np.zeros(img_shape, dtype='uint8')
+    centrosomes_mask = draw_foci(centrosomes_mask, _foci, radius=distance)
+
+    centrosomes_map = label(centrosomes_mask)
+    centrosomes_centroids = regionprops(centrosomes_map)
+
+    for f in _foci:
+        foci_index = centrosomes_map[f.centre]
+        centrosome_centroid = centrosomes_centroids[foci_index - 1].centroid
+        centrosome_centroid = tuple(int(c) for c in centrosome_centroid)
+        f.parent = Centre(centrosome_centroid, label='Centrosome')
+
+    return foci
+
+def assign(foci: list, nuclei: list, vicinity: float, pixel_size: float) -> list[tuple[Any, list[Any]]]:
     """
     Assign centrioles to nuclei in one field
     :param foci
     :param nuclei
     :param vicinity: the distance in pixels, below which centrioles are assigned
      to nucleus
+    :param pixel_size: in micrometres
     :return: List[Tuple[Centre, Contour]]
+
     """
-    pairs = []
+    _foci = foci.copy()
     _nuclei = nuclei.copy()
-    foci_free = foci.copy()
-    while _nuclei:
-        n = _nuclei.pop()
-        assigned = []
-        for f in foci_free:
-            distance = signed_distance(f, n)
-            if distance > vicinity:
-                assigned.append(f)
-                foci_free.remove(f)
-        pairs.append((n, assigned))
+
+    vicinity_pixel = int(vicinity / pixel_size)
+
+    nuclei_pos = [tuple(n.centre.to_numpy()) for n in _nuclei]
+
+    # Initialise the pairs so that nuclei
+    # with no centrioles are maintained in the output
+    container = defaultdict(list)
+    for k in nuclei_pos:
+        container.setdefault(k, [])
+
+    # Take each focus and compute the distance to all nuclei
+    # and assign it to the nearest nucleus, if it is in the vicinity
+    while len(_foci):
+        f = _foci.pop()
+        centrosome = f.parent
+        for n in _nuclei:
+            nuclei_pos = tuple(n.centre.to_numpy())
+            dist = signed_distance(centrosome, n)
+            if dist > vicinity_pixel:
+                container[nuclei_pos].append(f)
+
+    pairs = [(k, v) for k, v in container.items()]
 
     return pairs
 
@@ -58,20 +102,22 @@ def field_score(field: Field,
     :return: list(foci, nuclei, assigned, scores)
     """
 
+    image_shape = field.projection.shape[1:]
     centres, nuclei = extract_nuclei(field, nuclei_channel, factor, model_nuclei)
     prob_map, foci = extract_foci(data=field, foci_model_file=model_foci, channel=channel)
     foci = [Centre((r, c), f_id, 'Centriole') for f_id, (r, c) in enumerate(foci)]
 
-    assigned = assign(foci=foci, nuclei=nuclei, vicinity=vicinity)
+    foci = infer_centrosomes(foci, image_shape, distance=.6)
+    assigned = assign(foci=foci, nuclei=nuclei, vicinity=vicinity, pixel_size=.1025)
 
     scores = []
     for pair in assigned:
-        n, _foci = pair
+        nucleus, focus = pair
         scores.append({'fov': field.name,
                        'channel': channel,
-                       'nucleus': n.centre.position,
-                       'score': len(_foci),
-                       'is_full': full_in_field(n.centre.position, field.projection, .05)
+                       'nucleus': nucleus,
+                       'score': len(focus),
+                       'is_full': full_in_field(nucleus, image_shape, .05)
                        })
     return foci, nuclei, assigned, scores
 

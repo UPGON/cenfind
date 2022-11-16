@@ -9,7 +9,7 @@ from skimage.exposure import rescale_intensity
 from cenfind.core.data import Field
 
 
-@dataclass(eq=True, frozen=True)
+@dataclass(eq=True, frozen=False)
 class ROI(ABC):
     """Abstract class to represent any region of interest"""
 
@@ -23,12 +23,13 @@ class ROI(ABC):
         pass
 
 
-@dataclass(eq=True, frozen=True)
+@dataclass(eq=True, frozen=False)
 class Centre(ROI):
     position: tuple
     idx: int = 0
     label: str = ''
     confidence: float = 0
+    parent: 'Centre' = None
 
     @property
     def centre(self):
@@ -57,7 +58,7 @@ class Centre(ROI):
         return x, y
 
 
-@dataclass(eq=True, frozen=True)
+@dataclass(eq=True, frozen=False)
 class Contour(ROI):
     """Represent a blob using the row-column scheme."""
 
@@ -89,10 +90,11 @@ class Contour(ROI):
         return image
 
 
-def draw_foci(data: np.ndarray, foci: np.ndarray) -> np.ndarray:
+def draw_foci(data: np.ndarray, foci: list[Centre], radius=.4, pixel_size=.1025) -> np.ndarray:
     mask = np.zeros(data.shape, dtype='uint8')
-    for r, c in foci:
-        rr, cc = disk((r, c), 4)
+    for f in foci:
+        r, c = f.to_numpy()
+        rr, cc = disk((r, c), int(radius/pixel_size))
         try:
             mask[rr, cc] = 250
         except IndexError:

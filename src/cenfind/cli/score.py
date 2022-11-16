@@ -1,3 +1,10 @@
+from numpy.random import seed
+
+seed(1)
+
+import tensorflow as tf
+
+tf.random.set_seed(2)
 import argparse
 import logging
 from pathlib import Path
@@ -5,19 +12,13 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
-import tensorflow
 import tifffile as tf
 from stardist.models import StarDist2D
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.core.measure import field_score
-from cenfind.core.measure import field_score_frequency
-from cenfind.core.outline import Centre
-from cenfind.core.outline import create_vignette
-
-## GLOBAL SEED ##
-tensorflow.random.set_seed(3)
+from cenfind.core.measure import field_score, field_score_frequency
+from cenfind.core.outline import Centre, create_vignette
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
@@ -53,8 +54,8 @@ def get_args():
                         help='factor to use: given a 2048x2048 image, if 63x: 256; if 20x: 2048')
     parser.add_argument('--vicinity',
                         type=int,
-                        default=-50,
-                        help='distance threshold in pixel')
+                        default=-5,
+                        help='distance threshold in micrometer (default: -5 um)')
 
     parser.add_argument('--projection_suffix',
                         type=str,
@@ -110,13 +111,13 @@ def main():
                 background = create_vignette(field, marker_index=ch, nuclei_index=args.channel_nuclei)
                 for focus in foci:
                     background = focus.draw(background, annotation=False)
-                for nucleus in nuclei:
-                    background = nucleus.draw(background, annotation=False)
-                for n_pos, c_pos in assigned:
-                    for sub_c in c_pos:
-                        if sub_c:
-                            cv2.arrowedLine(background, sub_c.to_cv2(), n_pos.centre.to_cv2(), color=(0, 255, 0),
-                                            thickness=1)
+                # for nucleus in nuclei:
+                #     background = nucleus.draw(background, annotation=False)
+                # for n_pos, c_pos in assigned:
+                #     for sub_c in c_pos:
+                #         if sub_c:
+                #             cv2.arrowedLine(background, sub_c.to_cv2(), n_pos.centre.to_cv2(), color=(0, 255, 0),
+                #                             thickness=1)
                 tf.imwrite(args.path / 'visualisations' / f"{field.name}_C{ch}_pred.png", background)
 
     flattened = [leaf for tree in scores for leaf in tree]
