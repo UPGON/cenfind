@@ -7,6 +7,7 @@ from skimage.feature import blob_log
 from spotipy.utils import points_matching
 
 from cenfind.core.data import Field
+from cenfind.core.outline import Centre
 from cenfind.core.helpers import blob2point
 
 
@@ -44,10 +45,11 @@ def run_detection(method, data: Field,
                   annotation: np.ndarray,
                   tolerance,
                   channel=None,
-                  model_path=None) -> Tuple[np.ndarray, float]:
-    foci = method(data, foci_model_file=model_path, channel=channel)
-    if type(foci) == tuple:
-        prob_map, foci = foci
-    res = points_matching(annotation, foci, cutoff_distance=tolerance)
+                  model_path=None) -> Tuple[list[Centre], float]:
+    _foci = method(data, foci_model_file=model_path, channel=channel)
+    if type(_foci) == tuple:
+        prob_map, _foci = _foci
+    res = points_matching(annotation, _foci, cutoff_distance=tolerance)
     f1 = np.round(res.f1, 3)
+    foci = [Centre((r, c), label='Centriole') for r, c in _foci]
     return foci, f1
