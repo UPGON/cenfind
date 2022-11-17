@@ -14,7 +14,7 @@ from cenfind.core.data import Dataset
 
 config_unet = Config(n_channel_in=1,
                      backbone='unet',
-                     mode='mae',
+                     mode='bce',
                      unet_n_depth=3,
                      unet_pool=4,
                      unet_n_filter_base=64,
