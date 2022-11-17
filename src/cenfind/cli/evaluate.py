@@ -1,3 +1,10 @@
+from numpy.random import seed
+
+seed(1)
+
+import tensorflow as tf
+
+tf.random.set_seed(2)
 import argparse
 from pathlib import Path
 
@@ -12,8 +19,6 @@ from cenfind.experiments.constants import PREFIX_REMOTE
 from cenfind.experiments.constants import datasets as std_ds
 
 tf.get_logger().setLevel('ERROR')
-## GLOBAL SEED ##
-tf.random.set_seed(3)
 
 
 def get_args():
