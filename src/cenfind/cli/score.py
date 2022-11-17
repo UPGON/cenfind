@@ -111,14 +111,15 @@ def main():
                 background = create_vignette(field, marker_index=ch, nuclei_index=args.channel_nuclei)
                 for focus in foci:
                     background = focus.draw(background, annotation=False)
-                # for nucleus in nuclei:
-                #     background = nucleus.draw(background, annotation=False)
-                # for n_pos, c_pos in assigned:
-                #     for sub_c in c_pos:
-                #         if sub_c:
-                #             cv2.arrowedLine(background, sub_c.to_cv2(), n_pos.centre.to_cv2(), color=(0, 255, 0),
-                #                             thickness=1)
-                tf.imwrite(args.path / 'visualisations' / f"{field.name}_C{ch}_pred.png", background)
+                for nucleus in nuclei:
+                    background = nucleus.draw(background, annotation=False)
+                for n_pos, c_pos in assigned:
+                    nuc = Centre(n_pos, label='Nucleus')
+                    for sub_c in c_pos:
+                        if sub_c:
+                            cv2.arrowedLine(background, sub_c.to_cv2(), nuc.to_cv2(), color=(0, 255, 0),
+                                            thickness=1)
+                tf.imwrite(dataset.visualisation / f"{field.name}_C{ch}_pred.png", background)
 
     flattened = [leaf for tree in scores for leaf in tree]
 
