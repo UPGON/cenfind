@@ -72,11 +72,16 @@ def assign(foci: list, nuclei: list, vicinity: float, pixel_size: float) -> list
     while len(_foci):
         f = _foci.pop()
         centrosome = f.parent
+        dists = []
         for n in _nuclei:
             nuclei_pos = tuple(n.centre.to_numpy())
             dist = signed_distance(centrosome, n)
-            if dist > vicinity_pixel:
-                container[nuclei_pos].append(f)
+            dists.append((nuclei_pos, dist))
+        nuclei_pos_nearest = min(dists, key=lambda t: t[1])
+        min_dist, nearest_nucleus = nuclei_pos_nearest
+        if min_dist > vicinity_pixel:
+            container[nearest_nucleus].append(f)
+            break
 
     pairs = [(k, v) for k, v in container.items()]
 
