@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cenfind"
-version = "0.8.0"
+version = "0.9.0"
 description = "Score centrioles in fluorescence images"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
 repository = "https://github.com/UPGON/cenfind"

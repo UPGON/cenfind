@@ -72,7 +72,7 @@ Before scoring the cells, you need to prepare the dataset folder. `cenfind` assu
 ```
 2. Run `setup` to initialise the folder with a list of fields and output folders:
 ```shell
-setup /path/to/dataset <list channels of centrioles, like 1 2 3, (0 should be the nucleus channel)>
+prepare /path/to/dataset <list channels of centrioles, like 1 2 3, (0 should be the nucleus channel)>
 ```
 
 2. Run `squash` with the argument of the path to the project folder and the suffix of the raw files. `projections/` is populated with the max-projections `*_max.tif` files.
@@ -86,12 +86,6 @@ score /path/to/dataset ./model/master/ 0 1 2 3 --projection_suffix '_max'
 ```
 
 4. Check that the predictions are satisfactory by looking at the folder `outlines` and at the results/scores.csv.
-
-## Training the model
-
-- Declare the train/test split which will be used to define which images are never used as training instances (
-  scripts/train_test.py).
-- TODO
 
 ## API
 
