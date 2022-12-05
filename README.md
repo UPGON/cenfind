@@ -49,6 +49,7 @@ Before scoring the cells, you need to prepare the dataset folder. `cenfind` assu
 2. Run `prepare` to initialise the folder with a list of fields and output folders:
 ```shell
 prepare /path/to/dataset 1 2 3 [--pixel_size, [--projection_suffix]]
+prepare /path/to/dataset <list channels of centrioles, like 1 2 3, (0 should be the nucleus channel)>
 ```
 
 2. Run `squash` with the argument of the path to the project folder and the suffix of the raw files. `projections/` is populated with the max-projections `*_max.tif` files.

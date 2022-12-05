@@ -10,7 +10,7 @@ def get_args():
     parser.add_argument('path', type=Path,
                         help='Path to the dataset')
     parser.add_argument('channels', type=int, nargs='+',
-                        help='Channel indices to evaluate often ` 1 2 3`')
+                        help='Channel indices of centriolar markers to evaluate; often ` 1 2 3`.')
     parser.add_argument('--pixel_size', type=float,
                         default=.1025,
                         help='Pixel size in um, default `.1025`')

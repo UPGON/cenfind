@@ -38,16 +38,16 @@ def get_args():
 
     parser.add_argument('channel_nuclei',
                         type=int,
-                        help='channel id for nuclei segmentation, e.g., 0 or 3')
+                        help='Channel index for nuclei segmentation, e.g., 0 or 3')
 
     parser.add_argument('channels',
                         nargs='+',
                         type=int,
-                        help='channels to analyse, e.g., 1 2 3')
+                        help='Channel indices to analyse, e.g., 1 2 3')
 
     parser.add_argument('factor',
                         type=int,
-                        help='factor to use: given a 2048x2048 image, if 63x: 256; if 20x: 2048')
+                        help='Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:')
 
     parser.add_argument('--model',
                         type=Path,
@@ -56,13 +56,12 @@ def get_args():
     parser.add_argument('--vicinity',
                         type=int,
                         default=-5,
-                        help='distance threshold in micrometer (default: -5 um)')
+                        help='Distance threshold in micrometer (default: -5 um)')
 
     parser.add_argument('--projection_suffix',
                         type=str,
                         default='_max',
-                        help='the suffix indicating projection, e.g., `_max` or `_Projected`, if not specified, set to _max')
-
+                        help='Projection suffix (`_max` (default) or `_Projected`')
     args = parser.parse_args()
 
     if args.channel_nuclei in set(args.channels):

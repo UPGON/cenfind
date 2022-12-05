@@ -25,7 +25,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('model',
                         type=Path,
-                        help='Path to the model, e.g., <project>/models/master')
+                        help='Path to the model, e.g., <project>/models/master_20221123')
     parser.add_argument('dst',
                         type=Path,
                         help='Path to the destination file')

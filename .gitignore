@@ -2,7 +2,6 @@
 
 .DS_Store
 .python-version
-poetry.lock
 
 .ipynb_checkpoints/
 .idea/
@@ -16,7 +15,7 @@ logs/
 out/
 data/
 models/*
-!models/master/
+!models/archives/master_20221123/
 /src/centrosome_analysis/
 
 *.idlk
