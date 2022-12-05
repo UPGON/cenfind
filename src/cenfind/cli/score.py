@@ -34,11 +34,7 @@ def get_args():
 
     parser.add_argument('path',
                         type=Path,
-                        help='path to the ds')
-
-    parser.add_argument('model',
-                        type=Path,
-                        help='absolute path to the model folder')
+                        help='Path to the dataset')
 
     parser.add_argument('channel_nuclei',
                         type=int,
@@ -52,6 +48,11 @@ def get_args():
     parser.add_argument('factor',
                         type=int,
                         help='factor to use: given a 2048x2048 image, if 63x: 256; if 20x: 2048')
+
+    parser.add_argument('--model',
+                        type=Path,
+                        help='absolute path to the model folder')
+
     parser.add_argument('--vicinity',
                         type=int,
                         default=-5,
@@ -61,10 +62,11 @@ def get_args():
                         type=str,
                         default='_max',
                         help='the suffix indicating projection, e.g., `_max` or `_Projected`, if not specified, set to _max')
+
     args = parser.parse_args()
 
     if args.channel_nuclei in set(args.channels):
-        raise ValueError('Nuclei channel cannot present in channels')
+        raise ValueError('Nuclei channel cannot be present in channels')
 
     if not args.model.exists():
         raise FileNotFoundError(f"{args.model} does not exist")
@@ -88,6 +90,10 @@ def main():
 
     dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
     model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
+    if args.model:
+        model_path = args.model
+    else:
+        model_path = 'models/master'
 
     scores = []
     pbar = tqdm(dataset.pairs())
@@ -96,7 +102,7 @@ def main():
         for ch in args.channels:
             foci, nuclei, assigned, score = field_score(field=field,
                                                         model_nuclei=model_stardist,
-                                                        model_foci=args.model,
+                                                        model_foci=model_path,
                                                         nuclei_channel=args.channel_nuclei,
                                                         factor=args.factor,
                                                         vicinity=args.vicinity,
