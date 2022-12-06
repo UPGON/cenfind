@@ -66,6 +66,7 @@ def get_args():
 
     if args.channel_nuclei in set(args.channels):
         raise ValueError('Nuclei channel cannot present in channels')
+
     if args.model is None:
         args.model = 'models/master'
     else:
