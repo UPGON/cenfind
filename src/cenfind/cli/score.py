@@ -36,8 +36,9 @@ def get_args():
                         type=Path,
                         help='Path to the dataset')
 
-    parser.add_argument('model',
+    parser.add_argument('--model',
                         type=Path,
+                        default='models/master',
                         help='Absolute path to the model folder')
 
     parser.add_argument('channel_nuclei',
@@ -65,9 +66,11 @@ def get_args():
 
     if args.channel_nuclei in set(args.channels):
         raise ValueError('Nuclei channel cannot present in channels')
-
-    if not args.model.exists():
-        raise FileNotFoundError(f"{args.model} does not exist")
+    if args.model is None:
+        args.model = 'models/master'
+    else:
+        if not Path(args.model).exists():
+            raise FileNotFoundError(f"{args.model} does not exist")
 
     return args
 
