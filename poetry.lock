@@ -805,13 +805,12 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
-name = "spotipy"
+name = "spotipy-detector"
 version = "0.1.0"
-description = ""
+description = "Accurate and efficient spot detection with CNNs"
 category = "main"
 optional = false
 python-versions = ">=3.6"
-develop = false
 
 [package.dependencies]
 csbdeep = "*"
@@ -823,11 +822,8 @@ stardist = "*"
 tifffile = "*"
 tqdm = "*"
 
-[package.source]
-type = "git"
-url = "https://git@github.com/maweigert/spotipy.git"
-reference = "HEAD"
-resolved_reference = "5a98e1e5112689cd6828deb80af07ab5f9435571"
+[package.extras]
+testing = ["pytest", "pytest-cov", "pytest-mock", "tox"]
 
 [[package]]
 name = "stardist"
@@ -1089,7 +1085,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.10"
-content-hash = "4ad215c9634a76044e1e6c6c0f31ebe963965f255b39c05b70c39f55079cbf22"
+content-hash = "f184a662740fe9b1c151655fc1b22e2b10b5b1d5ebf82c26f7b8bea6a3658d54"
 
 [metadata.files]
 absl-py = [
@@ -1983,7 +1979,10 @@ six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
-spotipy = []
+spotipy-detector = [
+    {file = "spotipy-detector-0.1.0.tar.gz", hash = "sha256:fa41bfe38ed98bf9445191f69bfb5bc49359b1fbce27952d7a201197c68ff342"},
+    {file = "spotipy_detector-0.1.0-py3-none-any.whl", hash = "sha256:c8ffd7e4fe8eafc65701b16ed86477fc4efa7358f297bd93c315cceae3438597"},
+]
 stardist = [
     {file = "stardist-0.8.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0682681d302e0a008339242b7970c8b53d6fba174caf70adbcedb1101b68f7a6"},
     {file = "stardist-0.8.3-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:495a28eca29c1f3e00ea77d508bffc73e4b54788814d292d11ce5a5cf346bdaf"},
