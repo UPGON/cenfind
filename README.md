@@ -48,15 +48,34 @@ prepare /path/to/dataset <list channels of centrioles, like 1 2 3, (if 0 is the 
 
 2. Run `squash` with the argument of the path to the project folder and the suffix of the raw files. `projections/` is populated with the max-projections `*_max.tif` files.
 ```shell
-squash path/to/dataset .ome.tif
+squash path/to/dataset
 ```
 
-3. Run `score` with the arguments source and the index of the nuclei channel (usually 0 or 3).
+3. Run `score` with the arguments source, the index of the nuclei channel (usually 0 or 3), the channel to score and the path to the model. You need to download it from https://figshare.com/articles/software/Cenfind_model_weights/21724421
 ```shell
-score /path/to/dataset ./model/master/ 0 1 2 3 --projection_suffix '_max'
+score /path/to/dataset 0 1 2 3 /path/to/model/ --projection_suffix '_max'
 ```
 
-4. Check that the predictions are satisfactory by looking at the folder `visualisation` and under `statistics/`
+For reference:
+```shell
+score -h
+CENFIND: Automatic centriole scoring
+
+positional arguments:
+  path                  Path to the dataset
+  model                 Absolute path to the model folder
+  channel_nuclei        Channel index for nuclei segmentation, e.g., 0 or 3
+  channels              Channel indices to analyse, e.g., 1 2 3
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --vicinity VICINITY   Distance threshold in micrometer (default: -5 um)
+  --factor FACTOR       Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:
+  --projection_suffix PROJECTION_SUFFIX
+                        Projection suffix (`_max` (default) or `_Projected`
+```
+
+4. Check that the predictions are satisfactory by looking at the folders `visualisation/` and `statistics/`
 
 ## API
 
