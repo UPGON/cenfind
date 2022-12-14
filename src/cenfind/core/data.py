@@ -1,6 +1,7 @@
 import itertools
 import random
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Union
@@ -26,7 +27,10 @@ class Field:
 
     @property
     def stack(self) -> np.ndarray:
-        data = tf.imread(str(self.dataset.path / 'raw' / f"{self.name}.ome.tif"))
+        if not self.dataset.raw.exists():
+            print(f'The path {self.dataset.raw} does not exist')
+            sys.exit()
+        data = tf.imread(str(self.dataset.raw / f"{self.name}.ome.tif"))
         axes_order = self._axes_order()
         if axes_order == "ZCYX":
             data = np.swapaxes(data, 0, 1)
@@ -36,7 +40,9 @@ class Field:
     def projection(self) -> np.ndarray:
         path_projection = self.dataset.path / 'projections' / f"{self.name}{self.dataset.projection_suffix}.tif"
 
-        return tf.imread(str(path_projection))
+        with tf.TiffFile(str(path_projection)) as tif:
+            res = tif.asarray()
+        return res
 
     def channel(self, channel: int) -> np.ndarray:
         return self.projection[channel, :, :]
@@ -145,7 +151,12 @@ class Dataset:
     def write_projections(self, axis=1):
         for field in tqdm(self.fields):
             projection = field.stack.max(axis)
-            tf.imwrite(self.projections / f"{field.name}_max.tif", projection)
+            tf.imwrite(self.projections / f"{field.name}{self.projection_suffix}.tif",
+                       projection,
+                       photometric='minisblack',
+                       imagej=True,
+                       resolution=(1 / self.pixel_size, 1 / self.pixel_size),
+                       metadata={'unit': 'um'})
 
     def write_train_test(self, channels: list):
         train_fields, test_fields = split_pairs(self.fields, p=.9)
@@ -192,5 +203,4 @@ def split_pairs(fields: list[Field], p=.9) -> tuple[list[Field], list[Field]]:
 
 def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
     """Assign channel to field."""
-
     return [(field, int(channel)) for field, channel in itertools.product(fields, channels)]

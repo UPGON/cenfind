@@ -12,6 +12,11 @@ class TestData:
     projection = field.projection
     channel = field.channel(1)
 
+    def test_write_projections(self):
+        self.dataset.write_projections()
+        projection = self.field.projection
+        assert projection.shape == (4, 2048, 2048)
+
     def test_field(self):
         assert self.field.name == self.field_name
 
