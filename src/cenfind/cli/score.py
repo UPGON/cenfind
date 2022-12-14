@@ -94,8 +94,8 @@ def main():
     model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
 
     scores = []
-    pbar = tqdm(dataset.pairs())
-    for field, _ in pbar:
+    pbar = tqdm(dataset.fields)
+    for field in pbar:
         pbar.set_description(f"{field.name}")
         for ch in args.channels:
             foci, nuclei, assigned, score = field_score(field=field,
@@ -108,7 +108,7 @@ def main():
             predictions_path = dataset.predictions / 'centrioles' / f"{field.name}{args.projection_suffix}_C{ch}.txt"
             save_foci(foci, predictions_path)
 
-            pbar.set_postfix({'nuclei': len(nuclei), 'foci': len(foci)})
+            pbar.set_postfix({'field': field.name, 'channel': ch, 'nuclei': len(nuclei), 'foci': len(foci)})
             scores.append(score)
 
             if visualisation:

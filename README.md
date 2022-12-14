@@ -1,4 +1,4 @@
-# cenfind
+# CenFind
 
 A command line interface to score cells for centrioles.
 
@@ -14,70 +14,41 @@ A command line interface to score cells for centrioles.
 ## Installation
 1. Install python via pyenv
 2. Download and set up 3.9.5 as local version
-3. Install poetry, system-wide with `pip install poetry`
-
-Check that you're at the correct location (a simple and recommended location
-is `cd ~`, i.e., your home folder).
-
-4. Download `cenfind` with:
-
+3. Set up Python interpreter
 ```shell
-git clone git@github.com:UPGON/cenfind.git
-git clone git@github.com:maweigert/spotipy.git
+pyenv local 3.9.5
+pyenv global 3.9.5
+```
+4. Create a virtual environment for CenFind
+```shell
+python -m venv venv-cenfind
+source venv-cenfind/bin/activate
 ```
 
-5. As of now, you need to install the spotipy package from the git repository https://github.com/maweigert/spotipy:
-   !!! You need to have access to this private repo; contact Leo for setting up the permission.
-
-```shell
-cd cenfind
-```
-6. Activate the virtual environment using poetry
-```shell
-poetry shell
-```
-Your prompt should now be prepended with `(cenfind-py3.9)`.
-
-Note: if your python version is not supported, install the one recommended with pyenv, the set it up and run `poetry env use $(which python)`. Then, repeat the step. 
-
-6. Add the programs `squash` and `score` to the PATH with the following commands, so that they can be run from the command line, without the need to type the whole path.
-
-```shell
-poetry install
-```
-
-6. Add manually the package spotipy
-```shell
-pip install -e ../spotipy/
-```
-
-7. Check that `cenfind`'s programs are correctly installed by running:
+5. Check that `cenfind`'s programs are correctly installed by running:
 
 ```shell
 squash --help
 ```
 
-8. In case of updates, get the last version:
-
-```shell
-git pull
-poetry install
-```
-
 ## Basic usage
-Before scoring the cells, you need to prepare the dataset folder. `cenfind` assumes a fixed folder structure. In the following we will assume that the .ome.tif files are all immediately in raw/. Each field of view is a z-stack containing 4 channels (0, 1, 2, 3). The channel 0 contains the nuclei and the channels 1-3 contains centriolar markers.
+Before scoring the cells, you need to prepare the dataset folder. 
+`cenfind` assumes a fixed folder structure. 
+In the following we will assume that the .ome.tif files are all immediately in raw/. 
+Each field of view is a z-stack containing 4 channels (0, 1, 2, 3). The channel 0 contains the nuclei and the channels 1-3 contains centriolar markers.
+
 ```text
 <project_name>/
 └── raw/
 ```
-2. Run `setup` to initialise the folder with a list of fields and output folders:
+2. Run `prepare` to initialise the folder with a list of fields and output folders:
 ```shell
-prepare /path/to/dataset <list channels of centrioles, like 1 2 3, (0 should be the nucleus channel)>
+prepare /path/to/dataset <list channels of centrioles, like 1 2 3, (if 0 is the nucleus channel)>
 ```
 
 2. Run `squash` with the argument of the path to the project folder and the suffix of the raw files. `projections/` is populated with the max-projections `*_max.tif` files.
 ```shell
-squash path/to/ds .ome.tif
+squash path/to/dataset .ome.tif
 ```
 
 3. Run `score` with the arguments source and the index of the nuclei channel (usually 0 or 3).
@@ -85,7 +56,7 @@ squash path/to/ds .ome.tif
 score /path/to/dataset ./model/master/ 0 1 2 3 --projection_suffix '_max'
 ```
 
-4. Check that the predictions are satisfactory by looking at the folder `outlines` and at the results/scores.csv.
+4. Check that the predictions are satisfactory by looking at the folder `visualisation` and under `statistics/`
 
 ## API
 
