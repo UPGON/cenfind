@@ -7,6 +7,7 @@ import tensorflow as tf
 tf.random.set_seed(2)
 import argparse
 import logging
+import sys
 from pathlib import Path
 
 import cv2
@@ -36,6 +37,10 @@ def get_args():
                         type=Path,
                         help='Path to the dataset')
 
+    parser.add_argument('model',
+                        type=Path,
+                        help='Absolute path to the model folder')
+
     parser.add_argument('channel_nuclei',
                         type=int,
                         help='Channel index for nuclei segmentation, e.g., 0 or 3')
@@ -45,29 +50,28 @@ def get_args():
                         type=int,
                         help='Channel indices to analyse, e.g., 1 2 3')
 
-    parser.add_argument('factor',
-                        type=int,
-                        help='Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:')
-
-    parser.add_argument('--model',
-                        type=Path,
-                        help='absolute path to the model folder')
 
     parser.add_argument('--vicinity',
                         type=int,
                         default=-5,
                         help='Distance threshold in micrometer (default: -5 um)')
 
+    parser.add_argument('--factor',
+                        type=int,
+                        default=256,
+                        help='Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:')
+
     parser.add_argument('--projection_suffix',
                         type=str,
                         default='_max',
                         help='Projection suffix (`_max` (default) or `_Projected`')
+
     args = parser.parse_args()
 
     if args.channel_nuclei in set(args.channels):
-        raise ValueError('Nuclei channel cannot be present in channels')
+        raise ValueError('Nuclei channel cannot be in channels')
 
-    if not args.model.exists():
+    if not Path(args.model).exists():
         raise FileNotFoundError(f"{args.model} does not exist")
 
     return args
@@ -88,20 +92,26 @@ def main():
     visualisation = True
 
     dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
+
+    channels, width, height = dataset.fields[0].projection.shape
+    if args.channel_nuclei not in range(channels):
+        print(f"Index for nuclei ({args.channel_nuclei}) out of index range")
+        sys.exit()
+
+    if not set(args.channels).issubset(set(range(channels))):
+        print(f"Channels ({args.channels}) out of channel range {set(range(channels))}")
+        sys.exit()
+
     model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
-    if args.model:
-        model_path = args.model
-    else:
-        model_path = 'models/master'
 
     scores = []
-    pbar = tqdm(dataset.pairs())
-    for field, _ in pbar:
+    pbar = tqdm(dataset.fields)
+    for field in pbar:
         pbar.set_description(f"{field.name}")
         for ch in args.channels:
             foci, nuclei, assigned, score = field_score(field=field,
                                                         model_nuclei=model_stardist,
-                                                        model_foci=model_path,
+                                                        model_foci=args.model,
                                                         nuclei_channel=args.channel_nuclei,
                                                         factor=args.factor,
                                                         vicinity=args.vicinity,
@@ -109,7 +119,7 @@ def main():
             predictions_path = dataset.predictions / 'centrioles' / f"{field.name}{args.projection_suffix}_C{ch}.txt"
             save_foci(foci, predictions_path)
 
-            pbar.set_postfix({'nuclei': len(nuclei), 'foci': len(foci)})
+            pbar.set_postfix({'field': field.name, 'channel': ch, 'nuclei': len(nuclei), 'foci': len(foci)})
             scores.append(score)
 
             if visualisation:

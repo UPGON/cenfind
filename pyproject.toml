@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cenfind"
-version = "0.9.3"
+version = "0.9.8"
 description = "Score cells for centrioles in IF data"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
 repository = "https://github.com/UPGON/cenfind"
@@ -19,11 +19,11 @@ pytomlpp = "^1.0.10"
 imageio = "^2.16.0"
 scikit-image = "^0.19.2"
 pandas = "^1.4.1"
-tensorflow = "^2.8.0"
 scipy = "^1.7.1"
 csbdeep = "^0.6.3"
 stardist = "^0.8.3"
 scikit-learn = "^1.1.3"
+tensorflow = "^2.11.0"
 spotipy-detector = "^0.1.0"
 
 [tool.poetry.scripts]
