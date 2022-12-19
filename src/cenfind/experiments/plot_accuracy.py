@@ -1,8 +1,8 @@
+import re
 import matplotlib
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from cenfind.core.data import extract_info
 from cenfind.experiments.constants import datasets, pattern_dataset, protein_names, celltype_names
 
 font = {'size': 6}
@@ -10,6 +10,13 @@ matplotlib.rc('font', **font)
 
 matplotlib.use("Agg")
 
+def extract_info(pattern: re, dataset_name: str):
+    res = re.match(pattern, dataset_name)
+    res_dict = res.groupdict()
+    markers = res_dict['markers'].split('+')
+    res_dict['markers'] = tuple(markers)
+
+    return res_dict
 
 def _setup_ax(ax):
     ax.set_ylim(0, 1)
