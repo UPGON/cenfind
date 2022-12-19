@@ -8,7 +8,10 @@ from spotipy.utils import points_matching
 
 from cenfind.core.data import Field
 from cenfind.core.outline import Centre
-from cenfind.core.helpers import blob2point
+
+def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
+    res = (int(keypoint.pt[1]), int(keypoint.pt[0]))
+    return res
 
 
 def log_skimage(data: Field, channel: int, **kwargs) -> list:

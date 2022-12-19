@@ -12,10 +12,31 @@ from stardist.models import StarDist2D
 
 from cenfind.core.data import Dataset, Field
 from cenfind.core.detectors import extract_foci, extract_nuclei
-from cenfind.core.helpers import signed_distance, full_in_field
-from cenfind.core.outline import Centre, draw_foci
+from cenfind.core.outline import Centre, draw_foci, Contour
+
+import cv2
 
 
+def signed_distance(focus: Centre, nucleus: Contour) -> float:
+    """Wrapper for the opencv PolygonTest"""
+
+    result = cv2.pointPolygonTest(nucleus.contour,
+                                  focus.to_cv2(),
+                                  measureDist=True)
+    return result
+
+
+def full_in_field(coordinate, image_shape, fraction) -> bool:
+    h, w = image_shape
+    pad_lower = int(fraction * h)
+    pad_upper = h - pad_lower
+    if all([pad_lower < c < pad_upper for c in coordinate]):
+        return True
+    return False
+
+
+def flag(is_full: bool) -> tuple:
+    return (0, 255, 0) if is_full else (0, 0, 255)
 def infer_centrosomes(foci: list, img_shape: tuple, distance=.6) -> list:
     """
     Add centrosome to a list of foci.

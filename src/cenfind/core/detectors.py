@@ -2,6 +2,7 @@ import contextlib
 import os
 from pathlib import Path
 from typing import Tuple, List
+import functools
 
 import cv2
 import numpy as np
@@ -10,9 +11,17 @@ from spotipy.utils import normalize_fast2d
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Field
-from cenfind.core.helpers import get_model
-from cenfind.core.helpers import resize_image
+from cenfind.core.outline import resize_image
 from cenfind.core.outline import Centre, Contour
+
+
+@functools.lru_cache(maxsize=None)
+def get_model(model):
+    path = Path(model)
+    if not path.is_dir():
+        raise (FileNotFoundError(f"{path} is not a directory"))
+
+    return SpotNet(None, name=path.name, basedir=str(path.parent))
 
 
 def extract_foci(data: Field,

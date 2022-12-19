@@ -90,6 +90,17 @@ class Contour(ROI):
         return image
 
 
+def resize_image(data, factor=256):
+    height, width = data.shape
+    shrinkage_factor = int(height // factor)
+    height_scaled = int(height // shrinkage_factor)
+    width_scaled = int(width // shrinkage_factor)
+    data_resized = cv2.resize(data,
+                              dsize=(height_scaled, width_scaled),
+                              fx=1, fy=1,
+                              interpolation=cv2.INTER_NEAREST)
+    return data_resized
+
 def draw_foci(data: np.ndarray, foci: list[Centre], radius=.4, pixel_size=.1025) -> np.ndarray:
     mask = np.zeros(data.shape, dtype='uint8')
     for f in foci:
