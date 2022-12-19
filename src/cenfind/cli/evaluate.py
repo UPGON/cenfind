@@ -15,24 +15,22 @@ from tqdm import tqdm
 
 from cenfind.core.data import Dataset
 from cenfind.core.measure import dataset_metrics
-from cenfind.experiments.constants import PREFIX_REMOTE
-from cenfind.experiments.constants import datasets as std_ds
 
 tf.get_logger().setLevel('ERROR')
 
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('datasets',
+                        type=Path,
+                        nargs='+',
+                        help='Path to the dataset folder, can be one or more')
     parser.add_argument('model',
                         type=Path,
                         help='Path to the model, e.g., <project>/models/master_20221123')
-    parser.add_argument('dst',
+    parser.add_argument('--performances_file',
                         type=Path,
-                        help='Path to the destination file')
-    parser.add_argument('--datasets',
-                        type=Path,
-                        nargs='+',
-                        help='Path to the dataset folder, can be one or more, if not provided, fall back to use the standard datasets')
+                        help='Path to the destination file for performances')
     parser.add_argument('--tolerance',
                         type=int,
                         nargs='+',
@@ -48,8 +46,13 @@ def get_args():
 def main():
     args = get_args()
     tolerance = args.tolerance
+    if tolerance is None:
+        tolerance = [2]
     _thresholds = args.thresholds
-    dst = Path(args.dst)
+    if args.performances_file is None:
+        dst = Path('./performances.csv')
+    else:
+        dst = Path(args.performances_file)
     while dst.exists():
         answer = input(f'Do you want to overwrite {dst}? [yn]: ')
         if answer == 'y':
@@ -68,14 +71,11 @@ def main():
     else:
         thresholds = [.5]
 
-    if args.datasets is None:
-        datasets = std_ds
-    else:
-        datasets = args.datasets
+    datasets = args.datasets
 
     print(tolerance)
 
-    datasets = [Dataset(PREFIX_REMOTE / d) for d in datasets]
+    datasets = [Dataset(d) for d in datasets]
 
     performances = []
     p_bar = tqdm(datasets)
