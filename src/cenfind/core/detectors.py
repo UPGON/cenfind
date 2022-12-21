@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 from csbdeep.utils import normalize
 from spotipy.utils import normalize_fast2d
+from spotipy.model import SpotNet
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Field

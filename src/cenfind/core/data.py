@@ -1,6 +1,5 @@
 import itertools
 import random
-import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -11,26 +10,24 @@ import tifffile as tf
 from tqdm import tqdm
 
 
-def extract_info(pattern: re, dataset_name: str):
-    res = re.match(pattern, dataset_name)
-    res_dict = res.groupdict()
-    markers = res_dict['markers'].split('+')
-    res_dict['markers'] = tuple(markers)
-
-    return res_dict
-
-
 @dataclass
 class Field:
     name: str
     dataset: 'Dataset'
 
+    def __post_init__(self):
+        self.file_name = f"{self.name}{self.dataset.projection_suffix}.tif"
+
     @property
     def stack(self) -> np.ndarray:
-        if not self.dataset.raw.exists():
-            print(f'The path {self.dataset.raw} does not exist')
+        path_file = str(self.dataset.raw / f"{self.name}.ome.tif")
+
+        try:
+            data = tf.imread(path_file)
+        except FileNotFoundError:
+            print(f"File not found ({path_file})")
             sys.exit()
-        data = tf.imread(str(self.dataset.raw / f"{self.name}.ome.tif"))
+
         axes_order = self._axes_order()
         if axes_order == "ZCYX":
             data = np.swapaxes(data, 0, 1)
@@ -38,11 +35,12 @@ class Field:
 
     @property
     def projection(self) -> np.ndarray:
-        path_projection = self.dataset.path / 'projections' / f"{self.name}{self.dataset.projection_suffix}.tif"
-
-        with tf.TiffFile(str(path_projection)) as tif:
-            res = tif.asarray()
-        return res
+        path_projection = self.dataset.projections / self.file_name
+        try:
+            res = tf.imread(str(path_projection))
+            return res
+        except FileNotFoundError:
+            print(f"File not found ({path_projection}).")
 
     def channel(self, channel: int) -> np.ndarray:
         return self.projection[channel, :, :]
@@ -57,11 +55,11 @@ class Field:
         """
         name = f"{self.name}{self.dataset.projection_suffix}_C{channel}"
         path_annotation = self.dataset.path / 'annotations' / 'centrioles' / f"{name}.txt"
-        if path_annotation.exists():
+        try:
             annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=',')
             return annotation[:, [1, 0]]
-        else:
-            raise FileNotFoundError(f"{path_annotation}")
+        except FileNotFoundError:
+            print(f"No annotation found for {path_annotation}")
 
     def mask(self, channel) -> np.ndarray:
         mask_name = f"{self.name}{self.dataset.projection_suffix}_C{channel}.tif"
@@ -95,11 +93,16 @@ class Dataset:
     image_type: str = '.ome.tif'
     projection_suffix: str = '_max'
     pixel_size: float = .1025
+    has_projections: bool = False
+    is_setup: bool = False
 
     def __post_init__(self):
         self.path = Path(self.path)
-        if not self.path.exists():
-            raise FileNotFoundError(self.path)
+
+        if not self.path.is_dir():
+            print(f"Dataset does not exist ({self.path})")
+            sys.exit()
+
         self.raw = self.path / 'raw'
         self.projections = self.path / 'projections'
         self.predictions = self.path / 'predictions'
@@ -107,8 +110,28 @@ class Dataset:
         self.statistics = self.path / 'statistics'
         self.vignettes = self.path / 'vignettes'
 
+        self.has_projections = bool(len([f for f in self.projections.iterdir()]))
+
+    def setup(self) -> None:
+        """
+        Create folders for projections, predictions, statistics, visualisation and vignettes.
+        Collect field names into fields.txt
+        """
+        self.projections.mkdir(exist_ok=True)
+        self.predictions.mkdir(exist_ok=True)
+        (self.predictions / 'centrioles').mkdir(exist_ok=True)
+        (self.predictions / 'nuclei').mkdir(exist_ok=True)
+        self.statistics.mkdir(exist_ok=True)
+        self.visualisation.mkdir(exist_ok=True)
+        self.vignettes.mkdir(exist_ok=True)
+
+        self.is_setup = True
+
     @property
-    def fields(self):
+    def fields(self) -> List[Field]:
+        """
+        Construct a list of Fields using the fields listed in fields.txt.
+        """
         fields_path = self.path / 'fields.txt'
         with open(fields_path, 'r') as f:
             fields_list = f.read().splitlines()
@@ -127,28 +150,29 @@ class Dataset:
         else:
             return self.read_split(split, channel_id)
 
-    def write_fields(self):
+    def _field_name(self, file_name: str):
+        return file_name.split('.')[0].rstrip(self.projection_suffix)
+
+    def write_fields(self) -> None:
         """
         Write field names to fields.txt.
         """
-        if (self.path / 'raw').exists():
-            folder = self.path / 'raw'
-        elif (self.path / 'projections').exists():
-            folder = self.path / 'projections'
-        else:
-            raise FileNotFoundError(self.path)
+        if not self.is_setup:
+            self.setup()
 
-        fields = []
-        for f in folder.iterdir():
-            if f.name.startswith('.'):
-                continue
-            fields.append(f.name.split('.')[0].rstrip(self.projection_suffix))
+        if self.has_projections:
+            folder = self.projections
+        else:
+            folder = self.raw
+
+        fields = [self._field_name(str(f)) for f in folder.iterdir() if not str(f).startswith('.')]
+
 
         with open(self.path / 'fields.txt', 'w') as f:
             for field in fields:
                 f.write(field + '\n')
 
-    def write_projections(self, axis=1):
+    def write_projections(self, axis=1) -> None:
         for field in tqdm(self.fields):
             projection = field.stack.max(axis)
             tf.imwrite(self.projections / f"{field.name}{self.projection_suffix}.tif",
@@ -157,6 +181,7 @@ class Dataset:
                        imagej=True,
                        resolution=(1 / self.pixel_size, 1 / self.pixel_size),
                        metadata={'unit': 'um'})
+        self.has_projections = True
 
     def write_train_test(self, channels: list):
         train_fields, test_fields = split_pairs(self.fields, p=.9)
@@ -182,16 +207,17 @@ class Dataset:
             return [(Field(str(f[0]), self), int(f[1])) for f in files]
 
 
-def split_pairs(fields: list[Field], p=.9) -> tuple[list[Field], list[Field]]:
+def split_pairs(fields: list[Field], p=.9, seed=1993) -> tuple[list[Field], list[Field]]:
     """
     Split a list of pairs (field, channel).
 
     :param fields
     :param p the train proportion, default to .9
+    :param seed the seed to reproduce the splitting
     :return train_split, test_split
     """
 
-    random.seed(1993)
+    random.seed(seed)
     size = len(fields)
     split_idx = int(p * size)
     shuffled = random.sample(fields, k=size)
@@ -202,5 +228,5 @@ def split_pairs(fields: list[Field], p=.9) -> tuple[list[Field], list[Field]]:
 
 
 def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
-    """Assign channel to field."""
+    """Pick a channel for each field."""
     return [(field, int(channel)) for field, channel in itertools.product(fields, channels)]
