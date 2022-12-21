@@ -18,12 +18,15 @@ def get_args():
 def main():
     args = get_args()
     dataset = Dataset(args.path)
-    if len([f for f in dataset.projections.iterdir()]):
+
+    if dataset.has_projections:
         print(f"Projections already exists, squashing aborted.")
         sys.exit()
+
     if not dataset.raw.exists():
         print(f"raw folder not found.")
         sys.exit()
+
     dataset.write_projections()
 
 
