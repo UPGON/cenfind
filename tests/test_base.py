@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from cenfind.core.data import Dataset, Field
 
 
@@ -11,6 +13,10 @@ class TestData:
     stack = field.stack
     projection = field.projection
     channel = field.channel(1)
+
+    def test_write_fields(self):
+        self.dataset.write_fields()
+        assert (self.dataset.path / 'fields.txt').is_file() == True
 
     def test_write_projections(self):
         self.dataset.write_projections()
@@ -38,3 +44,10 @@ class TestData:
     def test_channel(self):
         assert self.channel.shape == (2048, 2048)
         assert self.dataset == self.dataset
+
+class TestDataNotExisting:
+    path_dataset = Path('/not/existing')
+
+    def test_dataset_initialisation(self):
+        with pytest.raises(SystemExit):
+            Dataset(self.path_dataset)
