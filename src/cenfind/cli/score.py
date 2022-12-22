@@ -50,7 +50,6 @@ def get_args():
                         type=int,
                         help='Channel indices to analyse, e.g., 1 2 3')
 
-
     parser.add_argument('--vicinity',
                         type=int,
                         default=-5,
