@@ -53,7 +53,7 @@ squash path/to/dataset
 
 3. Run `score` with the arguments source, the index of the nuclei channel (usually 0 or 3), the channel to score and the path to the model. You need to download it from https://figshare.com/articles/software/Cenfind_model_weights/21724421
 ```shell
-score /path/to/dataset 0 1 2 3 /path/to/model/ --projection_suffix '_max'
+score /path/to/dataset /path/to/model/ 0 1 2 3 --projection_suffix '_max'
 ```
 
 For reference:
