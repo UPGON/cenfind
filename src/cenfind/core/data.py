@@ -165,7 +165,7 @@ class Dataset:
         else:
             folder = self.raw
 
-        fields = [self._field_name(str(f)) for f in folder.iterdir() if not str(f).startswith('.')]
+        fields = [self._field_name(str(f.name)) for f in folder.iterdir() if not str(f).startswith('.')]
 
 
         with open(self.path / 'fields.txt', 'w') as f:
