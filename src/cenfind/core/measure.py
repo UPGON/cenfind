@@ -75,6 +75,8 @@ def assign(foci: list, nuclei: list, vicinity: float, pixel_size: float) -> list
     :return: List[Tuple[Centre, Contour]]
 
     """
+    if len(nuclei) == 0:
+        raise ValueError('foci is an empty list')
     _foci = foci.copy()
     _nuclei = nuclei.copy()
 
@@ -130,6 +132,8 @@ def field_score(field: Field,
 
     image_shape = field.projection.shape[1:]
     centres, nuclei = extract_nuclei(field, nuclei_channel, factor, model_nuclei)
+    if len(nuclei) == 0:
+        raise ValueError('No nucleus has been detected')
     prob_map, foci = extract_foci(data=field, foci_model_file=model_foci, channel=channel)
     foci = [Centre((r, c), f_id, 'Centriole') for f_id, (r, c) in enumerate(foci)]
 
