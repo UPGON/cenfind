@@ -15,7 +15,12 @@ def get_args():
     parser.add_argument('--projection_suffix',
                         type=str,
                         default='_max',
-                        help='the suffix indicating projection, e.g., `_max` (default) or `Projected`')
+                        help='Suffix indicating projection, e.g., `_max` (default) or `Projected`')
+
+    parser.add_argument('--splits',
+                        type=int,
+                        nargs='+',
+                        help='Write the train and test splits for continuous learning using the channels specified')
 
     args = parser.parse_args()
 
@@ -33,6 +38,8 @@ def main():
 
     dataset.setup()
     dataset.write_fields()
+    if args.splits:
+        dataset.write_train_test(args.splits)
 
 
 if __name__ == '__main__':
