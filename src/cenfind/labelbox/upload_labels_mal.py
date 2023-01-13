@@ -19,7 +19,7 @@ from cenfind.labelbox.helpers import (ontology_setup,
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-foci_model = Path("models/dev/multiscale/20221103_112531")
+foci_model = Path("/data1/models/cenfind/master/")
 
 path_dotenv = Path('.env')
 if not path_dotenv.exists():

@@ -28,7 +28,7 @@ def main():
     dataset = client.create_dataset(name=f"{ds.path.name}", iam_integration=None)
     # project.datasets.connect(dataset)
 
-    asset = [{"row_data": path, "external_id": path.name} for path in sorted((ds.path / 'vignettes').iterdir())]
+    asset = [{"row_data": str(path), "external_id": path.name} for path in sorted((ds.path / 'vignettes').iterdir())]
     dataset.create_data_rows(asset)
 
 
