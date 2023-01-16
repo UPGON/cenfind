@@ -28,56 +28,37 @@ source venv-cenfind/bin/activate
 5. Check that `cenfind`'s programs are correctly installed by running:
 
 ```shell
-squash --help
+cenfind squash --help
 ```
 
 ## Basic usage
 Before scoring the cells, you need to prepare the dataset folder. 
 `cenfind` assumes a fixed folder structure. 
 In the following we will assume that the .ome.tif files are all immediately in raw/. 
-Each field of view is a z-stack containing 4 channels (0, 1, 2, 3). The channel 0 contains the nuclei and the channels 1-3 contains centriolar markers.
+Each file is a z-stack field of view (referred to as field, in the following) containing 4 channels (0, 1, 2, 3). The channel 0 contains the nuclei and the channels 1-3 contains centriolar markers.
 
 ```text
 <project_name>/
 └── raw/
 ```
-2. Run `prepare` to initialise the folder with a list of fields and output folders:
+2. Run `prepare` to initialise the folder with a list of channels and output folders:
 ```shell
-prepare /path/to/dataset <list channels of centrioles, like 1 2 3, (if 0 is the nucleus channel)>
+cenfind prepare /path/to/dataset <list channels of centrioles, like 1 2 3, (if 0 is the nucleus channel)>
 ```
 
-2. Run `squash` with the argument of the path to the project folder and the suffix of the raw files. `projections/` is populated with the max-projections `*_max.tif` files.
+2. Run `squash` with the path to the project folder and the suffix of the raw files. `projections/` is populated with the max-projections `*_max.tif` files.
 ```shell
-squash path/to/dataset
+cenfind squash path/to/dataset
 ```
 
 3. Run `score` with the arguments source, the index of the nuclei channel (usually 0 or 3), the channel to score and the path to the model. You need to download it from https://figshare.com/articles/software/Cenfind_model_weights/21724421
 ```shell
-score /path/to/dataset /path/to/model/ 0 1 2 3 --projection_suffix '_max'
-```
-
-For reference:
-```shell
-score -h
-CENFIND: Automatic centriole scoring
-
-positional arguments:
-  path                  Path to the dataset
-  model                 Absolute path to the model folder
-  channel_nuclei        Channel index for nuclei segmentation, e.g., 0 or 3
-  channels              Channel indices to analyse, e.g., 1 2 3
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --vicinity VICINITY   Distance threshold in micrometer (default: -5 um)
-  --factor FACTOR       Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:
-  --projection_suffix PROJECTION_SUFFIX
-                        Projection suffix (`_max` (default) or `_Projected`
+cenfind score /path/to/dataset /path/to/model/ 0 1 2 3 --projection_suffix '_max'
 ```
 
 4. Check that the predictions are satisfactory by looking at the folders `visualisation/` and `statistics/`
 
-## API
+## Internal API
 
 `cenfind` consists of two core classes: `Dataset` and `Field`.
 

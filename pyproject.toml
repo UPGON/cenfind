@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cenfind"
-version = "0.10.0"
+version = "0.10.1"
 description = "Score cells for centrioles in IF data"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
 repository = "https://github.com/UPGON/cenfind"
@@ -27,9 +27,7 @@ tensorflow = "^2.9.0"
 spotipy-detector = "^0.1.0"
 
 [tool.poetry.scripts]
-prepare = "cenfind.cli.prepare:main"
-squash = "cenfind.cli.squash:main"
-score = "cenfind.cli.score:main"
+cenfind = "cenfind.cli.main:main"
 evaluate = "cenfind.cli.evaluate:main"
 vignettes = "cenfind.labelbox.vignettes:main"
 upload = "cenfind.labelbox.upload_labels:main"

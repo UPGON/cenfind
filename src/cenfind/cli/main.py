@@ -8,6 +8,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 import tensorflow as tf
 
 tf.random.set_seed(2)
+
 import argparse
 import logging
 import sys
@@ -17,81 +18,49 @@ import os
 from pathlib import Path
 
 import cv2
-import numpy as np
 import pandas as pd
 import tifffile as tf
 from tqdm import tqdm
 
-from cenfind.core.data import Dataset
+from cenfind.core.measure import save_foci
 from cenfind.core.outline import Centre, create_vignette
+from cenfind.core.data import Dataset
 
 
-def get_args():
-    parser = argparse.ArgumentParser(
-        description='CENFIND: Automatic centriole scoring')
+def cli_prepare(args):
+    if not args.path.exists():
+        print(f"The path `{args.path}` does not exist.")
+        sys.exit()
 
-    parser.add_argument('path',
-                        type=Path,
-                        help='Path to the dataset')
+    path_dataset = args.path
+    dataset = Dataset(path_dataset, projection_suffix=args.projection_suffix)
 
-    parser.add_argument('model',
-                        type=Path,
-                        help='Absolute path to the model folder')
+    dataset.setup()
+    dataset.write_fields()
+    if args.splits:
+        dataset.write_train_test(args.splits)
 
-    parser.add_argument('channel_nuclei',
-                        type=int,
-                        help='Channel index for nuclei segmentation, e.g., 0 or 3')
 
-    parser.add_argument('channels',
-                        nargs='+',
-                        type=int,
-                        help='Channel indices to analyse, e.g., 1 2 3')
+def cli_squash(args):
+    dataset = Dataset(args.path)
 
-    parser.add_argument('--vicinity',
-                        type=int,
-                        default=-5,
-                        help='Distance threshold in micrometer (default: -5 um)')
+    if dataset.has_projections:
+        print(f"Projections already exist, squashing skipped.")
+        sys.exit()
 
-    parser.add_argument('--factor',
-                        type=int,
-                        default=256,
-                        help='Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:')
+    if not dataset.raw.exists():
+        print(f"Folder raw/ not found.")
+        sys.exit()
 
-    parser.add_argument('--projection_suffix',
-                        type=str,
-                        default='_max',
-                        help='Projection suffix (`_max` (default) or `_Projected`')
+    dataset.write_projections()
 
-    parser.add_argument('--cpu',
-                        action='store_true',
-                        help='Only use the cpu')
 
-    args = parser.parse_args()
-
+def cli_score(args):
     if args.channel_nuclei in set(args.channels):
         raise ValueError('Nuclei channel cannot be in channels')
 
     if not Path(args.model).exists():
         raise FileNotFoundError(f"{args.model} does not exist")
-
-    return args
-
-
-def save_foci(foci_list: list[Centre], dst: str, logger=None) -> None:
-    if len(foci_list) == 0:
-        array = np.array([])
-        if logger is not None:
-            logger.info('No centriole detected')
-        else:
-            print('No centriole detected')
-    else:
-        array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
-        array = array[:, [1, 0]]
-    np.savetxt(dst, array, delimiter=',', fmt='%u')
-
-
-def main():
-    args = get_args()
     visualisation = True
 
     path_logs = args.path / 'logs'
@@ -112,7 +81,8 @@ def main():
     dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
 
     if not any(dataset.projections.iterdir()):
-        logger.error('The projection folder (%s) is empty.\nPlease ensure you have run `squash` or that you have put the projections under projections/' % dataset.projections)
+        logger.error(
+            'The projection folder (%s) is empty.\nPlease ensure you have run `squash` or that you have put the projections under projections/' % dataset.projections)
         sys.exit()
 
     channels, width, height = dataset.fields[0].projection.shape
@@ -179,6 +149,44 @@ def main():
     logger.info("Writing statistics to statistics.tsv")
 
     logger.info("All fields in (%s) have been processed" % dataset.path.name)
+
+
+def main():
+    parser = argparse.ArgumentParser(prog='CENFIND')
+    subparsers = parser.add_subparsers(title='subprograms')
+
+    # Prepare
+    parser_prepare = subparsers.add_parser('prepare', help='Prepare the dataset structure')
+    parser_prepare.add_argument('path', type=Path,
+                                help='Path to the dataset')
+    parser_prepare.add_argument('--projection_suffix', type=str, default='_max',
+                                help='Suffix indicating projection, e.g., `_max` (default) or `Projected`')
+    parser_prepare.add_argument('--splits', type=int, nargs='+',
+                                help='Write the train and test splits for continuous learning using the channels specified')
+    parser_prepare.set_defaults(func=cli_prepare)
+
+    # Squash
+    parser_squash = subparsers.add_parser('squash', help='Write z-projections.')
+    parser_squash.add_argument('path', type=Path, help='Path to the dataset folder')
+    parser_squash.set_defaults(func=cli_squash)
+
+    # Score
+    parser_score = subparsers.add_parser('score', help='Score the projections given the channels')
+    parser_score.add_argument('path', type=Path, help='Path to the dataset')
+    parser_score.add_argument('model', type=Path, help='Absolute path to the model folder')
+    parser_score.add_argument('channel_nuclei', type=int, help='Channel index for nuclei segmentation, e.g., 0 or 3')
+    parser_score.add_argument('channels', nargs='+', type=int, help='Channel indices to analyse, e.g., 1 2 3')
+    parser_score.add_argument('--vicinity', type=int, default=-5,
+                              help='Distance threshold in micrometer (default: -5 um)')
+    parser_score.add_argument('--factor', type=int, default=256,
+                              help='Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:')
+    parser_score.add_argument('--projection_suffix', type=str, default='_max',
+                              help='Projection suffix (`_max` (default) or `_Projected`')
+    parser_score.add_argument('--cpu', action='store_true', help='Only use the cpu')
+    parser_score.set_defaults(func=cli_score)
+
+    args = parser.parse_args()
+    args.func(args)
 
 
 if __name__ == '__main__':

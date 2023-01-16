@@ -1,6 +1,6 @@
 import numpy as np
 
-from cenfind.cli.score import save_foci
+from cenfind.core.measure import save_foci
 from cenfind.core.outline import Centre
 
 

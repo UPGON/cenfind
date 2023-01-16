@@ -37,6 +37,8 @@ def full_in_field(coordinate, image_shape, fraction) -> bool:
 
 def flag(is_full: bool) -> tuple:
     return (0, 255, 0) if is_full else (0, 0, 255)
+
+
 def infer_centrosomes(foci: list, img_shape: tuple, distance=.6) -> list:
     """
     Add centrosome to a list of foci.
@@ -63,6 +65,7 @@ def infer_centrosomes(foci: list, img_shape: tuple, distance=.6) -> list:
         f.parent = Centre(centrosome_centroid, label='Centrosome')
 
     return foci
+
 
 def assign(foci: list, nuclei: list, vicinity: float, pixel_size: float) -> list[tuple[Any, list[Any]]]:
     """
@@ -236,3 +239,16 @@ def field_score_frequency(df):
 
     result = result.pivot(index=['fov', 'channel'], columns='score_cat')
     return result
+
+
+def save_foci(foci_list: list[Centre], dst: str, logger=None) -> None:
+    if len(foci_list) == 0:
+        array = np.array([])
+        if logger is not None:
+            logger.info('No centriole detected')
+        else:
+            print('No centriole detected')
+    else:
+        array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
+        array = array[:, [1, 0]]
+    np.savetxt(dst, array, delimiter=',', fmt='%u')
