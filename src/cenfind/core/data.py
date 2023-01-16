@@ -15,12 +15,9 @@ class Field:
     name: str
     dataset: 'Dataset'
 
-    def __post_init__(self):
-        self.file_name = f"{self.name}{self.dataset.projection_suffix}.tif"
-
     @property
     def stack(self) -> np.ndarray:
-        path_file = str(self.dataset.raw / f"{self.name}.ome.tif")
+        path_file = str(self.dataset.raw / f"{self.name}{self.dataset.image_type}")
 
         try:
             data = tf.imread(path_file)
@@ -35,7 +32,12 @@ class Field:
 
     @property
     def projection(self) -> np.ndarray:
-        path_projection = self.dataset.projections / self.file_name
+        if self.dataset.projection_suffix == '':
+            _projection_name = f"{self.name}.tif"
+        else:
+            _projection_name = f"{self.name}{self.dataset.projection_suffix}.tif"
+
+        path_projection = self.dataset.projections / _projection_name
         try:
             res = tf.imread(str(path_projection))
             return res
@@ -74,7 +76,7 @@ class Field:
         Return a string of the form 'ZYCX' or 'CZYX'
         :return:
         """
-        path_raw = str(self.dataset.path / 'raw' / f"{self.name}.ome.tif")
+        path_raw = str(self.dataset.path / 'raw' / f"{self.name}{self.dataset.image_type}")
         with tf.TiffFile(path_raw) as tif:
             try:
                 order = tif.series[0].axes
@@ -135,23 +137,7 @@ class Dataset:
         fields_path = self.path / 'fields.txt'
         with open(fields_path, 'r') as f:
             fields_list = f.read().splitlines()
-        return [Field(field_path, self) for field_path in fields_list]
-
-    def pairs(self, split: str = None, channel_id: int = None) -> List[Tuple['Field', int]]:
-        """
-        Fetch the fields of view for train or test
-        :param channel_id:
-        :param split: all, test or train
-        :return: a list of tuples (fov name, channel id)
-        """
-
-        if split is None:
-            return self.read_split('train', channel_id) + self.read_split('test', channel_id)
-        else:
-            return self.read_split(split, channel_id)
-
-    def _field_name(self, file_name: str):
-        return file_name.split('.')[0].rstrip(self.projection_suffix)
+        return [Field(field_name, self) for field_name in fields_list]
 
     def write_fields(self) -> None:
         """
@@ -165,8 +151,10 @@ class Dataset:
         else:
             folder = self.raw
 
-        fields = [self._field_name(str(f.name)) for f in folder.iterdir() if not str(f).startswith('.')]
+        def _field_name(file_name: str):
+            return file_name.split('.')[0].rstrip(self.projection_suffix)
 
+        fields = [_field_name(str(f.name)) for f in folder.iterdir() if not str(f).startswith('.')]
 
         with open(self.path / 'fields.txt', 'w') as f:
             for field in fields:
@@ -195,6 +183,19 @@ class Dataset:
         with open(self.path / 'test.txt', 'w') as f:
             for fov, channel in pairs_test:
                 f.write(f"{fov.name},{channel}\n")
+
+    def pairs(self, split: str = None, channel_id: int = None) -> List[Tuple['Field', int]]:
+        """
+        Fetch the fields of view for train or test
+        :param channel_id:
+        :param split: all, test or train
+        :return: a list of tuples (fov name, channel id)
+        """
+
+        if split is None:
+            return self.read_split('train', channel_id) + self.read_split('test', channel_id)
+        else:
+            return self.read_split(split, channel_id)
 
     def read_split(self, split_type, channel_id=None) -> List[Tuple[Field, int]]:
         with open(self.path / f'{split_type}.txt', 'r') as f:
