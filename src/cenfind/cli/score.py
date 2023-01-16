@@ -1,6 +1,9 @@
 from numpy.random import seed
 
 seed(1)
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
 import tensorflow as tf
 
@@ -15,11 +18,9 @@ import cv2
 import numpy as np
 import pandas as pd
 import tifffile as tf
-from stardist.models import StarDist2D
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.core.measure import field_score, field_score_frequency
 from cenfind.core.outline import Centre, create_vignette
 
 
@@ -117,10 +118,12 @@ def main():
         logger.error("Channels (%s) out of channel range %s" % args.channels, set(range(channels)))
         sys.exit()
 
+    from stardist.models import StarDist2D
     model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
 
     scores = []
     pbar = tqdm(dataset.fields)
+    from cenfind.core.measure import field_score, field_score_frequency
     for field in pbar:
         logger.info("Processing %s" % field.name)
         pbar.set_description(f"{field.name}")

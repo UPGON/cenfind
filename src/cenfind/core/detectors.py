@@ -40,10 +40,10 @@ def extract_foci(data: Field,
     :param kwargs:
     :return:
     """
-    model = get_model(foci_model_file)
     data = data.channel(channel)
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         data = normalize_fast2d(data)
+        model = get_model(foci_model_file)
         mask_preds, points_preds = model.predict(data,
                                                  prob_thresh=prob_threshold,
                                                  min_distance=min_distance, verbose=False)
@@ -58,11 +58,14 @@ def extract_nuclei(field: Field,
     List[Centre], List[Contour]]:
     """
     Extract the nuclei from the nuclei image
-    :param channel:
     :param field:
-    :param annotation: a mask with pixels labelled for each centre
+    :param channel:
+    :param factor: the factor related to pixel size
     :param model:
+    :param annotation: a mask with pixels labelled for each centre
+
     :return: List of Contours.
+
     """
 
     if annotation is not None:
