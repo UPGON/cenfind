@@ -11,6 +11,8 @@ tf.random.set_seed(2)
 import argparse
 import logging
 import sys
+from datetime import datetime
+import contextlib
 import os
 from pathlib import Path
 
@@ -102,14 +104,19 @@ def main():
     logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    file_handler = logging.FileHandler(filename=path_logs / 'score.log')
+    start_stamp = datetime.now()
+    file_handler = logging.FileHandler(filename=path_logs / f'{start_stamp.strftime("%Y%m%d_%H:%M:%S")}_score.log')
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
     dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
 
+    if not any(dataset.projections.iterdir()):
+        logger.error('The projection folder (%s) is empty.\nPlease ensure you have run `squash` or that you have put the projections under projections/' % dataset.projections)
+        sys.exit()
+
     channels, width, height = dataset.fields[0].projection.shape
+
     if args.channel_nuclei not in range(channels):
         logger.error("Index for nuclei (%s) out of index range" % args.channel_nuclei)
         sys.exit()
@@ -119,7 +126,8 @@ def main():
         sys.exit()
 
     from stardist.models import StarDist2D
-    model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
+    with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
+        model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
 
     scores = []
     pbar = tqdm(dataset.fields)
