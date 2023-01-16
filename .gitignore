@@ -5,6 +5,7 @@
 
 .ipynb_checkpoints/
 .idea/
+.pytest_cache/
 __pycache__/
 
 venv/
