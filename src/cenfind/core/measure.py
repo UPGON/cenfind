@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, Tuple
 
 import numpy as np
 import pandas as pd
@@ -120,7 +120,7 @@ def field_score(field: Field,
                 nuclei_channel: int,
                 factor,
                 vicinity,
-                channel: int) -> (np.ndarray, list):
+                channel: int) -> Tuple[np.ndarray, list]:
     """
     1. Detect foci in the given channels
     2. Detect nuclei
@@ -237,7 +237,9 @@ def field_score_frequency(df):
               )
     result = result.rename({'level_2': 'score_cat'}, axis=1)
 
-    result = result.pivot(index=['fov', 'channel'], columns='score_cat')
+    result[['well', 'field']] = result['fov'].str.split('_', expand=True)
+    result = result.groupby(['well', 'channel', 'score_cat']).sum()
+
     return result
 
 
