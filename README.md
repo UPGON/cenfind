@@ -58,6 +58,8 @@ cenfind score /path/to/dataset /path/to/model/ 0 1 2 3 --projection_suffix '_max
 
 4. Check that the predictions are satisfactory by looking at the folders `visualisation/` and `statistics/`
 
+5. If you interested in categorising the number of centrioles, run `cenfind analyse path/to/dataset --by <well>` the --by option is interesting if you want to group your scoring by well, if the file names obey to the rule `<WELLID_FOVID>`.
+
 ## Running `cenfind score` in the background
 
 When you exit the shell, running programs receive the SIGHUP, which aborts them. This is undesirable if you need to close your shell for some reasons. Fortunately, you can make your program ignore this signal by prepending the program with the `nohup` command. Moreover, if you want to run your program in the background, you can append the ampersand `&`. In practice, run `nohup cenfind score ... &` instead of `cenfind score ...`.
