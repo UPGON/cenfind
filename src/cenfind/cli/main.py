@@ -174,7 +174,7 @@ def cli_analyse(args, logger):
     scores = pd.read_csv(dataset.statistics / "scores_df.tsv", sep="\t")
 
     try:
-        binned = field_score_frequency(scores)
+        binned = field_score_frequency(scores, by=args.by)
     except ValueError as e:
         logger.error(
             "The field value of `fov` does not conform with the syntax `<WELL>_<FOVID>`(%s) (%s)"
@@ -257,6 +257,7 @@ def main():
         help="Analyse the scoring and compute summary table and visualisation",
     )
     parser_analyse.add_argument("path", type=Path, help="Path to the dataset")
+    parser_analyse.add_argument("--by", type=str, help="Grouping (field or well)")
     parser_analyse.set_defaults(func=cli_analyse)
 
     args = parser.parse_args()
@@ -272,6 +273,10 @@ def main():
     start_stamp = datetime.now()
     log_file = f'{start_stamp.strftime("%Y%m%d_%H:%M:%S")}_score.log'
 
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
     try:
         file_handler = logging.FileHandler(filename=path_logs / log_file)
         file_handler.setFormatter(formatter)
@@ -280,9 +285,6 @@ def main():
         logger.warning(
             "Could not create %s because of permission; will only log to STDOUT" % log_file
         )
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
 
     args.func(args, logger)
 

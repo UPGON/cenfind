@@ -215,9 +215,9 @@ def dataset_metrics(dataset: Dataset, split: str, model: Path, tolerance, thresh
     return prob_maps, perfs
 
 
-def field_score_frequency(df):
+def field_score_frequency(df, by='field'):
     """
-    Count the absolute frequency of number of centriole per image
+    Count the absolute frequency of number of centriole per well or per field
     :param df: Df containing the number of centriole per nuclei
     :return: Df with absolut frequencies.
     """
@@ -236,10 +236,19 @@ def field_score_frequency(df):
               .reset_index()
               )
     result = result.rename({'level_2': 'score_cat'}, axis=1)
-
-    result[['well', 'field']] = result['fov'].str.split('_', expand=True)
-    result = result.groupby(['well', 'channel', 'score_cat']).sum()
-
+    
+    if by == 'well':
+        result[['well', 'field']] = result['fov'].str.split('_', expand=True)
+        result = result.groupby(['well', 'channel', 'score_cat']).sum()
+        result = result.reset_index()
+        result = result.pivot(index=['well', 'channel'], columns='score_cat')
+        result.reset_index().sort_values(['channel', 'well'])
+    else:
+        result = result.groupby(['fov', 'channel', 'score_cat']).sum()
+        result = result.reset_index()
+        result = result.pivot(index=['fov', 'channel'], columns='score_cat')
+        result.reset_index().sort_values(['channel', 'fov'])
+    
     return result
 
 
