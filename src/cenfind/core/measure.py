@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, Tuple
 
 import numpy as np
 import pandas as pd
@@ -120,7 +120,7 @@ def field_score(field: Field,
                 nuclei_channel: int,
                 factor,
                 vicinity,
-                channel: int) -> (np.ndarray, list):
+                channel: int) -> Tuple[np.ndarray, list]:
     """
     1. Detect foci in the given channels
     2. Detect nuclei
