@@ -58,6 +58,15 @@ cenfind score /path/to/dataset /path/to/model/ 0 1 2 3 --projection_suffix '_max
 
 4. Check that the predictions are satisfactory by looking at the folders `visualisation/` and `statistics/`
 
+## Running `cenfind score` in the background
+
+When you exit the shell, running programs receive the SIGHUP, which aborts them. This is undesirable if you need to close your shell for some reasons. Fortunately, you can make your program ignore this signal by prepending the program with the `nohup` command. Moreover, if you want to run your program in the background, you can append the ampersand `&`. In practice, run `nohup cenfind score ... &` instead of `cenfind score ...`.
+
+The output will be written to the file `nohup.out` and you can peek the progress by running `tail -F nohup.out`, the flag `-F` will refresh the screen as the file is being written. Enter Ctrl-C to exit the tail program.
+
+If you want to kill the program score, run  `jobs` and then run `kill <jobid>`. If you see no jobs, check the log `nohup.out`; it can be done or the program may have crashed, and you can check the error there.
+
+
 ## Internal API
 
 `cenfind` consists of two core classes: `Dataset` and `Field`.
