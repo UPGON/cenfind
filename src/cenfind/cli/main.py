@@ -144,7 +144,8 @@ def cli_score(args):
     scores_df = pd.DataFrame(flattened)
     scores_df.to_csv(dataset.statistics / f'scores_df.tsv', sep='\t', index=False)
     logger.info("Writing raw scores to scores_df.tsv")
-    binned = field_score_frequency(scores_df)
+    scores = pd.read_csv(dataset.statistics / 'scores_df.tsv', sep='\t')
+    binned = field_score_frequency(scores)
     binned.to_csv(dataset.statistics / f'statistics.tsv', sep='\t', index=True)
     logger.info("Writing statistics to statistics.tsv")
 
