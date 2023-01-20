@@ -32,17 +32,15 @@ class Field:
 
     @property
     def projection(self) -> np.ndarray:
-        if self.dataset.projection_suffix == '':
-            _projection_name = f"{self.name}.tif"
-        else:
-            _projection_name = f"{self.name}{self.dataset.projection_suffix}.tif"
+        _projection_name = f"{self.name}{self.dataset.projection_suffix}.tif"
 
         path_projection = self.dataset.projections / _projection_name
         try:
             res = tf.imread(str(path_projection))
             return res
         except FileNotFoundError:
-            print(f"File not found ({path_projection}).")
+            print(f"File not found ({path_projection}). Check the projection suffix...")
+            sys.exit()
 
     def channel(self, channel: int) -> np.ndarray:
         return self.projection[channel, :, :]

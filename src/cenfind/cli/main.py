@@ -67,7 +67,6 @@ def cli_score(args, logger):
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
-
     if not any(dataset.projections.iterdir()):
         logger.error(
             "The projection folder (%s) is empty.\nPlease ensure you have run `squash` or that you have put the projections under projections/"
@@ -246,8 +245,8 @@ def main():
     parser_score.add_argument(
         "--projection_suffix",
         type=str,
-        default="_max",
-        help="Projection suffix (`_max` (default) or `_Projected`",
+        default="",
+        help="Projection suffix (`_max` or `_Projected`) if not specified, empty",
     )
     parser_score.add_argument("--cpu", action="store_true", help="Only use the cpu")
     parser_score.set_defaults(func=cli_score)
