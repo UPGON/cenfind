@@ -198,7 +198,7 @@ def main():
     parser_prepare.add_argument(
         "--projection_suffix",
         type=str,
-        default="_max",
+        default="",
         help="Suffix indicating projection, e.g., `_max` (default) or `Projected`",
     )
     parser_prepare.add_argument(
