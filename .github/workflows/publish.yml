@@ -52,4 +52,6 @@ jobs:
 
       - name: Build and publish with Poetry
         run: |
+          python -m poetry version $(git describe --tags --abbrev=0)
           python -m poetry --build publish
+
