@@ -199,13 +199,13 @@ def main():
         "--projection_suffix",
         type=str,
         default="",
-        help="Suffix indicating projection, e.g., `_max` (default) or `Projected`",
+        help="Projection suffix (`_max` or `_Projected`), if not specified, empty",
     )
     parser_prepare.add_argument(
         "--splits",
         type=int,
         nargs="+",
-        help="Write the train and test splits for continuous learning using the channels specified",
+        help="Write the train and test splits for continuous learning, specify channel indices.",
     )
     parser_prepare.set_defaults(func=cli_prepare)
 
@@ -257,7 +257,7 @@ def main():
         help="Analyse the scoring and compute summary table and visualisation",
     )
     parser_analyse.add_argument("path", type=Path, help="Path to the dataset")
-    parser_analyse.add_argument("--by", type=str, help="Grouping (field or well)")
+    parser_analyse.add_argument("--by", type=str, default='field', help="Grouping (`field` or `well`)")
     parser_analyse.set_defaults(func=cli_analyse)
 
     args = parser.parse_args()
