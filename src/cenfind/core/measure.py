@@ -235,11 +235,11 @@ def field_score_frequency(df, by='field'):
     result = (result.sort_index()
               .reset_index()
               )
-    result = result.rename({'level_2': 'score_cat'}, axis=1)
-    
+    result = result.rename({'score': 'score_cat'}, axis=1)
     if by == 'well':
         result[['well', 'field']] = result['fov'].str.split('_', expand=True)
-        result = result.groupby(['well', 'channel', 'score_cat']).sum()
+        print(result.columns)
+        result = result.groupby(['well', 'channel', 'score_cat'])[['freq_abs']].sum()
         result = result.reset_index()
         result = result.pivot(index=['well', 'channel'], columns='score_cat')
         result.reset_index().sort_values(['channel', 'well'])
