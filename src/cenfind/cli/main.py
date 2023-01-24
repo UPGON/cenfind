@@ -257,7 +257,7 @@ def main():
         help="Analyse the scoring and compute summary table and visualisation",
     )
     parser_analyse.add_argument("path", type=Path, help="Path to the dataset")
-    parser_analyse.add_argument("--by", type=str, default='field', help="Grouping (`field` or `well`)")
+    parser_analyse.add_argument("--by", type=str, default='field', help="Grouping by `field` (default) or `well`")
     parser_analyse.set_defaults(func=cli_analyse)
 
     args = parser.parse_args()
@@ -273,15 +273,14 @@ def main():
     start_stamp = datetime.now()
     log_file = f'{start_stamp.strftime("%Y%m%d_%H:%M:%S")}_score.log'
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
     try:
         file_handler = logging.FileHandler(filename=path_logs / log_file)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
     except PermissionError:
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
         logger.warning(
             "Could not create %s because of permission; will only log to STDOUT" % log_file
         )

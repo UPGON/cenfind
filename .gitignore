@@ -5,6 +5,7 @@
 
 .ipynb_checkpoints/
 .idea/
+.fleet/
 .vscode/
 .pytest_cache/
 __pycache__/
