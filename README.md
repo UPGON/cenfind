@@ -98,7 +98,6 @@ Once the scoring is finished, inspect `visualisations/` and `statistics/` for ev
 The scoring may take long (1-2 h). If you plan to log out of the shell, please read the next section.
 
 ### Running `cenfind score` in the background
-
 When you exit the shell, running programs receive the SIGHUP, which aborts them. This is undesirable if you need to close your shell for some reasons. Fortunately, you can make your program ignore this signal by prepending the program with the `nohup` command. Moreover, if you want to run your program in the background, you can append the ampersand `&`. In practice, run `nohup cenfind score ... &` instead of `cenfind score ...`.
 
 The output will be written to the file `nohup.out` and you can peek the progress by running `tail -F nohup.out`, the flag `-F` will refresh the screen as the file is being written. Enter Ctrl-C to exit the tail program.
