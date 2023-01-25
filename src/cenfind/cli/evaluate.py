@@ -33,6 +33,7 @@ def get_args():
                         help='Path to the destination file for performances')
     parser.add_argument('--tolerance',
                         type=int,
+                        default=3,
                         nargs='+',
                         help='Distance above which two points are deemed not matching')
     parser.add_argument('--thresholds',
@@ -45,9 +46,7 @@ def get_args():
 
 def main():
     args = get_args()
-    tolerance = args.tolerance
-    if tolerance is None:
-        tolerance = [2]
+    tolerance = [args.tolerance]
     _thresholds = args.thresholds
     if args.performances_file is None:
         dst = Path('./performances.csv')

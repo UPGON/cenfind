@@ -8,6 +8,7 @@ from typing import List, Tuple, Union
 import numpy as np
 import tifffile as tf
 from tqdm import tqdm
+import pytomlpp
 
 
 @dataclass
@@ -57,8 +58,11 @@ class Field:
         path_annotation = self.dataset.path / 'annotations' / 'centrioles' / f"{name}.txt"
         try:
             annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=',')
-            return annotation[:, [1, 0]]
-        except FileNotFoundError:
+            if len(annotation) == 0:
+                return annotation
+            else:
+                return annotation[:, [1, 0]]
+        except OSError:
             print(f"No annotation found for {path_annotation}")
 
     def mask(self, channel) -> np.ndarray:
@@ -90,8 +94,8 @@ class Dataset:
     Represent a dataset structure
     """
     path: Union[str, Path]
+    projection_suffix: str = None
     image_type: str = '.ome.tif'
-    projection_suffix: str = '_max'
     pixel_size: float = .1025
     has_projections: bool = False
     is_setup: bool = False
@@ -114,6 +118,14 @@ class Dataset:
         self.path_annotations_cells = self.path_annotations / 'cells'
 
         self.has_projections = bool(len([f for f in self.projections.iterdir()]))
+        
+        if self.projection_suffix is None:
+            try:
+                metadata = pytomlpp.load(self.path / 'metadata.toml')
+                self.projection_suffix = metadata['projection_suffix']
+            except FileNotFoundError as e:
+                print(e)
+                sys.exit()
 
     def setup(self) -> None:
         """
