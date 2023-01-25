@@ -22,8 +22,8 @@ pandas = "^1.4.1"
 scipy = "^1.7.1"
 csbdeep = "^0.6.3"
 stardist = "^0.8.3"
-scikit-learn = "^1.1.3"
-tensorflow = "2.9.*"
+scikit-learn = "^1.2.1"
+tensorflow = "2.9.0"
 spotipy-detector = "^0.1.0"
 
 [tool.poetry.scripts]
