@@ -109,6 +109,9 @@ class Dataset:
         self.visualisation = self.path / 'visualisations'
         self.statistics = self.path / 'statistics'
         self.vignettes = self.path / 'vignettes'
+        self.path_annotations = self.path / 'annotations'
+        self.path_annotations_centrioles = self.path_annotations / 'centrioles'
+        self.path_annotations_cells = self.path_annotations / 'cells'
 
         self.has_projections = bool(len([f for f in self.projections.iterdir()]))
 
@@ -124,6 +127,9 @@ class Dataset:
         self.statistics.mkdir(exist_ok=True)
         self.visualisation.mkdir(exist_ok=True)
         self.vignettes.mkdir(exist_ok=True)
+        self.path_annotations.mkdir(parents=True, exist_ok=True)
+        self.path_annotations_centrioles.mkdir(exist_ok=True)
+        self.path_annotations_cells.mkdir(exist_ok=True)
 
         self.is_setup = True
 

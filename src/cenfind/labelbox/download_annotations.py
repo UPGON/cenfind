@@ -1,6 +1,7 @@
 import logging
+import sys
 import re
-
+from pathlib import Path
 import PIL
 import labelbox
 import numpy as np
@@ -9,84 +10,118 @@ from dotenv import dotenv_values
 from tqdm import tqdm
 
 from cenfind.experiments.constants import PREFIX_REMOTE
+from cenfind.core.data import Dataset
 
-config = dotenv_values('.env')
+config = dotenv_values(".env")
+
+
+def download_centrioles(label):
+    """
+    Collect the positions for a given label.
+    """
+    foci_in_label = [lab for lab in label.annotations if lab.name == "Centriole"]
+    positions = []
+
+    for lab in foci_in_label:
+        # the coordinates in labelbox are (x, y) and start
+        # in the top left corner;
+        # thus, they correspond to (col, row).
+        x = int(lab.value.x)
+        y = int(lab.value.y)
+        positions.append((x, y))
+
+    return np.array(positions, dtype=int)
+
+
+def download_nuclei(label):
+    """
+    Collect the nucleus masks for the label.
+    return a 16bit-numpy mask with each nucleus labelled by pixel value
+    """
+
+    nuclei_in_label = [lab for lab in label.annotations if lab.name == "Nucleus"]
+
+    if len(nuclei_in_label) == 0:
+        raise ValueError("Empty list; no nucleus")
+
+    mask_shape = nuclei_in_label[0].value.mask.value.shape
+    res = np.zeros(mask_shape[:2], dtype="uint16")
+    nucleus_id = 1
+
+    for lab in nuclei_in_label:
+        try:
+            cell_mask = lab.value.mask.value[:, :, 0]
+            res += ((cell_mask / 255) * nucleus_id).astype("uint16")
+            nucleus_id += 1
+        except PIL.UnidentifiedImageError as e:
+            continue
+
+    return res
 
 
 def main():
+    path_log = Path("./logs")
+    path_log.mkdir(exist_ok=True)
+
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-    ch = logging.FileHandler('logs/download.log')
-    formatter = logging.Formatter('%(asctime)s %(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
 
-    lb = labelbox.Client(api_key=config['LABELBOX_API_KEY'])
-    project = lb.get_project(config['PROJECT_CENTRIOLES'])
+    formatter = logging.Formatter("%(asctime)s %(message)s")
+    fh = logging.FileHandler(path_log / "download.log")
+    fh.setFormatter(formatter)
+
+    logger.addHandler(fh)
+
+    lb = labelbox.Client(api_key=config["LABELBOX_API_KEY"])
+    project = lb.get_project(config["PROJECT_CENTRIOLES"])
     labels = project.label_generator()
 
+    centrioles = True
+    nuclei = False
+
     for label in tqdm(labels):
-        ds = label.extra['Dataset Name']
+        ds = label.extra["Dataset Name"]
+
+        if ds != "denovo":
+            continue
+
         path_dataset = PREFIX_REMOTE / ds
-
-        path_annotations = path_dataset / 'annotations'
-        path_annotations_centrioles = path_annotations / 'centrioles'
-        path_annotations_cells = path_annotations / 'cells'
-
-        path_annotations.mkdir(parents=True, exist_ok=True)
-        path_annotations_centrioles.mkdir(exist_ok=True)
-        path_annotations_cells.mkdir(exist_ok=True)
+        projection_suffix = ""
+        dataset = Dataset(
+            path_dataset, image_type=".tif", projection_suffix=projection_suffix
+        )
 
         external_name = label.data.external_id
-        channel_id = external_name.split('.')[0][-1]
-        print('Processing %s / %s', ds, external_name)
-        if external_name.endswith(".png"):
-            annotation_name = re.sub('.png$', '.txt', external_name)
-            mask_name = re.sub('C\d.png$', '_max_C0.tif', external_name)
-        else:
-            annotation_name = f"{external_name}_max_C{channel_id}.txt"
-            mask_name = f"{external_name}_max_C0.tif"
+        extension = external_name.split(".")[-1]
 
-        if not (path_annotations_centrioles / annotation_name).exists():
-            print('annotation does not exist')
-            foci_in_label = [lab for lab in label.annotations if lab.name == 'Centriole']
-            with open(path_annotations_centrioles / annotation_name, 'w') as f:
-                for lab in foci_in_label:
-                    logger.info('Adding point')
-                    # the coordinates in labelbox are (x, y) and start
-                    # in the top left corner;
-                    # thus, they correspond to (col, row).
-                    x = int(lab.value.x)
-                    y = int(lab.value.y)
-                    f.write(f"{x},{y}\n")
-        else:
-            print('exists')
+        logger.info("Processing %s / %s" % (path_dataset, external_name))
 
-        if (path_annotations_cells / mask_name).exists():
-            logger.info("%s already exists; skipping..." % mask_name)
-            continue
-
-        nuclei_in_label = [lab for lab in label.annotations if lab.name == 'Nucleus']
-        if len(nuclei_in_label) == 0:
-            logger.warning("No nucleus found in %s" % external_name)
-            continue
-        mask_shape = nuclei_in_label[0].value.mask.value.shape
-        logger.debug('mask shape: %s' % str(mask_shape))
-        res = np.zeros(mask_shape[:2], dtype='uint16')
-        nucleus_id = 1
-        for lab in nuclei_in_label:
-            logger.info('Adding contour')
+        if centrioles:
+            annotation_name = re.sub(f".{extension}$", ".txt", external_name)
+            dst_centrioles = dataset.path_annotations_centrioles / annotation_name
             try:
-                cell_mask = lab.value.mask.value[:, :, 0]
-                res += ((cell_mask / 255) * nucleus_id).astype('uint16')
-                nucleus_id += 1
-            except PIL.UnidentifiedImageError as e:
-                logger.error('Problem with %s (%s)' % external_name, e)
+                positions = download_centrioles(label)
+                np.savetxt(dst_centrioles, positions, delimiter=",", fmt="%u")
+                logger.info("Saving centriole positions of %s to %s" % (external_name, dst_centrioles))
+            except FileExistsError:
+                logger.info("Skipping centriole positions for %s to %s" % (external_name, dst_nuclei))
                 continue
-        tf.imwrite(path_annotations_cells / mask_name, res)
-        logger.info("%s: DONE" % external_name)
-    logger.info('FINISHED')
+
+        if nuclei:
+            mask_name = re.sub(
+                f"C\d\.{extension}$", f"{projection_suffix}_C0.tif", external_name
+            )
+            dst_nuclei = dataset.path_annotations_cells / mask_name
+            try:
+                mask = download_nuclei(label, dst_nuclei, logger=logger)
+                tf.imwrite(dst_nuclei, mask)
+                logger.info("Saving mask of %s to %s" % (external_name, dst_nuclei))
+            except FileExistsError:
+                logger.info("Skipping mask of %s to %s" % (external_name, dst_nuclei))
+                continue
+
+    logger.info("FINISHED")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
