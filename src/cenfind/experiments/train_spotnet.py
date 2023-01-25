@@ -73,11 +73,16 @@ def load_pairs(dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.
     masks = []
 
     for field, channel in dataset.pairs(split):
+        print(field.name, channel)
+        # logger.info('Loading %s %s' % (field, channel))
         data = field.channel(channel)
         foci = field.annotation(channel)
         with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
             image = normalize_fast2d(data)
-        mask = points_to_prob(foci[:, [1, 0]], shape=image.shape, sigma=sigma)  # because it works with x, y
+        if len(foci) == 0:
+            mask = np.zeros(image.shape, dtype='uint16')
+        else:
+            mask = points_to_prob(foci[:, [1, 0]], shape=image.shape, sigma=sigma)  # because it works with x, y
 
         if transform is not None:
             transformed = transform(image=image, mask=mask)

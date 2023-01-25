@@ -7,7 +7,8 @@ import tensorflow as tf
 tf.random.set_seed(2)
 
 from datetime import datetime
-
+import logging
+from pathlib import Path
 from spotipy.model import SpotNet
 
 from cenfind.core.data import Dataset
@@ -15,6 +16,17 @@ from cenfind.experiments.constants import datasets, PREFIX_REMOTE
 from cenfind.experiments.train_spotnet import config_multiscale, fetch_all_fields
 
 def main():
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    start_stamp = datetime.now()
+    log_file = f'{start_stamp.strftime("%Y%m%d_%H:%M:%S")}_train.log'
+    fh = logging.FileHandler(Path('./logs') / log_file)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
     path_datasets = [PREFIX_REMOTE / ds for ds in datasets]
     dss = [Dataset(path) for path in path_datasets]
 

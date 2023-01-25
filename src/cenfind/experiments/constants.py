@@ -13,6 +13,7 @@ datasets = [
     'RPE1wt_CEP152+GTU88+PCNT_1',
     'U2OS_CEP63+SAS6+PCNT_1',
     'RPE1p53+Cnone_CEP63+CETN2+PCNT_1',
+    'denovo'
 ]
 
 protein_positions = {
@@ -21,11 +22,13 @@ protein_positions = {
     'RPE1wt_CEP152+GTU88+PCNT_1': ('DAPI', 'CEP152', 'GTU88', 'PCNT'),
     'U2OS_CEP63+SAS6+PCNT_1': ('DAPI', 'CEP63', 'SAS6', 'PCNT'),
     'RPE1p53+Cnone_CEP63+CETN2+PCNT_1': ('DAPI', 'CEP63', 'CETN2', 'PCNT'),
+    'denovo': ('CEP63', 'CEP135', 'DAPI')
 }
 
 protein_names = {
     'CEP63': 'Cep63',
     'CEP152': 'Cep152',
+    'CEP135': 'Cep135',
     'GTU88': 'γ-Tubulin',
     'PCNT': 'Pericentrin',
     'CETN2': 'Centrin',
