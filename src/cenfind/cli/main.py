@@ -93,6 +93,7 @@ def cli_score(args, logger):
         model_stardist = StarDist2D.from_pretrained("2D_versatile_fluo")
 
     scores = []
+    
     pbar = tqdm(dataset.fields)
     from cenfind.core.measure import field_score, field_score_frequency
 
@@ -273,17 +274,16 @@ def main():
     start_stamp = datetime.now()
     log_file = f'{start_stamp.strftime("%Y%m%d_%H:%M:%S")}_score.log'
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
     try:
         file_handler = logging.FileHandler(filename=path_logs / log_file)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
     except PermissionError:
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
         logger.warning(
-            "Could not create %s because of permission; will only log to STDOUT" % log_file
+            "Could not create %s because of permission; will log instead to STDOUT" % log_file
         )
 
     args.func(args, logger)
