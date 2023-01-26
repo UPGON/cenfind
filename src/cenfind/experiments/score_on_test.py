@@ -15,6 +15,7 @@ stardist_model = StarDist2D.from_pretrained('2D_versatile_fluo')
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('model', type=Path)
+    parser.add_argument('channel_nuclei', type=int, help='the index of the position')
     args = parser.parse_args()
 
     return args
@@ -23,7 +24,7 @@ def get_args():
 def main():
     args = get_args()
 
-    model_spotnet = get_model(args.model)
+    # model_spotnet = get_model(args.model)
     model_stardist = StarDist2D.from_pretrained('2D_versatile_fluo')
 
     scored = []
@@ -34,8 +35,9 @@ def main():
 
         for field, channel in test_files:
             channel = int(channel)
-            score = field_score(field=field, model_nuclei=model_stardist, model_foci=model_spotnet,
-                                nuclei_channel=args.channel_nuclei, channel=channel, factor=256)
+            score = field_score(field=field, model_nuclei=model_stardist, model_foci=args.model,
+                                nuclei_channel=args.channel_nuclei, channel=channel, factor=256,
+                                vicinity=-10)
             scored.append(score)
 
     scores = pd.DataFrame(scored)
