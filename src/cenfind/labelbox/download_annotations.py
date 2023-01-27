@@ -9,7 +9,7 @@ import tifffile as tf
 from dotenv import dotenv_values
 from tqdm import tqdm
 
-from cenfind.experiments.constants import PREFIX_REMOTE
+from cenfind.core.constants import PREFIX_REMOTE
 from cenfind.core.data import Dataset
 
 config = dotenv_values(".env")
