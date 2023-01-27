@@ -11,8 +11,8 @@ from datetime import datetime
 from spotipy.model import SpotNet
 
 from cenfind.core.data import Dataset
-from cenfind.experiments.constants import datasets, PREFIX_REMOTE
-from cenfind.experiments.train_spotnet import fetch_all_fields, config_unet
+from cenfind.core.constants import datasets, PREFIX_REMOTE
+from cenfind.cli.train_spotnet import fetch_all_fields, config_unet
 
 
 def main():

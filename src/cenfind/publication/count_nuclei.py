@@ -6,7 +6,7 @@ from tqdm import tqdm
 from cenfind.core.data import Dataset
 from cenfind.core.measure import flag, full_in_field, extract_nuclei
 from cenfind.core.outline import create_vignette
-from cenfind.experiments.constants import datasets, PREFIX_REMOTE
+from cenfind.core.constants import datasets, PREFIX_REMOTE
 
 config = dotenv_values('.env')
 

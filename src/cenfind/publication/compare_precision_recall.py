@@ -1,8 +1,8 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from cenfind.experiments.constants import ROOT_DIR
-from cenfind.experiments.constants import protein_positions
+from cenfind.core.constants import ROOT_DIR
+from cenfind.core.constants import protein_positions
 pd.options.display.max_columns =50
 
 def main():
