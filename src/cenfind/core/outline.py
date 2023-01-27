@@ -27,28 +27,40 @@ class ROI(ABC):
 class Centre(ROI):
     position: tuple
     idx: int = 0
-    label: str = ''
+    label: str = ""
     confidence: float = 0
-    parent: 'Centre' = None
+    parent: "Centre" = None
 
     @property
     def centre(self):
         row, col = self.position
         return int(row), int(col)
 
-    def draw(self, image, color=(0, 255, 0), annotation=True,
-             marker_type=cv2.MARKER_SQUARE, marker_size=8):
+    def draw(
+        self,
+        image,
+        color=(0, 255, 0),
+        annotation=True,
+        marker_type=cv2.MARKER_SQUARE,
+        marker_size=8,
+    ):
         r, c = self.centre
-        offset_col = int(.01 * image.shape[1])
+        offset_col = int(0.01 * image.shape[1])
 
         if annotation:
-            cv2.putText(image, f'{self.label} {self.idx}',
-                        org=(c + offset_col, r),
-                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                        fontScale=.4, thickness=1, color=color)
+            cv2.putText(
+                image,
+                f"{self.label} {self.idx}",
+                org=(c + offset_col, r),
+                fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                fontScale=0.4,
+                thickness=1,
+                color=color,
+            )
 
-        return cv2.drawMarker(image, (c, r), color, markerType=marker_type,
-                              markerSize=marker_size)
+        return cv2.drawMarker(
+            image, (c, r), color, markerType=marker_type, markerSize=marker_size
+        )
 
     def to_numpy(self):
         return np.asarray(self.centre)
@@ -63,7 +75,7 @@ class Contour(ROI):
     """Represent a blob using the row-column scheme."""
 
     contour: np.ndarray
-    label: str = ''
+    label: str = ""
     idx: int = 0
     confidence: float = 0
 
@@ -71,22 +83,26 @@ class Contour(ROI):
     def centre(self):
         moments = cv2.moments(self.contour)
 
-        centre_x = int(moments['m10'] / (moments['m00'] + 1e-5))
-        centre_y = int(moments['m01'] / (moments['m00'] + 1e-5))
-        return Centre((centre_y, centre_x), self.idx, self.label,
-                      self.confidence)
+        centre_x = int(moments["m10"] / (moments["m00"] + 1e-5))
+        centre_y = int(moments["m01"] / (moments["m00"] + 1e-5))
+        return Centre((centre_y, centre_x), self.idx, self.label, self.confidence)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, thickness=2, **kwargs):
         r, c = self.centre.centre
         cv2.drawContours(image, [self.contour], -1, color, thickness=thickness)
         if annotation:
-            cv2.putText(image, f'{self.label}{self.idx}',
-                        org=(c, r),
-                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                        fontScale=.8, thickness=2, color=color)
-            cv2.drawMarker(image, (c, r), color,
-                           markerType=cv2.MARKER_STAR,
-                           markerSize=10)
+            cv2.putText(
+                image,
+                f"{self.label}{self.idx}",
+                org=(c, r),
+                fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                fontScale=0.8,
+                thickness=2,
+                color=color,
+            )
+            cv2.drawMarker(
+                image, (c, r), color, markerType=cv2.MARKER_STAR, markerSize=10
+            )
         return image
 
 
@@ -95,17 +111,23 @@ def resize_image(data, factor=256):
     shrinkage_factor = int(height // factor)
     height_scaled = int(height // shrinkage_factor)
     width_scaled = int(width // shrinkage_factor)
-    data_resized = cv2.resize(data,
-                              dsize=(height_scaled, width_scaled),
-                              fx=1, fy=1,
-                              interpolation=cv2.INTER_NEAREST)
+    data_resized = cv2.resize(
+        data,
+        dsize=(height_scaled, width_scaled),
+        fx=1,
+        fy=1,
+        interpolation=cv2.INTER_NEAREST,
+    )
     return data_resized
 
-def draw_foci(data: np.ndarray, foci: list[Centre], radius=.4, pixel_size=.1025) -> np.ndarray:
-    mask = np.zeros(data.shape, dtype='uint8')
+
+def draw_foci(
+    data: np.ndarray, foci: list[Centre], radius=0.4, pixel_size=0.1025
+) -> np.ndarray:
+    mask = np.zeros(data.shape, dtype="uint8")
     for f in foci:
         r, c = f.to_numpy()
-        rr, cc = disk((r, c), int(radius/pixel_size))
+        rr, cc = disk((r, c), int(radius / pixel_size))
         try:
             mask[rr, cc] = 250
         except IndexError:
@@ -119,9 +141,9 @@ def _color_channel(data, color, out_range):
     :return:
     """
     data = rescale_intensity(data, out_range=out_range)
-    b = np.multiply(data, color[0], casting='unsafe')
-    g = np.multiply(data, color[1], casting='unsafe')
-    r = np.multiply(data, color[2], casting='unsafe')
+    b = np.multiply(data, color[0], casting="unsafe")
+    g = np.multiply(data, color[1], casting="unsafe")
+    r = np.multiply(data, color[2], casting="unsafe")
     res = cv2.merge([b, g, r])
     return res
 
@@ -139,12 +161,46 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
     layer_nuclei = field.channel(nuclei_index)
     layer_marker = field.channel(marker_index)
 
-    nuclei = _color_channel(layer_nuclei, (1, 0, 0), 'uint8')
-    marker = _color_channel(layer_marker, (0, 1, 0), 'uint8')
+    nuclei = _color_channel(layer_nuclei, (1, 0, 0), "uint8")
+    marker = _color_channel(layer_marker, (0, 1, 0), "uint8")
 
-    res = cv2.addWeighted(marker, 1, nuclei, .5, 0)
-    res = cv2.putText(res, f"{field.name} {marker_index}",
-                      (100, 100), cv2.FONT_HERSHEY_SIMPLEX,
-                      .8, (255, 255, 255), 1, cv2.LINE_AA)
+    res = cv2.addWeighted(marker, 1, nuclei, 0.5, 0)
+    res = cv2.putText(
+        res,
+        f"{field.name} {marker_index}",
+        (100, 100),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.8,
+        (255, 255, 255),
+        1,
+        cv2.LINE_AA,
+    )
 
     return res
+
+
+def save_visualisation(
+    field: Field, foci: list, nuclei: list, channel_centrioles: int, channel_nuclei: int, assigned: dict
+) -> np.ndarray:
+    background = create_vignette(field, marker_index=channel_centrioles, nuclei_index=channel_nuclei)
+
+    for focus in foci:
+        background = focus.draw(background, annotation=False)
+
+    for nucleus in nuclei:
+        background = nucleus.draw(background, annotation=False)
+
+    for n_pos, c_pos in assigned:
+        nuc = Centre(n_pos, label="Nucleus")
+
+        for sub_c in c_pos:
+            if sub_c:
+                cv2.arrowedLine(
+                    background,
+                    sub_c.to_cv2(),
+                    nuc.to_cv2(),
+                    color=(0, 255, 0),
+                    thickness=1,
+                )
+
+    return background

@@ -27,7 +27,7 @@ tensorflow = "2.9.0"
 spotipy-detector = "^0.1.0"
 
 [tool.poetry.scripts]
-cenfind = "cenfind.cli.main:main"
+cenfind = "cenfind.__main__:main"
 evaluate = "cenfind.cli.evaluate:main"
 vignettes = "cenfind.labelbox.vignettes:main"
 upload = "cenfind.labelbox.upload_labels:main"

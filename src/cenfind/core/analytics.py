@@ -70,17 +70,4 @@ def generate_figure(data, vmin, vmax):
     return fig
 
 
-def main():
-    path = '/data1/centrioles/20221019_ZScore_60X_EtOHvsFA_1/statistics/statistics.tsv'
-    data = pd.read_csv(path, sep='\t', header=[0, 1, 2])
-    vmin = 'A1'
-    vmax = 'A4'
 
-    data = prepare_data(data)
-    summed = reduce_data(data)
-    fig = generate_figure(summed, vmin=vmin, vmax=vmax)
-    fig.savefig('out/layout_score.png', dpi=300)
-
-
-if __name__ == '__main__':
-    main()

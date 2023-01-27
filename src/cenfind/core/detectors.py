@@ -6,6 +6,7 @@ import functools
 
 import cv2
 import numpy as np
+import tensorflow as tf
 from csbdeep.utils import normalize
 from spotipy.utils import normalize_fast2d
 from spotipy.model import SpotNet
@@ -15,6 +16,9 @@ from cenfind.core.data import Field
 from cenfind.core.outline import resize_image
 from cenfind.core.outline import Centre, Contour
 
+tf.get_logger().setLevel("ERROR")
+np.random.seed(1)
+tf.random.set_seed(2)
 
 @functools.lru_cache(maxsize=None)
 def get_model(model):
