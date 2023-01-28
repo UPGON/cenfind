@@ -19,12 +19,17 @@ def register_parser(parent_subparsers):
     parser.add_argument("dataset", type=Path, help="Path to the dataset")
     parser.add_argument("model", type=Path, help="Absolute path to the model folder")
     parser.add_argument(
-        "channel_nuclei",
+        "--channel_nuclei",
         type=int,
+        required=True,
         help="Channel index for nuclei segmentation, e.g., 0 or 3",
     )
     parser.add_argument(
-        "channels", nargs="+", type=int, help="Channel indices to analyse, e.g., 1 2 3"
+        "--channel_centrioles",
+        nargs="+",
+        type=int,
+        required=True,
+        help="Channel indices to analyse, e.g., 1 2 3",
     )
     parser.add_argument(
         "--vicinity",
@@ -38,12 +43,6 @@ def register_parser(parent_subparsers):
         default=256,
         help="Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:",
     )
-    parser.add_argument(
-        "--projection_suffix",
-        type=str,
-        default="",
-        help="Projection suffix (`_max` or `_Projected`); empty if not specified.",
-    )
     parser.add_argument("--cpu", action="store_true", help="Only use the cpu")
 
     return parser
@@ -52,15 +51,14 @@ def register_parser(parent_subparsers):
 def run(args):
     if not Path(args.model).exists():
         raise FileNotFoundError(f"{args.model} does not exist")
-    visualisation = True
 
-    if args.channel_nuclei in set(args.channels):
+    if args.channel_nuclei in set(args.channel_centrioles):
         raise ValueError("Nuclei channel cannot be in channels")
 
     if args.cpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-    dataset = Dataset(args.dataset, projection_suffix=args.projection_suffix)
+    dataset = Dataset(args.dataset)
 
     if not any(dataset.projections.iterdir()):
         print(
@@ -75,9 +73,9 @@ def run(args):
         print("Index for nuclei (%s) out of index range" % args.channel_nuclei)
         sys.exit()
 
-    if not set(args.channels).issubset(set(range(channels))):
+    if not set(args.channel_centrioles).issubset(set(range(channels))):
         print(
-            "Channels (%s) out of channel range %s" % args.channels,
+            "Channels (%s) out of channel range %s" % args.channel_centrioles,
             set(range(channels)),
         )
         sys.exit()
@@ -96,7 +94,7 @@ def run(args):
         print("Processing %s" % field.name)
         pbar.set_description(f"{field.name}")
 
-        for ch in args.channels:
+        for ch in args.channel_centrioles:
             print("Processing %s / %d" % (field.name, ch))
             try:
                 foci, nuclei, assigned, score = field_score(
@@ -111,7 +109,7 @@ def run(args):
                 predictions_path = (
                     dataset.predictions
                     / "centrioles"
-                    / f"{field.name}{args.projection_suffix}_C{ch}.txt"
+                    / f"{field.name}{dataset.projection_suffix}_C{ch}.txt"
                 )
                 save_foci(foci, predictions_path)
                 print(
@@ -128,16 +126,15 @@ def run(args):
                 )
                 scores.append(score)
 
-                if visualisation:
-                    print(
-                        "Writing visualisations for (%s), channel %s" % (field.name, ch)
-                    )
-                    vis = save_visualisation(
-                        field, foci, ch, nuclei, args.channel_nuclei, assigned
-                    )
-                    tif.imwrite(
-                        dataset.visualisation / f"{field.name}_C{ch}_pred.png", vis
-                    )
+                print(
+                    "Writing visualisations for (%s), channel %s" % (field.name, ch)
+                )
+                vis = save_visualisation(
+                    field, foci, ch, nuclei, args.channel_nuclei, assigned
+                )
+                tif.imwrite(
+                    dataset.visualisation / f"{field.name}_C{ch}_pred.png", vis
+                )
 
             except ValueError as e:
                 print("%s (%s)" % (e, field.name))
@@ -148,5 +145,4 @@ def run(args):
     flattened = [leaf for tree in scores for leaf in tree]
     scores_df = pd.DataFrame(flattened)
     scores_df.to_csv(dataset.statistics / f"scores_df.tsv", sep="\t", index=False)
-    print("Writing raw scores to scores_df.tsv")
-    print("All fields in (%s) have been processed" % dataset.path.name)
+    print("Writing raw scores to %s" % dataset.statistics / f"scores_df.tsv")

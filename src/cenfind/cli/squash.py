@@ -20,7 +20,8 @@ def run(args):
         sys.exit()
 
     if not dataset.raw.exists():
-        print(f"Folder raw/ not found.")
+        print(f"ERROR: Folder raw/ does not exist. Make sure to move all your images under raw/")
         sys.exit()
 
     dataset.write_projections()
+    print("Projections saved under %s" % dataset.projections)

@@ -7,7 +7,7 @@ from cenfind.core.data import Dataset
 from cenfind.core.outline import save_visualisation, Centre
 
 def register_parser(parent_subparsers: argparse.ArgumentParser):
-    parser = parent_subparsers.add_parser("predict", help="Predict centrioles on new dataset")
+    parser = parent_subparsers.add_parser("predict", help="Predict centrioles on new dataset and save under visualisations/runs/<model_name>")
     parser.add_argument("dataset", type=Path, help="Path to the dataset folder")
     parser.add_argument("model", type=Path, help="Path to the model")
     parser.add_argument("--channel_nuclei", type=int, required=True, help="Index of nuclei channel")

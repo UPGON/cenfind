@@ -16,7 +16,7 @@ def register_parser(parent_subparsers):
     parser.add_argument('--projection_suffix',
                         type=str,
                         default='',
-                        help='the suffix indicating projection, e.g., `_max` or `_Projected`')
+                        help='the suffix indicating projection, e.g., `_max` or `_Projected`, empty if not specified')
 
     return parser
 
