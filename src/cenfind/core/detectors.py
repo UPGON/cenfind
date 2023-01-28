@@ -16,7 +16,6 @@ from cenfind.core.data import Field
 from cenfind.core.outline import resize_image
 from cenfind.core.outline import Centre, Contour
 
-tf.get_logger().setLevel("ERROR")
 np.random.seed(1)
 tf.random.set_seed(2)
 
