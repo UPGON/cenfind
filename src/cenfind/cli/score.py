@@ -60,7 +60,7 @@ def run(args):
     if args.cpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-    dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
+    dataset = Dataset(args.dataset, projection_suffix=args.projection_suffix)
 
     if not any(dataset.projections.iterdir()):
         print(
@@ -133,7 +133,7 @@ def run(args):
                         "Writing visualisations for (%s), channel %s" % (field.name, ch)
                     )
                     vis = save_visualisation(
-                        field, foci, nuclei, ch, args.channel_nuclei, assigned
+                        field, foci, ch, nuclei, args.channel_nuclei, assigned
                     )
                     tif.imwrite(
                         dataset.visualisation / f"{field.name}_C{ch}_pred.png", vis
