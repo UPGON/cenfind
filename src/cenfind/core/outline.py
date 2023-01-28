@@ -180,12 +180,22 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
 
 
 def save_visualisation(
-    field: Field, foci: list, nuclei: list, channel_centrioles: int, channel_nuclei: int, assigned: dict
+    field: Field,
+    foci: list,
+    channel_centrioles: int,
+    nuclei: list = None,
+    channel_nuclei: int = None,
+    assigned: dict = None,
 ) -> np.ndarray:
-    background = create_vignette(field, marker_index=channel_centrioles, nuclei_index=channel_nuclei)
+    background = create_vignette(
+        field, marker_index=channel_centrioles, nuclei_index=channel_nuclei
+    )
 
     for focus in foci:
         background = focus.draw(background, annotation=False)
+
+    if nuclei is None:
+        return background
 
     for nucleus in nuclei:
         background = nucleus.draw(background, annotation=False)
