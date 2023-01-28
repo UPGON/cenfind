@@ -16,13 +16,13 @@ def register_parser(parent_subparsers):
     parser.add_argument(
         "--performances_file",
         type=Path,
-        help="Path to the destination file for performances",
+        help="Path of the performance file, STDOUT if not specified",
     )
     parser.add_argument(
         "--tolerance",
         type=int,
         default=3,
-        help="Distance (in pixels) above which two points are deemed not matching (default=3)",
+        help="Distance in pixels below which two points are deemed matching",
     )
 
     return parser

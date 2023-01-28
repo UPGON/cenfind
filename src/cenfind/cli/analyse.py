@@ -21,7 +21,7 @@ def register_parser(parent_subparsers):
 
 
 def run(args):
-    dataset = Dataset(args.path)
+    dataset = Dataset(args.dataset)
     
     if args.by not in UNITS:
         print(f"ERROR: `by` is not in {UNITS} ({{args.by}})")
@@ -45,10 +45,10 @@ def run(args):
     if args.by != 'well':
         return 0
     
-    data = pd.read_csv(path_stats , sep='\t', header=[0, 1, 2])
-    vmin = 'A1'
-    vmax = 'A4'
-    data = prepare_data(data)
-    summed = reduce_data(data)
-    fig = generate_figure(summed, vmin=vmin, vmax=vmax)
-    fig.savefig(dataset.statistics / 'layout_score.png', dpi=300)
+    # data = pd.read_csv(path_stats , sep='\t', header=[0, 1, 2])
+    # vmin = 'A1'
+    # vmax = 'A4'
+    # data = prepare_data(data)
+    # summed = reduce_data(data)
+    # fig = generate_figure(summed, vmin=vmin, vmax=vmax)
+    # fig.savefig(dataset.statistics / 'layout_score.png', dpi=300)

@@ -33,9 +33,11 @@ def reduce_data(data):
 def plot_layout(data, channel, ax, vmin, vmax):
     vmin = str_to_tuple(vmin)
     vmax = str_to_tuple(vmax)
+    _min = data[vmin]
+    _max = data[vmax]
     rows, cols = data.shape
     ax.set_title(f"Channel {channel}")
-    ax.imshow(data, cmap='cividis', vmin=vmin, vmax=vmax)
+    ax.imshow(data, cmap='cividis', vmin=_min, vmax=_max)
     rows_labels = list('abcdefgh'.upper())
     cols_labels = [str(i + 1) for i in range(cols)]
     ax.set_xticks(np.arange(cols), labels=cols_labels)

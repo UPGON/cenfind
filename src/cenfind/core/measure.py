@@ -114,6 +114,7 @@ def assign(foci: list, nuclei: list, vicinity: float, pixel_size: float) -> list
     return pairs
 
 
+# TODO: refactor as a field method
 def field_score(field: Field,
                 model_nuclei: StarDist2D,
                 model_foci: Path,
@@ -154,7 +155,7 @@ def field_score(field: Field,
                        })
     return foci, nuclei, assigned, scores
 
-
+# TODO: refactor as a fiield method
 def field_metrics(field: Field,
                   channel: int,
                   annotation: np.ndarray,
@@ -203,6 +204,7 @@ def field_metrics(field: Field,
     return perf
 
 
+# TODO: refactor as a field method
 def dataset_metrics(dataset: Dataset, split: str, model: Path, tolerance, threshold) -> tuple[dict, list]:
     perfs = []
     prob_maps = {}
