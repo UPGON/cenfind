@@ -6,12 +6,18 @@ from labelbox import Client
 
 from cenfind.core.data import Dataset
 
+
 def register_parser(parent_subparsers):
-    parser = parent_subparsers.add_parser("upload", help="Upload the vignettes to labelbox")
-    parser.add_argument("path", type=Path, help="Path to the dataset with existing vignettes")
+    parser = parent_subparsers.add_parser(
+        "upload", help="Upload the vignettes to labelbox"
+    )
+    parser.add_argument(
+        "path", type=Path, help="Path to the dataset with existing vignettes"
+    )
     parser.add_argument("--env", type=Path, help="Path to the .env file")
 
     return parser
+
 
 def run(args):
     ds = Dataset(args.path)

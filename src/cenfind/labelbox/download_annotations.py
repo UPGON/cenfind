@@ -1,5 +1,4 @@
 import logging
-import sys
 import re
 from pathlib import Path
 import PIL
@@ -102,9 +101,15 @@ def main():
             try:
                 positions = download_centrioles(label)
                 np.savetxt(dst_centrioles, positions, delimiter=",", fmt="%u")
-                logger.info("Saving centriole positions of %s to %s" % (external_name, dst_centrioles))
+                logger.info(
+                    "Saving centriole positions of %s to %s"
+                    % (external_name, dst_centrioles)
+                )
             except FileExistsError:
-                logger.info("Skipping centriole positions for %s to %s" % (external_name, dst_nuclei))
+                logger.info(
+                    "Skipping centriole positions for %s to %s"
+                    % (external_name, dst_centrioles)
+                )
                 continue
 
         if nuclei:

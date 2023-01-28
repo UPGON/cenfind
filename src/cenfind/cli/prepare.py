@@ -3,6 +3,7 @@ from pathlib import Path
 from cenfind.core.data import Dataset
 import pytomlpp
 
+
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
         "prepare", help="Prepare the dataset structure"
@@ -23,6 +24,7 @@ def register_parser(parent_subparsers):
 
     return parser
 
+
 def run(args):
     """Set up the dataset folder with default directories"""
 
@@ -30,7 +32,7 @@ def run(args):
         print(f"The path `{args.path}` does not exist.")
         sys.exit()
 
-    with open(args.dataset / 'metadata.toml', 'w') as f:
+    with open(args.dataset / "metadata.toml", "w") as f:
         content = pytomlpp.dumps({"projection_suffix": args.projection_suffix})
         f.write(content)
 

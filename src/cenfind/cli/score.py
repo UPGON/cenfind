@@ -126,15 +126,11 @@ def run(args):
                 )
                 scores.append(score)
 
-                print(
-                    "Writing visualisations for (%s), channel %s" % (field.name, ch)
-                )
+                print("Writing visualisations for (%s), channel %s" % (field.name, ch))
                 vis = save_visualisation(
                     field, foci, ch, nuclei, args.channel_nuclei, assigned
                 )
-                tif.imwrite(
-                    dataset.visualisation / f"{field.name}_C{ch}_pred.png", vis
-                )
+                tif.imwrite(dataset.visualisation / f"{field.name}_C{ch}_pred.png", vis)
 
             except ValueError as e:
                 print("%s (%s)" % (e, field.name))

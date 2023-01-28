@@ -6,15 +6,15 @@ from pathlib import Path
 from typing import List, Tuple, Union
 
 import numpy as np
+import pytomlpp
 import tifffile as tf
 from tqdm import tqdm
-import pytomlpp
 
 
 @dataclass
 class Field:
     name: str
-    dataset: 'Dataset'
+    dataset: "Dataset"
 
     @property
     def stack(self) -> np.ndarray:
@@ -55,9 +55,11 @@ class Field:
         :return:
         """
         name = f"{self.name}{self.dataset.projection_suffix}_C{channel}"
-        path_annotation = self.dataset.path / 'annotations' / 'centrioles' / f"{name}.txt"
+        path_annotation = (
+            self.dataset.path / "annotations" / "centrioles" / f"{name}.txt"
+        )
         try:
-            annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=',')
+            annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=",")
             if len(annotation) == 0:
                 return annotation
             else:
@@ -67,7 +69,7 @@ class Field:
 
     def mask(self, channel) -> np.ndarray:
         mask_name = f"{self.name}{self.dataset.projection_suffix}_C{channel}.tif"
-        path_annotation = self.dataset.path / 'annotations' / 'cells' / mask_name
+        path_annotation = self.dataset.path / "annotations" / "cells" / mask_name
         if path_annotation.exists():
             return tf.imread(str(path_annotation))
         else:
@@ -78,11 +80,15 @@ class Field:
         Return a string of the form 'ZYCX' or 'CZYX'
         :return:
         """
-        path_raw = str(self.dataset.path / 'raw' / f"{self.name}{self.dataset.image_type}")
+        path_raw = str(
+            self.dataset.path / "raw" / f"{self.name}{self.dataset.image_type}"
+        )
         with tf.TiffFile(path_raw) as tif:
             try:
                 order = tif.series[0].axes
-            except ValueError(f"Could not retrieve metadata for axes order for {path_raw}"):
+            except ValueError(
+                f"Could not retrieve metadata for axes order for {path_raw}"
+            ):
                 order = None
 
         return order
@@ -93,10 +99,11 @@ class Dataset:
     """
     Represent a dataset structure
     """
+
     path: Union[str, Path]
     projection_suffix: str = None
-    image_type: str = '.ome.tif'
-    pixel_size: float = .1025
+    image_type: str = ".ome.tif"
+    pixel_size: float = 0.1025
     has_projections: bool = False
     is_setup: bool = False
 
@@ -107,22 +114,22 @@ class Dataset:
             print(f"Dataset does not exist ({self.path})")
             sys.exit()
 
-        self.raw = self.path / 'raw'
-        self.projections = self.path / 'projections'
-        self.predictions = self.path / 'predictions'
-        self.visualisation = self.path / 'visualisations'
-        self.statistics = self.path / 'statistics'
-        self.vignettes = self.path / 'vignettes'
-        self.path_annotations = self.path / 'annotations'
-        self.path_annotations_centrioles = self.path_annotations / 'centrioles'
-        self.path_annotations_cells = self.path_annotations / 'cells'
+        self.raw = self.path / "raw"
+        self.projections = self.path / "projections"
+        self.predictions = self.path / "predictions"
+        self.visualisation = self.path / "visualisations"
+        self.statistics = self.path / "statistics"
+        self.vignettes = self.path / "vignettes"
+        self.path_annotations = self.path / "annotations"
+        self.path_annotations_centrioles = self.path_annotations / "centrioles"
+        self.path_annotations_cells = self.path_annotations / "cells"
 
         self.has_projections = bool(len([f for f in self.projections.iterdir()]))
-        
+
         if self.projection_suffix is None:
             try:
-                metadata = pytomlpp.load(self.path / 'metadata.toml')
-                self.projection_suffix = metadata['projection_suffix']
+                metadata = pytomlpp.load(self.path / "metadata.toml")
+                self.projection_suffix = metadata["projection_suffix"]
             except FileNotFoundError as e:
                 print(e)
                 sys.exit()
@@ -134,8 +141,8 @@ class Dataset:
         """
         self.projections.mkdir(exist_ok=True)
         self.predictions.mkdir(exist_ok=True)
-        (self.predictions / 'centrioles').mkdir(exist_ok=True)
-        (self.predictions / 'nuclei').mkdir(exist_ok=True)
+        (self.predictions / "centrioles").mkdir(exist_ok=True)
+        (self.predictions / "nuclei").mkdir(exist_ok=True)
         self.statistics.mkdir(exist_ok=True)
         self.visualisation.mkdir(exist_ok=True)
         self.vignettes.mkdir(exist_ok=True)
@@ -150,8 +157,8 @@ class Dataset:
         """
         Construct a list of Fields using the fields listed in fields.txt.
         """
-        fields_path = self.path / 'fields.txt'
-        with open(fields_path, 'r') as f:
+        fields_path = self.path / "fields.txt"
+        with open(fields_path, "r") as f:
             fields_list = f.read().splitlines()
         return [Field(field_name, self) for field_name in fields_list]
 
@@ -168,39 +175,47 @@ class Dataset:
             folder = self.raw
 
         def _field_name(file_name: str):
-            return file_name.split('.')[0].rstrip(self.projection_suffix)
+            return file_name.split(".")[0].rstrip(self.projection_suffix)
 
-        fields = [_field_name(str(f.name)) for f in folder.iterdir() if not str(f).startswith('.')]
+        fields = [
+            _field_name(str(f.name))
+            for f in folder.iterdir()
+            if not str(f).startswith(".")
+        ]
 
-        with open(self.path / 'fields.txt', 'w') as f:
+        with open(self.path / "fields.txt", "w") as f:
             for field in fields:
-                f.write(field + '\n')
+                f.write(field + "\n")
 
     def write_projections(self, axis=1) -> None:
         for field in tqdm(self.fields):
             projection = field.stack.max(axis)
-            tf.imwrite(self.projections / f"{field.name}{self.projection_suffix}.tif",
-                       projection,
-                       photometric='minisblack',
-                       imagej=True,
-                       resolution=(1 / self.pixel_size, 1 / self.pixel_size),
-                       metadata={'unit': 'um'})
+            tf.imwrite(
+                self.projections / f"{field.name}{self.projection_suffix}.tif",
+                projection,
+                photometric="minisblack",
+                imagej=True,
+                resolution=(1 / self.pixel_size, 1 / self.pixel_size),
+                metadata={"unit": "um"},
+            )
         self.has_projections = True
 
     def write_train_test(self, channels: list):
-        train_fields, test_fields = split_pairs(self.fields, p=.9)
+        train_fields, test_fields = split_pairs(self.fields, p=0.9)
         pairs_train = choose_channel(train_fields, channels)
         pairs_test = choose_channel(test_fields, channels)
 
-        with open(self.path / 'train.txt', 'w') as f:
+        with open(self.path / "train.txt", "w") as f:
             for fov, channel in pairs_train:
                 f.write(f"{fov.name},{channel}\n")
 
-        with open(self.path / 'test.txt', 'w') as f:
+        with open(self.path / "test.txt", "w") as f:
             for fov, channel in pairs_test:
                 f.write(f"{fov.name},{channel}\n")
 
-    def pairs(self, split: str = None, channel_id: int = None) -> List[Tuple['Field', int]]:
+    def pairs(
+        self, split: str = None, channel_id: int = None
+    ) -> List[Tuple["Field", int]]:
         """
         Fetch the fields of view for train or test
         :param channel_id:
@@ -209,22 +224,26 @@ class Dataset:
         """
 
         if split is None:
-            return self.read_split('train', channel_id) + self.read_split('test', channel_id)
+            return self.read_split("train", channel_id) + self.read_split(
+                "test", channel_id
+            )
         else:
             return self.read_split(split, channel_id)
 
     def read_split(self, split_type, channel_id=None) -> List[Tuple[Field, int]]:
-        with open(self.path / f'{split_type}.txt', 'r') as f:
+        with open(self.path / f"{split_type}.txt", "r") as f:
             files = f.read().splitlines()
 
-        files = [f.split(',') for f in files if f]
+        files = [f.split(",") for f in files if f]
         if channel_id:
             return [(Field(str(f[0]), self), int(channel_id)) for f in files]
         else:
             return [(Field(str(f[0]), self), int(f[1])) for f in files]
 
 
-def split_pairs(fields: list[Field], p=.9, seed=1993) -> tuple[list[Field], list[Field]]:
+def split_pairs(
+    fields: list[Field], p=0.9, seed=1993
+) -> tuple[list[Field], list[Field]]:
     """
     Split a list of pairs (field, channel).
 
@@ -246,4 +265,6 @@ def split_pairs(fields: list[Field], p=.9, seed=1993) -> tuple[list[Field], list
 
 def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
     """Pick a channel for each field."""
-    return [(field, int(channel)) for field, channel in itertools.product(fields, channels)]
+    return [
+        (field, int(channel)) for field, channel in itertools.product(fields, channels)
+    ]
