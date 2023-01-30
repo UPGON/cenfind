@@ -6,9 +6,9 @@ from cenfind.core.data import Dataset, Field
 
 
 class TestData:
-    path_dataset = Path('./dataset_test')
-    field_name = 'RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000'
-    dataset = Dataset(path=path_dataset, image_type='.ome.tif')
+    path_dataset = Path("./dataset_test")
+    field_name = "RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000"
+    dataset = Dataset(path=path_dataset, image_type=".ome.tif")
     field = Field(field_name, dataset)
     stack = field.stack
     projection = field.projection
@@ -16,7 +16,7 @@ class TestData:
 
     def test_write_fields(self):
         self.dataset.write_fields()
-        assert (self.dataset.path / 'fields.txt').is_file() == True
+        assert (self.dataset.path / "fields.txt").is_file()
 
     def test_write_projections(self):
         self.dataset.write_projections()
@@ -28,8 +28,16 @@ class TestData:
 
     def test_dataset(self):
         assert self.dataset.path == self.path_dataset
-        assert self.dataset.pairs() == [(Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000', self.dataset), 1),
-                                        (Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002', self.dataset), 1)]
+        assert self.dataset.pairs() == [
+            (
+                Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000", self.dataset),
+                1,
+            ),
+            (
+                Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002", self.dataset),
+                1,
+            ),
+        ]
 
     def test_stack(self):
         assert self.stack.ndim == 4
@@ -45,8 +53,9 @@ class TestData:
         assert self.channel.shape == (2048, 2048)
         assert self.dataset == self.dataset
 
+
 class TestDataNotExisting:
-    path_dataset = Path('/not/existing')
+    path_dataset = Path("/not/existing")
 
     def test_dataset_initialisation(self):
         with pytest.raises(SystemExit):

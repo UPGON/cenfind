@@ -97,7 +97,7 @@ def main():
 
         if centrioles:
             annotation_name = re.sub(f".{extension}$", ".txt", external_name)
-            dst_centrioles = dataset.path_annotations_centrioles / annotation_name
+            dst_centrioles = dataset.annotations_centrioles / annotation_name
             try:
                 positions = download_centrioles(label)
                 np.savetxt(dst_centrioles, positions, delimiter=",", fmt="%u")
@@ -116,7 +116,7 @@ def main():
             mask_name = re.sub(
                 f"C\d\.{extension}$", f"{projection_suffix}_C0.tif", external_name
             )
-            dst_nuclei = dataset.path_annotations_cells / mask_name
+            dst_nuclei = dataset.annotations_cells / mask_name
             try:
                 mask = download_nuclei(label, dst_nuclei, logger=logger)
                 tf.imwrite(dst_nuclei, mask)

@@ -30,7 +30,7 @@ def register_parser(parent_subparsers):
 
 def run(args):
     dataset = Dataset(args.dataset)
-    if not any(dataset.path_annotations_centrioles.iterdir()):
+    if not any(dataset.annotations_centrioles.iterdir()):
         print(f"ERROR: The dataset {dataset.path.name} has no annotation. You can run `cenfind predict` instead")
         sys.exit(2)
 

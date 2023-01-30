@@ -49,6 +49,7 @@ def register_parser(parent_subparsers):
 
 
 def run(args):
+
     if not Path(args.model).exists():
         raise FileNotFoundError(f"{args.model} does not exist")
 
@@ -89,6 +90,8 @@ def run(args):
 
     pbar = tqdm(dataset.fields)
     from cenfind.core.measure import field_score
+    path_run = dataset.results / args.model.name
+    path_run.mkdir(exist_ok=True)
 
     for field in pbar:
         print("Processing %s" % field.name)
@@ -107,8 +110,7 @@ def run(args):
                     channel=ch,
                 )
                 predictions_path = (
-                    dataset.predictions
-                    / "centrioles"
+                    dataset.predictions_centrioles
                     / f"{field.name}{dataset.projection_suffix}_C{ch}.txt"
                 )
                 save_foci(foci, predictions_path)
@@ -140,5 +142,5 @@ def run(args):
 
     flattened = [leaf for tree in scores for leaf in tree]
     scores_df = pd.DataFrame(flattened)
-    scores_df.to_csv(dataset.statistics / f"scores_df.tsv", sep="\t", index=False)
-    print("Writing raw scores to %s" % dataset.statistics / f"scores_df.tsv")
+    scores_df.to_csv(dataset.statistics / "scores.tsv", sep="\t", index=False)
+    print("Writing raw scores to %s" % dataset.statistics / "scores.tsv")
