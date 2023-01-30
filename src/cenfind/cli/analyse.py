@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 
 import pandas as pd
-
 from cenfind.core.constants import UNITS
 from cenfind.core.data import Dataset
 from cenfind.core.measure import field_score_frequency
@@ -45,11 +44,3 @@ def run(args):
 
     if args.by != "well":
         return 0
-
-    # data = pd.read_csv(path_stats , sep='\t', header=[0, 1, 2])
-    # vmin = 'A1'
-    # vmax = 'A4'
-    # data = prepare_data(data)
-    # summed = reduce_data(data)
-    # fig = generate_figure(summed, vmin=vmin, vmax=vmax)
-    # fig.savefig(dataset.statistics / 'layout_score.png', dpi=300)

@@ -119,7 +119,7 @@ class Dataset:
         self.annotations_centrioles = self.annotations / "centrioles"
         self.annotations_cells = self.annotations / "cells"
 
-        self.results = self.path / "results"
+        self.results = self.path
         self.predictions = self.results / "predictions"
         self.predictions_centrioles = self.predictions / "centrioles"
         self.predictions_cells = self.predictions / "cells"
@@ -243,7 +243,6 @@ class Dataset:
             return [(Field(str(f[0]), self), int(channel_id)) for f in files]
         else:
             return [(Field(str(f[0]), self), int(f[1])) for f in files]
-
     def _choose_channel(
         self, fields: list[Field], channels: list[int]
     ) -> list[tuple[Field, int]]:
@@ -253,9 +252,7 @@ class Dataset:
             for field, channel in itertools.product(fields, channels)
         ]
 
-    def _split_pairs(
-        self, fields: list[Field], p=0.9, seed=1993
-    ) -> tuple[list[Field], list[Field]]:
+    def _split_pairs(self, fields: list[Field], p=0.9, seed=1993) -> tuple[list[Field], list[Field]]:
         """
         Split a list of pairs (field, channel).
 
