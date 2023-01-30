@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cenfind"
-version = "0.0.0"
+version = "0.11.1"
 description = "Score cells for centrioles in IF data"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
 repository = "https://github.com/UPGON/cenfind"
