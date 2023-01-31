@@ -59,17 +59,6 @@ def download_nuclei(label):
 
 
 def main():
-    path_log = Path("./logs")
-    path_log.mkdir(exist_ok=True)
-
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-
-    formatter = logging.Formatter("%(asctime)s %(message)s")
-    fh = logging.FileHandler(path_log / "download.log")
-    fh.setFormatter(formatter)
-
-    logger.addHandler(fh)
 
     lb = labelbox.Client(api_key=config["LABELBOX_API_KEY"])
     project = lb.get_project(config["PROJECT_CENTRIOLES"])
@@ -93,7 +82,7 @@ def main():
         external_name = label.data.external_id
         extension = external_name.split(".")[-1]
 
-        logger.info("Processing %s / %s" % (path_dataset, external_name))
+        print("Processing %s / %s" % (path_dataset, external_name))
 
         if centrioles:
             annotation_name = re.sub(f".{extension}$", ".txt", external_name)
@@ -101,12 +90,12 @@ def main():
             try:
                 positions = download_centrioles(label)
                 np.savetxt(dst_centrioles, positions, delimiter=",", fmt="%u")
-                logger.info(
+                print(
                     "Saving centriole positions of %s to %s"
                     % (external_name, dst_centrioles)
                 )
             except FileExistsError:
-                logger.info(
+                print(
                     "Skipping centriole positions for %s to %s"
                     % (external_name, dst_centrioles)
                 )
@@ -118,14 +107,14 @@ def main():
             )
             dst_nuclei = dataset.annotations_cells / mask_name
             try:
-                mask = download_nuclei(label, dst_nuclei, logger=logger)
+                mask = download_nuclei(label, dst_nuclei)
                 tf.imwrite(dst_nuclei, mask)
-                logger.info("Saving mask of %s to %s" % (external_name, dst_nuclei))
+                print("Saving mask of %s to %s" % (external_name, dst_nuclei))
             except FileExistsError:
-                logger.info("Skipping mask of %s to %s" % (external_name, dst_nuclei))
+                print("Skipping mask of %s to %s" % (external_name, dst_nuclei))
                 continue
 
-    logger.info("FINISHED")
+    print("FINISHED")
 
 
 if __name__ == "__main__":
