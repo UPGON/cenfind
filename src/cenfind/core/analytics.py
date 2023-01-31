@@ -15,12 +15,6 @@ def fraction_zero(x):
     return round(frac, 3)
 
 
-def reduce_data(data):
-    data["frac_zero"] = data.apply(fraction_zero, axis=1)
-    summed = data.reset_index()
-    return summed
-
-
 def plot_layout(data, channel, ax, vmin=0, vmax=1):
     """
     Build heatmap for one channel
@@ -47,8 +41,10 @@ def plot_layout(data, channel, ax, vmin=0, vmax=1):
     return ax
 
 
-def reshape_data(data, channel, shape):
+def fill_plate(data, channel, shape):
     rows, cols = shape
+    for entry in data.iterrows():
+        ...
     return (
         data.loc[data["channel"] == channel, "frac_zero"].to_numpy().reshape(rows, cols)
     )
@@ -63,7 +59,7 @@ def generate_figure(data, vmin=0, vmax=1):
             ax = axes[c]
         except TypeError:
             ax = axes
-        summed_reshaped = reshape_data(data, channel, shape=shape)
+        summed_reshaped = fill_plate(data, channel, shape=shape)
         plot_layout(summed_reshaped, channel, ax, vmin=vmin, vmax=vmax)
 
     fig.suptitle("Fraction of centriole-free cells")
