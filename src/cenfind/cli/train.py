@@ -135,7 +135,7 @@ def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
         "train", help="Train a Spotnet model using the datasets"
     )
-    parser.add_argument("datasets", type=Path, help="Path to the dataset")
+    parser.add_argument("datasets", type=Path, nargs="+", help="Path to the dataset")
     parser.add_argument(
         "--model_path", type=Path, required=True, help="Path to the model fit"
     )
