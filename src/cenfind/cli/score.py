@@ -87,6 +87,9 @@ def run(args):
 
     scores = []
 
+    path_visualisation_model = dataset.visualisation / args.model.name
+    path_visualisation_model.mkdir(exist_ok=True)
+
     pbar = tqdm(dataset.fields)
     from cenfind.core.measure import field_score
 
@@ -130,7 +133,7 @@ def run(args):
                 vis = save_visualisation(
                     field, foci, ch, nuclei, args.channel_nuclei, assigned
                 )
-                tif.imwrite(dataset.visualisation / f"{field.name}_C{ch}_pred.png", vis)
+                tif.imwrite(path_visualisation_model / f"{field.name}_C{ch}_pred.png", vis)
 
             except ValueError as e:
                 print("%s (%s)" % (e, field.name))
@@ -140,5 +143,5 @@ def run(args):
 
     flattened = [leaf for tree in scores for leaf in tree]
     scores_df = pd.DataFrame(flattened)
-    scores_df.to_csv(dataset.statistics / f"scores_df.tsv", sep="\t", index=False)
-    print("Writing raw scores to %s" % dataset.statistics / f"scores_df.tsv")
+    scores_df.to_csv(dataset.statistics / "scores_df.tsv", sep="\t", index=False)
+    print("Writing raw scores to %s" % dataset.statistics / "scores_df.tsv")

@@ -1,9 +1,13 @@
 import sys
+import os
+import contextlib
 from pathlib import Path
 
 import pandas as pd
+import tifffile as tif
 
 from cenfind.core.data import Dataset
+from cenfind.core.outline import save_visualisation
 
 
 def register_parser(parent_subparsers):
@@ -24,6 +28,25 @@ def register_parser(parent_subparsers):
         default=3,
         help="Distance in pixels below which two points are deemed matching",
     )
+    parser.add_argument(
+        "--channel_nuclei",
+        type=int,
+        required=True,
+        help="Channel index for nuclei segmentation, e.g., 0 or 3",
+    )
+    parser.add_argument(
+        "--channel_centrioles",
+        nargs="+",
+        type=int,
+        required=True,
+        help="Channel indices to analyse, e.g., 1 2 3",
+    )
+    parser.add_argument(
+        "--vicinity",
+        type=int,
+        default=-5,
+        help="Distance threshold in micrometer (default: -5 um)",
+    )
 
     return parser
 
@@ -34,14 +57,43 @@ def run(args):
         print(f"ERROR: The dataset {dataset.path.name} has no annotation. You can run `cenfind predict` instead")
         sys.exit(2)
 
-    from cenfind.core.measure import dataset_metrics
+    from cenfind.core.measure import dataset_metrics, field_score
     _, performance = dataset_metrics(
         dataset, split="test", model=args.model, tolerance=args.tolerance, threshold=.5
     )
+    from stardist.models import StarDist2D
+    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+        model_stardist = StarDist2D.from_pretrained("2D_versatile_fluo")
+
+    path_visualisation_model = dataset.visualisation / args.model.name
+    path_visualisation_model.mkdir(exist_ok=True)
+
+    for field, channel in dataset.pairs('test'):
+        foci, nuclei, assigned, score = field_score(
+                    field=field,
+                    model_nuclei=model_stardist,
+                    model_foci=args.model,
+                    nuclei_channel=args.channel_nuclei,
+                    vicinity=args.vicinity,
+                    channel=channel,
+                )
+        vis = save_visualisation(
+                    field=field,
+                    foci=foci,
+                    channel_centrioles=channel,
+                    nuclei=nuclei,
+                    channel_nuclei=args.channel_nuclei,
+                    assigned=assigned
+                )
+        tif.imwrite(path_visualisation_model / f"{field.name}_C{channel}_pred.png", vis)
 
     performance_df = pd.DataFrame(performance)
     performance_df = performance_df.set_index("field")
     if args.performances_file:
         performance_df.to_csv(args.performance_file)
+        print(performance_df)
+        print("Performances have been saved under %s" % args.performance_file)
     else:
         print(performance_df)
+        print("Performances are ONLY displayed, not saved")
+
