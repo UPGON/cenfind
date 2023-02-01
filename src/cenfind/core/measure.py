@@ -120,9 +120,9 @@ def field_score(
     model_nuclei: StarDist2D,
     model_foci: Path,
     nuclei_channel: int,
-    factor,
     vicinity,
     channel: int,
+    factor: int = 256,
 ) -> Tuple[np.ndarray, list]:
     """
     1. Detect foci in the given channels
