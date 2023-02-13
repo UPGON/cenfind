@@ -1,18 +1,8 @@
-from numpy.random import seed
-
-seed(1)
-
-import tensorflow as tf
-
-tf.random.set_seed(2)
-
 from datetime import datetime
-
 from spotipy.model import SpotNet
-
+from cenfind.cli.train import config_unet, fetch_all_fields
+from cenfind.core.constants import PREFIX_REMOTE, datasets
 from cenfind.core.data import Dataset
-from cenfind.core.constants import datasets, PREFIX_REMOTE
-from cenfind.cli.train_spotnet import fetch_all_fields, config_unet
 
 
 def main():
