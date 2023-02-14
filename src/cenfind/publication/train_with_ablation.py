@@ -1,16 +1,16 @@
 from datetime import datetime
 from spotipy.model import SpotNet
 from spotipy.model import Config
-from cenfind.cli.train import fetch_all_fields
-from cenfind.core.constants import PREFIX_REMOTE, datasets
+from cenfind.core.constants import PREFIX_REMOTE
 from cenfind.core.data import Dataset
+from cenfind.cli.train import load_pairs, transforms
 
 config = Config(
     n_channel_in=1,
     backbone="unet",
     mode="mae",
     unet_n_depth=2,
-    unet_pool=8,
+    unet_pool=4,
     unet_n_filter_base=64,
     spot_weight=40,
     multiscale=True,
@@ -25,15 +25,16 @@ config = Config(
 
 
 def main():
-    path_datasets = [PREFIX_REMOTE / ds for ds in datasets]
-    dss = [Dataset(path) for path in path_datasets]
+    ds = Dataset(PREFIX_REMOTE / 'centrioles', projection_suffix='_max')
 
-    all_train_x, all_train_y, all_test_x, all_test_y = fetch_all_fields(dss)
+    train_x, train_y = load_pairs(ds, split="train", transform=transforms)
+    test_x, test_y = load_pairs(ds, split="test")
+    # validation_x, validation_y = load_pairs(ds, split="validation")
 
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    model = SpotNet(config, name=f"multi_depth2_{time_stamp}", basedir='models/dev/ablation')
-    model.train(all_train_x, all_train_y, validation_data=(all_test_x, all_test_y), epochs=100)
+    model = SpotNet(config, name=f"multi_depth2_mae_{time_stamp}", basedir='models/dev/ablation')
+    model.train(train_x, train_y, validation_data=(test_x, test_y), epochs=100)
 
     return 0
 

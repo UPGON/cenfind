@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 PREFIX_LOCAL = Path("/Users/buergy/Dropbox/epfl/datasets")
-PREFIX_REMOTE = Path("/data1/centrioles/")
+PREFIX_REMOTE = Path("/data1/centrioles/canonical")
 
 ROOT_DIR = Path("/home/buergy/projects/cenfind")
 datasets = [
