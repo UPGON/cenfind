@@ -25,6 +25,7 @@ def register_parser(parent_subparsers):
     parser.add_argument(
         "--tolerance",
         type=int,
+        nargs='+',
         default=3,
         help="Distance in pixels below which two points are deemed matching",
     )
@@ -90,9 +91,9 @@ def run(args):
     performance_df = pd.DataFrame(performance)
     performance_df = performance_df.set_index("field")
     if args.performances_file:
-        performance_df.to_csv(args.performance_file)
+        performance_df.to_csv(args.performances_file)
         print(performance_df)
-        print("Performances have been saved under %s" % args.performance_file)
+        print("Performances have been saved under %s" % args.performances_file)
     else:
         print(performance_df)
         print("Performances are ONLY displayed, not saved")
