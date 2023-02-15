@@ -218,6 +218,8 @@ def field_metrics(
 def dataset_metrics(
     dataset: Dataset, split: str, model: Path, tolerance, threshold
 ) -> tuple[dict, list]:
+    if type(tolerance) == int:
+        tolerance = [tolerance]
     perfs = []
     prob_maps = {}
     for field, channel in dataset.pairs(split):
@@ -225,11 +227,12 @@ def dataset_metrics(
         prob_map, predictions = extract_foci(
             field, model, channel, prob_threshold=threshold
         )
-        perf = field_metrics(
-            field, channel, annotation, predictions, tolerance, threshold=threshold
-        )
-        perfs.append(perf)
-        prob_maps[field.name] = prob_map
+        for tol in tolerance:
+            perf = field_metrics(
+                field, channel, annotation, predictions, tol, threshold=threshold
+            )
+            perfs.append(perf)
+            prob_maps[field.name] = prob_map
     return prob_maps, perfs
 
 
