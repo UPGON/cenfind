@@ -8,12 +8,12 @@ from cenfind.cli.train import load_pairs, transforms
 config = Config(
     n_channel_in=1,
     backbone="unet",
-    mode="mae",
-    unet_n_depth=2,
+    mode="bce",
+    unet_n_depth=3,
     unet_pool=4,
     unet_n_filter_base=64,
     spot_weight=40,
-    multiscale=True,
+    multiscale=False,
     train_learning_rate=3e-4,
     train_foreground_prob=1,
     train_batch_norm=False,
@@ -27,14 +27,13 @@ config = Config(
 def main():
     ds = Dataset(PREFIX_REMOTE / 'centrioles', projection_suffix='_max')
 
-    train_x, train_y = load_pairs(ds, split="train", transform=transforms)
-    test_x, test_y = load_pairs(ds, split="test")
-    # validation_x, validation_y = load_pairs(ds, split="validation")
+    train_x, train_y = load_pairs(ds, split="train", transform=transforms, sigma=3)
+    validation_x, validation_y = load_pairs(ds, split="validation", sigma=3)
 
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    model = SpotNet(config, name=f"multi_depth2_mae_{time_stamp}", basedir='models/dev/ablation')
-    model.train(train_x, train_y, validation_data=(test_x, test_y), epochs=100)
+    model = SpotNet(config, name=f"unet_depth3_bce_sigma3_{time_stamp}", basedir='models/dev/multiscale')
+    model.train(train_x, train_y, validation_data=(validation_x, validation_y), epochs=50)
 
     return 0
 

@@ -1,5 +1,4 @@
 from typing import Tuple
-
 import cv2
 import numpy as np
 from skimage.exposure import rescale_intensity
@@ -8,6 +7,7 @@ from spotipy.utils import points_matching
 
 from cenfind.core.data import Field
 from cenfind.core.outline import Centre
+
 
 def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
     res = (int(keypoint.pt[1]), int(keypoint.pt[0]))
