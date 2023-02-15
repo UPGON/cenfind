@@ -27,13 +27,14 @@ config = Config(
 def main():
     ds = Dataset(PREFIX_REMOTE / 'centrioles', projection_suffix='_max')
 
-    train_x, train_y = load_pairs(ds, split="train", transform=transforms, sigma=3)
-    validation_x, validation_y = load_pairs(ds, split="validation", sigma=3)
+    train_x, train_y = load_pairs(ds, split="train", transform=transforms, sigma=1.5)
+    validation_x, validation_y = load_pairs(ds, split="validation", sigma=1.5)
+    test_x, test_y = load_pairs(ds, split="test", sigma=1.5)
 
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    model = SpotNet(config, name=f"multi_depth2_mae_sigma3_{time_stamp}", basedir='models/dev/multiscale')
-    model.train(train_x, train_y, validation_data=(validation_x, validation_y), epochs=100)
+    model = SpotNet(config, name=f"multi_depth2_mae_sigma1p5_{time_stamp}", basedir='models/dev/multiscale')
+    model.train(train_x, train_y, validation_data=(test_x, test_y), epochs=50)
 
     return 0
 
