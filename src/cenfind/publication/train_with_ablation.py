@@ -8,12 +8,12 @@ from cenfind.cli.train import load_pairs, transforms
 config = Config(
     n_channel_in=1,
     backbone="unet",
-    mode="bce",
-    unet_n_depth=3,
+    mode="mae",
+    unet_n_depth=2,
     unet_pool=4,
     unet_n_filter_base=64,
     spot_weight=40,
-    multiscale=False,
+    multiscale=True,
     train_learning_rate=3e-4,
     train_foreground_prob=1,
     train_batch_norm=False,
@@ -32,8 +32,8 @@ def main():
 
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    model = SpotNet(config, name=f"unet_depth3_bce_sigma3_{time_stamp}", basedir='models/dev/multiscale')
-    model.train(train_x, train_y, validation_data=(validation_x, validation_y), epochs=50)
+    model = SpotNet(config, name=f"multi_depth2_mae_sigma3_{time_stamp}", basedir='models/dev/multiscale')
+    model.train(train_x, train_y, validation_data=(validation_x, validation_y), epochs=100)
 
     return 0
 
