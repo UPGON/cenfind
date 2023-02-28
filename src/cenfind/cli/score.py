@@ -1,6 +1,8 @@
 import os
 import sys
+import logging
 import contextlib
+from datetime import datetime
 from pathlib import Path
 
 from tqdm import tqdm
@@ -60,8 +62,17 @@ def run(args):
 
     dataset = Dataset(args.dataset)
 
+    time_stamp = datetime.now()
+    logging.basicConfig(
+        filename=dataset.logs / f"{__name__}_{time_stamp}.log",
+        encoding="utf-8",
+        level=logging.DEBUG,
+        format="%(asctime)s %(message)s",
+        datefmt="%m/%d/%Y %I:%M:%S %p",
+    )
+
     if not any(dataset.projections.iterdir()):
-        print(
+        logging.info(
             "The projection folder (%s) is empty.\nPlease ensure you have run `squash` or that you have put the projections under projections/"
             % dataset.projections
         )
@@ -70,11 +81,11 @@ def run(args):
     channels = dataset.fields[0].projection.shape[0]
 
     if args.channel_nuclei not in range(channels):
-        print("Index for nuclei (%s) out of index range" % args.channel_nuclei)
+        logging.info("Index for nuclei (%s) out of index range" % args.channel_nuclei)
         sys.exit()
 
     if not set(args.channel_centrioles).issubset(set(range(channels))):
-        print(
+        logging.info(
             "Channels (%s) out of channel range %s" % args.channel_centrioles,
             set(range(channels)),
         )
@@ -94,11 +105,11 @@ def run(args):
     from cenfind.core.measure import field_score
 
     for field in pbar:
-        print("Processing %s" % field.name)
+        logging.info("Processing %s" % field.name)
         pbar.set_description(f"{field.name}")
 
         for ch in args.channel_centrioles:
-            print("Processing %s / %d" % (field.name, ch))
+            logging.info("Processing %s / %d" % (field.name, ch))
             try:
                 foci, nuclei, assigned, score = field_score(
                     field=field,
@@ -115,7 +126,7 @@ def run(args):
                     / f"{field.name}{dataset.projection_suffix}_C{ch}.txt"
                 )
                 save_foci(foci, predictions_path)
-                print(
+                logging.info(
                     "(%s), channel %s: nuclei: %s; foci: %s"
                     % (field.name, ch, len(nuclei), len(foci))
                 )
@@ -129,19 +140,23 @@ def run(args):
                 )
                 scores.append(score)
 
-                print("Writing visualisations for (%s), channel %s" % (field.name, ch))
+                logging.info(
+                    "Writing visualisations for (%s), channel %s" % (field.name, ch)
+                )
                 vis = save_visualisation(
                     field, foci, ch, nuclei, args.channel_nuclei, assigned
                 )
-                tif.imwrite(path_visualisation_model / f"{field.name}_C{ch}_pred.png", vis)
+                tif.imwrite(
+                    path_visualisation_model / f"{field.name}_C{ch}_pred.png", vis
+                )
 
             except ValueError as e:
-                print("%s (%s)" % (e, field.name))
+                logging.error("%s (%s)" % (e, field.name))
                 continue
 
-        print("DONE (%s)" % field.name)
+        logging.info("DONE (%s)" % field.name)
 
     flattened = [leaf for tree in scores for leaf in tree]
     scores_df = pd.DataFrame(flattened)
     scores_df.to_csv(dataset.statistics / "scores_df.tsv", sep="\t", index=False)
-    print("Writing raw scores to %s" % dataset.statistics / "scores_df.tsv")
+    logging.info("Writing raw scores to %s" % str(dataset.statistics / "scores_df.tsv"))
