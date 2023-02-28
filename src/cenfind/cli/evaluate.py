@@ -97,4 +97,3 @@ def run(args):
     else:
         print(performance_df)
         print("Performances are ONLY displayed, not saved")
-

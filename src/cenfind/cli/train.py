@@ -1,3 +1,10 @@
+from numpy.random import seed
+
+seed(1)
+
+import tensorflow as tf
+
+tf.random.set_seed(2)
 import contextlib
 import json
 import os
