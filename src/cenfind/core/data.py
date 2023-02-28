@@ -120,11 +120,10 @@ class Dataset:
         self.visualisation = self.path / "visualisations"
         self.statistics = self.path / "statistics"
         self.vignettes = self.path / "vignettes"
+        self.logs = self.path / "logs"
         self.path_annotations = self.path / "annotations"
         self.path_annotations_centrioles = self.path_annotations / "centrioles"
         self.path_annotations_cells = self.path_annotations / "cells"
-
-        self.has_projections = bool(len([f for f in self.projections.iterdir()]))
 
         if self.projection_suffix is None:
             try:
@@ -146,10 +145,12 @@ class Dataset:
         self.statistics.mkdir(exist_ok=True)
         self.visualisation.mkdir(exist_ok=True)
         self.vignettes.mkdir(exist_ok=True)
+        self.logs.mkdir(exist_ok=True)
         self.path_annotations.mkdir(parents=True, exist_ok=True)
         self.path_annotations_centrioles.mkdir(exist_ok=True)
         self.path_annotations_cells.mkdir(exist_ok=True)
 
+        self.has_projections = bool(len([f for f in self.projections.iterdir()]))
         self.is_setup = True
 
     @property
