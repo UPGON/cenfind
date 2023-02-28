@@ -41,9 +41,9 @@ Each file is a z-stack field of view (referred to as field, in the following) co
 <project_name>/
 └── raw/
 ```
-2. Run `prepare` to initialise the folder with a list of channels and output folders:
+2. Run `prepare` to initialise the dataset folder with a list of output folders:
 ```shell
-cenfind prepare /path/to/dataset <list channels of centrioles, like 1 2 3, (if 0 is the nucleus channel)>
+cenfind prepare /path/to/dataset --splits 1 2 --projection_suffix _max
 ```
 ```shell
 usage: CENFIND prepare [-h] [--projection_suffix PROJECTION_SUFFIX] [--splits SPLITS [SPLITS ...]] dataset
@@ -72,27 +72,27 @@ positional arguments:
 
 3. Run `score` with the arguments source, the index of the nuclei channel (usually 0 or 3), the channel to score and the path to the model. You need to download it from https://figshare.com/articles/software/Cenfind_model_weights/21724421
 ```shell
-cenfind score /path/to/dataset /path/to/model/ 0 1 2 3 --projection_suffix '_max'
+cenfind score /path/to/dataset /path/to/model/ --channel_nuclei 0 --channel_centrioles 1 2 3
 ```
 ```shell
-usage: CENFIND score [-h] [--vicinity VICINITY] [--factor FACTOR] [--projection_suffix PROJECTION_SUFFIX] [--cpu] dataset model channel_nuclei channels [channels ...]
+usage: CENFIND score [-h] --channel_nuclei CHANNEL_NUCLEI --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...] [--vicinity VICINITY] [--factor FACTOR] [--cpu] dataset model
 
 positional arguments:
   dataset               Path to the dataset
   model                 Absolute path to the model folder
-  channel_nuclei        Channel index for nuclei segmentation, e.g., 0 or 3
-  channels              Channel indices to analyse, e.g., 1 2 3
 
 optional arguments:
   -h, --help            show this help message and exit
+  --channel_nuclei CHANNEL_NUCLEI
+                        Channel index for nuclei segmentation, e.g., 0 or 3 (default: None)
+  --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...]
+                        Channel indices to analyse, e.g., 1 2 3 (default: None)
   --vicinity VICINITY   Distance threshold in micrometer (default: -5 um) (default: -5)
   --factor FACTOR       Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x: (default: 256)
-  --projection_suffix PROJECTION_SUFFIX
-                        Projection suffix (`_max` or `_Projected`); empty if not specified. (default: )
   --cpu                 Only use the cpu (default: False)
 ```
 
-4. Check that the predictions are satisfactory by looking at the folders `visualisation/` and `statistics/`
+4. Check that the predictions are satisfactory by looking at the folders `visualisations/` and `statistics/`
 
 5. If you are interested in categorising the number of centrioles, run `cenfind analyse path/to/dataset --by <well>` the --by option is interesting if you want to group your scoring by well, if the file names obey to the rule `<WELLID_FOVID>`.
 
@@ -150,7 +150,9 @@ cenfind download dataset-name --env /path/to/.env
 evaluate dataset model
 
 ```shell
-usage: CENFIND evaluate [-h] [--performances_file PERFORMANCES_FILE] [--tolerance TOLERANCE] dataset model
+usage: CENFIND evaluate [-h] [--performances_file PERFORMANCES_FILE] [--tolerance TOLERANCE] --channel_nuclei CHANNEL_NUCLEI --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...]
+                        [--vicinity VICINITY]
+                        dataset model
 
 positional arguments:
   dataset               Path to the dataset folder
@@ -162,6 +164,11 @@ optional arguments:
                         Path of the performance file, STDOUT if not specified (default: None)
   --tolerance TOLERANCE
                         Distance in pixels below which two points are deemed matching (default: 3)
+  --channel_nuclei CHANNEL_NUCLEI
+                        Channel index for nuclei segmentation, e.g., 0 or 3 (default: None)
+  --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...]
+                        Channel indices to analyse, e.g., 1 2 3 (default: None)
+  --vicinity VICINITY   Distance threshold in micrometer (default: -5 um) (default: -5)
 ```
 5.	If the performance is poor (i.e., F1 score < 0.9), fit a new model instance, M*, with the standard dataset plus the new dataset (90% in each case).
 6.	Test performance of model M* on the new data set; hopefully the F1 score will now be ≥ 0.9 (if not: consider increasing size of annotated data).
