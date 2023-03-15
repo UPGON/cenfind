@@ -1,10 +1,8 @@
 from numpy.random import seed
 
-seed(1)
 
 import tensorflow as tf
 
-tf.random.set_seed(2)
 import contextlib
 import json
 import os
@@ -19,51 +17,10 @@ from spotipy.model import SpotNet, Config
 from spotipy.utils import points_to_prob, normalize_fast2d
 
 from cenfind.core.data import Dataset
+from cenfind.core.config import config_multiscale, transforms
 
-with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-    config_unet = Config(
-        n_channel_in=1,
-        backbone="unet",
-        mode="bce",
-        unet_n_depth=3,
-        unet_pool=4,
-        unet_n_filter_base=64,
-        spot_weight=40,
-        multiscale=False,
-        train_learning_rate=3e-4,
-        train_foreground_prob=1,
-        train_batch_norm=False,
-        train_multiscale_loss_decay_exponent=1,
-        train_patch_size=(512, 512),
-        spot_weight_decay=0.5,
-        train_batch_size=2,
-    )
-    config_multiscale = Config(
-        n_channel_in=1,
-        backbone="unet",
-        mode="mae",
-        unet_n_depth=3,
-        unet_pool=4,
-        unet_n_filter_base=64,
-        spot_weight=40,
-        multiscale=True,
-        train_learning_rate=3e-4,
-        train_foreground_prob=1,
-        train_batch_norm=False,
-        train_multiscale_loss_decay_exponent=1,
-        train_patch_size=(512, 512),
-        spot_weight_decay=0.5,
-        train_batch_size=2,
-    )
-
-transforms = alb.Compose(
-    [
-        alb.ShiftScaleRotate(scale_limit=0.0),
-        alb.Flip(),
-        alb.RandomBrightnessContrast(always_apply=True),
-        alb.RandomGamma(),
-    ]
-)
+seed(1)
+tf.random.set_seed(2)
 
 
 def read_config(path):
@@ -77,6 +34,7 @@ def read_config(path):
     return Config(**config_dict)
 
 
+# TODO: Include in Dataset or in torch.Dataset
 def load_pairs(
     dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.Compose = None
 ):
