@@ -59,7 +59,7 @@ def extract_foci(
 
 def extract_nuclei(
     field: Field, channel: int, factor: int, model: StarDist2D = None, annotation=None
-) -> Tuple[List[Centre], List[np.float], List[Contour]]:
+) -> List[Contour]:
     """
     Extract the nuclei from the nuclei image
     :param field:
@@ -73,31 +73,31 @@ def extract_nuclei(
     """
 
     if annotation is not None:
-        nuclei_detected = annotation
+        labels = annotation
     elif model is not None:
         data = field.channel(channel)
         data_resized = resize_image(data, factor)
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
             labels, coords = model.predict_instances(normalize(data_resized))
-        nuclei_detected = cv2.resize(
+        labels = cv2.resize(
             labels, dsize=data.shape, fx=1, fy=1, interpolation=cv2.INTER_NEAREST
         )
 
     else:
         raise ValueError("Please provide either an annotation or a model")
 
-    labels_id = np.unique(nuclei_detected)
+    labels_id = np.unique(labels)
 
     cnts = []
-    intensities = []
     for nucleus_id in labels_id:
         if nucleus_id == 0:
             continue
-        sub_mask = np.zeros_like(nuclei_detected, dtype="uint8")
-        sub_mask[nuclei_detected == nucleus_id] = 255
+        sub_mask = np.zeros_like(labels, dtype="uint8")
+        sub_mask[labels == nucleus_id] = 1
         contour, hierarchy = cv2.findContours(
             sub_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
+
         cnts.append(contour[0])
 
     contours = tuple(cnts)
@@ -105,6 +105,4 @@ def extract_nuclei(
         Contour(c, "Nucleus", c_id, confidence=-1) for c_id, c in enumerate(contours)
     ]
 
-    centres = [c.centre for c in contours]
-
-    return centres, intensities, contours
+    return contours

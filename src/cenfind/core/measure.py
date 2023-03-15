@@ -137,7 +137,7 @@ def field_score(
     """
 
     image_shape = field.projection.shape[1:]
-    centres, intensities, nuclei = extract_nuclei(field, nuclei_channel, factor, model_nuclei)
+    nuclei = extract_nuclei(field, nuclei_channel, factor, model_nuclei)
     if len(nuclei) == 0:
         raise ValueError("No nucleus has been detected")
     prob_map, foci = extract_foci(
@@ -163,7 +163,7 @@ def field_score(
     return foci, nuclei, assigned, scores
 
 
-# TODO: refactor as a fiield method
+# TODO: refactor as a field method
 def field_metrics(
     field: Field,
     channel: int,

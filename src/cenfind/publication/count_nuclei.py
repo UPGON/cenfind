@@ -22,15 +22,16 @@ def main():
         dataset = Dataset(PREFIX_REMOTE / dataset)
         for field in tqdm(dataset.fields):
             mask = field.mask(0)
-            centres, intensities, contours = extract_nuclei(field, 0, annotation=mask, factor=256)
+            nuclei = extract_nuclei(field, 0, annotation=mask, factor=256)
             vignette = create_vignette(field, 1, 0)
-            for centre, contour in zip(centres, contours):
+            for nucleus in nuclei:
+                centre = nucleus.centre
                 is_full = full_in_field(centre.centre, mask, .05)
                 records.append({'dataset': dataset.path.name,
                                 'field': field.name,
                                 'centre': centre.centre,
                                 'is_full': is_full})
-                contour.draw(vignette, color=flag(is_full))
+                nucleus.draw(vignette, color=flag(is_full))
 
             cv2.imwrite(f'out/checks/{field.name}.png', vignette)
     df = pd.DataFrame(records)
