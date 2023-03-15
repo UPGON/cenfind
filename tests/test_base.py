@@ -6,7 +6,7 @@ from cenfind.core.data import Dataset, Field
 
 
 class TestData:
-    path_dataset = Path("./dataset_test")
+    path_dataset = Path("/home/buergy/projects/cenfind/data/dataset_test")
     field_name = "RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000"
     dataset = Dataset(path=path_dataset, image_type=".ome.tif")
     field = Field(field_name, dataset)
