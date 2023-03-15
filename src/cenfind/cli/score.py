@@ -121,9 +121,7 @@ def run(args):
                     channel=ch,
                 )
                 predictions_path = (
-                    dataset.predictions
-                    / "centrioles"
-                    / f"{field.name}{dataset.projection_suffix}_C{ch}.txt"
+                    dataset.predictions / "centrioles" / f"{field.name}{dataset.projection_suffix}_C{ch}.txt"
                 )
                 save_foci(foci, predictions_path)
                 logging.info(

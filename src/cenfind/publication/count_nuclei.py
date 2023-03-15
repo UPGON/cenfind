@@ -22,7 +22,7 @@ def main():
         dataset = Dataset(PREFIX_REMOTE / dataset)
         for field in tqdm(dataset.fields):
             mask = field.mask(0)
-            centres, contours = extract_nuclei(field, 0, annotation=mask, factor=256)
+            centres, intensities, contours = extract_nuclei(field, 0, annotation=mask, factor=256)
             vignette = create_vignette(field, 1, 0)
             for centre, contour in zip(centres, contours):
                 is_full = full_in_field(centre.centre, mask, .05)

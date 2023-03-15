@@ -59,7 +59,7 @@ def extract_foci(
 
 def extract_nuclei(
     field: Field, channel: int, factor: int, model: StarDist2D = None, annotation=None
-) -> Tuple[List[Centre], List[Contour]]:
+) -> Tuple[List[Centre], List[np.float], List[Contour]]:
     """
     Extract the nuclei from the nuclei image
     :param field:
@@ -89,6 +89,7 @@ def extract_nuclei(
     labels_id = np.unique(nuclei_detected)
 
     cnts = []
+    intensities = []
     for nucleus_id in labels_id:
         if nucleus_id == 0:
             continue
@@ -106,4 +107,4 @@ def extract_nuclei(
 
     centres = [c.centre for c in contours]
 
-    return centres, contours
+    return centres, intensities, contours

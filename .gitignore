@@ -17,6 +17,10 @@ logs/
 out/
 data/
 models/*
+tests/dataset_test/annotations
+tests/dataset_test/predictions
+tests/dataset_test/statistics
+tests/dataset_test/visualisations
 !models/archives/master_20221123/
 /src/centrosome_analysis/
 

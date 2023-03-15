@@ -137,7 +137,7 @@ def field_score(
     """
 
     image_shape = field.projection.shape[1:]
-    centres, nuclei = extract_nuclei(field, nuclei_channel, factor, model_nuclei)
+    centres, intensities, nuclei = extract_nuclei(field, nuclei_channel, factor, model_nuclei)
     if len(nuclei) == 0:
         raise ValueError("No nucleus has been detected")
     prob_map, foci = extract_foci(
