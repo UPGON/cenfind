@@ -40,6 +40,8 @@ def run(args):
 
     dataset.setup()
     dataset.write_fields()
+    
+    # TODO: Move the rest to training specific programs
     if args.splits:
         train_fields, test_fields = dataset.split_pairs(dataset.fields, p=0.9)
         pairs_train = choose_channel(train_fields, args.splits)
