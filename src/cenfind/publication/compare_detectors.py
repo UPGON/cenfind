@@ -38,13 +38,13 @@ def main():
                 cv2.imwrite(f'out/images/{field.name}_max_C{channel}_preds_{name}.png', mask)
 
     perfs_df = pd.DataFrame(perfs)
-    perfs_df.to_csv(f'out/perfs_blobdetectors.csv')
+    perfs_df.to_csv('out/perfs_blobdetectors.csv')
 
     summary = perfs_df.groupby('method')['f1'].agg(['mean', 'std']).round(3)
     summary = summary.reset_index()
     summary['F1 (mean ± st. dev.)'] = summary['mean'].astype(str) + '±' + summary['std'].astype(str)
     summary.columns = ['Method', 'F1', 'Standard deviation', 'F1 (mean ± st. dev.)']
-    summary.to_csv(f'out/perfs_blobdetectors_summary.csv')
+    summary.to_csv('out/perfs_blobdetectors_summary.csv')
 
 
 if __name__ == '__main__':

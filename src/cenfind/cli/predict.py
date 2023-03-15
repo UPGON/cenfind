@@ -24,7 +24,7 @@ def register_parser(parent_subparsers: argparse.ArgumentParser):
 def run(args):
     dataset = Dataset(args.dataset)
 
-    model_predictions = dataset.visualisation / f"runs"
+    model_predictions = dataset.visualisation / "runs"
     model_predictions.mkdir(exist_ok=True)
 
     model_run = model_predictions / args.model.name
