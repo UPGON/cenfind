@@ -35,3 +35,4 @@ tests/dataset_test/visualisations
 *.tsv
 *.csv
 *.log
+*.png

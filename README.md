@@ -179,32 +179,32 @@ optional arguments:
 
 `cenfind` consists of two core classes: `Dataset` and `Field`.
 
-A `Dataset` represents a collection of related fields, i.e., same pixel size, same channels, same cell type.
+setup function that 
+- write the toml file
+- write the field.txt that list all the files
+- create the folders projections, predictions, visualisations and statistics
 
-It should:
-- return the name
-- iterate over the fields,
-- construct the file name for the projections and the z-stacks
-- read the fields.txt
-- write the fields.txt file
-- set up the folders projections, predictions, visualisations and statistics
-- set and get the splits
+A `Dataset` represents a collection of related fields and should:
+- construct file names for fields
+- split the fileds into train, test and validate
+- load all fields or only for a specific split
 
 A `Field` represents a field of view and should:
-
-- construct file names for projections, annotation
 - get Dataset
 - load the projection as np.ndarray
 - load the channel as np.ndarray
+- detect centrioles => list of Points
+- detect nuclei => list of Contours
+if present:
 - load annotation as np.ndarray
 - load mask as np.ndarray
 
-Using those two objects, `cenfind` should
+A scoring function that 
+- assigns centrioles to nuclei (contours, points) => pairs
+- compares predictions with annotation (points, points) => metrics_namespace
 
-- detect centrioles (data, model) => points,
-- extract nuclei (data, model) => contours,
-- assign centrioles to nuclei (contours, points) => pairs
+Visualisation functions that:
 - outline centrioles and nuclei (data, points) => image
 - create composite vignettes (data) => composite_image
 - flag partial nuclei (contours, tolerance) => contours
-- compare predictions with annotation (points, points) => metrics_namespace
+
