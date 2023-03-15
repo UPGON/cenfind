@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from cenfind.core.data import Dataset
+from cenfind.core.data import Dataset, choose_channel
 import pytomlpp
 
 
@@ -41,4 +41,14 @@ def run(args):
     dataset.setup()
     dataset.write_fields()
     if args.splits:
-        dataset.write_train_test(args.splits)
+        train_fields, test_fields = dataset.split_pairs(dataset.fields, p=0.9)
+        pairs_train = choose_channel(train_fields, args.splits)
+        pairs_test = choose_channel(test_fields, args.splits)
+
+        with open(dataset.path / "train.txt", "w") as f:
+            for fov, channel in pairs_train:
+                f.write(f"{fov.name},{channel}\n")
+
+        with open(dataset.path / "test.txt", "w") as f:
+            for fov, channel in pairs_test:
+                f.write(f"{fov.name},{channel}\n")

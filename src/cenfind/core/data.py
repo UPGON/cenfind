@@ -201,18 +201,24 @@ class Dataset:
             )
         self.has_projections = True
 
-    def write_train_test(self, channels: list):
-        train_fields, test_fields = split_pairs(self.fields, p=0.9)
-        pairs_train = choose_channel(train_fields, channels)
-        pairs_test = choose_channel(test_fields, channels)
+    def split_pairs(self, p=0.9, seed=1993) -> tuple[list[Field], list[Field]]:
+        """
+        Split a list of pairs (field, channel).
 
-        with open(self.path / "train.txt", "w") as f:
-            for fov, channel in pairs_train:
-                f.write(f"{fov.name},{channel}\n")
+        :param fields
+        :param p the train proportion, default to .9
+        :param seed the seed to reproduce the splitting
+        :return train_split, test_split
+        """
 
-        with open(self.path / "test.txt", "w") as f:
-            for fov, channel in pairs_test:
-                f.write(f"{fov.name},{channel}\n")
+        random.seed(seed)
+        size = len(self.fields)
+        split_idx = int(p * size)
+        shuffled = random.sample(self.fields, k=size)
+        split_test = shuffled[split_idx:]
+        split_train = shuffled[:split_idx]
+
+        return split_train, split_test
 
     def pairs(
         self, split: str = None, channel_id: int = None
@@ -240,28 +246,6 @@ class Dataset:
             return [(Field(str(f[0]), self), int(channel_id)) for f in files]
         else:
             return [(Field(str(f[0]), self), int(f[1])) for f in files]
-
-
-def split_pairs(
-    fields: list[Field], p=0.9, seed=1993
-) -> tuple[list[Field], list[Field]]:
-    """
-    Split a list of pairs (field, channel).
-
-    :param fields
-    :param p the train proportion, default to .9
-    :param seed the seed to reproduce the splitting
-    :return train_split, test_split
-    """
-
-    random.seed(seed)
-    size = len(fields)
-    split_idx = int(p * size)
-    shuffled = random.sample(fields, k=size)
-    split_test = shuffled[split_idx:]
-    split_train = shuffled[:split_idx]
-
-    return split_train, split_test
 
 
 def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
