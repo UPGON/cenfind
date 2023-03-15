@@ -58,7 +58,7 @@ def main():
         labels = []
         for field in tqdm(ds.fields):
             for channel_id in range(1, 4):
-                mask, mal_label = extract_foci(field, foci_model, channel_id)
+                mal_label = extract_foci(field, foci_model, channel_id)
                 vignette_path = ds.path / 'vignettes' / f"{field.name}_max_C{channel_id}.png"
                 image = cv2.imread(str(vignette_path))
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

@@ -36,7 +36,7 @@ def extract_foci(
     prob_threshold=0.5,
     min_distance=2,
     **kwargs,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> List[Centre]:
     """
     Detect centrioles as row, col, row major
     :param data:
@@ -51,10 +51,10 @@ def extract_foci(
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         data = normalize_fast2d(data)
         model = get_model(foci_model_file)
-        mask_preds, points_preds = model.predict(
+        _, points_preds = model.predict(
             data, prob_thresh=prob_threshold, min_distance=min_distance, verbose=False
         )
-    return mask_preds, points_preds
+    return points_preds
 
 
 def extract_nuclei(
@@ -94,7 +94,7 @@ def extract_nuclei(
             continue
         sub_mask = np.zeros_like(labels, dtype="uint8")
         sub_mask[labels == nucleus_id] = 1
-        contour, hierarchy = cv2.findContours(
+        contour, _ = cv2.findContours(
             sub_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
 

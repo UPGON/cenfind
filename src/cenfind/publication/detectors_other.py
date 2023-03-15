@@ -53,8 +53,6 @@ def run_detection(
     model_path=None,
 ) -> Tuple[list[Centre], float]:
     _foci = method(data, foci_model_file=model_path, channel=channel)
-    if type(_foci) == tuple:
-        prob_map, _foci = _foci
     res = points_matching(annotation, _foci, cutoff_distance=tolerance)
     f1 = np.round(res.f1, 3)
     foci = [Centre((r, c), label="Centriole") for r, c in _foci]

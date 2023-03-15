@@ -33,7 +33,7 @@ def run(args):
     from cenfind.core.measure import extract_foci
 
     for field, channel in dataset.pairs("test"):
-        _, foci = extract_foci(field, args.model, channel, prob_threshold=0.5)
+        foci = extract_foci(field, args.model, channel, prob_threshold=0.5)
         foci = [Centre((r, c), f_id, "Centriole") for f_id, (r, c) in enumerate(foci)]
         print(
             "Writing visualisations for field: %s, channel: %s, %s foci detected"

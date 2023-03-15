@@ -140,7 +140,7 @@ def field_score(
     nuclei = extract_nuclei(field, nuclei_channel, factor, model_nuclei)
     if len(nuclei) == 0:
         raise ValueError("No nucleus has been detected")
-    prob_map, foci = extract_foci(
+    foci = extract_foci(
         data=field, foci_model_file=model_foci, channel=channel
     )
     foci = [Centre((r, c), f_id, "Centriole") for f_id, (r, c) in enumerate(foci)]
@@ -221,10 +221,9 @@ def dataset_metrics(
     if type(tolerance) == int:
         tolerance = [tolerance]
     perfs = []
-    prob_maps = {}
     for field, channel in dataset.pairs(split):
         annotation = field.annotation(channel)
-        prob_map, predictions = extract_foci(
+        predictions = extract_foci(
             field, model, channel, prob_threshold=threshold
         )
         for tol in tolerance:
@@ -232,8 +231,7 @@ def dataset_metrics(
                 field, channel, annotation, predictions, tol, threshold=threshold
             )
             perfs.append(perf)
-            prob_maps[field.name] = prob_map
-    return prob_maps, perfs
+    return perfs
 
 
 def field_score_frequency(df, by="field"):
