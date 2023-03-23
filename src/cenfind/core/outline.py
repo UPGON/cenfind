@@ -140,9 +140,7 @@ def resize_image(data, factor=256):
     return data_resized
 
 
-def draw_foci(
-    data: np.ndarray, foci: list[Centre], radius=2
-) -> np.ndarray:
+def draw_foci(data: np.ndarray, foci: list[Centre], radius=2) -> np.ndarray:
     mask = np.zeros(data.shape, dtype="uint8")
     for f in foci:
         r, c = f.to_numpy()
@@ -217,7 +215,7 @@ def visualisation(
         background = nucleus.centre.draw(background, annotation=False)
         for centriole in centrioles:
             background = centriole.draw(background, annotation=False)
-        
+
         for centriole in nucleus.centrioles:
             cv2.arrowedLine(
                 background,

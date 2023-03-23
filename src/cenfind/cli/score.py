@@ -3,7 +3,6 @@ import sys
 import logging
 from datetime import datetime
 from pathlib import Path
-import copy
 
 from tqdm import tqdm
 import pandas as pd
@@ -110,13 +109,15 @@ def run(args):
                 continue
             logging.info("Processing %s / %d" % (field.name, channel))
             foci = extract_foci(data=field, foci_model_file=args.model, channel=channel)
-            
+
             nuclei_scored = assign(nuclei, foci)
             scored = score(field, nuclei_scored, channel)
             scores.append(scored)
 
             predictions_path = (
-                dataset.predictions / "centrioles" / f"{field.name}{dataset.projection_suffix}_C{channel}.txt"
+                dataset.predictions
+                / "centrioles"
+                / f"{field.name}{dataset.projection_suffix}_C{channel}.txt"
             )
             save_foci(foci, predictions_path)
 
