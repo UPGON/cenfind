@@ -1,20 +1,17 @@
 import logging
-from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Tuple
-
-import numpy as np
-import pandas as pd
-from skimage.measure import label, regionprops
-from spotipy.utils import points_matching
-from stardist.models import StarDist2D
-
-from cenfind.core.data import Dataset, Field
-from cenfind.core.detectors import extract_foci, extract_nuclei
-from cenfind.core.outline import Centre, draw_foci, Contour
+from typing import List
 
 import cv2
+import numpy as np
+import pandas as pd
+from ortools.linear_solver import pywraplp
+from spotipy.utils import points_matching
+
+from cenfind.core.data import Dataset, Field
+from cenfind.core.detectors import extract_foci
+from cenfind.core.outline import Centre, Contour
 
 
 def signed_distance(focus: Centre, nucleus: Contour) -> float:
@@ -24,11 +21,12 @@ def signed_distance(focus: Centre, nucleus: Contour) -> float:
     return result
 
 
-def full_in_field(coordinate, image_shape, fraction) -> bool:
+def full_in_field(nucleus: Contour, image_shape, fraction) -> bool:
     h, w = image_shape
     pad_lower = int(fraction * h)
     pad_upper = h - pad_lower
-    if all([pad_lower < c < pad_upper for c in coordinate]):
+    centroid = nucleus.centre.to_numpy()
+    if all([pad_lower < c < pad_upper for c in centroid]):
         return True
     return False
 
@@ -37,93 +35,59 @@ def flag(is_full: bool) -> tuple:
     return (0, 255, 0) if is_full else (0, 0, 255)
 
 
-def infer_centrosomes(foci: list, img_shape: tuple, distance=0.6) -> list:
-    """
-    Add centrosome to a list of foci.
-    Args:
-        foci:
-        img_shape:
-        distance: twice the inter-centriole distance in micrometres (2 x .3 um)
-
-    Returns:
-
-    """
-    _foci = foci.copy()
-
-    centrosomes_mask = np.zeros(img_shape, dtype="uint8")
-    centrosomes_mask = draw_foci(centrosomes_mask, _foci, radius=distance)
-
-    centrosomes_map = label(centrosomes_mask)
-    centrosomes_centroids = regionprops(centrosomes_map)
-
-    for f in _foci:
-        foci_index = centrosomes_map[f.centre]
-        centrosome_centroid = centrosomes_centroids[foci_index - 1].centroid
-        centrosome_centroid = tuple(int(c) for c in centrosome_centroid)
-        f.parent = Centre(centrosome_centroid, label="Centrosome")
-
-    return foci
-
-
 def assign(
-    foci: list, nuclei: list, vicinity: float, pixel_size: float
-) -> list[tuple[Any, list[Any]]]:
-    """
-    Assign centrioles to nuclei in one field
-    :param foci
-    :param nuclei
-    :param vicinity: the distance in pixels, below which centrioles are assigned
-     to nucleus
-    :param pixel_size: in micrometres
-    :return: List[Tuple[Centre, Contour]]
-
-    """
-    if len(nuclei) == 0:
-        raise ValueError("foci is an empty list")
-    _foci = foci.copy()
+    nuclei: List[Contour], centrioles: List[Centre], vicinity=0
+) -> List[Contour]:
     _nuclei = nuclei.copy()
+    _centrioles = centrioles.copy()
 
-    vicinity_pixel = int(vicinity / pixel_size)
+    num_nuclei = len(_nuclei)
+    num_centrioles = len(_centrioles)
+    # entries = list(product(range(num_nuclei), range(num_centrioles)))
 
-    nuclei_pos = [tuple(n.centre.to_numpy()) for n in _nuclei]
+    costs = {}
 
-    # Initialise the pairs so that nuclei
-    # with no centrioles are maintained in the output
-    container = defaultdict(list)
-    for k in nuclei_pos:
-        container.setdefault(k, [])
+    for i in range(num_nuclei):
+        for j in range(num_centrioles):
+            dist = signed_distance(_centrioles[j], _nuclei[i])
+            costs[i, j] = dist + vicinity
+    solver = pywraplp.Solver.CreateSolver("SCIP")
 
-    # Take each focus and compute the distance to all nuclei
-    # and assign it to the nearest nucleus, if it is in the vicinity
-    while len(_foci):
-        f = _foci.pop()
-        centrosome = f.parent
-        dists = []
-        for n in _nuclei:
-            nuclei_pos = tuple(n.centre.to_numpy())
-            dist = signed_distance(centrosome, n)
-            dists.append((nuclei_pos, dist))
-        nuclei_pos_nearest = max(dists, key=lambda t: t[1])
-        nearest_nucleus, max_signed_dist = nuclei_pos_nearest
-        if max_signed_dist > vicinity_pixel:
-            container[nearest_nucleus].append(f)
-            continue
+    x = {}
+    for i in range(num_nuclei):
+        for j in range(num_centrioles):
+            x[i, j] = solver.IntVar(0, 1, "")
 
-    pairs = [(k, v) for k, v in container.items()]
+    for j in range(num_centrioles):
+        solver.Add(solver.Sum([x[i, j] for i in range(num_nuclei)]) <= 1)
 
-    return pairs
+    # Objective
+    objective_terms = []
+    for i in range(num_nuclei):
+        for j in range(num_centrioles):
+            objective_terms.append(costs[i, j] * x[i, j])
+    solver.Maximize(solver.Sum(objective_terms))
+
+    # Solve
+    status = solver.Solve()
+    if status != pywraplp.Solver.OPTIMAL and status != pywraplp.Solver.FEASIBLE:
+        raise ValueError("No solution found.")
+
+    for i in range(num_nuclei):
+        for j in range(num_centrioles):
+            if x[i, j].solution_value() > 0.5:
+                print(f"Adding Centre {j} to Nucleus {i}")
+                _nuclei[i].add_centrioles(_centrioles[j])
+
+    return _nuclei
 
 
 # TODO: refactor as a field method
-def field_score(
-    field: Field,
-    model_nuclei: StarDist2D,
-    model_foci: Path,
-    nuclei_channel: int,
-    vicinity,
+def score(
+    field,
+    nuclei_scored,
     channel: int,
-    factor: int = 256,
-) -> Tuple[np.ndarray, list]:
+) -> List[dict]:
     """
     1. Detect foci in the given channels
     2. Detect nuclei
@@ -135,32 +99,63 @@ def field_score(
     :param field:
     :return: list(foci, nuclei, assigned, scores)
     """
-
     image_shape = field.projection.shape[1:]
-    nuclei = extract_nuclei(field, nuclei_channel, factor, model_nuclei)
-    if len(nuclei) == 0:
-        raise ValueError("No nucleus has been detected")
-    foci = extract_foci(
-        data=field, foci_model_file=model_foci, channel=channel
-    )
-    foci = [Centre((r, c), f_id, "Centriole") for f_id, (r, c) in enumerate(foci)]
-
-    foci = infer_centrosomes(foci, image_shape, distance=0.6)
-    assigned = assign(foci=foci, nuclei=nuclei, vicinity=vicinity, pixel_size=0.1025)
-
     scores = []
-    for pair in assigned:
-        nucleus, focus = pair
+    for nucleus in nuclei_scored:
         scores.append(
             {
                 "fov": field.name,
                 "channel": channel,
-                "nucleus": nucleus,
-                "score": len(focus),
+                "nucleus": nucleus.centre.to_numpy(),
+                "score": len(nucleus.centrioles),
                 "is_full": full_in_field(nucleus, image_shape, 0.05),
             }
         )
-    return foci, nuclei, assigned, scores
+    return scores
+
+
+def field_score_frequency(df, by="field"):
+    """
+    Count the absolute frequency of number of centriole per well or per field
+    :param df: Df containing the number of centriole per nuclei
+    :return: Df with absolut frequencies.
+    """
+    cuts = [0, 1, 2, 3, 4, 5, np.inf]
+    labels = "0 1 2 3 4 +".split(" ")
+
+    df = df.set_index(["fov", "channel"])
+    result = pd.cut(df["score"], cuts, right=False, labels=labels, include_lowest=True)
+    result = result.groupby(["fov", "channel"]).value_counts()
+    result.name = "freq_abs"
+    result = result.sort_index().reset_index()
+    result = result.rename({"score": "score_cat"}, axis=1)
+    if by == "well":
+        result[["well", "field"]] = result["fov"].str.split("_", expand=True)
+        print(result.columns)
+        result = result.groupby(["well", "channel", "score_cat"])[["freq_abs"]].sum()
+        result = result.reset_index()
+        result = result.pivot(index=["well", "channel"], columns="score_cat")
+        result.reset_index().sort_values(["channel", "well"])
+    else:
+        result = result.groupby(["fov", "channel", "score_cat"]).sum()
+        result = result.reset_index()
+        result = result.pivot(index=["fov", "channel"], columns="score_cat")
+        result.reset_index().sort_values(["channel", "fov"])
+
+    return result
+
+
+def save_foci(foci_list: list[Centre], dst: str, logger=None) -> None:
+    if len(foci_list) == 0:
+        array = np.array([])
+        if logger is not None:
+            logger.info("No centriole detected")
+        else:
+            print("No centriole detected")
+    else:
+        array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
+        array = array[:, [1, 0]]
+    np.savetxt(dst, array, delimiter=",", fmt="%u")
 
 
 # TODO: refactor as a field method
@@ -223,56 +218,10 @@ def dataset_metrics(
     perfs = []
     for field, channel in dataset.pairs(split):
         annotation = field.annotation(channel)
-        predictions = extract_foci(
-            field, model, channel, prob_threshold=threshold
-        )
+        predictions = extract_foci(field, model, channel, prob_threshold=threshold)
         for tol in tolerance:
             perf = field_metrics(
                 field, channel, annotation, predictions, tol, threshold=threshold
             )
             perfs.append(perf)
     return perfs
-
-
-def field_score_frequency(df, by="field"):
-    """
-    Count the absolute frequency of number of centriole per well or per field
-    :param df: Df containing the number of centriole per nuclei
-    :return: Df with absolut frequencies.
-    """
-    cuts = [0, 1, 2, 3, 4, 5, np.inf]
-    labels = "0 1 2 3 4 +".split(" ")
-
-    df = df.set_index(["fov", "channel"])
-    result = pd.cut(df["score"], cuts, right=False, labels=labels, include_lowest=True)
-    result = result.groupby(["fov", "channel"]).value_counts()
-    result.name = "freq_abs"
-    result = result.sort_index().reset_index()
-    result = result.rename({"score": "score_cat"}, axis=1)
-    if by == "well":
-        result[["well", "field"]] = result["fov"].str.split("_", expand=True)
-        print(result.columns)
-        result = result.groupby(["well", "channel", "score_cat"])[["freq_abs"]].sum()
-        result = result.reset_index()
-        result = result.pivot(index=["well", "channel"], columns="score_cat")
-        result.reset_index().sort_values(["channel", "well"])
-    else:
-        result = result.groupby(["fov", "channel", "score_cat"]).sum()
-        result = result.reset_index()
-        result = result.pivot(index=["fov", "channel"], columns="score_cat")
-        result.reset_index().sort_values(["channel", "fov"])
-
-    return result
-
-
-def save_foci(foci_list: list[Centre], dst: str, logger=None) -> None:
-    if len(foci_list) == 0:
-        array = np.array([])
-        if logger is not None:
-            logger.info("No centriole detected")
-        else:
-            print("No centriole detected")
-    else:
-        array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
-        array = array[:, [1, 0]]
-    np.savetxt(dst, array, delimiter=",", fmt="%u")
