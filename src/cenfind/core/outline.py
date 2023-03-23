@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import cv2
 import numpy as np
+
+# import numpy.ma as ma
 from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 
@@ -35,6 +37,11 @@ class Centre(ROI):
     def centre(self):
         row, col = self.position
         return int(row), int(col)
+
+    # def intensity(self, field: Field, channel: int):
+    #     data = field.channel(channel)
+    #     result = data[self.position]
+    #     return result
 
     def draw(
         self,
@@ -78,6 +85,7 @@ class Contour(ROI):
     label: str = ""
     idx: int = 0
     confidence: float = 0
+    centrioles: list = field(default_factory=list)
 
     @property
     def centre(self):
@@ -105,6 +113,17 @@ class Contour(ROI):
             )
         return image
 
+    def add_centrioles(self, centriole: Centre):
+        self.centrioles.append(centriole)
+        return 0
+
+    # def intensity(contour, field: Field, channel: int):
+    #     data = field.channel(channel)
+    #     label = np.zeros_like(data)
+    #     cv2.drawContours(label, [contour], -1, 1, thickness=-1)
+    #     result = (data * ma.masked_not_equal(label, 1)).sum()
+    #     return result
+
 
 def resize_image(data, factor=256):
     height, width = data.shape
@@ -122,12 +141,12 @@ def resize_image(data, factor=256):
 
 
 def draw_foci(
-    data: np.ndarray, foci: list[Centre], radius=0.4, pixel_size=0.1025
+    data: np.ndarray, foci: list[Centre], radius=2
 ) -> np.ndarray:
     mask = np.zeros(data.shape, dtype="uint8")
     for f in foci:
         r, c = f.to_numpy()
-        rr, cc = disk((r, c), int(radius / pixel_size))
+        rr, cc = disk((r, c), radius)
         try:
             mask[rr, cc] = 250
         except IndexError:
@@ -179,38 +198,33 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
     return res
 
 
-def save_visualisation(
+def visualisation(
     field: Field,
-    foci: list,
+    nuclei: list,
+    centrioles: list,
     channel_centrioles: int,
-    nuclei: list = None,
-    channel_nuclei: int = None,
-    assigned: dict = None,
+    channel_nuclei: int,
 ) -> np.ndarray:
     background = create_vignette(
         field, marker_index=channel_centrioles, nuclei_index=channel_nuclei
     )
-
-    for focus in foci:
-        background = focus.draw(background, annotation=False)
 
     if nuclei is None:
         return background
 
     for nucleus in nuclei:
         background = nucleus.draw(background, annotation=False)
-
-    for n_pos, c_pos in assigned:
-        nuc = Centre(n_pos, label="Nucleus")
-
-        for sub_c in c_pos:
-            if sub_c:
-                cv2.arrowedLine(
-                    background,
-                    sub_c.to_cv2(),
-                    nuc.to_cv2(),
-                    color=(0, 255, 0),
-                    thickness=1,
-                )
+        background = nucleus.centre.draw(background, annotation=False)
+        for centriole in centrioles:
+            background = centriole.draw(background, annotation=False)
+        
+        for centriole in nucleus.centrioles:
+            cv2.arrowedLine(
+                background,
+                centriole.to_cv2(),
+                nucleus.centre.to_cv2(),
+                color=(0, 255, 0),
+                thickness=1,
+            )
 
     return background

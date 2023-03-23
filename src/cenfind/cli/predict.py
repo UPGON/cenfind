@@ -4,7 +4,7 @@ from pathlib import Path
 import tifffile as tf
 
 from cenfind.core.data import Dataset
-from cenfind.core.outline import save_visualisation, Centre
+from cenfind.core.outline import visualisation, Centre
 
 
 def register_parser(parent_subparsers: argparse.ArgumentParser):
@@ -39,7 +39,7 @@ def run(args):
             "Writing visualisations for field: %s, channel: %s, %s foci detected"
             % (field.name, channel, len(foci))
         )
-        vis = save_visualisation(
+        vis = visualisation(
             field, foci, channel, channel_nuclei=args.channel_nuclei
         )
         tf.imwrite(model_run / f"{field.name}_C{channel}_pred.png", vis)

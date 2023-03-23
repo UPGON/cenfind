@@ -7,7 +7,7 @@ import pandas as pd
 import tifffile as tif
 
 from cenfind.core.data import Dataset
-from cenfind.core.outline import save_visualisation
+from cenfind.core.outline import visualisation
 
 
 def register_parser(parent_subparsers):
@@ -25,7 +25,7 @@ def register_parser(parent_subparsers):
     parser.add_argument(
         "--tolerance",
         type=int,
-        nargs='+',
+        nargs="+",
         default=3,
         help="Distance in pixels below which two points are deemed matching",
     )
@@ -55,37 +55,41 @@ def register_parser(parent_subparsers):
 def run(args):
     dataset = Dataset(args.dataset)
     if not any(dataset.path_annotations_centrioles.iterdir()):
-        print(f"ERROR: The dataset {dataset.path.name} has no annotation. You can run `cenfind predict` instead")
+        print(
+            f"ERROR: The dataset {dataset.path.name} has no annotation. You can run `cenfind predict` instead"
+        )
         sys.exit(2)
 
     from cenfind.core.measure import dataset_metrics, field_score
+
     _, performance = dataset_metrics(
-        dataset, split="test", model=args.model, tolerance=args.tolerance, threshold=.5
+        dataset, split="test", model=args.model, tolerance=args.tolerance, threshold=0.5
     )
     from stardist.models import StarDist2D
+
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         model_stardist = StarDist2D.from_pretrained("2D_versatile_fluo")
 
     path_visualisation_model = dataset.visualisation / args.model.name
     path_visualisation_model.mkdir(exist_ok=True)
 
-    for field, channel in dataset.pairs('test'):
+    for field, channel in dataset.pairs("test"):
         foci, nuclei, assigned, score = field_score(
-                    field=field,
-                    model_nuclei=model_stardist,
-                    model_foci=args.model,
-                    nuclei_channel=args.channel_nuclei,
-                    vicinity=args.vicinity,
-                    channel=channel,
-                )
-        vis = save_visualisation(
-                    field=field,
-                    foci=foci,
-                    channel_centrioles=channel,
-                    nuclei=nuclei,
-                    channel_nuclei=args.channel_nuclei,
-                    assigned=assigned
-                )
+            field=field,
+            model_nuclei=model_stardist,
+            model_foci=args.model,
+            nuclei_channel=args.channel_nuclei,
+            vicinity=args.vicinity,
+            channel=channel,
+        )
+        vis = visualisation(
+            field=field,
+            foci=foci,
+            channel_centrioles=channel,
+            nuclei=nuclei,
+            channel_nuclei=args.channel_nuclei,
+            assigned=assigned,
+        )
         tif.imwrite(path_visualisation_model / f"{field.name}_C{channel}_pred.png", vis)
 
     performance_df = pd.DataFrame(performance)

@@ -1,20 +1,20 @@
 import contextlib
+import functools
 import os
 from pathlib import Path
 from typing import List
-import functools
 
 import cv2
 import numpy as np
 import tensorflow as tf
 from csbdeep.utils import normalize
-from spotipy.utils import normalize_fast2d
+from skimage.measure import label, regionprops
 from spotipy.model import SpotNet
+from spotipy.utils import normalize_fast2d
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Field
-from cenfind.core.outline import resize_image
-from cenfind.core.outline import Centre, Contour
+from cenfind.core.outline import Centre, Contour, draw_foci, resize_image
 
 np.random.seed(1)
 tf.random.set_seed(2)
@@ -54,7 +54,23 @@ def extract_foci(
         _, points_preds = model.predict(
             data, prob_thresh=prob_threshold, min_distance=min_distance, verbose=False
         )
-    return points_preds
+    foci = [
+        Centre((r, c), f_id, "Centriole") for f_id, (r, c) in enumerate(points_preds)
+    ]
+
+    centrosomes_mask = np.zeros(data.shape, dtype="uint8")
+    centrosomes_mask = draw_foci(centrosomes_mask, foci, radius=min_distance * 2)
+
+    centrosomes_map = label(centrosomes_mask)
+    centrosomes_centroids = regionprops(centrosomes_map)
+
+    for f in foci:
+        foci_index = centrosomes_map[f.centre]
+        centrosome_centroid = centrosomes_centroids[foci_index - 1].centroid
+        centrosome_centroid = tuple(int(c) for c in centrosome_centroid)
+        f.parent = Centre(centrosome_centroid, label="Centrosome")
+
+    return foci
 
 
 def extract_nuclei(
@@ -71,6 +87,10 @@ def extract_nuclei(
     :return: List of Contours.
 
     """
+    if model is None: 
+        from stardist.models import StarDist2D
+        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+            model = StarDist2D.from_pretrained("2D_versatile_fluo")
 
     if annotation is not None:
         labels = annotation
@@ -78,7 +98,7 @@ def extract_nuclei(
         data = field.channel(channel)
         data_resized = resize_image(data, factor)
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            labels, coords = model.predict_instances(normalize(data_resized))
+            labels, _ = model.predict_instances(normalize(data_resized))
         labels = cv2.resize(
             labels, dsize=data.shape, fx=1, fy=1, interpolation=cv2.INTER_NEAREST
         )

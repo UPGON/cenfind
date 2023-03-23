@@ -1,17 +1,18 @@
 import os
 import sys
 import logging
-import contextlib
 from datetime import datetime
 from pathlib import Path
+import copy
 
 from tqdm import tqdm
 import pandas as pd
 import tifffile as tif
 
 from cenfind.core.data import Dataset
-from cenfind.core.measure import save_foci
-from cenfind.core.outline import save_visualisation
+from cenfind.core.measure import assign, save_foci
+from cenfind.core.detectors import extract_foci, extract_nuclei
+from cenfind.core.outline import visualisation
 
 
 def register_parser(parent_subparsers):
@@ -36,8 +37,8 @@ def register_parser(parent_subparsers):
     parser.add_argument(
         "--vicinity",
         type=int,
-        default=-5,
-        help="Distance threshold in micrometer (default: -5 um)",
+        default=50,
+        help="Distance threshold in pixel (default: 50 px)",
     )
     parser.add_argument(
         "--factor",
@@ -72,7 +73,7 @@ def run(args):
     )
 
     if not any(dataset.projections.iterdir()):
-        logging.info(
+        logging.error(
             "The projection folder (%s) is empty.\nPlease ensure you have run `squash` or that you have put the projections under projections/"
             % dataset.projections
         )
@@ -91,66 +92,57 @@ def run(args):
         )
         sys.exit()
 
-    from stardist.models import StarDist2D
-
-    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-        model_stardist = StarDist2D.from_pretrained("2D_versatile_fluo")
-
-    scores = []
-
     path_visualisation_model = dataset.visualisation / args.model.name
     path_visualisation_model.mkdir(exist_ok=True)
 
     pbar = tqdm(dataset.fields)
-    from cenfind.core.measure import field_score
+    from cenfind.core.measure import score
 
+    scores = []
     for field in pbar:
-        logging.info("Processing %s" % field.name)
         pbar.set_description(f"{field.name}")
+        logging.info("Processing %s" % field.name)
 
-        for ch in args.channel_centrioles:
-            logging.info("Processing %s / %d" % (field.name, ch))
-            try:
-                foci, nuclei, assigned, score = field_score(
-                    field=field,
-                    model_nuclei=model_stardist,
-                    model_foci=args.model,
-                    nuclei_channel=args.channel_nuclei,
-                    factor=args.factor,
-                    vicinity=args.vicinity,
-                    channel=ch,
-                )
-                predictions_path = (
-                    dataset.predictions / "centrioles" / f"{field.name}{dataset.projection_suffix}_C{ch}.txt"
-                )
-                save_foci(foci, predictions_path)
-                logging.info(
-                    "(%s), channel %s: nuclei: %s; foci: %s"
-                    % (field.name, ch, len(nuclei), len(foci))
-                )
-                pbar.set_postfix(
-                    {
-                        "field": field.name,
-                        "channel": ch,
-                        "nuclei": len(nuclei),
-                        "foci": len(foci),
-                    }
-                )
-                scores.append(score)
-
-                logging.info(
-                    "Writing visualisations for (%s), channel %s" % (field.name, ch)
-                )
-                vis = save_visualisation(
-                    field, foci, ch, nuclei, args.channel_nuclei, assigned
-                )
-                tif.imwrite(
-                    path_visualisation_model / f"{field.name}_C{ch}_pred.png", vis
-                )
-
-            except ValueError as e:
-                logging.error("%s (%s)" % (e, field.name))
+        for channel in args.channel_centrioles:
+            nuclei = extract_nuclei(field, args.channel_nuclei, args.factor)
+            if len(nuclei) == 0:
+                print("No nucleus has been detected")
                 continue
+            logging.info("Processing %s / %d" % (field.name, channel))
+            foci = extract_foci(data=field, foci_model_file=args.model, channel=channel)
+            
+            nuclei_scored = assign(nuclei, foci)
+            scored = score(field, nuclei_scored, channel)
+            scores.append(scored)
+
+            predictions_path = (
+                dataset.predictions / "centrioles" / f"{field.name}{dataset.projection_suffix}_C{channel}.txt"
+            )
+            save_foci(foci, predictions_path)
+
+            pbar.set_postfix(
+                {
+                    "field": field.name,
+                    "channel": channel,
+                    "nuclei": len(nuclei),
+                    "foci": len(foci),
+                }
+            )
+
+            logging.info(
+                "(%s), channel %s: nuclei: %s; foci: %s"
+                % (field.name, channel, len(nuclei), len(foci))
+            )
+
+            logging.info(
+                "Writing visualisations for (%s), channel %s" % (field.name, channel)
+            )
+            vis = visualisation(
+                field, nuclei_scored, foci, channel, args.channel_nuclei
+            )
+            tif.imwrite(
+                path_visualisation_model / f"{field.name}_C{channel}_pred.png", vis
+            )
 
         logging.info("DONE (%s)" % field.name)
 
