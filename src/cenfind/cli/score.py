@@ -51,6 +51,7 @@ def register_parser(parent_subparsers):
 
 
 def run(args):
+
     if not Path(args.model).exists():
         raise FileNotFoundError(f"{args.model} does not exist")
 
@@ -96,6 +97,8 @@ def run(args):
 
     pbar = tqdm(dataset.fields)
     from cenfind.core.measure import score
+    path_run = dataset.results / args.model.name
+    path_run.mkdir(exist_ok=True)
 
     scores = []
     for field in pbar:

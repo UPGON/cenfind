@@ -55,9 +55,7 @@ class Field:
         :return:
         """
         name = f"{self.name}{self.dataset.projection_suffix}_C{channel}"
-        path_annotation = (
-            self.dataset.path / "annotations" / "centrioles" / f"{name}.txt"
-        )
+        path_annotation = self.dataset.annotations_centrioles / f"{name}.txt"
         try:
             annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=",")
             if len(annotation) == 0:
@@ -69,7 +67,7 @@ class Field:
 
     def mask(self, channel) -> np.ndarray:
         mask_name = f"{self.name}{self.dataset.projection_suffix}_C{channel}.tif"
-        path_annotation = self.dataset.path / "annotations" / "cells" / mask_name
+        path_annotation = self.dataset.annotations_cells / mask_name
         if path_annotation.exists():
             return tf.imread(str(path_annotation))
         else:
@@ -116,14 +114,18 @@ class Dataset:
 
         self.raw = self.path / "raw"
         self.projections = self.path / "projections"
-        self.predictions = self.path / "predictions"
-        self.visualisation = self.path / "visualisations"
-        self.statistics = self.path / "statistics"
         self.vignettes = self.path / "vignettes"
         self.logs = self.path / "logs"
-        self.path_annotations = self.path / "annotations"
-        self.path_annotations_centrioles = self.path_annotations / "centrioles"
-        self.path_annotations_cells = self.path_annotations / "cells"
+        self.annotations = self.path / "annotations"
+        self.annotations_centrioles = self.annotations / "centrioles"
+        self.annotations_cells = self.annotations / "cells"
+
+        self.results = self.path
+        self.predictions = self.results / "predictions"
+        self.predictions_centrioles = self.predictions / "centrioles"
+        self.predictions_cells = self.predictions / "cells"
+        self.visualisation = self.results / "visualisations"
+        self.statistics = self.results / "statistics"
 
         if self.projection_suffix is None:
             try:
@@ -139,9 +141,15 @@ class Dataset:
         Collect field names into fields.txt
         """
         self.projections.mkdir(exist_ok=True)
+        self.vignettes.mkdir(exist_ok=True)
+        self.annotations.mkdir(parents=True, exist_ok=True)
+        self.annotations_centrioles.mkdir(exist_ok=True)
+        self.annotations_cells.mkdir(exist_ok=True)
+        self.results.mkdir(exist_ok=True)
+
         self.predictions.mkdir(exist_ok=True)
-        (self.predictions / "centrioles").mkdir(exist_ok=True)
-        (self.predictions / "nuclei").mkdir(exist_ok=True)
+        self.predictions_centrioles.mkdir(exist_ok=True)
+        self.predictions_cells.mkdir(exist_ok=True)
         self.statistics.mkdir(exist_ok=True)
         self.visualisation.mkdir(exist_ok=True)
         self.vignettes.mkdir(exist_ok=True)
@@ -210,6 +218,10 @@ class Dataset:
         :param seed the seed to reproduce the splitting
         :return train_split, test_split
         """
+    def write_train_test(self, channels: list):
+        train_fields, test_fields = self._split_pairs(self.fields, p=0.9)
+        pairs_train = self._choose_channel(train_fields, channels)
+        pairs_test = self._choose_channel(test_fields, channels)
 
         random.seed(seed)
         size = len(self.fields)
@@ -246,10 +258,30 @@ class Dataset:
             return [(Field(str(f[0]), self), int(channel_id)) for f in files]
         else:
             return [(Field(str(f[0]), self), int(f[1])) for f in files]
+    def _choose_channel(
+        self, fields: list[Field], channels: list[int]
+    ) -> list[tuple[Field, int]]:
+        """Pick a channel for each field."""
+        return [
+            (field, int(channel))
+            for field, channel in itertools.product(fields, channels)
+        ]
 
+    def _split_pairs(self, fields: list[Field], p=0.9, seed=1993) -> tuple[list[Field], list[Field]]:
+        """
+        Split a list of pairs (field, channel).
 
-def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
-    """Pick a channel for each field."""
-    return [
-        (field, int(channel)) for field, channel in itertools.product(fields, channels)
-    ]
+        :param fields
+        :param p the train proportion, default to .9
+        :param seed the seed to reproduce the splitting
+        :return train_split, test_split
+        """
+
+        random.seed(seed)
+        size = len(fields)
+        split_idx = int(p * size)
+        shuffled = random.sample(fields, k=size)
+        split_test = shuffled[split_idx:]
+        split_train = shuffled[:split_idx]
+
+        return split_train, split_test

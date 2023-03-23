@@ -62,8 +62,8 @@ def run(argv):
 
     try:
         return args.__command__.run(args)
-    except RecursionError:
-        print("FATAL: Maximum recursion depth reached.")
+    except RecursionError as e:
+        print("FATAL: Maximum recursion depth reached. %s" % e)
         sys.exit(2)
     except FileNotFoundError as e:
         print(f"ERROR: {e.strerror}: '{e.filename}'")
