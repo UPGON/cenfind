@@ -85,7 +85,7 @@ class Field:
             try:
                 order = tif.series[0].axes
             except ValueError(
-                f"Could not retrieve metadata for axes order for {path_raw}"
+                    f"Could not retrieve metadata for axes order for {path_raw}"
             ):
                 order = None
 
@@ -154,9 +154,9 @@ class Dataset:
         self.visualisation.mkdir(exist_ok=True)
         self.vignettes.mkdir(exist_ok=True)
         self.logs.mkdir(exist_ok=True)
-        self.path_annotations.mkdir(parents=True, exist_ok=True)
-        self.path_annotations_centrioles.mkdir(exist_ok=True)
-        self.path_annotations_cells.mkdir(exist_ok=True)
+        self.annotations.mkdir(parents=True, exist_ok=True)
+        self.annotations_centrioles.mkdir(exist_ok=True)
+        self.annotations_cells.mkdir(exist_ok=True)
 
         self.has_projections = bool(len([f for f in self.projections.iterdir()]))
         self.is_setup = True
@@ -209,20 +209,7 @@ class Dataset:
             )
         self.has_projections = True
 
-    def split_pairs(self, p=0.9, seed=1993) -> tuple[list[Field], list[Field]]:
-        """
-        Split a list of pairs (field, channel).
-
-        :param fields
-        :param p the train proportion, default to .9
-        :param seed the seed to reproduce the splitting
-        :return train_split, test_split
-        """
-    def write_train_test(self, channels: list):
-        train_fields, test_fields = self._split_pairs(self.fields, p=0.9)
-        pairs_train = self._choose_channel(train_fields, channels)
-        pairs_test = self._choose_channel(test_fields, channels)
-
+    def _split(self, p=0.9, seed=1993):
         random.seed(seed)
         size = len(self.fields)
         split_idx = int(p * size)
@@ -232,8 +219,34 @@ class Dataset:
 
         return split_train, split_test
 
+    def write_splits(self, channels):
+        """
+        Write field names and channel to use for train and test splits.
+        :param channels: Tuple of integers for the channel indices """
+        train_fields, test_fields = self._split()
+        pairs_train = choose_channel(train_fields, channels)
+        pairs_test = choose_channel(test_fields, channels)
+
+        with open(self.path / "train.txt", "w") as f:
+            for fov, channel in pairs_train:
+                f.write(f"{fov.name},{channel}\n")
+
+        with open(self.path / "test.txt", "w") as f:
+            for fov, channel in pairs_test:
+                f.write(f"{fov.name},{channel}\n")
+
+    def read_split(self, split_type: str, channel: int = None) -> List[Tuple[Field, int]]:
+        with open(self.path / f"{split_type}.txt", "r") as f:
+            files = f.read().splitlines()
+
+        files = [f.split(",") for f in files if f]
+        if channel:
+            return [(Field(str(f[0]), self), int(channel)) for f in files]
+        else:
+            return [(Field(str(f[0]), self), int(f[1])) for f in files]
+
     def pairs(
-        self, split: str = None, channel_id: int = None
+            self, split: str = None, channel_id: int = None
     ) -> List[Tuple["Field", int]]:
         """
         Fetch the fields of view for train or test
@@ -249,39 +262,14 @@ class Dataset:
         else:
             return self.read_split(split, channel_id)
 
-    def read_split(self, split_type, channel_id=None) -> List[Tuple[Field, int]]:
-        with open(self.path / f"{split_type}.txt", "r") as f:
-            files = f.read().splitlines()
 
-        files = [f.split(",") for f in files if f]
-        if channel_id:
-            return [(Field(str(f[0]), self), int(channel_id)) for f in files]
-        else:
-            return [(Field(str(f[0]), self), int(f[1])) for f in files]
-    def _choose_channel(
-        self, fields: list[Field], channels: list[int]
-    ) -> list[tuple[Field, int]]:
-        """Pick a channel for each field."""
-        return [
-            (field, int(channel))
-            for field, channel in itertools.product(fields, channels)
-        ]
-
-    def _split_pairs(self, fields: list[Field], p=0.9, seed=1993) -> tuple[list[Field], list[Field]]:
-        """
-        Split a list of pairs (field, channel).
-
-        :param fields
-        :param p the train proportion, default to .9
-        :param seed the seed to reproduce the splitting
-        :return train_split, test_split
-        """
-
-        random.seed(seed)
-        size = len(fields)
-        split_idx = int(p * size)
-        shuffled = random.sample(fields, k=size)
-        split_test = shuffled[split_idx:]
-        split_train = shuffled[:split_idx]
-
-        return split_train, split_test
+def choose_channel(
+        fields: list[Field], channels: Union[int, List[int]]
+) -> list[tuple[Field, int]]:
+    """Pick a channel for each field."""
+    if type(channels) == int:
+        channels = [channels]
+    return [
+        (field, int(channel))
+        for field, channel in itertools.product(fields, channels)
+    ]

@@ -40,17 +40,6 @@ def run(args):
 
     dataset.setup()
     dataset.write_fields()
-    
-    # TODO: Move the rest to training specific programs
+
     if args.splits:
-        train_fields, test_fields = dataset.split_pairs(dataset.fields, p=0.9)
-        pairs_train = choose_channel(train_fields, args.splits)
-        pairs_test = choose_channel(test_fields, args.splits)
-
-        with open(dataset.path / "train.txt", "w") as f:
-            for fov, channel in pairs_train:
-                f.write(f"{fov.name},{channel}\n")
-
-        with open(dataset.path / "test.txt", "w") as f:
-            for fov, channel in pairs_test:
-                f.write(f"{fov.name},{channel}\n")
+        dataset.write_splits(args.splits)
