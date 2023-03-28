@@ -39,12 +39,7 @@ def register_parser(parent_subparsers):
         default=50,
         help="Distance threshold in pixel (default: 50 px)",
     )
-    parser.add_argument(
-        "--factor",
-        type=int,
-        default=256,
-        help="Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:",
-    )
+
     parser.add_argument("--cpu", action="store_true", help="Only use the cpu")
 
     return parser
@@ -74,7 +69,7 @@ def run(args):
 
     if not any(dataset.projections.iterdir()):
         logging.error(
-            "The projection folder (%s) is empty.\nPlease ensure you have run `squash` or that you have put the projections under projections/"
+            "The projection folder (%s) is empty.\nRun `squash` or check that the projections are under projections/"
             % dataset.projections
         )
         sys.exit()
