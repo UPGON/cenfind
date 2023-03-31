@@ -1,13 +1,39 @@
 import logging
-from datetime import datetime
+import sys
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
-# TODO: Implement logger objects
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-start_stamp = datetime.now()
-log_file = f'{start_stamp.strftime("%Y%m%d_%H:%M:%S")}_train.log'
-fh = logging.FileHandler(Path("./logs") / log_file)
-fh.setFormatter(formatter)
-logger.addHandler(fh)
+FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
+LOG_FILE = Path(__file__).parents[3] / "logs/cenfind.log"
+
+
+def get_console_handler():
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(FORMATTER)
+    return console_handler
+
+
+def get_null_handler():
+    null_handler = logging.NullHandler()
+    null_handler.setFormatter(FORMATTER)
+    return null_handler
+
+
+def get_file_handler():
+    file_handler = TimedRotatingFileHandler(LOG_FILE, when='midnight')
+    file_handler.setFormatter(FORMATTER)
+    return file_handler
+
+
+def get_logger(logger_name):
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.DEBUG)  # better to have too much log than not enough
+    # logger.addHandler(get_console_handler())
+    logger.addHandler(get_file_handler())
+    # with this pattern, it's rarely necessary to propagate the error up to parent
+    logger.propagate = False
+    return logger
+
+
+if __name__ == "__main__":
+    print(Path(__file__).parents[3])
