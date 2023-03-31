@@ -9,22 +9,25 @@ keywords = ["microscopy", "scientific", "biology", "image-analysis"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.10"
-opencv-python = "^4.5.5.62"
-numpy = ">=1.21.2, <1.22"
+python = ">=3.8,<3.11"
+numpy = "^1.23.5"
+opencv-python = "^4.7.0.72"
+llvmlite = "0.39.1"
+numba = "0.56.4"
+scipy = "^1.7.1"
+stardist = "^0.8.3"
+ortools = "9.4.1874"
+csbdeep = "^0.7.3"
+tensorflow-macos = {version = "2.9.0", platform = "arm64"}
+protobuf = "3.19.6"
+spotipy-detector = "^0.1.0"
 tifffile = "^2022.5.4"
 tqdm = "^4.62.3"
-xarray = "^0.21.1"
 pytomlpp = "^1.0.10"
-imageio = "^2.16.0"
 scikit-image = "^0.19.2"
-pandas = "^1.4.1"
-scipy = "^1.7.1"
-csbdeep = "^0.6.3"
-stardist = "^0.8.3"
 scikit-learn = "^1.2.1"
-tensorflow = "2.9.0"
-spotipy-detector = "^0.1.0"
+pandas = "^1.4.1"
+tensorflow = {version = "^2.9.0", markers = "sys_platform == 'win32' or sys_platform == 'linux'"}
 albumentations = "^1.3.0"
 python-dotenv = "^0.21.1"
 labelbox = "^3.36.1"
@@ -37,10 +40,6 @@ upload = "cenfind.labelbox.upload_labels:main"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
-
-[tool.poetry.group.dev.dependencies]
-black = {version = "^23.1a1", allow-prereleases = true}
-flake8 = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "setuptools>=45", "setuptools_scm[toml]>=6.2"]
