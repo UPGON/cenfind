@@ -12,7 +12,9 @@ from cenfind.core.data import Dataset
 from cenfind.core.measure import assign, save_foci
 from cenfind.core.detectors import extract_foci, extract_nuclei
 from cenfind.core.outline import visualisation
+from cenfind.core.log import get_logger
 
+logger = get_logger(__name__)
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
@@ -62,34 +64,25 @@ def run(args):
 
     dataset = Dataset(args.dataset)
 
-    time_stamp = datetime.now()
-    logging.basicConfig(
-        filename=dataset.logs / f"{__name__}_{time_stamp}.log",
-        encoding="utf-8",
-        level=logging.DEBUG,
-        format="%(asctime)s %(message)s",
-        datefmt="%m/%d/%Y %I:%M:%S %p",
-    )
-
     if not any(dataset.projections.iterdir()):
-        logging.error(
+        logger.error(
             "The projection folder (%s) is empty.\nPlease ensure you have run `squash` or that you have put the projections under projections/"
-            % dataset.projections
+            % dataset.projections, exc_info=True
         )
-        sys.exit()
+        raise FileNotFoundError
 
     channels = dataset.fields[0].projection.shape[0]
 
     if args.channel_nuclei not in range(channels):
-        logging.info("Index for nuclei (%s) out of index range" % args.channel_nuclei)
-        sys.exit()
+        logger.error("Index for nuclei (%s) out of index range" % args.channel_nuclei, exc_info=True)
+        raise ValueError
 
     if not set(args.channel_centrioles).issubset(set(range(channels))):
-        logging.info(
+        logger.error(
             "Channels (%s) out of channel range %s" % args.channel_centrioles,
             set(range(channels)),
         )
-        sys.exit()
+        raise ValueError
 
     path_visualisation_model = dataset.visualisation / args.model.name
     path_visualisation_model.mkdir(exist_ok=True)
@@ -100,14 +93,14 @@ def run(args):
     scores = []
     for field in pbar:
         pbar.set_description(f"{field.name}")
-        logging.info("Processing %s" % field.name)
+        logger.info("Processing %s" % field.name)
 
         for channel in args.channel_centrioles:
             nuclei = extract_nuclei(field, args.channel_nuclei, args.factor)
             if len(nuclei) == 0:
                 print("No nucleus has been detected")
                 continue
-            logging.info("Processing %s / %d" % (field.name, channel))
+            logger.info("Processing %s / %d" % (field.name, channel))
             foci = extract_foci(data=field, foci_model_file=args.model, channel=channel)
 
             nuclei_scored = assign(nuclei, foci)
@@ -130,12 +123,12 @@ def run(args):
                 }
             )
 
-            logging.info(
+            logger.info(
                 "(%s), channel %s: nuclei: %s; foci: %s"
                 % (field.name, channel, len(nuclei), len(foci))
             )
 
-            logging.info(
+            logger.info(
                 "Writing visualisations for (%s), channel %s" % (field.name, channel)
             )
             vis = visualisation(
@@ -145,9 +138,9 @@ def run(args):
                 path_visualisation_model / f"{field.name}_C{channel}_pred.png", vis
             )
 
-        logging.info("DONE (%s)" % field.name)
+        logger.info("DONE (%s)" % field.name)
 
     flattened = [leaf for tree in scores for leaf in tree]
     scores_df = pd.DataFrame(flattened)
     scores_df.to_csv(dataset.statistics / "scores_df.tsv", sep="\t", index=False)
-    logging.info("Writing raw scores to %s" % str(dataset.statistics / "scores_df.tsv"))
+    logger.info("Writing raw scores to %s" % str(dataset.statistics / "scores_df.tsv"))
