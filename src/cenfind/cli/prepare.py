@@ -29,10 +29,6 @@ def register_parser(parent_subparsers):
 def run(args):
     """Set up the dataset folder with default directories"""
 
-    if not args.dataset.exists():
-        print(f"The path `{args.path}` does not exist.")
-        sys.exit()
-
     with open(args.dataset / "metadata.toml", "w") as f:
         content = pytomlpp.dumps({"projection_suffix": args.projection_suffix})
         f.write(content)
