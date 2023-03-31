@@ -5,7 +5,6 @@ import cv2
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.core.outline import create_vignette
 
 
 def register_parser(parent_subparsers):
@@ -44,7 +43,7 @@ def run(args):
     for field in pbar:
         for channel_id in args.channel_centrioles:
             pbar.set_description(f"{field.name}: {channel_id}")
-            vignette = create_vignette(field, channel_id, args.channel_nuclei)
+            vignette = field.create_vignette(channel_id, args.channel_nuclei)
             dst = (
                 dataset.vignettes
                 / f"{field.name}{args.projection_suffix}_C{channel_id}.png"

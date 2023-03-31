@@ -4,10 +4,10 @@ from pathlib import Path
 import tifffile as tf
 
 from cenfind.core.data import Dataset
-from cenfind.core.outline import visualisation, Centre
+from cenfind.core.detectors import extract_foci
 
 
-def register_parser(parent_subparsers: argparse.ArgumentParser):
+def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
         "predict",
         help="Predict centrioles on new dataset and save under visualisations/runs/<model_name>",
@@ -30,16 +30,14 @@ def run(args):
     model_run = model_predictions / args.model.name
     model_run.mkdir(exist_ok=True)
 
-    from cenfind.core.measure import extract_foci
-
     for field, channel in dataset.pairs("test"):
-        foci = extract_foci(field, args.model, channel, prob_threshold=0.5)
-        foci = [Centre((r, c), f_id, "Centriole") for f_id, (r, c) in enumerate(foci)]
+        foci = field.extract_centrioles(method=extract_foci, model_path=args.model, channel=channel)
+        nuclei = field.extract_nuclei(args.channel_nuclei, 256)
         print(
             "Writing visualisations for field: %s, channel: %s, %s foci detected"
             % (field.name, channel, len(foci))
         )
-        vis = visualisation(
-            field, foci, channel, channel_nuclei=args.channel_nuclei
+        vis = field.visualisation(
+            nuclei=nuclei, centrioles=foci, channel_centrioles=channel, channel_nuclei=args.channel_nuclei
         )
         tf.imwrite(model_run / f"{field.name}_C{channel}_pred.png", vis)

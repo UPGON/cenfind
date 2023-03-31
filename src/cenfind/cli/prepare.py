@@ -1,7 +1,11 @@
+import argparse
 import sys
 from pathlib import Path
-from cenfind.core.data import Dataset, choose_channel
-import pytomlpp
+
+from cenfind.core.data import Dataset
+from cenfind.core.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def register_parser(parent_subparsers):
@@ -9,12 +13,7 @@ def register_parser(parent_subparsers):
         "prepare", help="Prepare the dataset structure"
     )
     parser.add_argument("dataset", type=Path, help="Path to the dataset")
-    parser.add_argument(
-        "--projection_suffix",
-        type=str,
-        default="",
-        help="Suffix indicating projection, e.g., `_max` or `Projected`, empty if not specified",
-    )
+    parser.add_argument("projection_suffix", type=str, help="the projection suffix like `_max`", default='_max')
     parser.add_argument(
         "--splits",
         type=int,
@@ -32,14 +31,20 @@ def run(args):
         print(f"The path `{args.path}` does not exist.")
         sys.exit()
 
-    with open(args.dataset / "metadata.toml", "w") as f:
-        content = pytomlpp.dumps({"projection_suffix": args.projection_suffix})
-        f.write(content)
-
     dataset = Dataset(args.dataset, projection_suffix=args.projection_suffix)
+    logger.info("Dataset loaded")
 
     dataset.setup()
+    logger.info("Dataset set up")
     dataset.write_fields()
+    logger.info("Projections saved")
 
     if args.splits:
         dataset.write_splits(args.splits)
+
+
+if __name__ == "__main__":
+    args = argparse.Namespace(dataset=Path('data/dataset_test'),
+                              projection_suffix='_max',
+                              splits=[1, 2])
+    run(args)
