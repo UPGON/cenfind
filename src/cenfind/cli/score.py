@@ -45,7 +45,7 @@ def register_parser(parent_subparsers):
         "--factor",
         type=int,
         default=256,
-        help="Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x:",
+        help="Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x.",
     )
     parser.add_argument("--cpu", action="store_true", help="Only use the cpu")
 

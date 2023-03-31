@@ -51,7 +51,7 @@ usage: CENFIND prepare [-h] [--projection_suffix PROJECTION_SUFFIX] [--splits SP
 positional arguments:
   dataset               Path to the dataset
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --projection_suffix PROJECTION_SUFFIX
                         Suffix indicating projection, e.g., `_max` or `Projected`, empty if not specified (default: )
@@ -64,30 +64,36 @@ optional arguments:
 cenfind squash path/to/dataset
 ```
 ```shell
-usage: CENFIND squash [-h] path
+usage: CENFIND squash [-h] dataset
 
 positional arguments:
-  path        Path to the dataset folder
+  dataset     Path to the dataset folder
+
+options:
+  -h, --help  show this help message and exit
+
 ```
 
 3. Run `score` with the arguments source, the index of the nuclei channel (usually 0 or 3), the channel to score and the path to the model. You need to download it from https://figshare.com/articles/software/Cenfind_model_weights/21724421
 ```shell
-cenfind score /path/to/dataset /path/to/model/ --channel_nuclei 0 --channel_centrioles 1 2 3
+cenfind score /path/to/dataset /path/to/model/ -n 0 -c 1 2 3 -v 50
 ```
 ```shell
-usage: CENFIND score [-h] --channel_nuclei CHANNEL_NUCLEI --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...] [--vicinity VICINITY] [--factor FACTOR] [--cpu] dataset model
+usage: CENFIND score [-h] --channel_nuclei CHANNEL_NUCLEI --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...] [--vicinity VICINITY] [--factor FACTOR] [--cpu]
+                     dataset model
 
 positional arguments:
   dataset               Path to the dataset
   model                 Absolute path to the model folder
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  --channel_nuclei CHANNEL_NUCLEI
+  --channel_nuclei CHANNEL_NUCLEI, -n CHANNEL_NUCLEI
                         Channel index for nuclei segmentation, e.g., 0 or 3 (default: None)
-  --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...]
+  --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...], -c CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...]
                         Channel indices to analyse, e.g., 1 2 3 (default: None)
-  --vicinity VICINITY   Distance threshold in micrometer (default: -5 um) (default: -5)
+  --vicinity VICINITY, -v VICINITY
+                        Distance threshold in pixel (default: 50 px) (default: 50)
   --factor FACTOR       Factor to use: given a 2048x2048 image, 256 if 63x; 2048 if 20x: (default: 256)
   --cpu                 Only use the cpu (default: False)
 ```
@@ -102,7 +108,7 @@ usage: CENFIND analyse [-h] --by BY dataset
 positional arguments:
   dataset     Path to the dataset
 
-optional arguments:
+options:
   -h, --help  show this help message and exit
   --by BY     Grouping (field or well) (default: None)
 ```
@@ -207,4 +213,3 @@ Visualisation functions that:
 - outline centrioles and nuclei (data, points) => image
 - create composite vignettes (data) => composite_image
 - flag partial nuclei (contours, tolerance) => contours
-
