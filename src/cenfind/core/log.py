@@ -4,7 +4,6 @@ from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
 FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
-LOG_FILE = Path(__file__).parents[3] / "logs/cenfind.log"
 
 
 def get_console_handler():
@@ -19,8 +18,8 @@ def get_null_handler():
     return null_handler
 
 
-def get_file_handler():
-    file_handler = TimedRotatingFileHandler(LOG_FILE, when='midnight')
+def get_file_handler(file):
+    file_handler = TimedRotatingFileHandler(file, when='midnight')
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
@@ -32,7 +31,8 @@ def get_logger(logger_name, console=None, file=None):
     if console:
         logger.addHandler(get_console_handler())
     if file:
-        logger.addHandler(get_file_handler())
+        logger.addHandler(get_file_handler(file))
+
     # with this pattern, it's rarely necessary to propagate the error up to parent
     logger.propagate = False
     return logger

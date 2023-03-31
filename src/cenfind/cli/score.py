@@ -12,8 +12,6 @@ from cenfind.core.log import get_logger
 from cenfind.core.measure import assign, save_foci
 from cenfind.core.outline import visualisation
 
-logger = get_logger(__name__, file=1)
-
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
@@ -62,6 +60,7 @@ def run(args):
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     dataset = Dataset(args.dataset)
+    logger = get_logger(__name__, file=dataset.logs / 'cenfind.log')
 
     if not any(dataset.projections.iterdir()):
         logger.error(

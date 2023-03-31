@@ -5,8 +5,6 @@ from pathlib import Path
 from cenfind.core.data import Dataset
 from cenfind.core.log import get_logger
 
-logger = get_logger(__name__, console=1, file=1)
-
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser("squash", help="Write z-projections.")
@@ -21,6 +19,7 @@ def run(args):
     """
 
     dataset = Dataset(args.dataset)
+    logger = get_logger(__name__, console=1, file=dataset.logs / 'cenfind.log')
 
     if dataset.has_projections:
         logger.info("Projections already exist, squashing skipped.")
