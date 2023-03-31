@@ -106,7 +106,7 @@ def run(args):
             if len(foci) == 0:
                 logger.warning("No centrioles (channel: %s) has been detected in %s" % (channel, field.name))
 
-            nuclei_scored = assign(nuclei, foci)
+            nuclei_scored = assign(nuclei, foci, vicinity=args.vicinity)
             scored = score(field, nuclei_scored, channel)
             scores.append(scored)
 
