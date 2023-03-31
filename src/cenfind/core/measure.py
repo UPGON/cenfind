@@ -12,6 +12,9 @@ from spotipy.utils import points_matching
 from cenfind.core.data import Dataset, Field
 from cenfind.core.detectors import extract_foci
 from cenfind.core.outline import Centre, Contour
+from cenfind.core.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def signed_distance(focus: Centre, nucleus: Contour) -> float:
@@ -76,7 +79,7 @@ def assign(
     for i in range(num_nuclei):
         for j in range(num_centrioles):
             if x[i, j].solution_value() > 0.5:
-                print(f"Adding Centre {j} to Nucleus {i}")
+                logger.debug("Adding Centre %s to Nucleus %s" %(j, i))
                 _nuclei[i].add_centrioles(_centrioles[j])
 
     return _nuclei

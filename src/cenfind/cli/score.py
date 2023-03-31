@@ -1,20 +1,19 @@
+import argparse
 import os
-import sys
-import logging
-from datetime import datetime
 from pathlib import Path
 
-from tqdm import tqdm
 import pandas as pd
 import tifffile as tif
+from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.core.measure import assign, save_foci
 from cenfind.core.detectors import extract_foci, extract_nuclei
-from cenfind.core.outline import visualisation
 from cenfind.core.log import get_logger
+from cenfind.core.measure import assign, save_foci
+from cenfind.core.outline import visualisation
 
 logger = get_logger(__name__)
+
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
@@ -108,9 +107,9 @@ def run(args):
             scores.append(scored)
 
             predictions_path = (
-                dataset.predictions
-                / "centrioles"
-                / f"{field.name}{dataset.projection_suffix}_C{channel}.txt"
+                    dataset.predictions
+                    / "centrioles"
+                    / f"{field.name}{dataset.projection_suffix}_C{channel}.txt"
             )
             save_foci(foci, predictions_path)
 
@@ -144,3 +143,14 @@ def run(args):
     scores_df = pd.DataFrame(flattened)
     scores_df.to_csv(dataset.statistics / "scores_df.tsv", sep="\t", index=False)
     logger.info("Writing raw scores to %s" % str(dataset.statistics / "scores_df.tsv"))
+
+
+if __name__ == "__main__":
+    args = argparse.Namespace(dataset=Path('data/dataset_test'),
+                              model=Path('models/master'),
+                              channel_nuclei=0,
+                              channel_centrioles=[1, 2],
+                              vicinity=50,
+                              cpu=False,
+                              factor=256)
+    run(args)
