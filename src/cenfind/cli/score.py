@@ -12,7 +12,7 @@ from cenfind.core.log import get_logger
 from cenfind.core.measure import assign, save_foci
 from cenfind.core.outline import visualisation
 
-logger = get_logger(__name__, console=1, file=1)
+logger = get_logger(__name__, file=1)
 
 
 def register_parser(parent_subparsers):
