@@ -3,12 +3,8 @@ from dataclasses import dataclass, field
 
 import cv2
 import numpy as np
-
-# import numpy.ma as ma
 from skimage.draw import disk
 from skimage.exposure import rescale_intensity
-
-from cenfind.core.data import Field
 
 
 @dataclass(eq=True, frozen=False)
@@ -44,12 +40,12 @@ class Centre(ROI):
     #     return result
 
     def draw(
-        self,
-        image,
-        color=(0, 255, 0),
-        annotation=True,
-        marker_type=cv2.MARKER_SQUARE,
-        marker_size=8,
+            self,
+            image,
+            color=(0, 255, 0),
+            annotation=True,
+            marker_type=cv2.MARKER_SQUARE,
+            marker_size=8,
     ):
         r, c = self.centre
         offset_col = int(0.01 * image.shape[1])
@@ -163,66 +159,3 @@ def _color_channel(data, color, out_range):
     r = np.multiply(data, color[2], casting="unsafe")
     res = cv2.merge([b, g, r])
     return res
-
-
-def create_vignette(field: Field, marker_index: int, nuclei_index: int):
-    """
-    Normalise all markers
-    Represent them as blue
-    Highlight the channel in green
-    :param field:
-    :param nuclei_index:
-    :param marker_index:
-    :return:
-    """
-    layer_nuclei = field.channel(nuclei_index)
-    layer_marker = field.channel(marker_index)
-
-    nuclei = _color_channel(layer_nuclei, (1, 0, 0), "uint8")
-    marker = _color_channel(layer_marker, (0, 1, 0), "uint8")
-
-    res = cv2.addWeighted(marker, 1, nuclei, 0.5, 0)
-    res = cv2.putText(
-        res,
-        f"{field.name} {marker_index}",
-        (100, 100),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.8,
-        (255, 255, 255),
-        1,
-        cv2.LINE_AA,
-    )
-
-    return res
-
-
-def visualisation(
-    field: Field,
-    nuclei: list,
-    centrioles: list,
-    channel_centrioles: int,
-    channel_nuclei: int,
-) -> np.ndarray:
-    background = create_vignette(
-        field, marker_index=channel_centrioles, nuclei_index=channel_nuclei
-    )
-
-    if nuclei is None:
-        return background
-
-    for nucleus in nuclei:
-        background = nucleus.draw(background, annotation=False)
-        background = nucleus.centre.draw(background, annotation=False)
-        for centriole in centrioles:
-            background = centriole.draw(background, annotation=False)
-
-        for centriole in nucleus.centrioles:
-            cv2.arrowedLine(
-                background,
-                centriole.to_cv2(),
-                nucleus.centre.to_cv2(),
-                color=(0, 255, 0),
-                thickness=1,
-            )
-
-    return background

@@ -1,22 +1,18 @@
-import logging
-from pathlib import Path
-from types import SimpleNamespace
 from typing import List
 
 import cv2
 import numpy as np
 import pandas as pd
 from ortools.linear_solver import pywraplp
-from spotipy.utils import points_matching
 
-from cenfind.core.data import Dataset, Field
-from cenfind.core.detectors import extract_foci
+from cenfind.core.log import get_logger
 from cenfind.core.outline import Centre, Contour
+
+logger = get_logger(__name__)
 
 
 def signed_distance(focus: Centre, nucleus: Contour) -> float:
     """Wrapper for the opencv PolygonTest"""
-
     result = cv2.pointPolygonTest(nucleus.contour, focus.to_cv2(), measureDist=True)
     return result
 
@@ -36,14 +32,13 @@ def flag(is_full: bool) -> tuple:
 
 
 def assign(
-    nuclei: List[Contour], centrioles: List[Centre], vicinity=0
+        nuclei: List[Contour], centrioles: List[Centre], vicinity=0
 ) -> List[Contour]:
     _nuclei = nuclei.copy()
     _centrioles = centrioles.copy()
 
     num_nuclei = len(_nuclei)
     num_centrioles = len(_centrioles)
-    # entries = list(product(range(num_nuclei), range(num_centrioles)))
 
     costs = {}
 
@@ -76,49 +71,19 @@ def assign(
     for i in range(num_nuclei):
         for j in range(num_centrioles):
             if x[i, j].solution_value() > 0.5:
-                print(f"Adding Centre {j} to Nucleus {i}")
+                logger.debug(f"Adding Centre {j} to Nucleus {i}")
                 _nuclei[i].add_centrioles(_centrioles[j])
 
     return _nuclei
-
-
-# TODO: refactor as a field method
-def score(
-    field,
-    nuclei_scored,
-    channel: int,
-) -> List[dict]:
-    """
-    1. Detect foci in the given channels
-    2. Detect nuclei
-    3. Assign foci to nuclei
-    :param channel:
-    :param nuclei_channel:
-    :param model_foci:
-    :param model_nuclei:
-    :param field:
-    :return: list(foci, nuclei, assigned, scores)
-    """
-    image_shape = field.projection.shape[1:]
-    scores = []
-    for nucleus in nuclei_scored:
-        scores.append(
-            {
-                "fov": field.name,
-                "channel": channel,
-                "nucleus": nucleus.centre.to_numpy(),
-                "score": len(nucleus.centrioles),
-                "is_full": full_in_field(nucleus, image_shape, 0.05),
-            }
-        )
-    return scores
 
 
 def field_score_frequency(df, by="field"):
     """
     Count the absolute frequency of number of centriole per well or per field
     :param df: Df containing the number of centriole per nuclei
+    :param by: the unit to pool nuclei, either `field` or `well`
     :return: Df with absolut frequencies.
+
     """
     cuts = [0, 1, 2, 3, 4, 5, np.inf]
     labels = "0 1 2 3 4 +".split(" ")
@@ -130,7 +95,10 @@ def field_score_frequency(df, by="field"):
     result = result.sort_index().reset_index()
     result = result.rename({"score": "score_cat"}, axis=1)
     if by == "well":
-        result[["well", "field"]] = result["fov"].str.split("_", expand=True)
+        split_well = result["fov"].str.split("_", expand=True)
+        if len(split_well.columns) != 2:
+            raise ValueError("The name split has more than 2 parts (e.g. %s)" % result["fov"][0])
+        result[["well", "field"]] = split_well
         print(result.columns)
         result = result.groupby(["well", "channel", "score_cat"])[["freq_abs"]].sum()
         result = result.reset_index()
@@ -145,83 +113,12 @@ def field_score_frequency(df, by="field"):
     return result
 
 
-def save_foci(foci_list: list[Centre], dst: str, logger=None) -> None:
+def save_foci(foci_list: list[Centre], dst: str) -> None:
     if len(foci_list) == 0:
         array = np.array([])
-        if logger is not None:
-            logger.info("No centriole detected")
-        else:
-            print("No centriole detected")
+        logger.info("No centriole detected")
+
     else:
         array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
         array = array[:, [1, 0]]
     np.savetxt(dst, array, delimiter=",", fmt="%u")
-
-
-# TODO: refactor as a field method
-def field_metrics(
-    field: Field,
-    channel: int,
-    annotation: np.ndarray,
-    predictions: np.ndarray,
-    tolerance: int,
-    threshold: float,
-) -> dict:
-    """
-    Compute the accuracy of the prediction on one field.
-    :param threshold:
-    :param field:
-    :param channel:
-    :param annotation:
-    :param predictions:
-    :param tolerance:
-    :return: dictionary of fields
-    """
-    if all((len(predictions), len(annotation))) > 0:
-        res = points_matching(annotation, predictions, cutoff_distance=tolerance)
-    else:
-        logging.warning(
-            "threshold: %f; detected: %d; annotated: %d... Set precision and accuracy to zero"
-            % (threshold, len(predictions), len(annotation))
-        )
-        res = SimpleNamespace()
-        res.precision = 0.0
-        res.recall = 0.0
-        res.f1 = 0.0
-        res.tp = (0,)
-        res.fp = (0,)
-        res.fn = 0
-    perf = {
-        "dataset": field.dataset.path.name,
-        "field": field.name,
-        "channel": channel,
-        "n_actual": len(annotation),
-        "n_preds": len(predictions),
-        "threshold": threshold,
-        "tolerance": tolerance,
-        "tp": res.tp[0] if type(res.tp) == tuple else res.tp,
-        "fp": res.fp[0] if type(res.fp) == tuple else res.fp,
-        "fn": res.fn[0] if type(res.fn) == tuple else res.fn,
-        "precision": np.round(res.precision, 3),
-        "recall": np.round(res.recall, 3),
-        "f1": np.round(res.f1, 3),
-    }
-    return perf
-
-
-# TODO: refactor as a field method
-def dataset_metrics(
-    dataset: Dataset, split: str, model: Path, tolerance, threshold
-) -> tuple[dict, list]:
-    if type(tolerance) == int:
-        tolerance = [tolerance]
-    perfs = []
-    for field, channel in dataset.pairs(split):
-        annotation = field.annotation(channel)
-        predictions = extract_foci(field, model, channel, prob_threshold=threshold)
-        for tol in tolerance:
-            perf = field_metrics(
-                field, channel, annotation, predictions, tol, threshold=threshold
-            )
-            perfs.append(perf)
-    return perfs
