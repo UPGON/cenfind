@@ -214,7 +214,7 @@ def field_metrics(
 # TODO: refactor as a field method
 def dataset_metrics(
     dataset: Dataset, split: str, model: Path, tolerance, threshold
-) -> tuple[dict, list]:
+) -> list[dict]:
     if type(tolerance) == int:
         tolerance = [tolerance]
     perfs = []
