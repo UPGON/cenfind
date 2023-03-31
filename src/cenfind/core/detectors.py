@@ -1,6 +1,8 @@
 import contextlib
 import functools
+import logging
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from pathlib import Path
 from typing import List
 
@@ -18,7 +20,7 @@ from cenfind.core.outline import Centre, Contour, draw_foci, resize_image
 
 np.random.seed(1)
 tf.random.set_seed(2)
-
+tf.get_logger().setLevel(logging.ERROR)
 
 @functools.lru_cache(maxsize=None)
 def get_model(model):
@@ -87,7 +89,7 @@ def extract_nuclei(
     :return: List of Contours.
 
     """
-    if model is None: 
+    if model is None:
         from stardist.models import StarDist2D
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
             model = StarDist2D.from_pretrained("2D_versatile_fluo")
