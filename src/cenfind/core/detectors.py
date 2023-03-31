@@ -7,14 +7,18 @@ from typing import List
 import cv2
 import numpy as np
 import tensorflow as tf
-from csbdeep.utils import normalize
+from skimage.exposure import rescale_intensity
+from skimage.feature import blob_log
 from skimage.measure import label, regionprops
 from spotipy.model import SpotNet
 from spotipy.utils import normalize_fast2d
-from stardist.models import StarDist2D
 
+from cenfind.core.outline import draw_foci
+
+np.random.seed(1)
+tf.random.set_seed(2)
 from cenfind.core.data import Field
-from cenfind.core.outline import Centre, Contour, draw_foci, resize_image
+from cenfind.core.outline import Centre
 
 np.random.seed(1)
 tf.random.set_seed(2)
@@ -29,17 +33,22 @@ def get_model(model):
     return SpotNet(None, name=path.name, basedir=str(path.parent))
 
 
+def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
+    res = (int(keypoint.pt[1]), int(keypoint.pt[0]))
+    return res
+
+
 def extract_foci(
-    data: Field,
-    foci_model_file: Path,
-    channel: int,
-    prob_threshold=0.5,
-    min_distance=2,
-    **kwargs,
+        field: Field,
+        foci_model_file: Path,
+        channel: int,
+        prob_threshold=0.5,
+        min_distance=2,
+        **kwargs,
 ) -> List[Centre]:
     """
     Detect centrioles as row, col, row major
-    :param data:
+    :param field:
     :param foci_model_file:
     :param channel:
     :param prob_threshold:
@@ -47,7 +56,7 @@ def extract_foci(
     :param kwargs:
     :return:
     """
-    data = data.channel(channel)
+    data = field.channel(channel)
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         data = normalize_fast2d(data)
         model = get_model(foci_model_file)
@@ -73,56 +82,34 @@ def extract_foci(
     return foci
 
 
-def extract_nuclei(
-    field: Field, channel: int, factor: int, model: StarDist2D = None, annotation=None
-) -> List[Contour]:
-    """
-    Extract the nuclei from the nuclei image
-    :param field:
-    :param channel:
-    :param factor: the factor related to pixel size
-    :param model:
-    :param annotation: a mask with pixels labelled for each centre
 
-    :return: List of Contours.
 
-    """
-    if model is None: 
-        from stardist.models import StarDist2D
-        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            model = StarDist2D.from_pretrained("2D_versatile_fluo")
 
-    if annotation is not None:
-        labels = annotation
-    elif model is not None:
-        data = field.channel(channel)
-        data_resized = resize_image(data, factor)
-        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            labels, _ = model.predict_instances(normalize(data_resized))
-        labels = cv2.resize(
-            labels, dsize=data.shape, fx=1, fy=1, interpolation=cv2.INTER_NEAREST
-        )
+def log_skimage(data: Field, channel: int, **kwargs) -> list:
+    data = data.channel(channel)
+    data = rescale_intensity(data, out_range=(0, 1))
+    foci = blob_log(data, min_sigma=1, max_sigma=2, num_sigma=10, threshold=0.1)
+    res = [(int(r), int(c)) for r, c, _ in foci]
 
-    else:
-        raise ValueError("Please provide either an annotation or a model")
+    return res
 
-    labels_id = np.unique(labels)
 
-    cnts = []
-    for nucleus_id in labels_id:
-        if nucleus_id == 0:
-            continue
-        sub_mask = np.zeros_like(labels, dtype="uint8")
-        sub_mask[labels == nucleus_id] = 1
-        contour, _ = cv2.findContours(
-            sub_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
+def simpleblob_cv2(data: Field, channel: int, **kwargs) -> list:
+    data = data.channel(channel)
+    foci = rescale_intensity(data, out_range="uint8")
+    params = cv2.SimpleBlobDetector_Params()
 
-        cnts.append(contour[0])
+    params.blobColor = 255
+    params.filterByArea = True
+    params.minArea = 5
+    params.maxArea = 100
+    params.minDistBetweenBlobs = 1
+    params.minThreshold = 0
+    params.maxThreshold = 255
 
-    contours = tuple(cnts)
-    contours = [
-        Contour(c, "Nucleus", c_id, confidence=-1) for c_id, c in enumerate(contours)
-    ]
+    detector = cv2.SimpleBlobDetector_create(params)
+    keypoints = detector.detect(foci)
 
-    return contours
+    res = [blob2point(kp) for kp in keypoints]
+
+    return res

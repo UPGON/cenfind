@@ -2,10 +2,9 @@ import cv2
 import pandas as pd
 
 from cenfind.core.data import Dataset
-from cenfind.core.detectors import extract_foci
 from cenfind.core.outline import draw_foci
 from cenfind.core.constants import datasets, PREFIX_REMOTE
-from cenfind.publication.detectors_other import run_detection, log_skimage, simpleblob_cv2
+from cenfind.core.detectors import log_skimage, simpleblob_cv2, extract_foci
 
 
 def main():
@@ -23,7 +22,7 @@ def main():
             annotation = field.annotation(channel)
 
             for name, method, model_path in methods:
-                foci, f1 = run_detection(method, field, annotation=annotation, channel=channel,
+                foci, f1 = field.run_detection(method, annotation=annotation, channel=channel,
                                          model_path=model_path, tolerance=3)
                 print(f"{field.name} using {name}: F1={f1} (foci detected: {len(foci)})")
 
