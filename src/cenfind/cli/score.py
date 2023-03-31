@@ -21,12 +21,14 @@ def register_parser(parent_subparsers):
     parser.add_argument("model", type=Path, help="Absolute path to the model folder")
     parser.add_argument(
         "--channel_nuclei",
+        "-n",
         type=int,
         required=True,
         help="Channel index for nuclei segmentation, e.g., 0 or 3",
     )
     parser.add_argument(
         "--channel_centrioles",
+        "-c",
         nargs="+",
         type=int,
         required=True,
@@ -34,6 +36,7 @@ def register_parser(parent_subparsers):
     )
     parser.add_argument(
         "--vicinity",
+        "-v",
         type=int,
         default=50,
         help="Distance threshold in pixel (default: 50 px)",
