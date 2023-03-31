@@ -1,4 +1,5 @@
 import sys
+import argparse
 from pathlib import Path
 from cenfind.core.data import Dataset, choose_channel
 import pytomlpp
@@ -40,10 +41,10 @@ def run(args):
 
     dataset.setup()
     dataset.write_fields()
-    
+
     # TODO: Move the rest to training specific programs
     if args.splits:
-        train_fields, test_fields = dataset.split_pairs(dataset.fields, p=0.9)
+        train_fields, test_fields = dataset.split_pairs(p=0.9)
         pairs_train = choose_channel(train_fields, args.splits)
         pairs_test = choose_channel(test_fields, args.splits)
 
@@ -54,3 +55,10 @@ def run(args):
         with open(dataset.path / "test.txt", "w") as f:
             for fov, channel in pairs_test:
                 f.write(f"{fov.name},{channel}\n")
+
+
+if __name__ == "__main__":
+    args = argparse.Namespace(dataset=Path('data/dataset_test'),
+                              projection_suffix='_max',
+                              splits=[1, 2])
+    run(args)
