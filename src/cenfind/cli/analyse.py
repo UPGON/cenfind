@@ -1,10 +1,14 @@
-import sys
+import argparse
 from pathlib import Path
 
 import pandas as pd
+
 from cenfind.core.constants import UNITS
 from cenfind.core.data import Dataset
+from cenfind.core.log import get_logger
 from cenfind.core.measure import field_score_frequency
+
+logger = get_logger(__name__)
 
 
 def register_parser(parent_subparsers):
@@ -24,23 +28,25 @@ def run(args):
     dataset = Dataset(args.dataset)
 
     if args.by not in UNITS:
-        print(f"ERROR: `by` is not in {UNITS} ({{args.by}})")
-        sys.exit(2)
+        logger.error("`%s` is not in %s" % (args.by, UNITS), exc_info=True)
+        raise
 
     scores = pd.read_csv(dataset.statistics / "scores_df.tsv", sep="\t")
 
     try:
         binned = field_score_frequency(scores, by=args.by)
     except ValueError as e:
-        print(
-            "The field value of `fov` does not conform with the syntax `<WELL>_<FOVID>`(%s) (%s)"
-            % (scores.loc[0, "fov"], e)
-        )
-        sys.exit()
+            logger.error(e, exc_info=True)
+            raise
 
     path_stats = dataset.statistics / "statistics.tsv"
     binned.to_csv(path_stats, sep="\t", index=True)
-    print(f"Writing statistics to {path_stats}")
+    logger.info(f"Writing statistics to {path_stats}")
 
     if args.by != "well":
         return 0
+
+
+if __name__ == "__main__":
+    args = argparse.Namespace(dataset="data/dataset_test", by="field")
+    run(args)
