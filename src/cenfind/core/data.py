@@ -26,8 +26,8 @@ class Field:
         try:
             data = tf.imread(path_file)
         except FileNotFoundError:
-            print(f"File not found ({path_file})")
-            sys.exit()
+            logger.error(f"File not found (%s)" % path_file)
+            raise
 
         axes_order = self._axes_order()
         if axes_order == "ZCYX":
@@ -43,8 +43,8 @@ class Field:
             res = tf.imread(str(path_projection))
             return res
         except FileNotFoundError:
-            print(f"File not found ({path_projection}). Check the projection suffix...")
-            sys.exit()
+            logger.error("File not found (%s). Check the projection suffix..." % path_projection)
+            raise
 
     def channel(self, channel: int) -> np.ndarray:
         return self.projection[channel, :, :]
@@ -68,7 +68,8 @@ class Field:
             else:
                 return annotation[:, [1, 0]]
         except OSError:
-            print(f"No annotation found for {path_annotation}")
+            logger.error(f"No annotation found for %s" % path_annotation, exc_info=True)
+            raise
 
     def mask(self, channel) -> np.ndarray:
         mask_name = f"{self.name}{self.dataset.projection_suffix}_C{channel}.tif"
@@ -132,9 +133,9 @@ class Dataset:
             try:
                 metadata = pytomlpp.load(self.path / "metadata.toml")
                 self.projection_suffix = metadata["projection_suffix"]
-            except FileNotFoundError as e:
-                print(e)
-                sys.exit()
+            except FileNotFoundError:
+                logger.error("Metadata file not found (%s)" % str(self.path / "metadata.toml"))
+                raise
 
     def setup(self) -> None:
         """
