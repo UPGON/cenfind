@@ -46,7 +46,6 @@ def assign(
 
     num_nuclei = len(_nuclei)
     num_centrioles = len(_centrioles)
-    # entries = list(product(range(num_nuclei), range(num_centrioles)))
 
     costs = {}
 

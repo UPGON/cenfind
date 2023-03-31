@@ -12,7 +12,7 @@ from cenfind.core.log import get_logger
 from cenfind.core.measure import assign, save_foci
 from cenfind.core.outline import visualisation
 
-logger = get_logger(__name__)
+logger = get_logger(__name__, console=1, file=1)
 
 
 def register_parser(parent_subparsers):
@@ -97,10 +97,12 @@ def run(args):
         for channel in args.channel_centrioles:
             nuclei = extract_nuclei(field, args.channel_nuclei, args.factor)
             if len(nuclei) == 0:
-                print("No nucleus has been detected")
+                logger.warning("No nucleus has been detected in %s" % field.name)
                 continue
             logger.info("Processing %s / %d" % (field.name, channel))
             foci = extract_foci(data=field, foci_model_file=args.model, channel=channel)
+            if len(foci) == 0:
+                logger.warning("No centrioles (channel: %s) has been detected in %s" % (channel, field.name))
 
             nuclei_scored = assign(nuclei, foci)
             scored = score(field, nuclei_scored, channel)
