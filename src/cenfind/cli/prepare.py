@@ -1,8 +1,9 @@
-import sys
 import argparse
 from pathlib import Path
-from cenfind.core.data import Dataset, choose_channel
+
 import pytomlpp
+
+from cenfind.core.data import Dataset, choose_channel
 
 
 def register_parser(parent_subparsers):

@@ -1,7 +1,9 @@
 import sys
 from pathlib import Path
 from cenfind.core.data import Dataset
+from cenfind.core.log import get_logger, get_file_handler
 
+logger = get_logger(__name__, console=1, file=1)
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser("squash", help="Write z-projections.")
@@ -18,14 +20,14 @@ def run(args):
     dataset = Dataset(args.path)
 
     if dataset.has_projections:
-        print("Projections already exist, squashing skipped.")
+        logger.info("Projections already exist, squashing skipped.")
         sys.exit()
 
     if not dataset.raw.exists():
-        print(
-            "ERROR: Folder raw/ does not exist. Make sure to move all your images under raw/"
+        logger.error(
+            "Folder raw/ does not exist. Make sure to move all your images under raw/"
         )
-        sys.exit()
+        raise FileNotFoundError
 
     dataset.write_projections()
-    print("Projections saved under %s" % dataset.projections)
+    logger.info("Projections saved under %s" % dataset.projections)

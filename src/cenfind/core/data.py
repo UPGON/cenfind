@@ -9,6 +9,9 @@ import numpy as np
 import pytomlpp
 import tifffile as tf
 from tqdm import tqdm
+from cenfind.core.log import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -56,7 +59,7 @@ class Field:
         """
         name = f"{self.name}{self.dataset.projection_suffix}_C{channel}"
         path_annotation = (
-            self.dataset.path / "annotations" / "centrioles" / f"{name}.txt"
+                self.dataset.path / "annotations" / "centrioles" / f"{name}.txt"
         )
         try:
             annotation = np.loadtxt(str(path_annotation), dtype=int, delimiter=",")
@@ -87,7 +90,7 @@ class Field:
             try:
                 order = tif.series[0].axes
             except ValueError(
-                f"Could not retrieve metadata for axes order for {path_raw}"
+                    f"Could not retrieve metadata for axes order for {path_raw}"
             ):
                 order = None
 
@@ -111,8 +114,8 @@ class Dataset:
         self.path = Path(self.path)
 
         if not self.path.is_dir():
-            print(f"Dataset does not exist ({self.path})")
-            sys.exit()
+            logger.error(f"Dataset does not exist ({self.path})")
+            raise FileNotFoundError
 
         self.raw = self.path / "raw"
         self.projections = self.path / "projections"
@@ -221,7 +224,7 @@ class Dataset:
         return split_train, split_test
 
     def pairs(
-        self, split: str = None, channel_id: int = None
+            self, split: str = None, channel_id: int = None
     ) -> List[Tuple["Field", int]]:
         """
         Fetch the fields of view for train or test
