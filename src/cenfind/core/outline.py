@@ -9,6 +9,9 @@ from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 
 from cenfind.core.data import Field
+from cenfind.core.log import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass(eq=True, frozen=False)
@@ -44,12 +47,12 @@ class Centre(ROI):
     #     return result
 
     def draw(
-        self,
-        image,
-        color=(0, 255, 0),
-        annotation=True,
-        marker_type=cv2.MARKER_SQUARE,
-        marker_size=8,
+            self,
+            image,
+            color=(0, 255, 0),
+            annotation=True,
+            marker_type=cv2.MARKER_SQUARE,
+            marker_size=8,
     ):
         r, c = self.centre
         offset_col = int(0.01 * image.shape[1])
@@ -143,12 +146,8 @@ def resize_image(data, factor=256):
 def draw_foci(data: np.ndarray, foci: list[Centre], radius=2) -> np.ndarray:
     mask = np.zeros(data.shape, dtype="uint8")
     for f in foci:
-        r, c = f.to_numpy()
-        rr, cc = disk((r, c), radius)
-        try:
-            mask[rr, cc] = 250
-        except IndexError:
-            continue
+        rr, cc = disk(f.to_numpy(), radius, shape=data.shape[-2:])
+        mask[rr, cc] = 250
     return mask
 
 
@@ -197,11 +196,11 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
 
 
 def visualisation(
-    field: Field,
-    nuclei: list,
-    centrioles: list,
-    channel_centrioles: int,
-    channel_nuclei: int,
+        field: Field,
+        nuclei: list,
+        centrioles: list,
+        channel_centrioles: int,
+        channel_nuclei: int,
 ) -> np.ndarray:
     background = create_vignette(
         field, marker_index=channel_centrioles, nuclei_index=channel_nuclei
