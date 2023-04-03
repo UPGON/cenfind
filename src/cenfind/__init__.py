@@ -4,6 +4,7 @@ import sys
 import importlib
 
 from argparse import ArgumentDefaultsHelpFormatter
+from cenfind.core.log import get_logger
 
 commands = [
     "prepare",
@@ -60,14 +61,13 @@ def make_parser():
 def run(argv):
     args = make_parser().parse_args(argv)
 
+    logger = get_logger(__name__)
+
     try:
         return args.__command__.run(args)
     except RecursionError:
-        print("FATAL: Maximum recursion depth reached.")
-        sys.exit(2)
-    except FileNotFoundError as e:
-        print(f"ERROR: {e.strerror}: '{e.filename}'")
-        sys.exit(2)
-    except Exception:
-        traceback.print_exc(file=sys.stderr)
-        sys.exit(2)
+        logger.error("Maximum recursion depth reached.", exc_info=True)
+        raise
+    except FileNotFoundError:
+        logger.error("File not found", exc_info=True)
+        raise
