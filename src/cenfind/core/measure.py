@@ -39,7 +39,7 @@ def flag(is_full: bool) -> tuple:
 
 
 def assign(
-    nuclei: List[Contour], centrioles: List[Centre], vicinity=0
+        nuclei: List[Contour], centrioles: List[Centre], vicinity=0
 ) -> List[Contour]:
     _nuclei = nuclei.copy()
     _centrioles = centrioles.copy()
@@ -78,7 +78,7 @@ def assign(
     for i in range(num_nuclei):
         for j in range(num_centrioles):
             if x[i, j].solution_value() > 0.5:
-                logger.debug("Adding Centre %s to Nucleus %s" %(j, i))
+                logger.debug("Adding Centre %s to Nucleus %s" % (j, i))
                 _nuclei[i].add_centrioles(_centrioles[j])
 
     return _nuclei
@@ -86,20 +86,20 @@ def assign(
 
 # TODO: refactor as a field method
 def score(
-    field,
-    nuclei_scored,
-    channel: int,
+        field,
+        nuclei_scored,
+        channel: int,
+        channel_nuclei: int
 ) -> List[dict]:
     """
     1. Detect foci in the given channels
     2. Detect nuclei
     3. Assign foci to nuclei
+    :param field: The field to score
+    :param nuclei_scored: the nuclei with the field centrioles filled
     :param channel:
-    :param nuclei_channel:
-    :param model_foci:
-    :param model_nuclei:
-    :param field:
-    :return: list(foci, nuclei, assigned, scores)
+    :param channel_nuclei:
+    :return: list of scores
     """
     image_shape = field.projection.shape[1:]
     scores = []
@@ -120,6 +120,7 @@ def field_score_frequency(df, by="field"):
     """
     Count the absolute frequency of number of centriole per well or per field
     :param df: Df containing the number of centriole per nuclei
+    :param by: the unit to group by, either `well` or `field`
     :return: Df with absolut frequencies.
     """
     cuts = [0, 1, 2, 3, 4, 5, np.inf]
@@ -162,22 +163,22 @@ def save_foci(foci_list: list[Centre], dst: str, logger=None) -> None:
 
 # TODO: refactor as a field method
 def field_metrics(
-    field: Field,
-    channel: int,
-    annotation: np.ndarray,
-    predictions: np.ndarray,
-    tolerance: int,
-    threshold: float,
+        field: Field,
+        channel: int,
+        annotation: np.ndarray,
+        predictions: np.ndarray,
+        tolerance: int,
+        threshold: float,
 ) -> dict:
     """
     Compute the accuracy of the prediction on one field.
-    :param threshold:
     :param field:
     :param channel:
     :param annotation:
     :param predictions:
     :param tolerance:
-    :return: dictionary of fields
+    :param threshold:
+    :return: dictionary of metrics for the field
     """
     if all((len(predictions), len(annotation))) > 0:
         res = points_matching(annotation, predictions, cutoff_distance=tolerance)
@@ -213,8 +214,17 @@ def field_metrics(
 
 # TODO: refactor as a field method
 def dataset_metrics(
-    dataset: Dataset, split: str, model: Path, tolerance, threshold
+        dataset: Dataset, split: str, model: Path, tolerance, threshold
 ) -> list[dict]:
+    """
+    Apply field_metrics for every field of the dataset (test or train split)
+    :param dataset
+    :param split
+    :param model,
+    :param tolerance
+    :param threshold
+    :return list of metrics dictionaries
+    """
     if type(tolerance) == int:
         tolerance = [tolerance]
     perfs = []
