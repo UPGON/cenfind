@@ -89,7 +89,6 @@ def score(
         field,
         nuclei_scored,
         channel: int,
-        channel_nuclei: int
 ) -> List[dict]:
     """
     1. Detect foci in the given channels
@@ -98,7 +97,6 @@ def score(
     :param field: The field to score
     :param nuclei_scored: the nuclei with the field centrioles filled
     :param channel:
-    :param channel_nuclei:
     :return: list of scores
     """
     image_shape = field.projection.shape[1:]
