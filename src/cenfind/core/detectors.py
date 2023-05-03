@@ -2,6 +2,7 @@ import contextlib
 import functools
 import logging
 import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from pathlib import Path
 from typing import List
@@ -16,11 +17,12 @@ from spotipy.utils import normalize_fast2d
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Field
-from cenfind.core.outline import Centre, Contour, draw_foci, resize_image
+from cenfind.core.outline import Centriole, Nucleus, draw_foci, resize_image
 
 np.random.seed(1)
 tf.random.set_seed(2)
 tf.get_logger().setLevel(logging.ERROR)
+
 
 @functools.lru_cache(maxsize=None)
 def get_model(model):
@@ -32,13 +34,13 @@ def get_model(model):
 
 
 def extract_foci(
-    data: Field,
-    foci_model_file: Path,
-    channel: int,
-    prob_threshold=0.5,
-    min_distance=2,
-    **kwargs,
-) -> List[Centre]:
+        data: Field,
+        foci_model_file: Path,
+        channel: int,
+        prob_threshold=0.5,
+        min_distance=2,
+        **kwargs,
+) -> List[Centriole]:
     """
     Detect centrioles as row, col, row major
     :param data:
@@ -57,7 +59,7 @@ def extract_foci(
             data, prob_thresh=prob_threshold, min_distance=min_distance, verbose=False
         )
     foci = [
-        Centre((r, c), f_id, "Centriole") for f_id, (r, c) in enumerate(points_preds)
+        Centriole((r, c), f_id, "Centriole") for f_id, (r, c) in enumerate(points_preds)
     ]
 
     centrosomes_mask = np.zeros(data.shape, dtype="uint8")
@@ -70,14 +72,14 @@ def extract_foci(
         foci_index = centrosomes_map[f.centre]
         centrosome_centroid = centrosomes_centroids[foci_index - 1].centroid
         centrosome_centroid = tuple(int(c) for c in centrosome_centroid)
-        f.parent = Centre(centrosome_centroid, label="Centrosome")
+        f.parent = Centriole(centrosome_centroid, label="Centrosome")
 
     return foci
 
 
 def extract_nuclei(
-    field: Field, channel: int, factor: int, model: StarDist2D = None, annotation=None
-) -> List[Contour]:
+        field: Field, channel: int, factor: int, model: StarDist2D = None, annotation=None
+) -> List[Nucleus]:
     """
     Extract the nuclei from the nuclei image
     :param field:
@@ -124,7 +126,7 @@ def extract_nuclei(
 
     contours = tuple(cnts)
     contours = [
-        Contour(c, "Nucleus", c_id, confidence=-1) for c_id, c in enumerate(contours)
+        Nucleus(c, "Nucleus", c_id, confidence=-1) for c_id, c in enumerate(contours)
     ]
 
     return contours

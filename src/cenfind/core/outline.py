@@ -28,12 +28,12 @@ class ROI(ABC):
 
 
 @dataclass(eq=True, frozen=False)
-class Centre(ROI):
+class Centriole(ROI):
     position: tuple
     idx: int = 0
     label: str = ""
     confidence: float = 0
-    parent: "Centre" = None
+    parent: "Centriole" = None
 
     @property
     def centre(self):
@@ -75,7 +75,7 @@ class Centre(ROI):
 
 
 @dataclass(eq=True, frozen=False)
-class Contour(ROI):
+class Nucleus(ROI):
     """Represent a blob using the row-column scheme."""
 
     contour: np.ndarray
@@ -90,7 +90,7 @@ class Contour(ROI):
 
         centre_x = int(moments["m10"] / (moments["m00"] + 1e-5))
         centre_y = int(moments["m01"] / (moments["m00"] + 1e-5))
-        return Centre((centre_y, centre_x), self.idx, self.label, self.confidence)
+        return Centriole((centre_y, centre_x), self.idx, self.label, self.confidence)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, thickness=2, **kwargs):
         r, c = self.centre.centre
@@ -110,7 +110,7 @@ class Contour(ROI):
             )
         return image
 
-    def add_centrioles(self, centriole: Centre):
+    def add_centrioles(self, centriole: Centriole):
         self.centrioles.append(centriole)
         return 0
 
@@ -136,7 +136,7 @@ def resize_image(data: np.ndarray, factor: int = 256) -> np.ndarray:
     return data_resized
 
 
-def draw_foci(data: np.ndarray, foci: list[Centre], radius=2) -> np.ndarray:
+def draw_foci(data: np.ndarray, foci: list[Centriole], radius=2) -> np.ndarray:
     """
     Draw foci as disks of given radius
     :param data: the channel for the dimension extraction
@@ -170,7 +170,7 @@ def _color_channel(data: np.ndarray, color: tuple, out_range: str):
 def create_vignette(field: Field, marker_index: int, nuclei_index: int):
     """
     Normalise all markers
-    sRepresent them as blue
+    Represent them as blue
     Highlight the channel in green
     :param field:
     :param nuclei_index:
@@ -200,10 +200,10 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
 
 def visualisation(
         field: Field,
-        nuclei: list,
         centrioles: list,
         channel_centrioles: int,
-        channel_nuclei: int,
+        nuclei: list = None,
+        channel_nuclei: int = None,
 ) -> np.ndarray:
     background = create_vignette(
         field, marker_index=channel_centrioles, nuclei_index=channel_nuclei

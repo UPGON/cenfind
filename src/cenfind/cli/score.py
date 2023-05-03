@@ -134,9 +134,7 @@ def run(args):
             logger.info(
                 "Writing visualisations for (%s), channel %s" % (field.name, channel)
             )
-            vis = visualisation(
-                field, nuclei_scored, foci, channel, args.channel_nuclei
-            )
+            vis = visualisation(field, foci, channel, nuclei_scored, args.channel_nuclei)
             tif.imwrite(
                 path_visualisation_model / f"{field.name}_C{channel}_pred.png", vis
             )
