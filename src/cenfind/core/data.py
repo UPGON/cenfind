@@ -1,6 +1,5 @@
 import itertools
 import random
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Union
@@ -179,17 +178,17 @@ class Dataset:
         else:
             folder = self.raw
 
-        def _field_name(file_name: str):
-            return file_name.split(".")[0].rstrip(self.projection_suffix)
+        def _field_name(file_name: Path):
+            return file_name.name.split('.')[0].rstrip(self.projection_suffix)
 
         fields = [
-            _field_name(str(f.name))
+            _field_name(f)
             for f in folder.iterdir()
-            if not str(f).startswith(".")
+            if not f.name.startswith(".")
         ]
 
         with open(self.path / "fields.txt", "w") as f:
-            for field in fields:
+            for field in sorted(fields):
                 f.write(field + "\n")
 
     def write_projections(self, axis=1) -> None:
