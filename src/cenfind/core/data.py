@@ -122,6 +122,7 @@ class Dataset:
         self.predictions = self.path / "predictions"
         self.visualisation = self.path / "visualisations"
         self.statistics = self.path / "statistics"
+        self.measurements = self.path / "measurements"
         self.vignettes = self.path / "vignettes"
         self.logs = self.path / "logs"
         self.path_annotations = self.path / "annotations"
@@ -146,6 +147,7 @@ class Dataset:
         (self.predictions / "centrioles").mkdir(exist_ok=True)
         (self.predictions / "nuclei").mkdir(exist_ok=True)
         self.statistics.mkdir(exist_ok=True)
+        self.measurements.mkdir(exist_ok=True)
         self.visualisation.mkdir(exist_ok=True)
         self.vignettes.mkdir(exist_ok=True)
         self.logs.mkdir(exist_ok=True)

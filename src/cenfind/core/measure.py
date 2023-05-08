@@ -103,7 +103,7 @@ def score(
     """
     image_shape = field.projection.shape[1:]
     scores = []
-    for nucleus in nuclei_scored:
+    for nucleus, centrioles in nuclei_scored:
         scores.append(
             {
                 "fov": field.name,
@@ -146,6 +146,10 @@ def field_score_frequency(df, by="field"):
         result.reset_index().sort_values(["channel", "fov"])
 
     return result
+
+
+def measure_signal_foci(foci_list: list[Centriole], dst: str, logger=None) -> None:
+    pass
 
 
 def save_foci(foci_list: list[Centriole], dst: str, logger=None) -> None:

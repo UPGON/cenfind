@@ -9,7 +9,7 @@ from tqdm import tqdm
 from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_foci, extract_nuclei
 from cenfind.core.log import get_logger
-from cenfind.core.measure import assign, save_foci
+from cenfind.core.measure import assign, save_foci, measure_signal_foci
 from cenfind.core.outline import visualisation
 
 
@@ -115,6 +115,8 @@ def run(args):
                     / "centrioles"
                     / f"{field.name}{dataset.projection_suffix}_C{channel}.txt"
             )
+            measurements_path = dataset.measurements / f"{field.name}{dataset.projection_suffix}_C{channel}.txt"
+            measure_signal_foci(foci, measurements_path)
             save_foci(foci, predictions_path)
 
             pbar.set_postfix(
