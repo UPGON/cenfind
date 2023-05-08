@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 import cv2
 import numpy as np
 
-# import numpy.ma as ma
 from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 
@@ -40,11 +39,6 @@ class Centre(ROI):
     def centre(self):
         row, col = self.position
         return int(row), int(col)
-
-    # def intensity(self, field: Field, channel: int):
-    #     data = field.channel(channel)
-    #     result = data[self.position]
-    #     return result
 
     def draw(
             self,
@@ -120,15 +114,14 @@ class Contour(ROI):
         self.centrioles.append(centriole)
         return 0
 
-    # def intensity(contour, field: Field, channel: int):
-    #     data = field.channel(channel)
-    #     label = np.zeros_like(data)
-    #     cv2.drawContours(label, [contour], -1, 1, thickness=-1)
-    #     result = (data * ma.masked_not_equal(label, 1)).sum()
-    #     return result
 
-
-def resize_image(data, factor=256):
+def resize_image(data: np.ndarray, factor: int = 256) -> np.ndarray:
+    """
+    Resize the image for nuclei segmentation by StarDist
+    :param data: a single channel image (H x W)
+    :param factor: the target dimension
+    :return the image resized
+    """
     height, width = data.shape
     shrinkage_factor = int(height // factor)
     height_scaled = int(height // shrinkage_factor)
@@ -144,6 +137,13 @@ def resize_image(data, factor=256):
 
 
 def draw_foci(data: np.ndarray, foci: list[Centre], radius=2) -> np.ndarray:
+    """
+    Draw foci as disks of given radius
+    :param data: the channel for the dimension extraction
+    :param foci: the list of foci
+    :param radius: the radius of foci
+    :return the mask with foci
+    """
     mask = np.zeros(data.shape, dtype="uint8")
     for f in foci:
         rr, cc = disk(f.to_numpy(), radius, shape=data.shape[-2:])
@@ -151,9 +151,12 @@ def draw_foci(data: np.ndarray, foci: list[Centre], radius=2) -> np.ndarray:
     return mask
 
 
-def _color_channel(data, color, out_range):
+def _color_channel(data: np.ndarray, color: tuple, out_range: str):
     """
     Create a colored version of a channel image
+    :param data: the data to use
+    :param color: the color as a tuple (B, G, R)
+    :param out_range:
     :return:
     """
     data = rescale_intensity(data, out_range=out_range)
@@ -167,7 +170,7 @@ def _color_channel(data, color, out_range):
 def create_vignette(field: Field, marker_index: int, nuclei_index: int):
     """
     Normalise all markers
-    Represent them as blue
+    sRepresent them as blue
     Highlight the channel in green
     :param field:
     :param nuclei_index:
