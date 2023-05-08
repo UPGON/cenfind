@@ -6,9 +6,11 @@ from cenfind.core.data import Dataset, Field
 
 
 class TestData:
-    path_dataset = Path("/home/buergy/projects/cenfind/data/dataset_test")
+    path_dataset = Path("../data/dataset_test")
     field_name = "RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000"
     dataset = Dataset(path=path_dataset, image_type=".ome.tif")
+    dataset.setup()
+    dataset.write_fields()
     field = Field(field_name, dataset)
     stack = field.stack
     projection = field.projection
@@ -29,14 +31,14 @@ class TestData:
     def test_dataset(self):
         assert self.dataset.path == self.path_dataset
         assert self.dataset.pairs() == [
-            (
-                Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000", self.dataset),
-                1,
-            ),
-            (
-                Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002", self.dataset),
-                1,
-            ),
+            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000", self.dataset), 1,),
+            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000", self.dataset), 2,),
+            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002", self.dataset), 1,),
+            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002", self.dataset), 2,),
+        ]
+        assert self.dataset.pairs(channel_id=1) == [
+            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000", self.dataset), 1,),
+            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002", self.dataset), 1,),
         ]
 
     def test_stack(self):
