@@ -1,26 +1,26 @@
 import sys
-import os
-import contextlib
+import argparse
 from pathlib import Path
 
 import pandas as pd
-import tifffile as tif
+import tifffile as tf
 
 from cenfind.core.data import Dataset
 from cenfind.core.outline import visualisation
+from cenfind.core.log import get_logger
 
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
         "evaluate", help="Evaluate the model on the test split of the dataset"
     )
-
     parser.add_argument("dataset", type=Path, help="Path to the dataset folder")
     parser.add_argument("model", type=Path, help="Path to the model")
     parser.add_argument(
-        "--performances_file",
-        type=Path,
-        help="Path of the performance file, STDOUT if not specified",
+        "--channel_nuclei",
+        "-n",
+        type=int,
+        help="Channel index of nuclei",
     )
     parser.add_argument(
         "--tolerance",
@@ -30,23 +30,15 @@ def register_parser(parent_subparsers):
         help="Distance in pixels below which two points are deemed matching",
     )
     parser.add_argument(
-        "--channel_nuclei",
-        type=int,
-        required=True,
-        help="Channel index for nuclei segmentation, e.g., 0 or 3",
+        "--threshold",
+        type=float,
+        default=.5,
+        help="Confidence."
     )
     parser.add_argument(
-        "--channel_centrioles",
-        nargs="+",
-        type=int,
-        required=True,
-        help="Channel indices to analyse, e.g., 1 2 3",
-    )
-    parser.add_argument(
-        "--vicinity",
-        type=int,
-        default=-5,
-        help="Distance threshold in micrometer (default: -5 um)",
+        "--performances_file",
+        type=Path,
+        help="Path of the performance file, STDOUT if not specified",
     )
 
     return parser
@@ -54,50 +46,56 @@ def register_parser(parent_subparsers):
 
 def run(args):
     dataset = Dataset(args.dataset)
+    dataset.setup()
+    logger = get_logger(__name__, console=1, file=dataset.logs / "cenfind.log")
     if not any(dataset.path_annotations_centrioles.iterdir()):
-        print(
-            f"ERROR: The dataset {dataset.path.name} has no annotation. You can run `cenfind predict` instead"
+        logger.error(
+            f"The dataset {dataset.path.name} has no annotation. You can run `cenfind predict` instead"
         )
         sys.exit(2)
 
-    from cenfind.core.measure import dataset_metrics, field_score
-
-    _, performance = dataset_metrics(
-        dataset, split="test", model=args.model, tolerance=args.tolerance, threshold=0.5
-    )
-    from stardist.models import StarDist2D
-
-    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-        model_stardist = StarDist2D.from_pretrained("2D_versatile_fluo")
+    if type(args.tolerance) == int:
+        tolerances = [args.tolerance]
+    else:
+        tolerances = args.tolerance
 
     path_visualisation_model = dataset.visualisation / args.model.name
     path_visualisation_model.mkdir(exist_ok=True)
 
-    for field, channel in dataset.pairs("test"):
-        foci, nuclei, assigned, score = field_score(
-            field=field,
-            model_nuclei=model_stardist,
-            model_foci=args.model,
-            nuclei_channel=args.channel_nuclei,
-            vicinity=args.vicinity,
-            channel=channel,
-        )
-        vis = visualisation(
-            field=field,
-            foci=foci,
-            channel_centrioles=channel,
-            nuclei=nuclei,
-            channel_nuclei=args.channel_nuclei,
-            assigned=assigned,
-        )
-        tif.imwrite(path_visualisation_model / f"{field.name}_C{channel}_pred.png", vis)
+    from cenfind.core.measure import evaluate
+    from cenfind.core.detectors import extract_foci, extract_nuclei
 
-    performance_df = pd.DataFrame(performance)
+    perfs = []
+    for field, channel in dataset.pairs("test"):
+        annotation = field.annotation(channel)
+        predictions = extract_foci(field, args.model, channel, prob_threshold=args.threshold)
+        nuclei = extract_nuclei(field, args.channel_nuclei, factor=256)
+
+        for tol in tolerances:
+            logger.info("Processing %s %s %s" % (field, channel, tol))
+            perf = evaluate(field, channel, annotation, predictions, tol, threshold=args.threshold)
+            vis = visualisation(field=field, centrioles=predictions, channel_centrioles=channel, nuclei=nuclei, channel_nuclei=args.channel_nuclei)
+            tf.imwrite(path_visualisation_model / f"{field.name}_C{channel}_pred.png", vis)
+            perfs.append(perf)
+
+    performance_df = pd.DataFrame(perfs)
     performance_df = performance_df.set_index("field")
+
     if args.performances_file:
         performance_df.to_csv(args.performances_file)
         print(performance_df)
-        print("Performances have been saved under %s" % args.performances_file)
+        logger.info("Performances have been saved under %s" % args.performances_file)
     else:
         print(performance_df)
-        print("Performances are ONLY displayed, not saved")
+        logger.warning("Performances are ONLY displayed, not saved")
+
+
+if __name__ == "__main__":
+    args = argparse.Namespace(dataset=Path('data/dataset_test'),
+                              model=Path('models/master'),
+                              channel_nuclei=0,
+                              tolerance=3,
+                              threshold=.5,
+                              performances_file="out/perfs.txt"
+                              )
+    run(args)
