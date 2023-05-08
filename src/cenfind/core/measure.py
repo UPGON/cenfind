@@ -1,30 +1,31 @@
-import logging
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List
+from typing import List, Tuple
 
 import cv2
 import numpy as np
 import pandas as pd
+import tifffile as tf
 from ortools.linear_solver import pywraplp
 from spotipy.utils import points_matching
 
 from cenfind.core.data import Dataset, Field
+
 from cenfind.core.detectors import extract_foci
-from cenfind.core.outline import Centre, Contour
 from cenfind.core.log import get_logger
+from cenfind.core.outline import Centriole, Nucleus, visualisation
 
 logger = get_logger(__name__)
 
 
-def signed_distance(focus: Centre, nucleus: Contour) -> float:
+def signed_distance(focus: Centriole, nucleus: Nucleus) -> float:
     """Wrapper for the opencv PolygonTest"""
 
     result = cv2.pointPolygonTest(nucleus.contour, focus.to_cv2(), measureDist=True)
     return result
 
 
-def full_in_field(nucleus: Contour, image_shape, fraction) -> bool:
+def full_in_field(nucleus: Nucleus, image_shape, fraction) -> bool:
     h, w = image_shape
     pad_lower = int(fraction * h)
     pad_upper = h - pad_lower
@@ -39,8 +40,8 @@ def flag(is_full: bool) -> tuple:
 
 
 def assign(
-        nuclei: List[Contour], centrioles: List[Centre], vicinity=0
-) -> List[Contour]:
+        nuclei: List[Nucleus], centrioles: List[Centriole], vicinity=0
+) -> List[Tuple[Nucleus, Centriole]]:
     _nuclei = nuclei.copy()
     _centrioles = centrioles.copy()
 
@@ -75,16 +76,17 @@ def assign(
     if status != pywraplp.Solver.OPTIMAL and status != pywraplp.Solver.FEASIBLE:
         raise ValueError("No solution found.")
 
+    assigned = []
+
     for i in range(num_nuclei):
         for j in range(num_centrioles):
             if x[i, j].solution_value() > 0.5:
-                logger.debug("Adding Centre %s to Nucleus %s" % (j, i))
-                _nuclei[i].add_centrioles(_centrioles[j])
+                logger.debug("Adding Centriole %s to Nucleus %s" % (j, i))
+                assigned.append((_nuclei[i], _centrioles[j]))
 
-    return _nuclei
+    return assigned
 
 
-# TODO: refactor as a field method
 def score(
         field,
         nuclei_scored,
@@ -146,7 +148,7 @@ def field_score_frequency(df, by="field"):
     return result
 
 
-def save_foci(foci_list: list[Centre], dst: str, logger=None) -> None:
+def save_foci(foci_list: list[Centriole], dst: str, logger=None) -> None:
     if len(foci_list) == 0:
         array = np.array([])
         if logger is not None:
@@ -159,8 +161,7 @@ def save_foci(foci_list: list[Centre], dst: str, logger=None) -> None:
     np.savetxt(dst, array, delimiter=",", fmt="%u")
 
 
-# TODO: refactor as a field method
-def field_metrics(
+def evaluate(
         field: Field,
         channel: int,
         annotation: np.ndarray,
@@ -178,12 +179,13 @@ def field_metrics(
     :param threshold:
     :return: dictionary of metrics for the field
     """
-    if all((len(predictions), len(annotation))) > 0:
-        res = points_matching(annotation, predictions, cutoff_distance=tolerance)
+    _predictions = [f.centre for f in predictions]
+    if all((len(_predictions), len(annotation))) > 0:
+        res = points_matching(annotation, _predictions, cutoff_distance=tolerance)
     else:
-        logging.warning(
+        logger.warning(
             "threshold: %f; detected: %d; annotated: %d... Set precision and accuracy to zero"
-            % (threshold, len(predictions), len(annotation))
+            % (threshold, len(_predictions), len(annotation))
         )
         res = SimpleNamespace()
         res.precision = 0.0
@@ -197,7 +199,7 @@ def field_metrics(
         "field": field.name,
         "channel": channel,
         "n_actual": len(annotation),
-        "n_preds": len(predictions),
+        "n_preds": len(_predictions),
         "threshold": threshold,
         "tolerance": tolerance,
         "tp": res.tp[0] if type(res.tp) == tuple else res.tp,
@@ -208,30 +210,3 @@ def field_metrics(
         "f1": np.round(res.f1, 3),
     }
     return perf
-
-
-# TODO: refactor as a field method
-def dataset_metrics(
-        dataset: Dataset, split: str, model: Path, tolerance, threshold
-) -> list[dict]:
-    """
-    Apply field_metrics for every field of the dataset (test or train split)
-    :param dataset
-    :param split
-    :param model,
-    :param tolerance
-    :param threshold
-    :return list of metrics dictionaries
-    """
-    if type(tolerance) == int:
-        tolerance = [tolerance]
-    perfs = []
-    for field, channel in dataset.pairs(split):
-        annotation = field.annotation(channel)
-        predictions = extract_foci(field, model, channel, prob_threshold=threshold)
-        for tol in tolerance:
-            perf = field_metrics(
-                field, channel, annotation, predictions, tol, threshold=threshold
-            )
-            perfs.append(perf)
-    return perfs
