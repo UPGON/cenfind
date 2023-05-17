@@ -1,6 +1,6 @@
-import logging
 import re
 from pathlib import Path
+
 import PIL
 import labelbox
 import numpy as np
@@ -8,7 +8,6 @@ import tifffile as tf
 from dotenv import dotenv_values
 from tqdm import tqdm
 
-from cenfind.core.constants import PREFIX_REMOTE
 from cenfind.core.data import Dataset
 
 config = dotenv_values(".env")
@@ -32,26 +31,29 @@ def download_centrioles(label):
     return np.array(positions, dtype=int)
 
 
-def download_nuclei(label):
+def download_mask(label, object_type):
     """
     Collect the nucleus masks for the label.
     return a 16bit-numpy mask with each nucleus labelled by pixel value
     """
+    ALLOWED_OBJECT_TYPES = ["Nucleus", "Cilium"]
+    if object_type not in ALLOWED_OBJECT_TYPES:
+        raise ValueError("object type must be of: %s" % ALLOWED_OBJECT_TYPES)
 
-    nuclei_in_label = [lab for lab in label.annotations if lab.name == "Nucleus"]
+    objects_in_label = [lab for lab in label.annotations if lab.name == object_type]
 
-    if len(nuclei_in_label) == 0:
+    if len(objects_in_label) == 0:
         raise ValueError("Empty list; no nucleus")
 
-    mask_shape = nuclei_in_label[0].value.mask.value.shape
+    mask_shape = objects_in_label[0].value.mask.value.shape
     res = np.zeros(mask_shape[:2], dtype="uint16")
-    nucleus_id = 1
+    object_id = 1
 
-    for lab in nuclei_in_label:
+    for lab in objects_in_label:
         try:
-            cell_mask = lab.value.mask.value[:, :, 0]
-            res += ((cell_mask / 255) * nucleus_id).astype("uint16")
-            nucleus_id += 1
+            mask = lab.value.mask.value[:, :, 0]
+            res += ((mask / 255) * object_id).astype("uint16")
+            object_id += 1
         except PIL.UnidentifiedImageError as e:
             continue
 
@@ -59,7 +61,6 @@ def download_nuclei(label):
 
 
 def main():
-
     lb = labelbox.Client(api_key=config["LABELBOX_API_KEY"])
     project = lb.get_project(config["PROJECT_CENTRIOLES"])
     labels = project.label_generator()
@@ -70,10 +71,10 @@ def main():
     for label in tqdm(labels):
         ds = label.extra["Dataset Name"]
 
-        if ds != "denovo":
+        if ds != "cilia":
             continue
 
-        path_dataset = PREFIX_REMOTE / ds
+        path_dataset = Path(f'data/{ds}')
         projection_suffix = ""
         dataset = Dataset(
             path_dataset, image_type=".tif", projection_suffix=projection_suffix
@@ -86,7 +87,7 @@ def main():
 
         if centrioles:
             annotation_name = re.sub(f".{extension}$", ".txt", external_name)
-            dst_centrioles = dataset.annotations_centrioles / annotation_name
+            dst_centrioles = dataset.path_annotations_centrioles / annotation_name
             try:
                 positions = download_centrioles(label)
                 np.savetxt(dst_centrioles, positions, delimiter=",", fmt="%u")
@@ -105,9 +106,9 @@ def main():
             mask_name = re.sub(
                 f"C\d\.{extension}$", f"{projection_suffix}_C0.tif", external_name
             )
-            dst_nuclei = dataset.annotations_cells / mask_name
+            dst_nuclei = dataset.path_annotations_cells / mask_name
             try:
-                mask = download_nuclei(label, dst_nuclei)
+                mask = download_mask(label, "Nucleus")
                 tf.imwrite(dst_nuclei, mask)
                 print("Saving mask of %s to %s" % (external_name, dst_nuclei))
             except FileExistsError:
