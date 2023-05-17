@@ -200,10 +200,10 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
 
 def visualisation(
         field: Field,
-        nuclei: list,
         centrioles: list,
         channel_centrioles: int,
-        channel_nuclei: int,
+        nuclei: list = None,
+        channel_nuclei: int = None,
 ) -> np.ndarray:
     background = create_vignette(
         field, marker_index=channel_centrioles, nuclei_index=channel_nuclei

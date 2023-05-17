@@ -30,16 +30,14 @@ def run(args):
     model_run = model_predictions / args.model.name
     model_run.mkdir(exist_ok=True)
 
-    from cenfind.core.measure import extract_foci
+    from cenfind.core.detectors import extract_foci, extract_nuclei
 
     for field, channel in dataset.pairs("test"):
         foci = extract_foci(field, args.model, channel, prob_threshold=0.5)
-        foci = [Centre((r, c), f_id, "Centriole") for f_id, (r, c) in enumerate(foci)]
+        nuclei = extract_nuclei(field=field, channel=args.channel_nuclei, factor=256)
         print(
             "Writing visualisations for field: %s, channel: %s, %s foci detected"
             % (field.name, channel, len(foci))
         )
-        vis = visualisation(
-            field, foci, channel, channel_nuclei=args.channel_nuclei
-        )
+        vis = visualisation(field, foci, channel, channel_nuclei=args.channel_nuclei)
         tf.imwrite(model_run / f"{field.name}_C{channel}_pred.png", vis)
