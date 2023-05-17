@@ -1,6 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Tuple
+from typing import List, Union
 
 import cv2
 import numpy as np
@@ -13,19 +13,19 @@ from cenfind.core.data import Dataset, Field
 
 from cenfind.core.detectors import extract_foci
 from cenfind.core.log import get_logger
-from cenfind.core.outline import Centriole, Nucleus, visualisation
+from cenfind.core.outline import Point, Contour, visualisation
 
-logger = get_logger(__name__)
+logger = get_logger(__name__, console=True)
 
 
-def signed_distance(focus: Centriole, nucleus: Nucleus) -> float:
+def signed_distance(focus: Point, nucleus: Contour) -> float:
     """Wrapper for the opencv PolygonTest"""
 
     result = cv2.pointPolygonTest(nucleus.contour, focus.to_cv2(), measureDist=True)
     return result
 
 
-def full_in_field(nucleus: Nucleus, image_shape, fraction) -> bool:
+def full_in_field(nucleus: Contour, image_shape, fraction) -> bool:
     h, w = image_shape
     pad_lower = int(fraction * h)
     pad_upper = h - pad_lower
@@ -40,8 +40,8 @@ def flag(is_full: bool) -> tuple:
 
 
 def assign(
-        nuclei: List[Nucleus], centrioles: List[Centriole], vicinity=0
-) -> List[Tuple[Nucleus, Centriole]]:
+        nuclei: List[Contour], centrioles: List[Point], vicinity=0
+) -> List[Contour]:
     _nuclei = nuclei.copy()
     _centrioles = centrioles.copy()
 
@@ -76,15 +76,13 @@ def assign(
     if status != pywraplp.Solver.OPTIMAL and status != pywraplp.Solver.FEASIBLE:
         raise ValueError("No solution found.")
 
-    assigned = []
-
-    for i in range(num_nuclei):
+    for i, n in enumerate(_nuclei):
         for j in range(num_centrioles):
             if x[i, j].solution_value() > 0.5:
                 logger.debug("Adding Centriole %s to Nucleus %s" % (j, i))
-                assigned.append((_nuclei[i], _centrioles[j]))
+                _nuclei[i].add_centrioles(_centrioles[j])
 
-    return assigned
+    return _nuclei
 
 
 def score(
@@ -103,7 +101,7 @@ def score(
     """
     image_shape = field.projection.shape[1:]
     scores = []
-    for nucleus, centrioles in nuclei_scored:
+    for nucleus in nuclei_scored:
         scores.append(
             {
                 "fov": field.name,
@@ -148,22 +146,22 @@ def field_score_frequency(df, by="field"):
     return result
 
 
-def measure_signal_foci(field, channel, foci_list: list[Centriole], dst: str, logger=None) -> None:
+def measure_signal_foci(field, channel, foci_list: list[Point], dst: str, logger=None) -> None:
     if len(foci_list) == 0:
-        array = np.array([])
+        df = pd.DataFrame()
         if logger is not None:
-            logger.info("No centriole detected")
+            logger.info("No centriole detected (%s)" % field.name)
         else:
-            print("No centriole detected")
+            print("No centriole detected (%s)" % field.name)
     else:
         data = field.projection[channel, :, :]
-        intensities = [data[i.centre] for i in foci_list]
-        array = np.array(intensities)
+        intensities = [(*i.position, data[i.centre]) for i in foci_list]
+        df = pd.DataFrame(intensities, columns=[['row', 'col', 'intensity']])
 
-    np.savetxt(dst, array, delimiter=",", fmt="%u")
+    df.to_csv(dst, index=False)
 
 
-def save_foci(foci_list: list[Centriole], dst: str, logger=None) -> None:
+def save_foci(foci_list: list[Point], dst: str, logger=None) -> None:
     if len(foci_list) == 0:
         array = np.array([])
         if logger is not None:

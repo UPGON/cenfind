@@ -32,12 +32,12 @@ class ROI(ABC):
 
 
 @dataclass(eq=True, frozen=False)
-class Centriole(ROI):
+class Point(ROI):
     position: tuple
     idx: int = 0
     label: str = ""
     confidence: float = 0
-    parent: "Centriole" = None
+    parent: "Point" = None
 
     @property
     def centre(self):
@@ -84,7 +84,7 @@ class Centriole(ROI):
 
 
 @dataclass(eq=True, frozen=False)
-class Nucleus(ROI):
+class Contour(ROI):
     """Represent a blob using the row-column scheme."""
 
     contour: np.ndarray
@@ -99,7 +99,7 @@ class Nucleus(ROI):
 
         centre_x = int(moments["m10"] / (moments["m00"] + 1e-5))
         centre_y = int(moments["m01"] / (moments["m00"] + 1e-5))
-        return Centriole((centre_y, centre_x), self.idx, self.label, self.confidence)
+        return Point((centre_y, centre_x), self.idx, self.label, self.confidence)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, thickness=2, **kwargs):
         r, c = self.centre.centre
@@ -119,7 +119,7 @@ class Nucleus(ROI):
             )
         return image
 
-    def add_centrioles(self, centriole: Centriole):
+    def add_centrioles(self, centriole: Point):
         self.centrioles.append(centriole)
         return 0
 
@@ -151,7 +151,7 @@ def resize_image(data: np.ndarray, factor: int = 256) -> np.ndarray:
     return data_resized
 
 
-def draw_foci(data: np.ndarray, foci: list[Centriole], radius=2) -> np.ndarray:
+def draw_foci(data: np.ndarray, foci: list[Point], radius=2) -> np.ndarray:
     """
     Draw foci as disks of given radius
     :param data: the channel for the dimension extraction
@@ -226,16 +226,17 @@ def visualisation(
     if nuclei is None:
         return background
 
-    for nucleus, centriole in nuclei:
+    for nucleus in nuclei:
         background = nucleus.draw(background, annotation=False)
         background = nucleus.centre.draw(background, annotation=False)
-        background = centriole.draw(background, annotation=False)
-        cv2.arrowedLine(
-            background,
-            centriole.to_cv2(),
-            nucleus.centre.to_cv2(),
-            color=(0, 255, 0),
-            thickness=1,
-        )
+        for centriole in nucleus.centrioles:
+            background = centriole.draw(background, annotation=False)
+            cv2.arrowedLine(
+                background,
+                centriole.to_cv2(),
+                nucleus.centre.to_cv2(),
+                color=(0, 255, 0),
+                thickness=1,
+            )
 
     return background

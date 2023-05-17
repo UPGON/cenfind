@@ -6,7 +6,7 @@ from skimage.feature import blob_log
 from spotipy.utils import points_matching
 
 from cenfind.core.data import Field
-from cenfind.core.outline import Centriole
+from cenfind.core.outline import Point
 
 
 def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
@@ -51,9 +51,9 @@ def run_detection(
     tolerance,
     channel=None,
     model_path=None,
-) -> Tuple[list[Centriole], float]:
+) -> Tuple[list[Point], float]:
     _foci = method(data, foci_model_file=model_path, channel=channel)
     res = points_matching(annotation, _foci, cutoff_distance=tolerance)
     f1 = np.round(res.f1, 3)
-    foci = [Centriole((r, c), label="Centriole") for r, c in _foci]
+    foci = [Point((r, c), label="Point") for r, c in _foci]
     return foci, f1
