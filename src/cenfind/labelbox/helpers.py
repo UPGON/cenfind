@@ -29,7 +29,7 @@ def to_labelbox_format(predictions):
     """
     annotations = []
     for r, c in predictions:
-        annot = ObjectAnnotation(name='Centriole', value=Point(x=c, y=r))
+        annot = ObjectAnnotation(name='Point', value=Point(x=c, y=r))
         annotations.append(annot)
     return annotations
 

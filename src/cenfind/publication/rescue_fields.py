@@ -20,7 +20,7 @@ def main():
     for label in tqdm(labels):
         ds = label.extra['Dataset Name']
         external_name = label.data.external_id
-        # foci_in_label = [lab for lab in label.annotations if lab.name == 'Centriole']
+        # foci_in_label = [lab for lab in label.annotations if lab.name == 'Point']
         stem = external_name.split('.')[0]
         channel = stem.split('_')[-1]
         channel_id = channel[-1]
