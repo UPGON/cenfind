@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import argparse
 from dotenv import dotenv_values
 from labelbox import Client
 
@@ -11,7 +11,7 @@ def register_parser(parent_subparsers):
         "upload", help="Upload the vignettes to labelbox"
     )
     parser.add_argument(
-        "path", type=Path, help="Path to the dataset with existing vignettes"
+        "dataset", type=Path, help="Path to the dataset with existing vignettes"
     )
     parser.add_argument("--env", type=Path, help="Path to the .env file")
 
@@ -19,7 +19,7 @@ def register_parser(parent_subparsers):
 
 
 def run(args):
-    ds = Dataset(args.path)
+    ds = Dataset(args.dataset)
 
     config = dotenv_values(args.env)
     client = Client(api_key=config["LABELBOX_API_KEY"])
@@ -31,3 +31,9 @@ def run(args):
         for path in sorted((ds.path / "vignettes").iterdir())
     ]
     dataset.create_data_rows(asset)
+
+
+if __name__ == "__main__":
+    args = argparse.Namespace(dataset=Path('data/dataset_test'),
+                              env=Path('.env'))
+    run(args)
