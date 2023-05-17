@@ -3,9 +3,8 @@ import functools
 import logging
 import os
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import cv2
 import numpy as np
@@ -23,6 +22,7 @@ np.random.seed(1)
 tf.random.set_seed(2)
 tf.get_logger().setLevel(logging.ERROR)
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 @functools.lru_cache(maxsize=None)
 def get_model(model):
@@ -112,7 +112,7 @@ def extract_nuclei(
 
     labels_id = np.unique(labels)
 
-    cnts = []
+    contours = []
     for nucleus_id in labels_id:
         if nucleus_id == 0:
             continue
@@ -121,12 +121,8 @@ def extract_nuclei(
         contour, _ = cv2.findContours(
             sub_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
+        nucleus = Nucleus(contour[0], "Nucleus", nucleus_id, confidence=-1)
 
-        cnts.append(contour[0])
-
-    contours = tuple(cnts)
-    contours = [
-        Nucleus(c, "Nucleus", c_id, confidence=-1) for c_id, c in enumerate(contours)
-    ]
+        contours.append(nucleus)
 
     return contours

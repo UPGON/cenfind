@@ -26,6 +26,10 @@ class ROI(ABC):
     def draw(self, plane, color, marker_type, marker_size):
         pass
 
+    @abstractmethod
+    def intensity(self, image):
+        pass
+
 
 @dataclass(eq=True, frozen=False)
 class Centriole(ROI):
@@ -73,6 +77,11 @@ class Centriole(ROI):
         y, x = self.centre
         return x, y
 
+    def intensity(self, image: np.ndarray, channel: int = None):
+        if image.ndims == 3:
+            return image[channel, self.centre]
+        return image[self.centre]
+
 
 @dataclass(eq=True, frozen=False)
 class Nucleus(ROI):
@@ -113,6 +122,12 @@ class Nucleus(ROI):
     def add_centrioles(self, centriole: Centriole):
         self.centrioles.append(centriole)
         return 0
+
+    def intensity(self, image):
+        mask = np.zeros_like(image.shape)
+        cv2.drawContours(mask, [self.contour], 0, 255, -1)
+        pixel_points = np.transpose(np.nonzero(mask))
+        return np.mean(pixel_points)
 
 
 def resize_image(data: np.ndarray, factor: int = 256) -> np.ndarray:

@@ -116,7 +116,7 @@ def run(args):
                     / f"{field.name}{dataset.projection_suffix}_C{channel}.txt"
             )
             measurements_path = dataset.measurements / f"{field.name}{dataset.projection_suffix}_C{channel}.txt"
-            measure_signal_foci(foci, measurements_path)
+            measure_signal_foci(field, channel, foci, measurements_path)
             save_foci(foci, predictions_path)
 
             pbar.set_postfix(

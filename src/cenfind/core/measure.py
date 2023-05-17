@@ -148,8 +148,19 @@ def field_score_frequency(df, by="field"):
     return result
 
 
-def measure_signal_foci(foci_list: list[Centriole], dst: str, logger=None) -> None:
-    pass
+def measure_signal_foci(field, channel, foci_list: list[Centriole], dst: str, logger=None) -> None:
+    if len(foci_list) == 0:
+        array = np.array([])
+        if logger is not None:
+            logger.info("No centriole detected")
+        else:
+            print("No centriole detected")
+    else:
+        data = field.projection[channel, :, :]
+        intensities = [data[i.centre] for i in foci_list]
+        array = np.array(intensities)
+
+    np.savetxt(dst, array, delimiter=",", fmt="%u")
 
 
 def save_foci(foci_list: list[Centriole], dst: str, logger=None) -> None:
