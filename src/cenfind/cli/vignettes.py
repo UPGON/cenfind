@@ -16,12 +16,14 @@ def register_parser(parent_subparsers):
     parser.add_argument("dataset", type=Path, help="the path to the dataset")
     parser.add_argument(
         "--channel_nuclei",
+        "-n",
         type=int,
         required=True,
         help="the index of the nuclei (often, 0 or 3, first or last)",
     )
     parser.add_argument(
         "--channel_centrioles",
+        "-c",
         type=int,
         required=True,
         nargs="+",
@@ -29,6 +31,7 @@ def register_parser(parent_subparsers):
     )
     parser.add_argument(
         "--projection_suffix",
+        "-s",
         type=str,
         default="",
         help="the suffix indicating projection, e.g., `_max` or `_Projected`, empty if not specified",
