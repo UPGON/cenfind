@@ -215,10 +215,9 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
 
 def visualisation(
         field: Field,
-        centrioles: list,
         channel_centrioles: int,
-        nuclei: list = None,
-        channel_nuclei: int = None,
+        channel_nuclei: int,
+        nuclei: list,
 ) -> np.ndarray:
     background = create_vignette(
         field, marker_index=channel_centrioles, nuclei_index=channel_nuclei
@@ -227,19 +226,16 @@ def visualisation(
     if nuclei is None:
         return background
 
-    for nucleus in nuclei:
+    for nucleus, centriole in nuclei:
         background = nucleus.draw(background, annotation=False)
         background = nucleus.centre.draw(background, annotation=False)
-        for centriole in centrioles:
-            background = centriole.draw(background, annotation=False)
-
-        for centriole in nucleus.centrioles:
-            cv2.arrowedLine(
-                background,
-                centriole.to_cv2(),
-                nucleus.centre.to_cv2(),
-                color=(0, 255, 0),
-                thickness=1,
-            )
+        background = centriole.draw(background, annotation=False)
+        cv2.arrowedLine(
+            background,
+            centriole.to_cv2(),
+            nucleus.centre.to_cv2(),
+            color=(0, 255, 0),
+            thickness=1,
+        )
 
     return background
