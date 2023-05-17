@@ -2,6 +2,7 @@ from pathlib import Path
 import argparse
 from dotenv import dotenv_values
 from labelbox import Client
+import sys
 
 from cenfind.core.data import Dataset
 
@@ -30,6 +31,9 @@ def run(args):
         {"row_data": str(path), "external_id": path.name}
         for path in sorted((ds.path / "vignettes").iterdir())
     ]
+    if not asset:
+        print('There are no vignettes...')
+        sys.exit()
     dataset.create_data_rows(asset)
 
 
