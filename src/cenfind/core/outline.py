@@ -227,7 +227,7 @@ def visualisation(
     if nuclei is None:
         return background
 
-    for nucleus, _ in nuclei:
+    for nucleus in nuclei:
         background = nucleus.draw(background, annotation=False)
         background = nucleus.centre.draw(background, annotation=False)
         for centriole in centrioles:

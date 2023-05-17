@@ -5,6 +5,7 @@ import cv2
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
+from cenfind.core.outline import create_vignette
 
 
 def register_parser(parent_subparsers):
@@ -12,7 +13,7 @@ def register_parser(parent_subparsers):
         "vignettes",
         help="VIGNETTE: create png version of channel+nuclei for annotation tool",
     )
-    parser.add_argument("path", type=Path, help="the path to the dataset")
+    parser.add_argument("dataset", type=Path, help="the path to the dataset")
     parser.add_argument(
         "--channel_nuclei",
         type=int,
@@ -37,15 +38,24 @@ def register_parser(parent_subparsers):
 
 
 def run(args):
-    dataset = Dataset(args.path, projection_suffix=args.projection_suffix)
+    dataset = Dataset(args.dataset, projection_suffix=args.projection_suffix)
 
     pbar = tqdm(dataset.fields)
     for field in pbar:
         for channel_id in args.channel_centrioles:
             pbar.set_description(f"{field.name}: {channel_id}")
-            vignette = field.create_vignette(channel_id, args.channel_nuclei)
+            vignette = create_vignette(field, channel_id, args.channel_nuclei)
             dst = (
-                dataset.vignettes
-                / f"{field.name}{args.projection_suffix}_C{channel_id}.png"
+                    dataset.vignettes
+                    / f"{field.name}{args.projection_suffix}_C{channel_id}.png"
             )
             cv2.imwrite(str(dst), vignette)
+
+
+if __name__ == "__main__":
+    args = argparse.Namespace(dataset=Path('data/dataset_test'),
+                              model=Path('models/master'),
+                              channel_nuclei=0,
+                              channel_centrioles=[1, 2],
+                              projection_suffix='_max')
+    run(args)
