@@ -1,3 +1,4 @@
+import argparse
 import logging
 from pathlib import Path
 from tqdm import tqdm
@@ -20,7 +21,7 @@ from cenfind.labelbox.helpers import (
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-foci_model = Path("/data1/models/cenfind/master/")
+foci_model = Path("models/master/")
 
 path_dotenv = Path(".env")
 if not path_dotenv.exists():
@@ -29,7 +30,18 @@ if not path_dotenv.exists():
 config = dotenv_values(path_dotenv)
 
 
-def main():
+def register_parser(parent_subparsers):
+    parser = parent_subparsers.add_parser(
+        "uploadmal",
+        help="Upload MAL",
+    )
+    parser.add_argument("dataset", type=Path, help="Path to the dataset folder")
+    parser.add_argument("model", type=Path, help="Path to the model")
+
+    return parser
+
+
+def run(args):
     client = Client(api_key=config["LABELBOX_API_KEY"])
 
     project_name = "centrioles_mal"
@@ -51,28 +63,28 @@ def main():
         ontology_setup(client, project, ontology_id=ontology_id)
     project.enable_model_assisted_labeling()
 
-    for _ds in datasets:
-        print(f"Processing {_ds}")
-        ds = Dataset(PREFIX_REMOTE / _ds)
-        dataset_name = ds.path.name
+    ds = Dataset(args.dataset)
+    dataset_name = ds.path.name
 
-        dataset = client.create_dataset(name=dataset_name, iam_integration=None)
-        project.datasets.connect(dataset)
+    dataset = client.create_dataset(name=dataset_name, iam_integration=None)
+    project.datasets.connect(dataset)
 
-        labels = []
-        for field in tqdm(ds.fields):
-            for channel_id in range(1, 4):
-                mal_label = extract_foci(field, foci_model, channel_id)
-                vignette_path = (
+    labels = []
+    for field in tqdm(ds.fields):
+        for channel_id in range(1, 4):
+            mal_label = extract_foci(field, foci_model, channel_id)
+            vignette_path = (
                     ds.path / "vignettes" / f"{field.name}_max_C{channel_id}.png"
-                )
-                image = cv2.imread(str(vignette_path))
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                labels.append(label_create(image, mal_label, vignette_path.name))
-        mal_label_list = labels_list_create(labels)
-        task = task_prepare(client, project, dataset, mal_label_list)
-        print(task.errors)
+            )
+            image = cv2.imread(str(vignette_path))
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            labels.append(label_create(image, mal_label, vignette_path.name))
+    mal_label_list = labels_list_create(labels)
+    task = task_prepare(client, project, dataset, mal_label_list)
+    print(task.errors)
 
 
 if __name__ == "__main__":
-    main()
+    args = argparse.Namespace(dataset=Path('data/dataset_test'),
+                              )
+    run(args)
