@@ -2,15 +2,19 @@ import contextlib
 import functools
 import logging
 import os
-
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 import cv2
 import numpy as np
 import tensorflow as tf
 from csbdeep.utils import normalize
-from skimage.measure import label, regionprops
+from matplotlib import pyplot as plt
+from scipy.ndimage import gaussian_filter
+from skimage import measure
+from skimage.exposure import rescale_intensity
+from skimage.feature import blob_doh
+from skimage.filters.thresholding import threshold_otsu
 from spotipy.model import SpotNet
 from spotipy.utils import normalize_fast2d
 from stardist.models import StarDist2D
@@ -66,8 +70,8 @@ def extract_foci(
     centrosomes_mask = np.zeros(data.shape, dtype="uint8")
     centrosomes_mask = draw_foci(centrosomes_mask, foci, radius=min_distance * 2)
 
-    centrosomes_map = label(centrosomes_mask)
-    centrosomes_centroids = regionprops(centrosomes_map)
+    centrosomes_map = measure.label(centrosomes_mask)
+    centrosomes_centroids = measure.regionprops(centrosomes_map)
 
     for f in foci:
         foci_index = centrosomes_map[f.centre]
@@ -129,6 +133,55 @@ def extract_nuclei(
     return contours
 
 
-def extract_cilia(field: Field, channel) -> List[Contour]:
+def extract_cilia(field: Field, channel) -> List[Point]:
+    p = 50
+    data = field.channel(channel)
+    r, c = data.shape
+    data[0:p, :] = 0
+    data[r-p:r, :] = 0
+    data[:, 0:p] = 0
+    data[:, r-p:r] = 0
+    blurred = gaussian_filter(data, sigma=1)
+    resc = rescale_intensity(blurred, out_range='uint8')
+
+    blobs_doh = blob_doh(resc, min_sigma=5, max_sigma=200, threshold=.001)
+
+    fig, ax = plt.subplots(1, 1, figsize=(9, 9))
     contours = []
+    for idx, blob in enumerate(blobs_doh):
+        ax.imshow(data)
+        y, x, r = blob
+        y = int(y)
+        x = int(x)
+        y_start, y_stop = y - p, y + p
+        x_start, x_stop = x - p, x + p
+
+        roi = resc[y_start:y_stop, x_start:x_stop]
+        threshold = threshold_otsu(roi)
+
+        mask = roi > threshold
+        plt.imshow(mask)
+        plt.show()
+        plt.imshow(roi)
+        plt.show()
+        labels = measure.label(mask)
+        props = measure.regionprops_table(labels, roi, properties=['eccentricity', 'area'])
+
+        eccentricity = props['eccentricity'][0]
+        area = props['area'][0]
+        if (eccentricity > .9) and (area > 300) and (area < 500):
+            contours.append(Point((y, x), idx, label='Cilium'))
+            color = 'green'
+            print('OK', eccentricity, props['area'])
+        else:
+            color = 'red'
+            print('KO', eccentricity, props['area'])
+        # color = 'green'
+        c = plt.Circle((x, y), r, color=color, linewidth=2, fill=False)
+        ax.add_patch(c)
+        ax.set_axis_off()
+
+    plt.tight_layout()
+    plt.show()
+    fig.savefig(f'../out/{field.name}.png')
     return contours
