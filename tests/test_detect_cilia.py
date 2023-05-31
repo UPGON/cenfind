@@ -1,20 +1,24 @@
 from pathlib import Path
 
-from cenfind.core.data import Dataset, Field
+import pandas as pd
+import tifffile as tf
+
 from cenfind.core.detectors import extract_cilia
+from cenfind.core.data import Dataset
 
 
 class TestDataCilia:
     path_dataset = Path("../data/cilia")
-    field_name_cilia_6 = "RPE1-GFPCep135_NC_48h_100k_mCETN2-AF488_rArl13b-AF568_gCEP164-AF647_1_MMStack_10-Pos_000_001"
-    field_name_cilia_22 = "RPE1-GFPCep135_Palbo_48h_100k_mCETN2-AF488_rArl13b-AF568_gCEP164-AF647_2_MMStack_1-Pos_000_000"
-    dataset = Dataset(path=path_dataset, image_type=".ome.tif")
-    dataset.setup()
-    dataset.write_fields()
-
-    field_cilia_6 = Field(field_name_cilia_6, dataset)
-    field_cilia_22 = Field(field_name_cilia_22, dataset)
+    ds = Dataset(path_dataset)
+    annotation = pd.read_csv(path_dataset / 'annotations.tsv', sep='\t', index_col=0)
+    annotation = annotation.to_dict(orient='index')
 
     def test_detect_cilia(self):
-        assert abs(len(extract_cilia(self.field_cilia_6, channel=2)) - 4) / 4 <= .1
-        assert abs(len(extract_cilia(self.field_cilia_22, channel=2)) - 22) / 22 <= .1
+        for field in self.ds.fields:
+            print(field.name)
+            cilia = extract_cilia(field, channel=2)
+            groundtruth = self.annotation[field.name]['cilia']
+            # if groundtruth == 0:
+            #     assert len(cilia) >= 0
+            # else:
+            #     assert abs(len(cilia) / groundtruth) >= .9

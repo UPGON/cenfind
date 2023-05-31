@@ -3,7 +3,7 @@ import functools
 import logging
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import cv2
 import numpy as np
@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 from scipy.ndimage import gaussian_filter
 from skimage import measure
 from skimage.exposure import rescale_intensity
-from skimage.feature import blob_doh
+from skimage.feature import hessian_matrix, hessian_matrix_eigvals
 from skimage.filters.thresholding import threshold_otsu
 from spotipy.model import SpotNet
 from spotipy.utils import normalize_fast2d
@@ -133,55 +133,41 @@ def extract_nuclei(
     return contours
 
 
-def extract_cilia(field: Field, channel) -> List[Point]:
-    p = 50
+def detect_ridges(gray, sigma=1.0):
+    H_elems = hessian_matrix(gray, sigma=sigma, order='rc')
+    maxima_ridges, minima_ridges = hessian_matrix_eigvals(H_elems)
+    return maxima_ridges, minima_ridges
+
+
+def extract_cilia(field: Field, channel, dst) -> List[Point]:
     data = field.channel(channel)
-    r, c = data.shape
-    data[0:p, :] = 0
-    data[r-p:r, :] = 0
-    data[:, 0:p] = 0
-    data[:, r-p:r] = 0
-    blurred = gaussian_filter(data, sigma=1)
-    resc = rescale_intensity(blurred, out_range='uint8')
+    resc = rescale_intensity(data, out_range='uint8')
 
-    blobs_doh = blob_doh(resc, min_sigma=5, max_sigma=200, threshold=.001)
-
-    fig, ax = plt.subplots(1, 1, figsize=(9, 9))
+    a, b = detect_ridges(resc, sigma=5.0)
+    threshold = threshold_otsu(b)
     contours = []
-    for idx, blob in enumerate(blobs_doh):
-        ax.imshow(data)
-        y, x, r = blob
-        y = int(y)
-        x = int(x)
-        y_start, y_stop = y - p, y + p
-        x_start, x_stop = x - p, x + p
 
-        roi = resc[y_start:y_stop, x_start:x_stop]
-        threshold = threshold_otsu(roi)
+    mask = b < threshold
+    labels = measure.label(mask)
+    props = measure.regionprops(labels, mask)
 
-        mask = roi > threshold
-        plt.imshow(mask)
-        plt.show()
-        plt.imshow(roi)
-        plt.show()
-        labels = measure.label(mask)
-        props = measure.regionprops_table(labels, roi, properties=['eccentricity', 'area'])
+    fig, axs = plt.subplots(1, 2, figsize=(18, 9))
 
-        eccentricity = props['eccentricity'][0]
-        area = props['area'][0]
-        if (eccentricity > .9) and (area > 300) and (area < 500):
-            contours.append(Point((y, x), idx, label='Cilium'))
+    ax_mask = axs[0]
+    ax_annotated = axs[1]
+    ax_mask.imshow(mask)
+    ax_annotated.imshow(data, cmap='gray_r')
+
+    for prop in props:
+        if prop.eccentricity > .9 and prop.area > 200:
+            r, c = prop.centroid
+            contours.append(Point((c, r), -1, label='Cilium'))
             color = 'green'
-            print('OK', eccentricity, props['area'])
-        else:
-            color = 'red'
-            print('KO', eccentricity, props['area'])
-        # color = 'green'
-        c = plt.Circle((x, y), r, color=color, linewidth=2, fill=False)
-        ax.add_patch(c)
-        ax.set_axis_off()
+            c = plt.Circle((c, r), 30, color=color, linewidth=2, fill=False)
+            ax_annotated.add_patch(c)
+    ax_annotated.set_axis_off()
+    ax_mask.set_axis_off()
 
     plt.tight_layout()
-    plt.show()
-    fig.savefig(f'../out/{field.name}.png')
+    fig.savefig(dst / f'{field.name}.png')
     return contours
