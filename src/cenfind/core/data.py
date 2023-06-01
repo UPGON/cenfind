@@ -1,13 +1,17 @@
-import itertools
+import contextlib
+import os
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 
+import albumentations as alb
 import numpy as np
 import pytomlpp
 import tifffile as tf
+from spotipy.utils import points_to_prob, normalize_fast2d
 from tqdm import tqdm
+
 from cenfind.core.log import get_logger
 
 logger = get_logger(__name__)
@@ -206,55 +210,78 @@ class Dataset:
             )
         self.has_projections = True
 
-    def split_pairs(self, p=0.9, seed=1993) -> tuple[list[Field], list[Field]]:
+    def write_pairs(self, channels: Tuple[int, int]) -> None:
         """
-        Split a list of pairs (field, channel).
-
-        :param fields
-        :param p the train proportion, default to .9
-        :param seed the seed to reproduce the splitting
-        :return train_split, test_split
+        Write pairs of field name and channel to `pairs.txt`.
+        It internally zips field name with specified channels.
         """
+        pairs = [
+            (field, int(channel)) for field, channel in zip(self.fields, channels)
+        ]
+        with open(self.path / "pairs.txt", "w") as f:
+            for fov, channel in pairs:
+                f.write(f"{fov.name},{channel}\n")
 
+    def pairs(self) -> list[Tuple[Field, int]]:
+        """
+        Load pairs (field, channel) from file.
+
+        """
+        if not (self.path / 'pairs.txt').exists():
+            raise FileNotFoundError
+
+        with open(self.path / "pairs.txt", "r") as f:
+            pairs = f.read().splitlines()
+
+        pairs = [f.split(",") for f in pairs if f]
+        pairs = [(Field(str(name), self), int(channel)) for name, channel in pairs]
+
+        return pairs
+
+    def splits(self, p=0.9, seed=1993) -> Dict[str, List]:
+        """
+        Split the pairs into test and train sets.
+        """
         random.seed(seed)
         size = len(self.fields)
         split_idx = int(p * size)
-        shuffled = random.sample(self.fields, k=size)
-        split_test = shuffled[split_idx:]
-        split_train = shuffled[:split_idx]
+        shuffled = random.sample(self.pairs(), k=size)
+        return {"test": shuffled[split_idx:], "train": shuffled[:split_idx]}
 
-        return split_train, split_test
-
-    def pairs(
-            self, split: str = None, channel_id: int = None
-    ) -> List[Tuple["Field", int]]:
+    def load_pairs(
+            self, split: str, sigma: float = 1.5, transform: alb.Compose = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Fetch the fields of view for train or test
-        :param channel_id:
-        :param split: all, test or train
-        :return: a list of tuples (fov name, channel id)
+        Load two arrays, the images and the foci masks
+        path: the path to the ds
+        split: either train or test
         """
 
-        if split is None:
-            return self.read_split("train", channel_id) + self.read_split(
-                "test", channel_id
-            )
-        else:
-            return self.read_split(split, channel_id)
+        channels = []
+        masks = []
 
-    def read_split(self, split_type, channel_id=None) -> List[Tuple[Field, int]]:
-        with open(self.path / f"{split_type}.txt", "r") as f:
-            files = f.read().splitlines()
+        pairs = self.splits()
 
-        files = [f.split(",") for f in files if f]
-        if channel_id:
-            return [(Field(str(f[0]), self), int(channel_id)) for f in files]
-        else:
-            return [(Field(str(f[0]), self), int(f[1])) for f in files]
+        for field, channel in pairs[split]:
+            data = field.channel(channel)
+            foci = field.annotation(channel)
 
+            with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+                image = normalize_fast2d(data)
 
-def choose_channel(fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
-    """Pick a channel for each field."""
-    return [
-        (field, int(channel)) for field, channel in itertools.product(fields, channels)
-    ]
+            if len(foci) == 0:
+                mask = np.zeros(image.shape, dtype="uint16")
+            else:
+                mask = points_to_prob(
+                    foci[:, [1, 0]], shape=image.shape, sigma=sigma
+                )  # because it works with x, y
+
+            if transform is not None:
+                transformed = transform(image=image, mask=mask)
+                image = transformed["image"]
+                mask = transformed["mask"]
+
+            channels.append(image)
+            masks.append(mask)
+
+        return np.stack(channels), np.stack(masks)

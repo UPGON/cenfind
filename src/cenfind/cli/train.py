@@ -1,23 +1,15 @@
-from numpy.random import seed
-
-
-import tensorflow as tf
-
-import contextlib
 import json
-import os
 from datetime import datetime
 from pathlib import Path
 
-from tqdm import tqdm
 import numpy as np
-import albumentations as alb
-
+import tensorflow as tf
+from numpy.random import seed
 from spotipy.model import SpotNet, Config
-from spotipy.utils import points_to_prob, normalize_fast2d
+from tqdm import tqdm
 
-from cenfind.core.data import Dataset
 from cenfind.core.config import config_multiscale, transforms
+from cenfind.core.data import Dataset
 
 seed(1)
 tf.random.set_seed(2)
@@ -34,45 +26,6 @@ def read_config(path):
     return Config(**config_dict)
 
 
-# TODO: Include in Dataset or in torch.Dataset
-def load_pairs(
-    dataset: Dataset, split: str, sigma: float = 1.5, transform: alb.Compose = None
-):
-    """
-    Load two arrays, the images and the foci masks
-    path: the path to the ds
-    split: either train or test
-    """
-
-    channels = []
-    masks = []
-
-    for field, channel in dataset.pairs(split):
-        print(field.name, channel)
-        data = field.channel(channel)
-        foci = field.annotation(channel)
-
-        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            image = normalize_fast2d(data)
-
-        if len(foci) == 0:
-            mask = np.zeros(image.shape, dtype="uint16")
-        else:
-            mask = points_to_prob(
-                foci[:, [1, 0]], shape=image.shape, sigma=sigma
-            )  # because it works with x, y
-
-        if transform is not None:
-            transformed = transform(image=image, mask=mask)
-            image = transformed["image"]
-            mask = transformed["mask"]
-
-        channels.append(image)
-        masks.append(mask)
-
-    return np.stack(channels), np.stack(masks)
-
-
 def fetch_all_fields(datasets: list[Dataset]):
     all_train_x = []
     all_train_y = []
@@ -81,8 +34,8 @@ def fetch_all_fields(datasets: list[Dataset]):
     all_test_y = []
 
     for ds in tqdm(datasets):
-        train_x, train_y = load_pairs(ds, split="train", transform=transforms)
-        test_x, test_y = load_pairs(ds, split="test")
+        train_x, train_y = ds.load_pairs(ds, split="train", transform=transforms)
+        test_x, test_y = ds.load_pairs(ds, split="test")
         all_train_x.append(train_x)
         all_train_y.append(train_y)
         all_test_x.append(test_x)

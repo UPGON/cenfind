@@ -11,6 +11,7 @@ class TestData:
     dataset = Dataset(path=path_dataset, image_type=".ome.tif")
     dataset.setup()
     dataset.write_fields()
+    dataset.write_pairs(channels=(1, 2))
     field = Field(field_name, dataset)
     stack = field.stack
     projection = field.projection
@@ -30,15 +31,11 @@ class TestData:
 
     def test_dataset(self):
         assert self.dataset.path == self.path_dataset
+
+    def test_pairs(self):
         assert self.dataset.pairs() == [
-            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000", self.dataset), 1,),
-            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000", self.dataset), 2,),
-            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002", self.dataset), 1,),
-            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002", self.dataset), 2,),
-        ]
-        assert self.dataset.pairs(channel_id=1) == [
-            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000", self.dataset), 1,),
-            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002", self.dataset), 1,),
+            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000", self.dataset), 1),
+            (Field("RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002", self.dataset), 2),
         ]
 
     def test_stack(self):
@@ -60,5 +57,5 @@ class TestDataNotExisting:
     path_dataset = Path("/not/existing")
 
     def test_dataset_initialisation(self):
-        with pytest.raises(SystemExit):
+        with pytest.raises(FileNotFoundError):
             Dataset(self.path_dataset)

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytomlpp
 
-from cenfind.core.data import Dataset, choose_channel
+from cenfind.core.data import Dataset
 
 
 def register_parser(parent_subparsers):
@@ -29,7 +29,6 @@ def register_parser(parent_subparsers):
 
 def run(args):
     """Set up the dataset folder with default directories"""
-
     with open(args.dataset / "metadata.toml", "w") as f:
         content = pytomlpp.dumps({"projection_suffix": args.projection_suffix})
         f.write(content)
@@ -38,20 +37,6 @@ def run(args):
 
     dataset.setup()
     dataset.write_fields()
-
-    # TODO: Move the rest to training specific programs
-    if args.splits:
-        train_fields, test_fields = dataset.split_pairs(p=0.9)
-        pairs_train = choose_channel(train_fields, args.splits)
-        pairs_test = choose_channel(test_fields, args.splits)
-
-        with open(dataset.path / "train.txt", "w") as f:
-            for fov, channel in pairs_train:
-                f.write(f"{fov.name},{channel}\n")
-
-        with open(dataset.path / "test.txt", "w") as f:
-            for fov, channel in pairs_test:
-                f.write(f"{fov.name},{channel}\n")
 
 
 if __name__ == "__main__":

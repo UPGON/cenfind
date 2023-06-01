@@ -34,15 +34,15 @@ def run(args):
     model_run.mkdir(exist_ok=True)
 
     from cenfind.core.detectors import extract_foci, extract_nuclei
-
-    for field, channel in dataset.pairs("test"):
+    pairs = dataset.splits()
+    for field, channel in pairs["test"]:
         nuclei = extract_nuclei(field=field, channel=args.channel_nuclei, factor=256)
         foci = extract_foci(field, args.model, channel, prob_threshold=0.5)
         logger.info(
             "Writing visualisations for field: %s, channel: %s, %s foci detected"
             % (field.name, channel, len(foci))
         )
-        vis = visualisation(field, foci, channel, nuclei, channel_nuclei=args.channel_nuclei)
+        vis = visualisation(field, channel_centrioles=channel, channel_nuclei=args.channel_nuclei, nuclei=nuclei)
         tf.imwrite(model_run / f"{field.name}_C{channel}_pred.png", vis)
 
 
