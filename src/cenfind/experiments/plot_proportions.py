@@ -1,6 +1,6 @@
 import pandas as pd
 from cenfind.core.data import Dataset
-from cenfind.core.analytics import fraction_zero, plot_layout, fill_plate 
+from cenfind.core.analytics import fraction_zero, plot_layout, fill_plate
 import itertools as it
 
 import numpy as np
@@ -26,7 +26,7 @@ def main():
         except TypeError:
             ax = axes
         summed_reshaped = fill_plate(data, channel, shape=shape)
-        plot_layout(summed_reshaped, channel, ax, vmin=vmin, vmax=vmax)
+        plot_layout(summed_reshaped, channel, ax, vmin=0, vmax=1)
 
     fig.suptitle("Fraction of centriole-free cells")
     fig.tight_layout()
