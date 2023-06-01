@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 
 import cv2
 import numpy as np
-
 from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 

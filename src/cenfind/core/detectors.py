@@ -3,14 +3,13 @@ import functools
 import logging
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import List
 
 import cv2
 import numpy as np
 import tensorflow as tf
 from csbdeep.utils import normalize
 from matplotlib import pyplot as plt
-from scipy.ndimage import gaussian_filter
 from skimage import measure
 from skimage.exposure import rescale_intensity
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals

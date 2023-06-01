@@ -3,18 +3,16 @@ import os
 from pathlib import Path
 
 import pandas as pd
-import tifffile as tif
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_cilia, extract_nuclei
 from cenfind.core.log import get_logger
-from cenfind.core.outline import visualisation
 
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
-        "cilia", help="Detect cilia and return the proportion of ciliated cells"
+        "cilia", help="Detect cilia with the Hessian matrix and return the proportion of ciliated cells"
     )
     parser.add_argument("dataset", type=Path, help="Path to the dataset")
     parser.add_argument(
