@@ -37,7 +37,6 @@ def register_parser(parent_subparsers):
 
 
 def run(args):
-
     if args.channel_nuclei == args.channel_cilia:
         raise ValueError("Nuclei channel cannot be in channels")
 
@@ -60,7 +59,7 @@ def run(args):
         logger.error("Index for nuclei (%s) out of index range" % args.channel_nuclei, exc_info=True)
         raise ValueError
 
-    if not args.channel_cilia in set(range(channels)):
+    if args.channel_cilia not in set(range(channels)):
         logger.error(
             "Channels (%s) out of channel range %s" % args.channel_cilia,
             set(range(channels)),
@@ -86,7 +85,7 @@ def run(args):
             logger.warning("No centrioles (channel: %s) has been detected in %s" % (args.channel_cilia, field.name))
 
         ciliated = len(cilia) / len(nuclei)
-        proportions.append({'field':field.name,
+        proportions.append({'field': field.name,
                             "channel_cilia": args.channel_cilia,
                             "n_nuclei": len(nuclei),
                             "n_cilia": len(cilia),
