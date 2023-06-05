@@ -1,12 +1,12 @@
 from pathlib import Path
-
 import pytest
 
 from cenfind.core.data import Dataset, Field
 
+ROOT_DIR = Path(__file__).parent.parent
 
 class TestData:
-    path_dataset = Path("../data/dataset_test")
+    path_dataset = ROOT_DIR / "data/dataset_test"
     field_name = "RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000"
     dataset = Dataset(path=path_dataset, image_type=".ome.tif")
     dataset.setup()
@@ -54,7 +54,7 @@ class TestData:
 
 
 class TestDataNotExisting:
-    path_dataset = Path("/not/existing")
+    path_dataset = Path("./not/existing")
 
     def test_dataset_initialisation(self):
         with pytest.raises(FileNotFoundError):
