@@ -1,9 +1,11 @@
 from pathlib import Path
+
 import pytest
 
 from cenfind.core.data import Dataset, Field
 
 ROOT_DIR = Path(__file__).parent.parent
+
 
 class TestData:
     path_dataset = ROOT_DIR / "data/dataset_test"
