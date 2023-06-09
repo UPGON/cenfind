@@ -1,6 +1,2 @@
-def main():
+def test_collect_dapi():
     print("ehllpe")
-
-
-if __name__ == '__main__':
-    main()
