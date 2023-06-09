@@ -10,7 +10,7 @@ from spotipy.model import SpotNet
 from spotipy.model import Config
 from cenfind.core.constants import PREFIX_REMOTE
 from cenfind.core.data import Dataset
-from cenfind.cli.train import load_pairs, transforms
+from scripts.train import load_pairs, transforms
 
 config = Config(
     n_channel_in=1,
