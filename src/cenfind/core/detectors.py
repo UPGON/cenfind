@@ -100,10 +100,11 @@ def extract_nuclei(
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
             model = StarDist2D.from_pretrained("2D_versatile_fluo")
 
+    data = field.channel(channel)
+
     if annotation is not None:
         labels = annotation
     elif model is not None:
-        data = field.channel(channel)
         data_resized = resize_image(data, factor)
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
             labels, _ = model.predict_instances(normalize(data_resized))
@@ -126,6 +127,8 @@ def extract_nuclei(
             sub_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
         nucleus = Contour(contour[0], "Nucleus", nucleus_id, confidence=-1)
+        nucleus.measure_intensity(data)
+        nucleus.measure_area()
 
         contours.append(nucleus)
 

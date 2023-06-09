@@ -91,6 +91,8 @@ class Contour(ROI):
     idx: int = 0
     confidence: float = 0
     centrioles: list = field(default_factory=list)
+    intensity: float = None
+    area: float = None
 
     @property
     def centre(self):
@@ -118,15 +120,18 @@ class Contour(ROI):
             )
         return image
 
+    def measure_intensity(self, image: np.ndarray):
+        mask = np.zeros_like(image)
+        cv2.drawContours(mask, [self.contour], 0, 255, -1)
+        pixel_points = np.transpose(np.nonzero(mask))
+        self.intensity = np.sum(pixel_points)
+
+    def measure_area(self):
+        self.area = cv2.contourArea(self.contour)
+
     def add_centrioles(self, centriole: Point):
         self.centrioles.append(centriole)
         return 0
-
-    def intensity(self, image):
-        mask = np.zeros_like(image.shape)
-        cv2.drawContours(mask, [self.contour], 0, 255, -1)
-        pixel_points = np.transpose(np.nonzero(mask))
-        return np.mean(pixel_points)
 
 
 def resize_image(data: np.ndarray, factor: int = 256) -> np.ndarray:
