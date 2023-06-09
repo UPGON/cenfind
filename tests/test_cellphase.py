@@ -1,2 +1,2 @@
 def test_collect_dapi():
-    print("ehllpe")
+    assert 2 == 2
