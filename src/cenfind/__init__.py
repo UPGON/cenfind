@@ -9,11 +9,6 @@ commands = [
     "squash",
     "score",
     "analyse",
-    "evaluate",
-    "predict",
-    "train",
-    "vignettes",
-    "upload",
     "cilia"
 ]
 
