@@ -6,7 +6,6 @@ from cenfind.core.log import get_logger
 
 commands = [
     "prepare",
-    "squash",
     "score",
     "analyse",
     "cilia"
