@@ -17,12 +17,6 @@ def register_parser(parent_subparsers):
         default="",
         help="Suffix indicating projection, e.g., `_max` or `Projected`, empty if not specified",
     )
-    parser.add_argument(
-        "--splits",
-        type=int,
-        nargs="+",
-        help="Write the train and test splits for continuous learning using the channels specified",
-    )
 
     return parser
 
@@ -42,5 +36,5 @@ def run(args):
 if __name__ == "__main__":
     args = argparse.Namespace(dataset=Path('data/dataset_test'),
                               projection_suffix='_max',
-                              splits=[1, 2])
+                              )
     run(args)
