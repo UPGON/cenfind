@@ -8,6 +8,8 @@ from typing import List
 import cv2
 import numpy as np
 import tensorflow as tf
+from cenfind.core.data import Field
+from cenfind.core.outline import Point, Contour, draw_foci, resize_image
 from csbdeep.utils import normalize
 from matplotlib import pyplot as plt
 from skimage import measure
@@ -17,9 +19,6 @@ from skimage.filters.thresholding import threshold_otsu
 from spotipy.model import SpotNet
 from spotipy.utils import normalize_fast2d
 from stardist.models import StarDist2D
-
-from cenfind.core.data import Field
-from cenfind.core.outline import Point, Contour, draw_foci, resize_image
 
 np.random.seed(1)
 tf.random.set_seed(2)
@@ -38,24 +37,22 @@ def get_model(model):
 
 
 def extract_foci(
-        data: Field,
+        field: Field,
         foci_model_file: Path,
         channel: int,
         prob_threshold=0.5,
         min_distance=2,
-        **kwargs,
 ) -> List[Point]:
     """
     Detect centrioles as row, col, row major
-    :param data:
+    :param field:
     :param foci_model_file:
     :param channel:
     :param prob_threshold:
     :param min_distance:
-    :param kwargs:
     :return:
     """
-    data = data.channel(channel)
+    data = field.data[channel, ...]
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         data = normalize_fast2d(data)
         model = get_model(foci_model_file)
@@ -82,13 +79,12 @@ def extract_foci(
 
 
 def extract_nuclei(
-        field: Field, channel: int, factor: int, model: StarDist2D = None, annotation=None
+        field: Field, channel: int, model: StarDist2D = None, annotation=None
 ) -> List[Contour]:
     """
     Extract the nuclei from the nuclei image
     :param field:
     :param channel:
-    :param factor: the factor related to pixel size
     :param model:
     :param annotation: a mask with pixels labelled for each centre
 
@@ -100,12 +96,12 @@ def extract_nuclei(
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
             model = StarDist2D.from_pretrained("2D_versatile_fluo")
 
-    data = field.channel(channel)
+    data = field.data[channel, ...]
 
     if annotation is not None:
         labels = annotation
     elif model is not None:
-        data_resized = resize_image(data, factor)
+        data_resized = resize_image(data)
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
             labels, _ = model.predict_instances(normalize(data_resized))
         labels = cv2.resize(
@@ -135,17 +131,16 @@ def extract_nuclei(
     return contours
 
 
-def detect_ridges(gray, sigma=1.0):
-    H_elems = hessian_matrix(gray, sigma=sigma, order='rc')
-    maxima_ridges, minima_ridges = hessian_matrix_eigvals(H_elems)
-    return maxima_ridges, minima_ridges
-
-
 def extract_cilia(field: Field, channel, dst) -> List[Point]:
-    data = field.channel(channel)
+    data = field.data[channel, ...]
     resc = rescale_intensity(data, out_range='uint8')
 
-    a, b = detect_ridges(resc, sigma=5.0)
+    def _detect_ridges(gray, sigma=1.0):
+        h_elems = hessian_matrix(gray, sigma=sigma, order='rc')
+        maxima_ridges, minima_ridges = hessian_matrix_eigvals(h_elems)
+        return maxima_ridges, minima_ridges
+
+    a, b = _detect_ridges(resc, sigma=5.0)
     threshold = threshold_otsu(b)
     contours = []
 
