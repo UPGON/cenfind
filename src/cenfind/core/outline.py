@@ -3,11 +3,10 @@ from dataclasses import dataclass, field
 
 import cv2
 import numpy as np
-from skimage.draw import disk
-from skimage.exposure import rescale_intensity
-
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
+from skimage.draw import disk
+from skimage.exposure import rescale_intensity
 
 logger = get_logger(__name__)
 
@@ -196,8 +195,8 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
     :param marker_index:
     :return:
     """
-    layer_nuclei = field.channel(nuclei_index)
-    layer_marker = field.channel(marker_index)
+    layer_nuclei = field.data[nuclei_index, ...]
+    layer_marker = field.data[marker_index, ...]
 
     nuclei = _color_channel(layer_nuclei, (1, 0, 0), "uint8")
     marker = _color_channel(layer_marker, (0, 1, 0), "uint8")
@@ -243,4 +242,7 @@ def visualisation(
                 thickness=1,
             )
 
+    logger.info(
+        "Writing visualisations for (%s), channel %s" % (field.name, channel_centrioles)
+    )
     return background
