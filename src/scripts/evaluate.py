@@ -70,12 +70,13 @@ def run(args):
     for field, channel in pairs["test"]:
         annotation = field.annotation(channel)
         predictions = extract_foci(field, args.model, channel, prob_threshold=args.threshold)
-        nuclei = extract_nuclei(field, args.channel_nuclei, factor=256)
+        nuclei = extract_nuclei(field, args.channel_nuclei)
 
         for tol in tolerances:
             logger.info("Processing %s %s %s" % (field, channel, tol))
             perf = evaluate(field, channel, annotation, predictions, tol, threshold=args.threshold)
-            vis = visualisation(field=field, channel_centrioles=channel, nuclei=nuclei, channel_nuclei=args.channel_nuclei)
+            vis = visualisation(field=field, channel_centrioles=channel, nuclei=nuclei,
+                                channel_nuclei=args.channel_nuclei)
             tf.imwrite(path_visualisation_model / f"{field.name}_C{channel}_pred.png", vis)
             perfs.append(perf)
 
