@@ -44,14 +44,7 @@ def run(args):
     dataset = Dataset(args.dataset)
     logger = get_logger(__name__, file=dataset.logs / 'cenfind.log')
 
-    if not any(dataset.projections.iterdir()):
-        logger.error(
-            "The projection folder (%s) is empty.\nPlease ensure you have run `squash` or that you have put the projections under projections/"
-            % dataset.projections, exc_info=True
-        )
-        raise FileNotFoundError
-
-    channels = dataset.fields[0].projection.shape[0]
+    channels = dataset.fields[0].data.shape[0]
 
     if args.channel_nuclei not in range(channels):
         logger.error("Index for nuclei (%s) out of index range" % args.channel_nuclei, exc_info=True)
@@ -71,7 +64,7 @@ def run(args):
         pbar.set_description(f"{field.name}")
         logger.info("Processing %s" % field.name)
 
-        nuclei = extract_nuclei(field, args.channel_nuclei, 256)
+        nuclei = extract_nuclei(field, args.channel_nuclei)
         if len(nuclei) == 0:
             logger.warning("No nucleus has been detected in %s" % field.name)
             continue
