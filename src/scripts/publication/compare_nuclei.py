@@ -23,8 +23,8 @@ def main():
         dataset = Dataset(path_dataset)
         for field in tqdm(dataset.fields):
             nuclei_mask = field.mask(0)
-            nuclei_preds = extract_nuclei(field=field, model=model_stardist, channel=0, factor=256)
-            nuclei_actual = extract_nuclei(field=field, annotation=nuclei_mask, channel=0, factor=256)
+            nuclei_preds = extract_nuclei(field=field, model=model_stardist, channel=0)
+            nuclei_actual = extract_nuclei(field=field, annotation=nuclei_mask, channel=0)
             centres_preds = [c.centre for c in nuclei_preds]
             centres_actual = [c.centre for c in nuclei_actual]
             logging.info("Found %d nuclei instead of %d" % (len(centres_preds), len(centres_actual)))
