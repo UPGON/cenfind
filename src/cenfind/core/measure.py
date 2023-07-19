@@ -99,7 +99,7 @@ def score(
     :param channel:
     :return: list of scores
     """
-    image_shape = field.projection.shape[1:]
+    image_shape = field.data.shape[1:]
     scores = []
     for nucleus in nuclei_scored:
         scores.append(
@@ -111,6 +111,7 @@ def score(
                 "is_full": full_in_field(nucleus, image_shape, 0.05),
             }
         )
+
     return scores
 
 
@@ -146,7 +147,7 @@ def field_score_frequency(df, by="field"):
     return result
 
 
-def measure_signal_foci(field, channel, foci_list: list[Point], dst: str, logger=None) -> None:
+def measure_signal_foci(field, channel, foci_list: list[Point], dst: Path) -> None:
     if len(foci_list) == 0:
         df = pd.DataFrame()
         if logger is not None:
@@ -154,14 +155,14 @@ def measure_signal_foci(field, channel, foci_list: list[Point], dst: str, logger
         else:
             print("No centriole detected (%s)" % field.name)
     else:
-        data = field.projection[channel, :, :]
+        data = field.data[channel, :, :]
         intensities = [(*i.position, data[i.centre]) for i in foci_list]
         df = pd.DataFrame(intensities, columns=[['row', 'col', 'intensity']])
 
     df.to_csv(dst, index=False)
 
 
-def save_foci(foci_list: list[Point], dst: str, logger=None) -> None:
+def save_foci(foci_list: list[Point], dst: Union[Path, str]) -> None:
     if len(foci_list) == 0:
         array = np.array([])
         if logger is not None:
@@ -171,7 +172,7 @@ def save_foci(foci_list: list[Point], dst: str, logger=None) -> None:
     else:
         array = np.asarray(np.stack([c.to_numpy() for c in foci_list]))
         array = array[:, [1, 0]]
-    np.savetxt(dst, array, delimiter=",", fmt="%u")
+    np.savetxt(str(dst), array, delimiter=",", fmt="%u")
 
 
 def evaluate(
