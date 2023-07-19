@@ -10,6 +10,7 @@ import numpy as np
 import tensorflow as tf
 from cenfind.core.data import Field
 from cenfind.core.outline import Point, Contour, draw_foci, resize_image
+from cenfind.core.log import get_logger
 from csbdeep.utils import normalize
 from matplotlib import pyplot as plt
 from skimage import measure
@@ -25,6 +26,8 @@ tf.random.set_seed(2)
 tf.get_logger().setLevel(logging.ERROR)
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+logger = get_logger(__name__)
 
 
 @functools.lru_cache(maxsize=None)
@@ -75,6 +78,10 @@ def extract_foci(
         centrosome_centroid = tuple(int(c) for c in centrosome_centroid)
         f.parent = Point(centrosome_centroid, label="Centrosome")
 
+    if len(foci) == 0:
+        logger.warning("No centrioles (channel: %s) has been detected in %s" % (channel, field.name))
+
+    logger.info("(%s), channel %s: foci: %s" % (field.name, channel, len(foci)))
     return foci
 
 
@@ -113,7 +120,7 @@ def extract_nuclei(
 
     labels_id = np.unique(labels)
 
-    contours = []
+    nuclei = []
     for nucleus_id in labels_id:
         if nucleus_id == 0:
             continue
@@ -126,9 +133,11 @@ def extract_nuclei(
         nucleus.measure_intensity(data)
         nucleus.measure_area()
 
-        contours.append(nucleus)
+        nuclei.append(nucleus)
 
-    return contours
+    logger.info("(%s), channel %s: foci: %s" % (field.name, channel, len(nuclei)))
+
+    return nuclei
 
 
 def extract_cilia(field: Field, channel, dst) -> List[Point]:
