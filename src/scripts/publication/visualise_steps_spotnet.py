@@ -17,9 +17,9 @@ def main():
     model = get_model('models/dev/5785b6d9-f09b-4486-af65-0a923c8ae533')
 
     dataset = Dataset(Path('/Users/buergy/Dropbox/epfl/datasets/RPE1wt_CEP152+GTU88+PCNT_1'))
-    field = Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_002', dataset)
-    data = field.projection[2, :, :]
-    dna = field.projection[0, :, :]
+    field = Field('RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_002')
+    data = field.data[2, :, :]
+    dna = field.data[0, :, :]
 
     percentile = .2
     width = 32
