@@ -5,7 +5,6 @@ from argparse import ArgumentDefaultsHelpFormatter
 from cenfind.core.log import get_logger
 
 commands = [
-    "prepare",
     "score",
     "analyse",
     "cilia"
