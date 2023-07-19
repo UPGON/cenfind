@@ -1,116 +1,88 @@
-from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Union
+from typing import List
 
 import numpy as np
-import pytomlpp
 import tifffile as tf
+from attrs import define, field, validators
 from cenfind.core.log import get_logger
 
 logger = get_logger(__name__)
 
 
-@dataclass
+def path_exists(instance, attribute, value):
+    if not value.exists():
+        raise FileNotFoundError(f"Invalid path ({value})")
+
+
+def has_projections(instance, attribute, value):
+    projections = value / 'projections'
+    if not projections.is_dir():
+        raise FileNotFoundError(f"Invalid path for Projections: ({value}).")
+
+
+def is_tif(instance, attribute, value):
+    if value.suffix != '.tif':
+        raise ValueError(f'Not a tif file ({value})')
+
+
+@define
 class Field:
-    name: str
-    dataset: "Dataset"
+    path: Path = field(validator=[validators.instance_of(Path), path_exists, is_tif])
 
     @property
-    def projection(self) -> np.ndarray:
-        _projection_name = f"{self.name}{self.dataset.projection_suffix}.tif"
+    def name(self) -> str:
+        """
+        Return the field name as a string without the extension
+        """
+        return self.path.stem
 
-        path_projection = self.dataset.projections / _projection_name
-        try:
-            res = tf.imread(str(path_projection))
-            return res
-        except FileNotFoundError:
-            logger.error("File not found (%s). Check the projection suffix..." % path_projection)
-            raise
-
-    def channel(self, channel: int) -> np.ndarray:
-        return self.projection[channel, :, :]
+    @property
+    def data(self) -> np.ndarray:
+        """
+        Load the data into a numpy array
+        """
+        return tf.imread(str(self.path))
 
 
-@dataclass
+@define
 class Dataset:
     """
     Represent a dataset structure
     """
+    path: Path = field(validator=[
+        validators.instance_of(Path),
+        path_exists,
+        has_projections])
 
-    path: Union[str, Path]
-    projection_suffix: str = None
-    image_type: str = ".tif"
-    pixel_size: float = 0.1025
-    has_projections: bool = False
-    is_setup: bool = False
+    @property
+    def logs(self):
+        return self.path / 'logs'
 
-    def __post_init__(self):
-        self.path = Path(self.path)
+    @property
+    def predictions(self):
+        return self.path / 'predictions'
 
-        if not self.path.is_dir():
-            logger.error(f"Dataset does not exist ({self.path})")
-            raise FileNotFoundError
+    @property
+    def visualisation(self):
+        return self.path / 'visualisation'
 
-        self.logs = self.path / "logs"
-        self.projections = self.path / "projections"
-        self.predictions = self.path / "predictions"
-        self.visualisation = self.path / "visualisations"
-        self.statistics = self.path / "statistics"
-        self.path_annotations = self.path / "annotations"
+    @property
+    def statistics(self):
+        return self.path / 'statistics'
 
-        if self.projection_suffix is None:
-            try:
-                metadata = pytomlpp.load(self.path / "metadata.toml")
-                self.projection_suffix = metadata["projection_suffix"]
-            except FileNotFoundError:
-                logger.error("Metadata file not found (%s)" % str(self.path / "metadata.toml"))
-                raise
-
-    def setup(self) -> None:
-        """
-        Create folders for projections, predictions, statistics, visualisation and vignettes.
-        Collect field names into fields.txt
-        """
-        if not self.projections.is_dir():
-            logger.error("Projection folder not found")
-            raise FileNotFoundError()
-
-        self.logs.mkdir(exist_ok=True)
-
-        self.predictions.mkdir(exist_ok=True)
+    def setup(self):
         self.visualisation.mkdir(exist_ok=True)
         self.statistics.mkdir(exist_ok=True)
-
-        self.has_projections = bool(len([f for f in self.projections.iterdir()]))
-        self.is_setup = True
+        self.predictions.mkdir(exist_ok=True)
 
     @property
     def fields(self) -> List[Field]:
         """
-        Construct a list of Fields using the fields listed in fields.txt.
+        Return a list of Fields found in projections.
         """
-        fields_path = self.path / "fields.txt"
-        with open(fields_path, "r") as f:
-            fields_list = f.read().splitlines()
-        return [Field(field_name, self) for field_name in fields_list]
-
-    def write_fields(self) -> None:
-        """
-        Write field names to fields.txt.
-        """
-        if not self.is_setup:
-            self.setup()
-        folder = self.projections
-
-        def _field_name(file_name: Path):
-            return file_name.name.split('.')[0].rstrip(self.projection_suffix)
-
-        fields = [
-            _field_name(f)
-            for f in folder.iterdir()
-            if not f.name.startswith(".")
-        ]
-
-        with open(self.path / "fields.txt", "w") as f:
-            for field in sorted(fields):
-                f.write(field + "\n")
+        path = self.path / 'projections'
+        result = [Field(path) for path in path.iterdir() if
+                  (path.suffix == '.tif') and not path.name.startswith('.')]
+        if len(result) == 0:
+            raise ValueError(f'No field found in {path}')
+        return result
