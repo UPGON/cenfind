@@ -73,18 +73,13 @@ def run(args):
 
             foci = extract_foci(field=field, foci_model_file=args.model, channel=channel)
 
+            measure_signal_foci(dataset.statistics / f"{field.name}_C{channel}.txt", field, channel, foci)
             nuclei_scored = assign(nuclei, foci, vicinity=args.vicinity)
             scored = score(field, nuclei_scored, channel)
             scores.append(scored)
-
-            measurements_path = dataset.statistics / f"{field.name}_C{channel}.txt"
-            measure_signal_foci(measurements_path, field, channel, foci)
-
-            predictions_path = path_predictions_centrioles / f"{field.name}_C{channel}.txt"
-            save_foci(foci, predictions_path)
-
-            path_visualisation = dataset.visualisation / f"{field.name}_C{channel}_pred.png"
-            visualisation(path_visualisation, field,
+            save_foci(foci, path_predictions_centrioles / f"{field.name}_C{channel}.txt")
+            save_scores(dataset.statistics / "scores_df.tsv", scores)
+            visualisation(dataset.visualisation / f"{field.name}_C{channel}_pred.png", field,
                           channel_centrioles=channel, channel_nuclei=args.channel_nuclei,
                           nuclei=nuclei_scored)
 
@@ -96,9 +91,6 @@ def run(args):
                     "foci": len(foci),
                 }
             )
-        logger.info("DONE (%s)" % field.name)
-
-    save_scores(dataset.statistics / "scores_df.tsv", scores)
 
 
 if __name__ == "__main__":
