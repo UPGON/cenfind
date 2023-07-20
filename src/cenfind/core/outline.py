@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 
 import cv2
 import numpy as np
+import tifffile as tif
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
 from skimage.draw import disk
@@ -216,12 +217,12 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
     return res
 
 
-def visualisation(
-        field: Field,
-        channel_centrioles: int,
-        channel_nuclei: int,
-        nuclei: list,
-) -> np.ndarray:
+def visualisation(dst,
+                  field: Field,
+                  channel_centrioles: int,
+                  channel_nuclei: int,
+                  nuclei: list,
+                  ) -> np.ndarray:
     background = create_vignette(
         field, marker_index=channel_centrioles, nuclei_index=channel_nuclei
     )
@@ -245,4 +246,5 @@ def visualisation(
     logger.info(
         "Writing visualisations for (%s), channel %s" % (field.name, channel_centrioles)
     )
-    return background
+
+    tif.imwrite(dst, background)
