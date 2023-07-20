@@ -5,17 +5,13 @@ from typing import List, Union
 import cv2
 import numpy as np
 import pandas as pd
-import tifffile as tf
+from cenfind.core.data import Field
+from cenfind.core.log import get_logger
+from cenfind.core.outline import Point, Contour
 from ortools.linear_solver import pywraplp
 from spotipy.utils import points_matching
 
-from cenfind.core.data import Dataset, Field
-
-from cenfind.core.detectors import extract_foci
-from cenfind.core.log import get_logger
-from cenfind.core.outline import Point, Contour, visualisation
-
-logger = get_logger(__name__, console=True)
+logger = get_logger(__name__)
 
 
 def signed_distance(focus: Point, nucleus: Contour) -> float:
@@ -147,8 +143,8 @@ def field_score_frequency(df, by="field"):
     return result
 
 
-def measure_signal_foci(field, channel, foci_list: list[Point], dst: Path) -> None:
-    if len(foci_list) == 0:
+def measure_signal_foci(dst: Path, field: Field, channel: int, foci: list[Point]) -> None:
+    if len(foci) == 0:
         df = pd.DataFrame()
         if logger is not None:
             logger.info("No centriole detected (%s)" % field.name)
@@ -156,10 +152,20 @@ def measure_signal_foci(field, channel, foci_list: list[Point], dst: Path) -> No
             print("No centriole detected (%s)" % field.name)
     else:
         data = field.data[channel, :, :]
-        intensities = [(*i.position, data[i.centre]) for i in foci_list]
+        intensities = [(*i.position, data[i.centre]) for i in foci]
         df = pd.DataFrame(intensities, columns=[['row', 'col', 'intensity']])
 
     df.to_csv(dst, index=False)
+
+
+def scores_to_df(scores: List[List[dict]]):
+    return pd.DataFrame([leaf for tree in scores for leaf in tree])
+
+
+def save_scores(dst: Path, scores: List[List[dict]]):
+    result = scores_to_df(scores)
+    logger.info("Writing raw scores to %s" % str(dst))
+    result.to_csv(dst, sep="\t", index=False)
 
 
 def save_foci(foci_list: list[Point], dst: Union[Path, str]) -> None:
