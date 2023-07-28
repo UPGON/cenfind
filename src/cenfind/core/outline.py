@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import List, Tuple
 
 import cv2
 import numpy as np
 import tifffile as tif
-from cenfind.core.data import Field
-from cenfind.core.log import get_logger
 from skimage.draw import disk
 from skimage.exposure import rescale_intensity
+
+from cenfind.core.data import Field
+from cenfind.core.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -33,9 +35,9 @@ class ROI(ABC):
 @dataclass(eq=True, frozen=False)
 class Point(ROI):
     position: tuple
+    channel: int
     idx: int = 0
     label: str = ""
-    confidence: float = 0
     parent: "Point" = None
 
     @property
@@ -77,7 +79,7 @@ class Point(ROI):
         return x, y
 
     def intensity(self, image: np.ndarray, channel: int = None):
-        if image.ndims == 3:
+        if image.ndim == 3:
             return image[channel, self.centre]
         return image[self.centre]
 
@@ -87,12 +89,10 @@ class Contour(ROI):
     """Represent a blob using the row-column scheme."""
 
     contour: np.ndarray
+    channel: int
     label: str = ""
     idx: int = 0
-    confidence: float = 0
     centrioles: list = field(default_factory=list)
-    intensity: float = None
-    area: float = None
 
     @property
     def centre(self):
@@ -100,7 +100,7 @@ class Contour(ROI):
 
         centre_x = int(moments["m10"] / (moments["m00"] + 1e-5))
         centre_y = int(moments["m01"] / (moments["m00"] + 1e-5))
-        return Point((centre_y, centre_x), self.idx, self.label, self.confidence)
+        return Point((centre_y, centre_x), self.channel, self.idx, self.label)
 
     def draw(self, image, color=(0, 255, 0), annotation=True, thickness=2, **kwargs):
         r, c = self.centre.centre
@@ -120,14 +120,14 @@ class Contour(ROI):
             )
         return image
 
-    def measure_intensity(self, image: np.ndarray):
+    def intensity(self, image: np.ndarray):
         mask = np.zeros_like(image)
         cv2.drawContours(mask, [self.contour], 0, 255, -1)
-        pixel_points = np.transpose(np.nonzero(mask))
-        self.intensity = np.sum(pixel_points)
+        masked = cv2.bitwise_and(image, mask)
+        return np.sum(masked)
 
-    def measure_area(self):
-        self.area = cv2.contourArea(self.contour)
+    def area(self):
+        return cv2.contourArea(self.contour)
 
     def add_centrioles(self, centriole: Point):
         self.centrioles.append(centriole)
@@ -213,38 +213,37 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
         1,
         cv2.LINE_AA,
     )
-
     return res
 
 
-def visualisation(dst,
-                  field: Field,
-                  channel_centrioles: int,
-                  channel_nuclei: int,
-                  nuclei: list,
+def visualisation(background: np.ndarray,
+                  centrioles: List[Point],
+                  nuclei: List[Contour],
+                  assigned: list = None,
                   ) -> np.ndarray:
-    background = create_vignette(
-        field, marker_index=channel_centrioles, nuclei_index=channel_nuclei
-    )
-
-    if nuclei is None:
-        return background
-
+    for centriole in centrioles:
+        background = centriole.draw(background, annotation=False)
     for nucleus in nuclei:
         background = nucleus.draw(background, annotation=False)
-        background = nucleus.centre.draw(background, annotation=False)
-        for centriole in nucleus.centrioles:
-            background = centriole.draw(background, annotation=False)
-            cv2.arrowedLine(
-                background,
-                centriole.to_cv2(),
-                nucleus.centre.to_cv2(),
-                color=(0, 255, 0),
-                thickness=1,
-            )
+    if assigned is None:
+        return background
 
-    logger.info(
-        "Writing visualisations for (%s), channel %s" % (field.name, channel_centrioles)
-    )
+    for centriole, nucleus in assigned:
+        background = nucleus.draw(background, annotation=False)
+        background = centriole.draw(background, annotation=False)
+        cv2.arrowedLine(background, centriole.to_cv2(), nucleus.centre.to_cv2(),
+                        color=(0, 255, 0), thickness=1)
 
-    tif.imwrite(dst, background)
+    return background
+
+
+def save_visualisation(dst, field: Field,
+                       channel_centrioles: int,
+                       channel_nuclei: int,
+                       centrioles: List[Point] = None,
+                       nuclei: List[Contour] = None,
+                       assigned: List[Tuple[Point, Contour]] = None) -> None:
+    background = create_vignette(field, marker_index=channel_centrioles, nuclei_index=channel_nuclei)
+    vis = visualisation(background, centrioles=centrioles, nuclei=nuclei, assigned=assigned)
+    logger.info("Writing visualisation to %s" % (str(dst)))
+    tif.imwrite(dst, vis)
