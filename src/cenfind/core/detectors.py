@@ -8,9 +8,6 @@ from typing import List
 import cv2
 import numpy as np
 import tensorflow as tf
-from cenfind.core.data import Field
-from cenfind.core.outline import Point, Contour, draw_foci, resize_image
-from cenfind.core.log import get_logger
 from csbdeep.utils import normalize
 from matplotlib import pyplot as plt
 from skimage import measure
@@ -20,6 +17,10 @@ from skimage.filters.thresholding import threshold_otsu
 from spotipy.model import SpotNet
 from spotipy.utils import normalize_fast2d
 from stardist.models import StarDist2D
+
+from cenfind.core.data import Field
+from cenfind.core.log import get_logger
+from cenfind.core.outline import Point, Contour, draw_foci, resize_image
 
 np.random.seed(1)
 tf.random.set_seed(2)
@@ -55,6 +56,7 @@ def extract_foci(
     :param min_distance:
     :return:
     """
+    logger.info("Processing %s / %d" % (field.name, channel))
     data = field.data[channel, ...]
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         data = normalize_fast2d(data)
@@ -63,7 +65,7 @@ def extract_foci(
             data, prob_thresh=prob_threshold, min_distance=min_distance, verbose=False
         )
     foci = [
-        Point((r, c), f_id, "Centriole") for f_id, (r, c) in enumerate(points_preds)
+        Point((r, c), channel, f_id, "Centriole") for f_id, (r, c) in enumerate(points_preds)
     ]
 
     centrosomes_mask = np.zeros(data.shape, dtype="uint8")
@@ -76,7 +78,7 @@ def extract_foci(
         foci_index = centrosomes_map[f.centre]
         centrosome_centroid = centrosomes_centroids[foci_index - 1].centroid
         centrosome_centroid = tuple(int(c) for c in centrosome_centroid)
-        f.parent = Point(centrosome_centroid, label="Centrosome")
+        f.parent = Point(centrosome_centroid, channel, label="Centrosome")
 
     if len(foci) == 0:
         logger.warning("No centrioles (channel: %s) has been detected in %s" % (channel, field.name))
@@ -86,7 +88,7 @@ def extract_foci(
 
 
 def extract_nuclei(
-        field: Field, channel: int, model: StarDist2D = None, annotation=None
+        field: Field, channel: int, model: StarDist2D = None
 ) -> List[Contour]:
     """
     Extract the nuclei from the nuclei image
@@ -105,34 +107,28 @@ def extract_nuclei(
 
     data = field.data[channel, ...]
 
-    if annotation is not None:
-        labels = annotation
-    elif model is not None:
-        data_resized = resize_image(data)
-        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            labels, _ = model.predict_instances(normalize(data_resized))
-        labels = cv2.resize(
-            labels, dsize=data.shape, fx=1, fy=1, interpolation=cv2.INTER_NEAREST
-        )
+    data_resized = resize_image(data)
+    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+        labels, _ = model.predict_instances(normalize(data_resized))
+    labels = cv2.resize(
+        labels, dsize=data.shape, fx=1, fy=1, interpolation=cv2.INTER_NEAREST
+    )
 
-    else:
-        raise ValueError("Please provide either an annotation or a model")
-
+    if len(labels) == 0:
+        logger.warning("No nucleus has been detected in %s" % field.name)
+        return []
     labels_id = np.unique(labels)
 
     nuclei = []
-    for nucleus_id in labels_id:
-        if nucleus_id == 0:
+    for nucleus_index, nucleus_label in enumerate(labels_id):
+        if nucleus_label == 0:
             continue
         sub_mask = np.zeros_like(labels, dtype="uint8")
-        sub_mask[labels == nucleus_id] = 1
+        sub_mask[labels == nucleus_label] = 1
         contour, _ = cv2.findContours(
             sub_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
-        nucleus = Contour(contour[0], "Nucleus", nucleus_id, confidence=-1)
-        nucleus.measure_intensity(data)
-        nucleus.measure_area()
-
+        nucleus = Contour(contour[0], channel, "Nucleus", nucleus_index - 1)
         nuclei.append(nucleus)
 
     logger.info("(%s), channel %s: foci: %s" % (field.name, channel, len(nuclei)))
@@ -156,6 +152,9 @@ def extract_cilia(field: Field, channel, dst) -> List[Point]:
     mask = b < threshold
     labels = measure.label(mask)
     props = measure.regionprops(labels, mask)
+
+    if len(props) == 0:
+        logger.warning("No cilium (channel: %s) has been detected in %s" % (channel, field.name))
 
     fig, axs = plt.subplots(1, 2, figsize=(18, 9))
 
