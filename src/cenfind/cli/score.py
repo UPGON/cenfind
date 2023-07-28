@@ -2,12 +2,13 @@ import argparse
 import os
 from pathlib import Path
 
+from tqdm import tqdm
+
 from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_foci, extract_nuclei
-from cenfind.core.log import get_logger
-from cenfind.core.measure import assign, save_foci, measure_signal_foci, save_scores
-from cenfind.core.outline import visualisation
-from tqdm import tqdm
+from cenfind.core.measure import assign, save_foci, save_nuclei_mask, save_assigned, score_nuclei, assign_centrioles, \
+    save_scores, save_assigned_centrioles
+from cenfind.core.outline import make_visualisation
 
 
 def register_parser(parent_subparsers):
@@ -50,47 +51,32 @@ def run(args):
 
     dataset = Dataset(args.dataset)
     dataset.setup()
-    logger = get_logger(__name__, file=dataset.logs / 'cenfind.log')
-
-    path_predictions_centrioles = dataset.predictions / "centrioles"
-    path_predictions_centrioles.mkdir(exist_ok=True)
 
     pbar = tqdm(dataset.fields)
-    from cenfind.core.measure import score
 
-    scores = []
     for field in pbar:
         pbar.set_description(f"{field.name}")
-        logger.info("Processing %s" % field.name)
 
         nuclei = extract_nuclei(field, args.channel_nuclei)
-        if len(nuclei) == 0:
-            logger.warning("No nucleus has been detected in %s" % field.name)
-            continue
+        save_nuclei_mask(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.png", nuclei,
+                         image=field.data[args.channel_nuclei, ...])
 
         for channel in args.channel_centrioles:
-            logger.info("Processing %s / %d" % (field.name, channel))
+            centrioles = extract_foci(field=field, foci_model_file=args.model, channel=channel)
+            save_foci(dataset.centrioles / f"{field.name}_C{channel}.tsv", centrioles, image=field.data[channel, ...])
+            assigned = assign(nuclei, centrioles, vicinity=args.vicinity)
+            save_assigned(dataset.assignment / f"{field.name}_C{channel}_matrix.tsv", assigned)
 
-            foci = extract_foci(field=field, foci_model_file=args.model, channel=channel)
+            scores = score_nuclei(assigned, nuclei)
+            save_scores(dataset.statistics / f"{field.name}_C{channel}_scores.tsv", scores)
+            centrioles_nuclei = assign_centrioles(assigned, nuclei, centrioles)
+            save_assigned_centrioles(dataset.statistics / f"{field.name}_C{channel}_assigned.tsv", centrioles_nuclei)
 
-            measure_signal_foci(dataset.statistics / f"{field.name}_C{channel}.txt", field, channel, foci)
-            nuclei_scored = assign(nuclei, foci, vicinity=args.vicinity)
-            scored = score(field, nuclei_scored, channel)
-            scores.append(scored)
-            save_foci(foci, path_predictions_centrioles / f"{field.name}_C{channel}.txt")
-            save_scores(dataset.statistics / "scores_df.tsv", scores)
-            visualisation(dataset.visualisation / f"{field.name}_C{channel}_pred.png", field,
-                          channel_centrioles=channel, channel_nuclei=args.channel_nuclei,
-                          nuclei=nuclei_scored)
+            make_visualisation(dataset.visualisation / f"{field.name}_C{channel}.png", field, channel,
+                               args.channel_nuclei, centrioles, nuclei, assigned)
 
-            pbar.set_postfix(
-                {
-                    "field": field.name,
-                    "channel": channel,
-                    "nuclei": len(nuclei),
-                    "foci": len(foci),
-                }
-            )
+            pbar.set_postfix({"field": field.name, "channel": channel,
+                              "nuclei": len(nuclei), "foci": len(centrioles)})
 
 
 if __name__ == "__main__":
