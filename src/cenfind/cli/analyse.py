@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pandas as pd
 
+from cenfind.core.analytics import field_score_frequency
 from cenfind.core.constants import UNITS
 from cenfind.core.data import Dataset
 from cenfind.core.log import get_logger
-from cenfind.core.measure import field_score_frequency
 
 logger = get_logger(__name__)
 
@@ -36,8 +36,8 @@ def run(args):
     try:
         binned = field_score_frequency(scores, by=args.by)
     except ValueError as e:
-            logger.error(e, exc_info=True)
-            raise
+        logger.error(e, exc_info=True)
+        raise
 
     path_stats = dataset.statistics / "statistics.tsv"
     binned.to_csv(path_stats, sep="\t", index=True)
