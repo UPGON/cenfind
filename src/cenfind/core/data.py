@@ -78,12 +78,17 @@ class Dataset:
     def centrioles(self):
         return self.predictions / 'centrioles'
 
+    @property
+    def assignment(self):
+        return self.predictions / 'assignment'
+
     def setup(self):
         self.visualisation.mkdir(exist_ok=True)
         self.statistics.mkdir(exist_ok=True)
         self.predictions.mkdir(exist_ok=True)
         self.nuclei.mkdir(exist_ok=True)
         self.centrioles.mkdir(exist_ok=True)
+        self.assignment.mkdir(exist_ok=True)
 
     @property
     def fields(self) -> List[Field]:
