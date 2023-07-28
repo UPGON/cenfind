@@ -70,10 +70,20 @@ class Dataset:
     def statistics(self):
         return self.path / 'statistics'
 
+    @property
+    def nuclei(self):
+        return self.predictions / 'nuclei'
+
+    @property
+    def centrioles(self):
+        return self.predictions / 'centrioles'
+
     def setup(self):
         self.visualisation.mkdir(exist_ok=True)
         self.statistics.mkdir(exist_ok=True)
         self.predictions.mkdir(exist_ok=True)
+        self.nuclei.mkdir(exist_ok=True)
+        self.centrioles.mkdir(exist_ok=True)
 
     @property
     def fields(self) -> List[Field]:
