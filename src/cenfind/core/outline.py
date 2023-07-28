@@ -24,10 +24,6 @@ class ROI(ABC):
         pass
 
     @abstractmethod
-    def draw(self, plane, color, marker_type, marker_size):
-        pass
-
-    @abstractmethod
     def intensity(self, image):
         pass
 
@@ -36,7 +32,7 @@ class ROI(ABC):
 class Point(ROI):
     position: tuple
     channel: int
-    idx: int = 0
+    index: int = 0
     label: str = ""
     parent: "Point" = None
 
@@ -44,32 +40,6 @@ class Point(ROI):
     def centre(self):
         row, col = self.position
         return int(row), int(col)
-
-    def draw(
-            self,
-            image,
-            color=(0, 255, 0),
-            annotation=True,
-            marker_type=cv2.MARKER_SQUARE,
-            marker_size=8,
-    ):
-        r, c = self.centre
-        offset_col = int(0.01 * image.shape[1])
-
-        if annotation:
-            cv2.putText(
-                image,
-                f"{self.label} {self.idx}",
-                org=(c + offset_col, r),
-                fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=0.4,
-                thickness=1,
-                color=color,
-            )
-
-        return cv2.drawMarker(
-            image, (c, r), color, markerType=marker_type, markerSize=marker_size
-        )
 
     def to_numpy(self):
         return np.asarray(self.centre)
@@ -91,7 +61,7 @@ class Contour(ROI):
     contour: np.ndarray
     channel: int
     label: str = ""
-    idx: int = 0
+    index: int = 0
     centrioles: list = field(default_factory=list)
 
     @property
@@ -100,25 +70,7 @@ class Contour(ROI):
 
         centre_x = int(moments["m10"] / (moments["m00"] + 1e-5))
         centre_y = int(moments["m01"] / (moments["m00"] + 1e-5))
-        return Point((centre_y, centre_x), self.channel, self.idx, self.label)
-
-    def draw(self, image, color=(0, 255, 0), annotation=True, thickness=2, **kwargs):
-        r, c = self.centre.centre
-        cv2.drawContours(image, [self.contour], -1, color, thickness=thickness)
-        if annotation:
-            cv2.putText(
-                image,
-                f"{self.label}{self.idx}",
-                org=(c, r),
-                fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=0.8,
-                thickness=2,
-                color=color,
-            )
-            cv2.drawMarker(
-                image, (c, r), color, markerType=cv2.MARKER_STAR, markerSize=10
-            )
-        return image
+        return Point((centre_y, centre_x), self.channel, self.index, self.label)
 
     def intensity(self, image: np.ndarray):
         mask = np.zeros_like(image)
@@ -153,6 +105,50 @@ def resize_image(data: np.ndarray, factor: int = 256) -> np.ndarray:
         interpolation=cv2.INTER_NEAREST,
     )
     return data_resized
+
+
+def draw_point(image: np.ndarray, point: Point,
+               color=(0, 255, 0),
+               annotation=True,
+               marker_type=cv2.MARKER_SQUARE,
+               marker_size=8,
+               ):
+    r, c = point.centre
+    offset_col = int(0.01 * image.shape[1])
+
+    if annotation:
+        cv2.putText(
+            image,
+            f"{point.label} {point.index}",
+            org=(c + offset_col, r),
+            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            fontScale=0.4,
+            thickness=1,
+            color=color,
+        )
+
+    return cv2.drawMarker(
+        image, (c, r), color, markerType=marker_type, markerSize=marker_size
+    )
+
+
+def draw_contour(image, contour: Contour, color=(0, 255, 0), annotation=True, thickness=2):
+    r, c = contour.centre.centre
+    cv2.drawContours(image, [contour.contour], -1, color, thickness=thickness)
+    if annotation:
+        cv2.putText(
+            image,
+            f"{contour.label}{contour.index}",
+            org=(c, r),
+            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            fontScale=0.8,
+            thickness=2,
+            color=color,
+        )
+        cv2.drawMarker(
+            image, (c, r), color, markerType=cv2.MARKER_STAR, markerSize=10
+        )
+    return image
 
 
 def draw_foci(data: np.ndarray, foci: list[Point], radius=2) -> np.ndarray:
@@ -219,25 +215,31 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
 def visualisation(background: np.ndarray,
                   centrioles: List[Point],
                   nuclei: List[Contour],
-                  assigned: list = None,
+                  assigned: List[Tuple[Point, Contour]] = None,
                   ) -> np.ndarray:
     for centriole in centrioles:
-        background = centriole.draw(background, annotation=False)
+        background = draw_point(background, centriole, annotation=False)
     for nucleus in nuclei:
-        background = nucleus.draw(background, annotation=False)
+        background = draw_contour(background, nucleus, annotation=False)
     if assigned is None:
         return background
 
-    for centriole, nucleus in assigned:
-        background = nucleus.draw(background, annotation=False)
-        background = centriole.draw(background, annotation=False)
+    it = np.nditer(assigned, flags=['multi_index'])
+    for entry in it:
+        if not entry:
+            continue
+        n, c = it.multi_index
+        nucleus = nuclei[n]
+        centriole = centrioles[c]
+        background = draw_contour(background, nucleus, annotation=False)
+        background = draw_point(background, centriole, annotation=False)
         cv2.arrowedLine(background, centriole.to_cv2(), nucleus.centre.to_cv2(),
-                        color=(0, 255, 0), thickness=1)
+                        color=(0, 255, 0), thickness=2)
 
     return background
 
 
-def save_visualisation(dst, field: Field,
+def make_visualisation(dst, field: Field,
                        channel_centrioles: int,
                        channel_nuclei: int,
                        centrioles: List[Point] = None,
