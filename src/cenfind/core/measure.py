@@ -1,16 +1,12 @@
-from pathlib import Path
-from types import SimpleNamespace
 from typing import List
 
 import cv2
 import numpy as np
 import pandas as pd
 from ortools.linear_solver import pywraplp
-from spotipy.utils import points_matching
 
-from cenfind.core.data import Field, Dataset
 from cenfind.core.log import get_logger
-from cenfind.core.outline import Point, Contour, draw_contour
+from cenfind.core.outline import Point, Contour
 
 logger = get_logger(__name__)
 
@@ -73,17 +69,15 @@ def assign(nuclei: List[Contour], centrioles: List[Point], vicinity=0) -> np.nda
     -------
 
     """
-    _nuclei = nuclei.copy()
-    _centrioles = centrioles.copy()
 
-    num_nuclei = len(_nuclei)
-    num_centrioles = len(_centrioles)
+    num_nuclei = len(nuclei)
+    num_centrioles = len(centrioles)
 
     costs = {}
 
     for i in range(num_nuclei):
         for j in range(num_centrioles):
-            dist = signed_distance(_centrioles[j], _nuclei[i])
+            dist = signed_distance(centrioles[j], nuclei[i])
             costs[i, j] = dist + vicinity
     solver = pywraplp.Solver.CreateSolver("SCIP")
 
@@ -116,91 +110,13 @@ def assign(nuclei: List[Contour], centrioles: List[Point], vicinity=0) -> np.nda
     return result
 
 
-def save_assigned(dst: Path, assigned: np.ndarray) -> None:
-    """
-    Save the assignment matrix to a file
-    Parameters
-    ----------
-    dst
-    assigned
-
-    Returns
-    -------
-
-    """
-    logger.info("Writing assigned matrix to %s" % str(dst))
-    np.savetxt(str(dst), assigned, fmt='%i')
-
-
-def save_foci(dst: Path, centrioles: List[Point], image: np.ndarray) -> None:
-    if len(centrioles) == 0:
-        result = pd.DataFrame([])
-        logger.info("No centriole detected")
-    else:
-        container = []
-        for c in centrioles:
-            rec = {"index": c.index,
-                   "channel": c.channel,
-                   "pos_r": c.centre[0],
-                   "pos_c": c.centre[1],
-                   "intensity": c.intensity(image)}
-            container.append(rec)
-        result = pd.DataFrame(container)
-    result.to_csv(dst, index_label='index', index=False, sep='\t')
-
-
-def save_nuclei_mask(path: Path, nuclei: List[Contour], image):
-    """
-    Save the detected nuclei as a mask.
-    Parameters
-    ----------
-    path
-    nuclei
-    image
-
-    Returns
-    -------
-
-    """
-    result = np.zeros_like(image, dtype='uint8')
-    for nucleus in nuclei:
-        result = draw_contour(result, nucleus, color=255, annotation=False, thickness=-1)
-    cv2.imwrite(str(path), result)
-
-
-def save_nuclei(dst: Path, nuclei: List[Contour], image):
-    """
-    Save nuclei as a table with measurements and position.
-    Parameters
-    ----------
-    dst
-    nuclei
-    image
-
-    Returns
-    -------
-
-    """
-    container = []
-    for nucleus in nuclei:
-        rec = {"index": nucleus.index,
-               "channel": nucleus.channel,
-               "pos_r": nucleus.centre.centre[0],
-               "pos_c": nucleus.centre.centre[1],
-               "intensity": nucleus.intensity(image),
-               "surface_area": nucleus.area(),
-               "is_nucleus_full": full_in_field(nucleus, image.shape, 0.05),
-               }
-        container.append(rec)
-    result = pd.DataFrame(container)
-    result.to_csv(dst, sep='\t')
-
-
-def score_nuclei(assigned, nuclei):
+def score_nuclei(assigned, nuclei, field_name, channel):
     """
     Score nuclei using the assignment matrix.
     Parameters
     ----------
+    channel
+    field_name
     assigned
     nuclei
 
@@ -208,25 +124,40 @@ def score_nuclei(assigned, nuclei):
     -------
 
     """
-    scores = assigned.sum(axis=1)
-    return list(zip(nuclei, scores))
+    result = assigned.sum(axis=1)
+    result = list(zip(nuclei, result))
+
+    result = pd.DataFrame(list((n.index, s) for n, s in result))
+    result.columns = ['nucleus', 'score']
+    result["field"] = field_name
+    result["channel"] = channel
+    result = result.set_index(["field", "channel"])
+    return result
 
 
-def save_scores(dst, scores):
+def frequency(df: pd.DataFrame):
     """
-    Save scores produced by score_nuclei.
+    Count the absolute frequency of number of centriole per well or per field
+    :param df: Df containing the number of centriole per nuclei
+    :return: Df with absolute frequencies.
+
     Parameters
     ----------
-    dst
-    scores
-
-    Returns
-    -------
-
+    scored
     """
-    result = pd.DataFrame(list((n.index, s) for n, s in scores))
-    result.columns = ['nuclei_index', 'centriole_number']
-    result.to_csv(dst, sep='\t', index=False)
+    cuts = [0, 1, 2, 3, 4, 5, np.inf]
+    labels = "0 1 2 3 4 +".split(" ")
+
+    result = pd.cut(df["score"], cuts, right=False, labels=labels,
+                    include_lowest=True)
+    result = result.groupby(["field", "channel"]).value_counts()
+    result.name = "freq_abs"
+    result = result.reset_index()
+    result = result.rename({"score": "score_category"}, axis=1)
+    result = result.pivot(index=["channel", "field"], columns="score_category")
+    result.columns = labels
+
+    return result
 
 
 def assign_centrioles(assigned, nuclei, centrioles):
@@ -255,71 +186,12 @@ def assign_centrioles(assigned, nuclei, centrioles):
     return result
 
 
-def save_assigned_centrioles(dst, assigned_centrioles):
-    """
-    Save assigned centrioles.
-    Parameters
-    ----------
-    dst
-    assigned_centrioles
-
-    Returns
-    -------
-
-    """
-    result = pd.DataFrame(assigned_centrioles)
-    result.columns = ['centriole_index', 'nucleus_index']
-    result.to_csv(dst, sep='\t', index=False)
-
-
-def evaluate(
-        dataset: Dataset,
-        field: Field,
-        channel: int,
-        annotation: np.ndarray,
-        predictions: np.ndarray,
-        tolerance: int,
-        threshold: float,
-) -> dict:
-    """
-    Compute the accuracy of the prediction on one field.
-    :param dataset:
-    :param field:
-    :param channel:
-    :param annotation:
-    :param predictions:
-    :param tolerance:
-    :param threshold:
-    :return: dictionary of metrics for the field
-    """
-    _predictions = [f.centre for f in predictions]
-    if all((len(_predictions), len(annotation))) > 0:
-        res = points_matching(annotation, _predictions, cutoff_distance=tolerance)
-    else:
-        logger.warning(
-            "threshold: %f; detected: %d; annotated: %d... Set precision and accuracy to zero"
-            % (threshold, len(_predictions), len(annotation))
-        )
-        res = SimpleNamespace()
-        res.precision = 0.0
-        res.recall = 0.0
-        res.f1 = 0.0
-        res.tp = (0,)
-        res.fp = (0,)
-        res.fn = 0
-    perf = {
-        "dataset": dataset.path.name,
-        "field": field.name,
-        "channel": channel,
-        "n_actual": len(annotation),
-        "n_preds": len(_predictions),
-        "threshold": threshold,
-        "tolerance": tolerance,
-        "tp": res.tp[0] if type(res.tp) == tuple else res.tp,
-        "fp": res.fp[0] if type(res.fp) == tuple else res.fp,
-        "fn": res.fn[0] if type(res.fn) == tuple else res.fn,
-        "precision": np.round(res.precision, 3),
-        "recall": np.round(res.recall, 3),
-        "f1": np.round(res.f1, 3),
-    }
-    return perf
+def proportion_cilia(field, cilia, nuclei, channel_cilia):
+    proportions = []
+    ciliated = len(cilia) / len(nuclei)
+    proportions.append({'field': field.name,
+                        "channel_cilia": channel_cilia,
+                        "n_nuclei": len(nuclei),
+                        "n_cilia": len(cilia),
+                        "p_ciliated": round(ciliated, 2)})
+    return pd.DataFrame(proportions)

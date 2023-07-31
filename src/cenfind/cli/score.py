@@ -2,13 +2,25 @@ import argparse
 import os
 from pathlib import Path
 
+import pandas as pd
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.core.detectors import extract_foci, extract_nuclei
-from cenfind.core.measure import assign, save_foci, save_nuclei_mask, save_assigned, score_nuclei, assign_centrioles, \
-    save_scores, save_assigned_centrioles
-from cenfind.core.outline import make_visualisation
+from cenfind.core.detectors import extract_foci, extract_nuclei, extract_cilia
+from cenfind.core.measure import (
+    assign,
+    score_nuclei,
+    proportion_cilia,
+    assign_centrioles,
+    frequency
+)
+from cenfind.core.serialise import (
+    save_foci,
+    save_nuclei_mask,
+    save_assigned,
+    save_assigned_centrioles,
+    make_visualisation
+)
 
 
 def register_parser(parent_subparsers):
@@ -29,8 +41,14 @@ def register_parser(parent_subparsers):
         "-c",
         nargs="+",
         type=int,
-        required=True,
+        default=[],
         help="Channel indices to analyse, e.g., 1 2 3",
+    )
+    parser.add_argument(
+        "--channel_cilia",
+        "-l",
+        type=int,
+        help="Channel indices to analyse cilium",
     )
     parser.add_argument(
         "--vicinity",
@@ -46,6 +64,8 @@ def register_parser(parent_subparsers):
 
 
 def run(args):
+    if (args.channel_centrioles is None) and (args.channel_cilia is None):
+        raise ValueError("Please specify at least one channel to evaluate.")
     if args.cpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
@@ -54,6 +74,8 @@ def run(args):
 
     pbar = tqdm(dataset.fields)
 
+    scores_container = []
+    ciliated_container = []
     for field in pbar:
         pbar.set_description(f"{field.name}")
 
@@ -61,22 +83,48 @@ def run(args):
         save_nuclei_mask(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.png", nuclei,
                          image=field.data[args.channel_nuclei, ...])
 
-        for channel in args.channel_centrioles:
-            centrioles = extract_foci(field=field, foci_model_file=args.model, channel=channel)
-            save_foci(dataset.centrioles / f"{field.name}_C{channel}.tsv", centrioles, image=field.data[channel, ...])
-            assigned = assign(nuclei, centrioles, vicinity=args.vicinity)
-            save_assigned(dataset.assignment / f"{field.name}_C{channel}_matrix.tsv", assigned)
+        dict_pbar = {"nuclei": len(nuclei)}
+        if args.channel_centrioles is not None:
+            for channel in args.channel_centrioles:
+                dict_pbar["channel"] = channel
+                centrioles = extract_foci(field=field, foci_model_file=args.model, channel=channel)
+                assigned = assign(nuclei, centrioles, vicinity=args.vicinity)
 
-            scores = score_nuclei(assigned, nuclei)
-            save_scores(dataset.statistics / f"{field.name}_C{channel}_scores.tsv", scores)
-            centrioles_nuclei = assign_centrioles(assigned, nuclei, centrioles)
-            save_assigned_centrioles(dataset.statistics / f"{field.name}_C{channel}_assigned.tsv", centrioles_nuclei)
+                scores = score_nuclei(assigned, nuclei, field.name, channel)
+                scores_container.append(scores)
+                centrioles_nuclei = assign_centrioles(assigned, nuclei, centrioles)
 
-            make_visualisation(dataset.visualisation / f"{field.name}_C{channel}.png", field, channel,
-                               args.channel_nuclei, centrioles, nuclei, assigned)
+                save_foci(dataset.centrioles / f"{field.name}_C{channel}.tsv",
+                          centrioles, image=field.data[channel, ...])
+                save_assigned(dataset.assignment / f"{field.name}_C{channel}_matrix.txt",
+                              assigned)
+                save_assigned_centrioles(dataset.statistics / f"{field.name}_C{channel}_assigned.tsv",
+                                         centrioles_nuclei)
 
-            pbar.set_postfix({"field": field.name, "channel": channel,
-                              "nuclei": len(nuclei), "foci": len(centrioles)})
+                make_visualisation(dataset.visualisation / f"{field.name}_C{channel}.png",
+                                   field, channel, args.channel_nuclei, centrioles, nuclei, assigned)
+                dict_pbar[f"centrioles"] = len(centrioles)
+                pbar.set_postfix(dict_pbar)
+
+        if args.channel_cilia is not None:
+            channel = args.channel_cilia
+            ciliae = extract_cilia(field, channel=channel)
+            record = proportion_cilia(field, ciliae, nuclei, channel)
+            ciliated_container.append(record)
+
+            save_foci(dataset.ciliae / f"{field.name}_C{channel}.tsv",
+                      ciliae, image=field.data[channel, ...])
+            make_visualisation(dataset.visualisation / f"{field.name}_C{args.channel_cilia}.png",
+                               field, channel, args.channel_nuclei, ciliae, nuclei)
+            dict_pbar["ciliae"] = len(ciliae)
+            pbar.set_postfix(dict_pbar)
+
+    ciliated_all = pd.concat(ciliated_container)
+    ciliated_all.to_csv(dataset.statistics / "ciliated.tsv", sep="\t", index=True)
+
+    scores_all = pd.concat(scores_container)
+    binned = frequency(scores_all)
+    binned.to_csv(dataset.statistics / "statistics.tsv", sep="\t", index=True)
 
 
 if __name__ == "__main__":
@@ -84,6 +132,7 @@ if __name__ == "__main__":
                               model=Path('models/master'),
                               channel_nuclei=0,
                               channel_centrioles=[1, 2],
+                              channel_cilia=3,
                               vicinity=50,
                               cpu=False,
                               )
