@@ -4,7 +4,6 @@ from typing import List, Tuple
 
 import cv2
 import numpy as np
-import tifffile as tif
 from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 
@@ -40,9 +39,6 @@ class Point(ROI):
     def centre(self):
         row, col = self.position
         return int(row), int(col)
-
-    def to_numpy(self):
-        return np.asarray(self.centre)
 
     def to_cv2(self):
         y, x = self.centre
@@ -132,6 +128,21 @@ def draw_point(image: np.ndarray, point: Point,
     )
 
 
+def draw_foci(data: np.ndarray, foci: list[Point], radius=2) -> np.ndarray:
+    """
+    Draw foci as disks of given radius
+    :param data: the channel for the dimension extraction
+    :param foci: the list of foci
+    :param radius: the radius of foci
+    :return the mask with foci
+    """
+    mask = np.zeros(data.shape, dtype="uint8")
+    for f in foci:
+        rr, cc = disk(f.centre, radius, shape=data.shape[-2:])
+        mask[rr, cc] = 250
+    return mask
+
+
 def draw_contour(image, contour: Contour, color=(0, 255, 0), annotation=True, thickness=2):
     r, c = contour.centre.centre
     cv2.drawContours(image, [contour.contour], -1, color, thickness=thickness)
@@ -149,21 +160,6 @@ def draw_contour(image, contour: Contour, color=(0, 255, 0), annotation=True, th
             image, (c, r), color, markerType=cv2.MARKER_STAR, markerSize=10
         )
     return image
-
-
-def draw_foci(data: np.ndarray, foci: list[Point], radius=2) -> np.ndarray:
-    """
-    Draw foci as disks of given radius
-    :param data: the channel for the dimension extraction
-    :param foci: the list of foci
-    :param radius: the radius of foci
-    :return the mask with foci
-    """
-    mask = np.zeros(data.shape, dtype="uint8")
-    for f in foci:
-        rr, cc = disk(f.to_numpy(), radius, shape=data.shape[-2:])
-        mask[rr, cc] = 250
-    return mask
 
 
 def _color_channel(data: np.ndarray, color: tuple, out_range: str):
@@ -237,15 +233,3 @@ def visualisation(background: np.ndarray,
                         color=(0, 255, 0), thickness=2)
 
     return background
-
-
-def make_visualisation(dst, field: Field,
-                       channel_centrioles: int,
-                       channel_nuclei: int,
-                       centrioles: List[Point] = None,
-                       nuclei: List[Contour] = None,
-                       assigned: List[Tuple[Point, Contour]] = None) -> None:
-    background = create_vignette(field, marker_index=channel_centrioles, nuclei_index=channel_nuclei)
-    vis = visualisation(background, centrioles=centrioles, nuclei=nuclei, assigned=assigned)
-    logger.info("Writing visualisation to %s" % (str(dst)))
-    tif.imwrite(dst, vis)
