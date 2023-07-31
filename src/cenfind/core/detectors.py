@@ -9,7 +9,6 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from csbdeep.utils import normalize
-from matplotlib import pyplot as plt
 from skimage import measure
 from skimage.exposure import rescale_intensity
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
@@ -48,7 +47,7 @@ def extract_foci(
         min_distance=2,
 ) -> List[Point]:
     """
-    Detect centrioles as row, col, row major
+    Detect centrioles in Field as row, col, row major
     :param field:
     :param foci_model_file:
     :param channel:
@@ -91,11 +90,10 @@ def extract_nuclei(
         field: Field, channel: int, model: StarDist2D = None
 ) -> List[Contour]:
     """
-    Extract the nuclei from the nuclei image
+    Extract the nuclei from the field.
     :param field:
     :param channel:
     :param model:
-    :param annotation: a mask with pixels labelled for each centre
 
     :return: List of Contours.
 
@@ -136,43 +134,25 @@ def extract_nuclei(
     return nuclei
 
 
-def extract_cilia(field: Field, channel, dst) -> List[Point]:
+def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -> List[Point]:
     data = field.data[channel, ...]
-    resc = rescale_intensity(data, out_range='uint8')
+    resc = rescale_intensity(data, out_range='uint8').squeeze()
 
-    def _detect_ridges(gray, sigma=1.0):
-        h_elems = hessian_matrix(gray, sigma=sigma, order='rc')
-        maxima_ridges, minima_ridges = hessian_matrix_eigvals(h_elems)
-        return maxima_ridges, minima_ridges
+    h_elems = hessian_matrix(resc, sigma=sigma, order='rc')
+    _, minima_ridges = hessian_matrix_eigvals(h_elems)
+    threshold = threshold_otsu(minima_ridges)
 
-    a, b = _detect_ridges(resc, sigma=5.0)
-    threshold = threshold_otsu(b)
-    contours = []
-
-    mask = b < threshold
+    mask = minima_ridges < threshold
     labels = measure.label(mask)
     props = measure.regionprops(labels, mask)
 
-    if len(props) == 0:
+    if not props:
         logger.warning("No cilium (channel: %s) has been detected in %s" % (channel, field.name))
 
-    fig, axs = plt.subplots(1, 2, figsize=(18, 9))
-
-    ax_mask = axs[0]
-    ax_annotated = axs[1]
-    ax_mask.imshow(mask)
-    ax_annotated.imshow(data, cmap='gray_r')
-
+    result = []
     for prop in props:
-        if prop.eccentricity > .9 and prop.area > 200:
+        if prop.eccentricity > eccentricity and prop.area > area:
             r, c = prop.centroid
-            contours.append(Point((c, r), -1, label='Cilium'))
-            color = 'green'
-            c = plt.Circle((c, r), 30, color=color, linewidth=2, fill=False)
-            ax_annotated.add_patch(c)
-    ax_annotated.set_axis_off()
-    ax_mask.set_axis_off()
+            result.append(Point((int(r), int(c)), channel, label='Cilium'))
 
-    plt.tight_layout()
-    fig.savefig(dst / f'{field.name}.png')
-    return contours
+    return result
