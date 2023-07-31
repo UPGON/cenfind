@@ -6,8 +6,6 @@ from cenfind.core.log import get_logger
 
 commands = [
     "score",
-    "analyse",
-    "cilia"
 ]
 
 COMMANDS = [importlib.import_module("cenfind.cli." + c) for c in commands]
