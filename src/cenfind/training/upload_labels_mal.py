@@ -11,7 +11,7 @@ from labelbox.exceptions import ResourceNotFoundError
 
 from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_foci
-from scripts.labelbox.helpers import (
+from cenfind.training.helpers import (
     ontology_setup,
     label_create,
     labels_list_create,
