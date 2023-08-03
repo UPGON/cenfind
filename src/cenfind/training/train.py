@@ -8,7 +8,7 @@ from numpy.random import seed
 from spotipy.model import SpotNet, Config
 from tqdm import tqdm
 
-from cenfind.core.config import config_multiscale, transforms
+from cenfind.training.config import config_multiscale, transforms
 from cenfind.core.data import Dataset
 
 seed(1)
