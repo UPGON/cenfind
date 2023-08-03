@@ -9,7 +9,8 @@ import tifffile as tif
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
 from cenfind.core.measure import full_in_field
-from cenfind.core.outline import Point, Contour, draw_contour, visualisation, create_vignette
+from cenfind.core.outline import Point, Contour
+from cenfind.core.visualisation import draw_contour, visualisation, create_vignette
 
 logger = get_logger(__name__)
 
@@ -30,7 +31,7 @@ def save_assigned(dst: Path, assigned: np.ndarray) -> None:
     np.savetxt(str(dst), assigned, fmt='%i')
 
 
-def save_assigned_centrioles(dst, assigned_centrioles):
+def save_assigned_centrioles(dst: Path, assigned_centrioles):
     """
     Save assigned centrioles.
     Parameters
@@ -111,7 +112,7 @@ def save_nuclei(dst: Path, nuclei: List[Contour], image):
     result.to_csv(dst, sep='\t')
 
 
-def make_visualisation(dst, field: Field,
+def save_visualisation(dst, field: Field,
                        channel_centrioles: int,
                        channel_nuclei: int,
                        centrioles: List[Point] = None,

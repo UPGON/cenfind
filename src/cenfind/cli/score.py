@@ -19,7 +19,7 @@ from cenfind.core.serialise import (
     save_nuclei_mask,
     save_assigned,
     save_assigned_centrioles,
-    make_visualisation
+    save_visualisation
 )
 
 
@@ -101,8 +101,8 @@ def run(args):
                 save_assigned_centrioles(dataset.statistics / f"{field.name}_C{channel}_assigned.tsv",
                                          centrioles_nuclei)
 
-                make_visualisation(dataset.visualisation / f"{field.name}_C{channel}.png",
-                                   field, channel, args.channel_nuclei, centrioles, nuclei, assigned)
+                save_visualisation(dataset.visualisation / f"{field.name}_C{channel}.png", field, channel,
+                                   args.channel_nuclei, centrioles, nuclei, assigned)
                 dict_pbar[f"centrioles"] = len(centrioles)
                 pbar.set_postfix(dict_pbar)
 
@@ -114,8 +114,8 @@ def run(args):
 
             save_foci(dataset.ciliae / f"{field.name}_C{channel}.tsv",
                       ciliae, image=field.data[channel, ...])
-            make_visualisation(dataset.visualisation / f"{field.name}_C{args.channel_cilia}.png",
-                               field, channel, args.channel_nuclei, ciliae, nuclei)
+            save_visualisation(dataset.visualisation / f"{field.name}_C{args.channel_cilia}.png", field, channel,
+                               args.channel_nuclei, ciliae, nuclei)
             dict_pbar["ciliae"] = len(ciliae)
             pbar.set_postfix(dict_pbar)
 
