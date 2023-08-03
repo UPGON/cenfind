@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Tuple
 
 import cv2
 import numpy as np
 import pandas as pd
 from ortools.linear_solver import pywraplp
 
+from cenfind.core.data import Field
 from cenfind.core.log import get_logger
 from cenfind.core.outline import Point, Contour
 
@@ -56,7 +57,7 @@ def signed_distance(focus: Point, nucleus: Contour) -> float:
     return result
 
 
-def assign(nuclei: List[Contour], centrioles: List[Point], vicinity=0) -> np.ndarray:
+def assign(nuclei: List[Contour], centrioles: List[Point], vicinity: float = 0) -> np.ndarray:
     """
     Solve the linear assignment of n centrioles nearest to 1 nucleus, up to a threshold.
     Parameters
@@ -110,7 +111,7 @@ def assign(nuclei: List[Contour], centrioles: List[Point], vicinity=0) -> np.nda
     return result
 
 
-def score_nuclei(assigned, nuclei, field_name, channel):
+def score_nuclei(assigned: np.ndarray, nuclei: List[Contour], field_name: str, channel: int):
     """
     Score nuclei using the assignment matrix.
     Parameters
@@ -135,7 +136,7 @@ def score_nuclei(assigned, nuclei, field_name, channel):
     return result
 
 
-def frequency(df: pd.DataFrame):
+def frequency(df: pd.DataFrame) -> pd.DataFrame:
     """
     Count the absolute frequency of number of centriole per well or per field
     :param df: Df containing the number of centriole per nuclei
@@ -160,7 +161,7 @@ def frequency(df: pd.DataFrame):
     return result
 
 
-def assign_centrioles(assigned, nuclei, centrioles):
+def assign_centrioles(assigned: np.ndarray, nuclei: List[Contour], centrioles: List[Point]) -> List[Tuple[int, int]]:
     """
     Assign nucleus index to centrioles index, or -1 if no nucleus.
     Parameters
@@ -186,7 +187,7 @@ def assign_centrioles(assigned, nuclei, centrioles):
     return result
 
 
-def proportion_cilia(field, cilia, nuclei, channel_cilia):
+def proportion_cilia(field: Field, cilia: List[Point], nuclei: List[Contour], channel_cilia: int) -> pd.DataFrame:
     proportions = []
     ciliated = len(cilia) / len(nuclei)
     proportions.append({'field': field.name,
