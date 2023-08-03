@@ -19,7 +19,8 @@ from stardist.models import StarDist2D
 
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
-from cenfind.core.outline import Point, Contour, draw_foci, resize_image
+from cenfind.core.outline import Point, Contour
+from cenfind.core.visualisation import draw_foci, resize_image
 
 np.random.seed(1)
 tf.random.set_seed(2)
@@ -136,7 +137,7 @@ def extract_nuclei(
 
 def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -> List[Point]:
     data = field.data[channel, ...]
-    resc = rescale_intensity(data, out_range='uint8').squeeze()
+    resc = rescale_intensity(data, out_range='uint8')
 
     h_elems = hessian_matrix(resc, sigma=sigma, order='rc')
     _, minima_ridges = hessian_matrix_eigvals(h_elems)
