@@ -2,9 +2,10 @@ import cv2
 import pandas as pd
 
 from cenfind.core.data import Dataset
-from cenfind.core.outline import draw_foci
-from cenfind.core.constants import datasets, PREFIX_REMOTE
-from cenfind.core.detectors import log_skimage, simpleblob_cv2, extract_foci
+from cenfind.core.visualisation import draw_foci
+from cenfind.publication.constants import datasets, PREFIX_REMOTE
+from cenfind.publication.detectors_other import log_skimage, simpleblob_cv2
+from cenfind.core.detectors import extract_foci
 
 
 def main():
