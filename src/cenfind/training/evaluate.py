@@ -6,7 +6,7 @@ import pandas as pd
 import tifffile as tf
 
 from cenfind.core.data import Dataset
-from cenfind.core.outline import visualisation
+from cenfind.core.visualisation import visualisation
 from cenfind.core.log import get_logger
 
 
@@ -69,7 +69,7 @@ def run(args):
     pairs = dataset.splits()
     for field, channel in pairs["test"]:
         annotation = field.annotation(channel)
-        predictions = extract_foci(field, args.model, channel, prob_threshold=args.threshold)
+        predictions = extract_foci(field, channel, args.model, prob_threshold=args.threshold)
         nuclei = extract_nuclei(field, args.channel_nuclei)
 
         for tol in tolerances:
