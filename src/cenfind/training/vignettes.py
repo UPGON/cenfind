@@ -5,7 +5,7 @@ import cv2
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.core.outline import create_vignette
+from cenfind.core.visualisation import create_vignette
 
 
 def register_parser(parent_subparsers):

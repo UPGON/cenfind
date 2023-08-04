@@ -1,7 +1,7 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from cenfind.core.constants import ROOT_DIR
+from cenfind.publication.constants import ROOT_DIR
 
 pd.options.display.max_columns = 50
 

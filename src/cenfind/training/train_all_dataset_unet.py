@@ -1,7 +1,7 @@
 from datetime import datetime
 from spotipy.model import SpotNet
 from cenfind.training.train import config_unet, fetch_all_fields
-from cenfind.core.constants import PREFIX_REMOTE, datasets
+from cenfind.publication.constants import PREFIX_REMOTE, datasets
 from cenfind.core.data import Dataset
 
 

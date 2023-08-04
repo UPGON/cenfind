@@ -4,14 +4,14 @@ from pathlib import Path
 import tifffile as tf
 
 from cenfind.core.data import Dataset
-from cenfind.core.outline import visualisation
+from cenfind.core.visualisation import visualisation
 from cenfind.core.log import get_logger
 
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
         "predict",
-        help="Predict centrioles on new dataset and save under visualisations/runs/<model_name>",
+        help="Predict centrioles on new dataset and save under visualisation/runs/<model_name>",
     )
     parser.add_argument("dataset", type=Path, help="Path to the dataset folder")
     parser.add_argument("model", type=Path, help="Path to the model")
@@ -39,7 +39,7 @@ def run(args):
         nuclei = extract_nuclei(field=field, channel=args.channel_nuclei)
         foci = extract_foci(field, args.model, channel, prob_threshold=0.5)
         logger.info(
-            "Writing visualisations for field: %s, channel: %s, %s foci detected"
+            "Writing visualisation for field: %s, channel: %s, %s foci detected"
             % (field.name, channel, len(foci))
         )
         vis = visualisation(field, channel_centrioles=channel, channel_nuclei=args.channel_nuclei, nuclei=nuclei)

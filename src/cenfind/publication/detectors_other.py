@@ -6,7 +6,7 @@ from skimage.feature import blob_log
 from spotipy.utils import points_matching
 
 from cenfind.core.data import Field
-from cenfind.core.outline import Point
+from cenfind.core.structures import Point
 
 
 def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:

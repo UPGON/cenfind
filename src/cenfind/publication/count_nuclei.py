@@ -4,9 +4,10 @@ from dotenv import dotenv_values
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.core.measure import flag, full_in_field, extract_nuclei
-from cenfind.core.outline import create_vignette
-from cenfind.core.constants import datasets, PREFIX_REMOTE
+from cenfind.core.measure import flag, full_in_field
+from cenfind.core.detectors import extract_nuclei
+from cenfind.core.visualisation import draw_contour, create_vignette
+from cenfind.publication.constants import datasets, PREFIX_REMOTE
 
 config = dotenv_values('.env')
 
@@ -22,7 +23,7 @@ def main():
         dataset = Dataset(PREFIX_REMOTE / dataset)
         for field in tqdm(dataset.fields):
             mask = field.mask(0)
-            nuclei = extract_nuclei(field, 0, annotation=mask, factor=256)
+            nuclei = extract_nuclei(field, 0)
             vignette = create_vignette(field, 1, 0)
             for nucleus in nuclei:
                 centre = nucleus.centre
@@ -31,7 +32,7 @@ def main():
                                 'field': field.name,
                                 'centre': centre.centre,
                                 'is_full': is_full})
-                nucleus.draw(vignette, color=flag(is_full))
+                draw_contour(nucleus, vignette, color=flag(is_full))
 
             cv2.imwrite(f'out/checks/{field.name}.png', vignette)
     df = pd.DataFrame(records)

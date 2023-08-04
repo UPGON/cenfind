@@ -7,7 +7,7 @@ from matplotlib_scalebar.scalebar import ScaleBar
 import cv2
 import numpy as np
 from skimage import exposure
-from cenfind.core.outline import to_8bit
+from cenfind.core.structures import to_8bit
 from cenfind.core.data import Dataset, Field
 
 plt.rcParams["font.family"] = "Helvetica"

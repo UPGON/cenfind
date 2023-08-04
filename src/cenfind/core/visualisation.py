@@ -6,7 +6,7 @@ from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 
 from cenfind.core.data import Field
-from cenfind.core.outline import Point, Contour
+from cenfind.core.structures import Point, Contour
 from cenfind.core.log import get_logger
 
 logger = get_logger(__name__)

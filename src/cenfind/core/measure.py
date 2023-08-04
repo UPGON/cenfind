@@ -7,7 +7,7 @@ from ortools.linear_solver import pywraplp
 
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
-from cenfind.core.outline import Point, Contour
+from cenfind.core.structures import Point, Contour
 
 logger = get_logger(__name__)
 

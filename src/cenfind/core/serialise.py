@@ -9,7 +9,7 @@ import tifffile as tif
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
 from cenfind.core.measure import full_in_field
-from cenfind.core.outline import Point, Contour
+from cenfind.core.structures import Point, Contour
 from cenfind.core.visualisation import draw_contour, visualisation, create_vignette
 
 logger = get_logger(__name__)

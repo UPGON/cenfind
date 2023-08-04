@@ -19,7 +19,7 @@ from stardist.models import StarDist2D
 
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
-from cenfind.core.outline import Point, Contour
+from cenfind.core.structures import Point, Contour
 from cenfind.core.visualisation import draw_foci, resize_image
 
 np.random.seed(1)
