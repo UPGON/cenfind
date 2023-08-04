@@ -37,7 +37,7 @@ def run(args):
     pairs = dataset.splits()
     for field, channel in pairs["test"]:
         nuclei = extract_nuclei(field=field, channel=args.channel_nuclei)
-        foci = extract_foci(field, args.model, channel, prob_threshold=0.5)
+        foci = extract_foci(field, channel, args.model, prob_threshold=0.5)
         logger.info(
             "Writing visualisation for field: %s, channel: %s, %s foci detected"
             % (field.name, channel, len(foci))

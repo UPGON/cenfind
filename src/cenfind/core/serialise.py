@@ -65,12 +65,12 @@ def save_foci(dst: Path, centrioles: List[Point], image: np.ndarray) -> None:
     result.to_csv(dst, index_label='index', index=False, sep='\t')
 
 
-def save_nuclei_mask(path: Path, nuclei: List[Contour], image):
+def save_nuclei_mask(dst: Path, nuclei: List[Contour], image):
     """
     Save the detected nuclei as a mask.
     Parameters
     ----------
-    path
+    dst
     nuclei
     image
 
@@ -81,7 +81,7 @@ def save_nuclei_mask(path: Path, nuclei: List[Contour], image):
     result = np.zeros_like(image, dtype='uint8')
     for nucleus in nuclei:
         result = draw_contour(result, nucleus, color=255, annotation=False, thickness=-1)
-    cv2.imwrite(str(path), result)
+    cv2.imwrite(str(dst), result)
 
 
 def save_nuclei(dst: Path, nuclei: List[Contour], image):

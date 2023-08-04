@@ -71,7 +71,7 @@ def run(args):
     labels = []
     for field in tqdm(ds.fields):
         for channel_id in range(1, 4):
-            mal_label = extract_foci(field, foci_model, channel_id)
+            mal_label = extract_foci(field, channel_id, foci_model)
             vignette_path = (
                     ds.path / "vignettes" / f"{field.name}_max_C{channel_id}.png"
             )

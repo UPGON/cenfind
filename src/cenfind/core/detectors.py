@@ -31,22 +31,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 logger = get_logger(__name__)
 
 
-@functools.lru_cache(maxsize=None)
-def get_model(model):
-    path = Path(model)
-    if not path.is_dir():
-        raise (FileNotFoundError(f"{path} is not a directory"))
-
-    return SpotNet(None, name=path.name, basedir=str(path.parent))
-
-
-def extract_foci(
-        field: Field,
-        foci_model_file: Path,
-        channel: int,
-        prob_threshold=0.5,
-        min_distance=2,
-) -> List[Point]:
+def extract_foci(field: Field, channel: int, foci_model_file: Path, prob_threshold=0.5, min_distance=2, ) -> List[ Point]:
     """
     Detect centrioles in Field as row, col, row major
     :param field:
@@ -58,6 +43,15 @@ def extract_foci(
     """
     logger.info("Processing %s / %d" % (field.name, channel))
     data = field.data[channel, ...]
+
+    @functools.lru_cache(maxsize=None)
+    def get_model(model):
+        path = Path(model)
+        if not path.is_dir():
+            raise (FileNotFoundError(f"{path} is not a directory"))
+
+        return SpotNet(None, name=path.name, basedir=str(path.parent))
+
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         data = normalize_fast2d(data)
         model = get_model(foci_model_file)
@@ -87,9 +81,7 @@ def extract_foci(
     return foci
 
 
-def extract_nuclei(
-        field: Field, channel: int, model: StarDist2D = None
-) -> List[Contour]:
+def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List[Contour]:
     """
     Extract the nuclei from the field.
     :param field:
