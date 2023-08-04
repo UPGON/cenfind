@@ -72,7 +72,3 @@ class Contour(ROI):
 
     def area(self):
         return cv2.contourArea(self.contour)
-
-    def add_centrioles(self, centriole: Point):
-        self.centrioles.append(centriole)
-        return 0
