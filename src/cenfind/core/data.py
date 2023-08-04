@@ -79,8 +79,8 @@ class Dataset:
         return self.predictions / 'centrioles'
 
     @property
-    def ciliae(self):
-        return self.predictions / 'ciliae'
+    def cilia(self):
+        return self.predictions / 'cilia'
 
     @property
     def assignment(self):
@@ -92,7 +92,7 @@ class Dataset:
         self.predictions.mkdir(exist_ok=True)
         self.nuclei.mkdir(exist_ok=True)
         self.centrioles.mkdir(exist_ok=True)
-        self.ciliae.mkdir(exist_ok=True)
+        self.cilia.mkdir(exist_ok=True)
         self.assignment.mkdir(exist_ok=True)
 
     @property
