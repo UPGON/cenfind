@@ -11,17 +11,16 @@ ROOT_DIR = Path(__file__).parent.parent
 class TestDataCilia:
     path_dataset = ROOT_DIR / "data/cilia"
     ds = Dataset(path_dataset)
+    ds.setup()
     annotation = pd.read_csv(path_dataset / 'annotations.tsv', sep='\t', index_col=0)
     annotation = annotation.to_dict(orient='index')
-    path_cilia = (ds.visualisation / "cilia")
-    path_cilia.mkdir(exist_ok=True)
 
     def test_detect_cilia(self):
         for field in self.ds.fields:
             print(field.name)
-            cilia = extract_cilia(field, channel=2, dst=self.path_cilia)
-            groundtruth = self.annotation[field.name]['cilia']
-            if groundtruth == 0:
+            cilia = extract_cilia(field, channel=2)
+            ground_truth = self.annotation[field.name]['cilia']
+            if ground_truth == 0:
                 assert len(cilia) >= 0
             else:
-                assert abs(len(cilia) / groundtruth) >= .8
+                assert abs(len(cilia) / ground_truth) >= .8
