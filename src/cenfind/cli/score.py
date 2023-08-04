@@ -87,7 +87,7 @@ def run(args):
         if args.channel_centrioles is not None:
             for channel in args.channel_centrioles:
                 dict_pbar["channel"] = channel
-                centrioles = extract_foci(field=field, foci_model_file=args.model, channel=channel)
+                centrioles = extract_foci(field=field, channel=channel, foci_model_file=args.model)
                 assigned = assign(nuclei, centrioles, vicinity=args.vicinity)
 
                 scores = score_nuclei(assigned, nuclei, field.name, channel)
@@ -112,11 +112,11 @@ def run(args):
             record = proportion_cilia(field, ciliae, nuclei, channel)
             ciliated_container.append(record)
 
-            save_foci(dataset.ciliae / f"{field.name}_C{channel}.tsv",
+            save_foci(dataset.cilia / f"{field.name}_C{channel}.tsv",
                       ciliae, image=field.data[channel, ...])
             save_visualisation(dataset.visualisation / f"{field.name}_C{args.channel_cilia}.png", field, channel,
                                args.channel_nuclei, ciliae, nuclei)
-            dict_pbar["ciliae"] = len(ciliae)
+            dict_pbar["cilia"] = len(ciliae)
             pbar.set_postfix(dict_pbar)
 
     ciliated_all = pd.concat(ciliated_container)
