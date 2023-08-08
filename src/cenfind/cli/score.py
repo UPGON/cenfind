@@ -17,6 +17,8 @@ from cenfind.core.measure import (
 from cenfind.core.serialise import (
     save_foci,
     save_nuclei_mask,
+    save_nuclei,
+    save_nuclei_contour,
     save_assigned,
     save_assigned_centrioles,
     save_visualisation
@@ -82,6 +84,9 @@ def run(args):
         nuclei = extract_nuclei(field, args.channel_nuclei)
         save_nuclei_mask(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.png", nuclei,
                          image=field.data[args.channel_nuclei, ...])
+        save_nuclei(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.txt", nuclei,
+                    image=field.data[args.channel_nuclei, ...])
+        save_nuclei_contour(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.json", nuclei)
 
         dict_pbar = {"nuclei": len(nuclei)}
         if args.channel_centrioles is not None:

@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import List, Tuple
 
@@ -82,6 +83,15 @@ def save_nuclei_mask(dst: Path, nuclei: List[Contour], image):
     for nucleus in nuclei:
         result = draw_contour(result, nucleus, color=255, annotation=False, thickness=-1)
     cv2.imwrite(str(dst), result)
+
+
+def save_nuclei_contour(dst: Path, nuclei: List[Contour]):
+    container = {}
+    for nucleus in nuclei:
+        container[nucleus.index] = nucleus.contour.tolist()
+    with open(dst, 'w') as file:
+        json.dump(container, file)
+        logger.info('Writing contours to %s' % str(dst))
 
 
 def save_nuclei(dst: Path, nuclei: List[Contour], image):

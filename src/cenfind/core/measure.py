@@ -28,7 +28,7 @@ def full_in_field(nucleus: Contour, image_shape, fraction) -> bool:
     h, w = image_shape
     pad_lower = int(fraction * h)
     pad_upper = h - pad_lower
-    centroid = nucleus.centre.to_numpy()
+    centroid = nucleus.centre.centre
     if all([pad_lower < c < pad_upper for c in centroid]):
         return True
     return False
