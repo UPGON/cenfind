@@ -1,28 +1,29 @@
-from abc import ABC, abstractmethod
-from attrs import define, field, astuple
+from typing import Tuple
 
 import cv2
 import numpy as np
+from attrs import define
 
+from cenfind.core.data import Field
 from cenfind.core.log import get_logger
 
 logger = get_logger(__name__)
 
 
 @define
-class Point:
-    position: tuple
+class Centriole:
+    """
+    Represent a centriole as a 2d point associated with a Field and a channel index.
+    """
+    field: Field
     channel: int
+    centre: Tuple[int, int]
     index: int = 0
     label: str = ""
-    parent: "Point" = None
+    parent: 'Centriole' = None
 
     @property
-    def centre(self):
-        row, col = self.position
-        return int(row), int(col)
-
-    def to_cv2(self):
+    def centre_xy(self):
         y, x = self.centre
         return x, y
 
@@ -43,27 +44,33 @@ class Point:
 
 
 @define
-class Contour:
-    """Represent a blob using the row-column scheme."""
-    contour: np.ndarray
+class Nucleus:
+    field: Field
     channel: int
-    label: str = ""
+    contour: np.ndarray
     index: int = 0
-    centrioles: list = []
+    label: str = ""
 
     @property
     def centre(self):
         moments = cv2.moments(self.contour)
-
         centre_x = int(moments["m10"] / (moments["m00"] + 1e-5))
         centre_y = int(moments["m01"] / (moments["m00"] + 1e-5))
-        return Point((centre_y, centre_x), self.channel, self.index, self.label)
+        return centre_y, centre_x
 
-    def intensity(self, image: np.ndarray):
-        mask = np.zeros_like(image)
+    @property
+    def centre_xy(self):
+        y, x = self.centre
+        return x, y
+
+    @property
+    def intensity(self):
+        _data = self.field.data[self.channel, ...]
+        mask = np.zeros_like(_data)
         cv2.drawContours(mask, [self.contour], 0, 255, -1)
-        masked = cv2.bitwise_and(image, mask)
+        masked = cv2.bitwise_and(_data, mask)
         return np.sum(masked)
 
+    @property
     def area(self):
         return cv2.contourArea(self.contour)
