@@ -4,8 +4,8 @@ from dotenv import dotenv_values
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.core.measure import flag, full_in_field
 from cenfind.core.detectors import extract_nuclei
+from cenfind.core.measure import flag, full_in_field
 from cenfind.core.visualisation import draw_contour, create_vignette
 from cenfind.publication.constants import datasets, PREFIX_REMOTE
 
@@ -32,7 +32,7 @@ def main():
                                 'field': field.name,
                                 'centre': centre.centre,
                                 'is_full': is_full})
-                draw_contour(nucleus, vignette, color=flag(is_full))
+                draw_contour(vignette, nucleus, color=flag(is_full))
 
             cv2.imwrite(f'out/checks/{field.name}.png', vignette)
     df = pd.DataFrame(records)
