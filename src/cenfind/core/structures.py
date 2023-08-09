@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from attrs import define, field, astuple
 
 import cv2
 import numpy as np
@@ -9,22 +9,8 @@ from cenfind.core.log import get_logger
 logger = get_logger(__name__)
 
 
-@dataclass(eq=True, frozen=False)
-class ROI(ABC):
-    """Abstract class to represent any region of interest"""
-
-    @property
-    @abstractmethod
-    def centre(self):
-        pass
-
-    @abstractmethod
-    def intensity(self, image):
-        pass
-
-
-@dataclass(eq=True, frozen=False)
-class Point(ROI):
+@define
+class Point:
     position: tuple
     channel: int
     index: int = 0
@@ -40,21 +26,30 @@ class Point(ROI):
         y, x = self.centre
         return x, y
 
-    def intensity(self, image: np.ndarray, channel: int = None):
-        if image.ndim == 3:
-            return image[channel, self.centre]
-        return image[self.centre]
+    def intensity(self, image: np.ndarray, k: int = 0, channel: int = None):
+        r, c = self.centre
+        max_r, max_c = image.shape[-2:]
+
+        r_start = np.clip(r - k, 0, max_r)
+        r_stop = np.clip(r + k, 0, max_r)
+        c_start = np.clip(c - k, 0, max_c)
+        c_stop = np.clip(c + k, 0, max_c)
+
+        if image.ndim < 3:
+            return np.sum(image[r_start:r_stop, c_start:c_stop])
+        if channel is None:
+            raise ValueError('Channel must be supplied when image has 3 dimensions')
+        return np.sum(image[channel, r_start:r_stop, c_start:c_stop])
 
 
-@dataclass(eq=True, frozen=False)
-class Contour(ROI):
+@define
+class Contour:
     """Represent a blob using the row-column scheme."""
-
     contour: np.ndarray
     channel: int
     label: str = ""
     index: int = 0
-    centrioles: list = field(default_factory=list)
+    centrioles: list = []
 
     @property
     def centre(self):

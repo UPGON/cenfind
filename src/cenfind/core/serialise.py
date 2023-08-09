@@ -60,7 +60,7 @@ def save_foci(dst: Path, centrioles: List[Point], image: np.ndarray) -> None:
                    "channel": c.channel,
                    "pos_r": c.centre[0],
                    "pos_c": c.centre[1],
-                   "intensity": c.intensity(image)}
+                   "intensity": c.intensity(image, k=3)}
             container.append(rec)
         result = pd.DataFrame(container)
     result.to_csv(dst, index_label='index', index=False, sep='\t')
