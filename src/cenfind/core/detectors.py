@@ -19,7 +19,7 @@ from stardist.models import StarDist2D
 
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
-from cenfind.core.structures import Point, Contour
+from cenfind.core.structures import Centriole, Nucleus
 from cenfind.core.visualisation import draw_foci, resize_image
 
 np.random.seed(1)
@@ -31,7 +31,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 logger = get_logger(__name__)
 
 
-def extract_foci(field: Field, channel: int, foci_model_file: Path, prob_threshold=0.5, min_distance=2, ) -> List[ Point]:
+def extract_foci(field: Field, channel: int, foci_model_file: Path, prob_threshold=0.5, min_distance=2, ) -> List[
+    Centriole]:
     """
     Detect centrioles in Field as row, col, row major
     :param field:
@@ -58,8 +59,10 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path, prob_thresho
         _, points_preds = model.predict(
             data, prob_thresh=prob_threshold, min_distance=min_distance, verbose=False
         )
+
     foci = [
-        Point((r, c), channel, f_id, "Centriole") for f_id, (r, c) in enumerate(points_preds)
+        Centriole(field=field, channel=channel, centre=(r, c), index=f_id, label='Centriole') for f_id, (r, c) in
+        enumerate(points_preds.tolist())
     ]
 
     centrosomes_mask = np.zeros(data.shape, dtype="uint8")
@@ -71,8 +74,7 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path, prob_thresho
     for f in foci:
         foci_index = centrosomes_map[f.centre]
         centrosome_centroid = centrosomes_centroids[foci_index - 1].centroid
-        centrosome_centroid = tuple(int(c) for c in centrosome_centroid)
-        f.parent = Point(centrosome_centroid, channel, label="Centrosome")
+        f.parent = Centriole(field=field, channel=channel, centre=centrosome_centroid, label="Centrosome")
 
     if len(foci) == 0:
         logger.warning("No centrioles (channel: %s) has been detected in %s" % (channel, field.name))
@@ -81,7 +83,7 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path, prob_thresho
     return foci
 
 
-def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List[Contour]:
+def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List[Nucleus]:
     """
     Extract the nuclei from the field.
     :param field:
@@ -119,7 +121,7 @@ def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List
         contour, _ = cv2.findContours(
             sub_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
-        nucleus = Contour(contour[0], channel, "Nucleus", nucleus_index - 1)
+        nucleus = Nucleus(field=field, channel=channel, contour=contour[0], label="Nucleus", index=nucleus_index - 1)
         nuclei.append(nucleus)
 
     logger.info("(%s), channel %s: foci: %s" % (field.name, channel, len(nuclei)))
@@ -127,7 +129,7 @@ def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List
     return nuclei
 
 
-def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -> List[Point]:
+def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -> List[Centriole]:
     data = field.data[channel, ...]
     resc = rescale_intensity(data, out_range='uint8')
 
@@ -146,6 +148,6 @@ def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -
     for prop in props:
         if prop.eccentricity > eccentricity and prop.area > area:
             r, c = prop.centroid
-            result.append(Point((int(r), int(c)), channel, label='Cilium'))
+            result.append(Centriole(field=field, channel=channel, centre=(int(r), int(c)), label='Cilium'))
 
     return result

@@ -6,8 +6,8 @@ from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 
 from cenfind.core.data import Field
-from cenfind.core.structures import Point, Contour
 from cenfind.core.log import get_logger
+from cenfind.core.structures import Centriole, Nucleus
 
 logger = get_logger(__name__)
 
@@ -33,7 +33,7 @@ def resize_image(image: np.ndarray, factor: int = 256) -> np.ndarray:
     return data_resized
 
 
-def draw_point(image: np.ndarray, point: Point,
+def draw_point(image: np.ndarray, point: Centriole,
                color=(0, 255, 0),
                annotation=True,
                marker_type=cv2.MARKER_SQUARE,
@@ -58,10 +58,10 @@ def draw_point(image: np.ndarray, point: Point,
     )
 
 
-def draw_foci(image: np.ndarray, foci: list[Point], radius=2) -> np.ndarray:
+def draw_foci(image: np.ndarray, foci: list[Centriole], radius=2) -> np.ndarray:
     """
     Draw foci as disks of given radius
-    :param data: the channel for the dimension extraction
+    :param image: the channel for the dimension extraction
     :param foci: the list of foci
     :param radius: the radius of foci
     :return the mask with foci
@@ -73,13 +73,13 @@ def draw_foci(image: np.ndarray, foci: list[Point], radius=2) -> np.ndarray:
     return mask
 
 
-def draw_contour(image, contour: Contour, color=(0, 255, 0), annotation=True, thickness=2):
-    r, c = contour.centre.centre
-    cv2.drawContours(image, [contour.contour], -1, color, thickness=thickness)
+def draw_contour(image: np.ndarray, nucleus: Nucleus, color=(0, 255, 0), annotation=True, thickness=2):
+    r, c = nucleus.centre
+    cv2.drawContours(image, [nucleus.contour], -1, color, thickness=thickness)
     if annotation:
         cv2.putText(
             image,
-            f"{contour.label}{contour.index}",
+            f"{nucleus.label}{nucleus.index}",
             org=(c, r),
             fontFace=cv2.FONT_HERSHEY_SIMPLEX,
             fontScale=0.8,
@@ -139,9 +139,9 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int):
 
 
 def visualisation(background: np.ndarray,
-                  centrioles: List[Point],
-                  nuclei: List[Contour],
-                  assigned: List[Tuple[Point, Contour]] = None,
+                  centrioles: List[Centriole],
+                  nuclei: List[Nucleus],
+                  assigned: List[Tuple[Centriole, Nucleus]] = None,
                   ) -> np.ndarray:
     for centriole in centrioles:
         background = draw_point(background, centriole, annotation=False)
@@ -159,7 +159,7 @@ def visualisation(background: np.ndarray,
         centriole = centrioles[c]
         background = draw_contour(background, nucleus, annotation=False)
         background = draw_point(background, centriole, annotation=False)
-        cv2.arrowedLine(background, centriole.to_cv2(), nucleus.centre.to_cv2(),
+        cv2.arrowedLine(background, tuple(reversed(centriole.centre)), tuple(reversed(nucleus.centre)),
                         color=(0, 255, 0), thickness=2)
 
     return background

@@ -7,12 +7,12 @@ from ortools.linear_solver import pywraplp
 
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
-from cenfind.core.structures import Point, Contour
+from cenfind.core.structures import Centriole, Nucleus
 
 logger = get_logger(__name__)
 
 
-def full_in_field(nucleus: Contour, image_shape, fraction) -> bool:
+def full_in_field(nucleus: Nucleus, image_shape, fraction) -> bool:
     """
     Check if a contour is fully visible.
     Parameters
@@ -28,7 +28,7 @@ def full_in_field(nucleus: Contour, image_shape, fraction) -> bool:
     h, w = image_shape
     pad_lower = int(fraction * h)
     pad_upper = h - pad_lower
-    centroid = nucleus.centre.centre
+    centroid = nucleus.centre
     if all([pad_lower < c < pad_upper for c in centroid]):
         return True
     return False
@@ -48,16 +48,16 @@ def flag(is_full: bool) -> tuple:
     return (0, 255, 0) if is_full else (0, 0, 255)
 
 
-def signed_distance(focus: Point, nucleus: Contour) -> float:
+def signed_distance(focus: Centriole, nucleus: Nucleus) -> float:
     """
     Wrapper for the opencv PolygonTest
     """
 
-    result = cv2.pointPolygonTest(nucleus.contour, focus.to_cv2(), measureDist=True)
+    result = cv2.pointPolygonTest(nucleus.contour, focus.centre_xy, measureDist=True)
     return result
 
 
-def assign(nuclei: List[Contour], centrioles: List[Point], vicinity: float = 0) -> np.ndarray:
+def assign(nuclei: List[Nucleus], centrioles: List[Centriole], vicinity: float = 0) -> np.ndarray:
     """
     Solve the linear assignment of n centrioles nearest to 1 nucleus, up to a threshold.
     Parameters
@@ -111,7 +111,7 @@ def assign(nuclei: List[Contour], centrioles: List[Point], vicinity: float = 0) 
     return result
 
 
-def score_nuclei(assigned: np.ndarray, nuclei: List[Contour], field_name: str, channel: int):
+def score_nuclei(assigned: np.ndarray, nuclei: List[Nucleus], field_name: str, channel: int):
     """
     Score nuclei using the assignment matrix.
     Parameters
@@ -161,7 +161,8 @@ def frequency(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def assign_centrioles(assigned: np.ndarray, nuclei: List[Contour], centrioles: List[Point]) -> List[Tuple[int, int]]:
+def assign_centrioles(assigned: np.ndarray, nuclei: List[Nucleus], centrioles: List[Centriole]) -> List[
+    Tuple[int, int]]:
     """
     Assign nucleus index to centrioles index, or -1 if no nucleus.
     Parameters
@@ -187,7 +188,7 @@ def assign_centrioles(assigned: np.ndarray, nuclei: List[Contour], centrioles: L
     return result
 
 
-def proportion_cilia(field: Field, cilia: List[Point], nuclei: List[Contour], channel_cilia: int) -> pd.DataFrame:
+def proportion_cilia(field: Field, cilia: List[Centriole], nuclei: List[Nucleus], channel_cilia: int) -> pd.DataFrame:
     proportions = []
     ciliated = len(cilia) / len(nuclei)
     proportions.append({'field': field.name,

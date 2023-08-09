@@ -10,7 +10,7 @@ import tifffile as tif
 from cenfind.core.data import Field
 from cenfind.core.log import get_logger
 from cenfind.core.measure import full_in_field
-from cenfind.core.structures import Point, Contour
+from cenfind.core.structures import Centriole, Nucleus
 from cenfind.core.visualisation import draw_contour, visualisation, create_vignette
 
 logger = get_logger(__name__)
@@ -49,7 +49,7 @@ def save_assigned_centrioles(dst: Path, assigned_centrioles):
     result.to_csv(dst, sep='\t', index=False)
 
 
-def save_foci(dst: Path, centrioles: List[Point], image: np.ndarray) -> None:
+def save_foci(dst: Path, centrioles: List[Centriole], image: np.ndarray) -> None:
     if len(centrioles) == 0:
         result = pd.DataFrame([])
         logger.info("No centriole detected")
@@ -66,7 +66,7 @@ def save_foci(dst: Path, centrioles: List[Point], image: np.ndarray) -> None:
     result.to_csv(dst, index_label='index', index=False, sep='\t')
 
 
-def save_nuclei_mask(dst: Path, nuclei: List[Contour], image):
+def save_nuclei_mask(dst: Path, nuclei: List[Nucleus], image):
     """
     Save the detected nuclei as a mask.
     Parameters
@@ -85,7 +85,7 @@ def save_nuclei_mask(dst: Path, nuclei: List[Contour], image):
     cv2.imwrite(str(dst), result)
 
 
-def save_nuclei_contour(dst: Path, nuclei: List[Contour]):
+def save_nuclei_contour(dst: Path, nuclei: List[Nucleus]):
     container = {}
     for nucleus in nuclei:
         container[nucleus.index] = nucleus.contour.tolist()
@@ -94,7 +94,7 @@ def save_nuclei_contour(dst: Path, nuclei: List[Contour]):
         logger.info('Writing contours to %s' % str(dst))
 
 
-def save_nuclei(dst: Path, nuclei: List[Contour], image):
+def save_nuclei(dst: Path, nuclei: List[Nucleus], image):
     """
     Save nuclei as a table with measurements and position.
     Parameters
@@ -111,10 +111,10 @@ def save_nuclei(dst: Path, nuclei: List[Contour], image):
     for nucleus in nuclei:
         rec = {"index": nucleus.index,
                "channel": nucleus.channel,
-               "pos_r": nucleus.centre.centre[0],
-               "pos_c": nucleus.centre.centre[1],
-               "intensity": nucleus.intensity(image),
-               "surface_area": nucleus.area(),
+               "pos_r": nucleus.centre[0],
+               "pos_c": nucleus.centre[1],
+               "intensity": nucleus.intensity,
+               "surface_area": nucleus.area,
                "is_nucleus_full": full_in_field(nucleus, image.shape, 0.05),
                }
         container.append(rec)
@@ -125,9 +125,9 @@ def save_nuclei(dst: Path, nuclei: List[Contour], image):
 def save_visualisation(dst, field: Field,
                        channel_centrioles: int,
                        channel_nuclei: int,
-                       centrioles: List[Point] = None,
-                       nuclei: List[Contour] = None,
-                       assigned: List[Tuple[Point, Contour]] = None) -> None:
+                       centrioles: List[Centriole] = None,
+                       nuclei: List[Nucleus] = None,
+                       assigned: List[Tuple[Centriole, Nucleus]] = None) -> None:
     background = create_vignette(field, marker_index=channel_centrioles, nuclei_index=channel_nuclei)
     vis = visualisation(background, centrioles=centrioles, nuclei=nuclei, assigned=assigned)
     logger.info("Writing visualisation to %s" % (str(dst)))
