@@ -124,8 +124,9 @@ def run(args):
     binned = frequency(scores_all)
     binned.to_csv(dataset.statistics / "statistics.tsv", sep="\t", index=True)
 
-    ciliated_all = pd.concat(ciliated_container)
-    ciliated_all.to_csv(dataset.statistics / "ciliated.tsv", sep="\t", index=True)
+    if ciliated_container:
+        ciliated_all = pd.concat(ciliated_container)
+        ciliated_all.to_csv(dataset.statistics / "ciliated.tsv", sep="\t", index=True)
 
 
 if __name__ == "__main__":
