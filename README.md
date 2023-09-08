@@ -78,6 +78,29 @@ options:
 
 2. Check that the predictions are satisfactory by looking at the folders `visualisations/` and `statistics/`
 
+## The outputs in version 0.13.x
+
+In version 0.13, we operated a shift in what cenfind-score outputs. Now, there are modular outputs that can be linked together depending on the applications. In the following section, each output is explained.
+
+### Assignment
+
+Cenfind saves the assignment matrix in the assignment folder.
+
+This matrix is NxC where the row indices correspond to nucleus ID and the column indices to the centriole ID. It describes which centrioles are assigned to which nucleus. One can compute the number of centrioles by cell by summing over the columns and to retrieve the nucleus ID of every centriole assigned by looking up the row number of the entry for a given centriole.
+
+### Centriole predictions
+Cenfind saves a TSV file for each field of view with the detected centrioles and the channel used as well as the maximum intensity at the position.
+
+### Nuclei predictions
+
+Cenfind saves a JSON file for each field of view with the detected nuclei. Each nucleus contour is saved as an entry in the JSON together with the channel index, the position (row, col) the summed intensity, the surface area, whether the nucleus is fully in the field of view.
+
+### Cilia
+If specified by the user at the command line prompt, the cilia can be analysed in the given channel. In such cases, the folder called cilia will contain TSV files similar in structure to the one from centrioles.
+
+### Summary statistics
+The statistics folder contains precomputed information about the distribution of centriole number (statistics.tsv), TSV files for pairs of assigned centrioles their nucleus if possible. If the cilia are analysed, a TSV file containing the fraction of ciliated cells is saved as well.
+
 ## Running `cenfind score` in the background
 
 When you exit the shell, running programs receive the SIGHUP, which aborts them. This is undesirable if you need to
