@@ -28,7 +28,7 @@ def save_points(dst: Path, centrioles: List[Centriole]) -> None:
         result = pd.DataFrame([])
         logger.info("No centriole detected")
     else:
-        result = pd.DataFrame({c.index: c.as_dict() for c in centrioles})
+        result = pd.DataFrame.from_dict({c.index: c.as_dict() for c in centrioles}, orient='index')
     result.to_csv(dst, index_label='index', index=False, sep='\t')
 
 
