@@ -9,7 +9,7 @@ keywords = ["microscopy", "scientific", "biology", "image-analysis"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.9,<3.11"
 numpy = "^1.23.5"
 opencv-python = "^4.7.0.72"
 llvmlite = "0.39.1"
@@ -32,6 +32,7 @@ albumentations = "^1.3.0"
 python-dotenv = "^0.21.1"
 labelbox = { extras = ["data"], version = "^3.46.0" }
 attrs = "^22.2.0"
+sphinx = "^7.2.6"
 
 [tool.poetry.scripts]
 cenfind = "cenfind.__main__:main"
