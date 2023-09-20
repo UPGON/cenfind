@@ -1,4 +1,4 @@
-![alt text](https://github.com/UPGON/cenfind/cenfind.png)
+![alt text](cenfind.png)
 # CenFind
 
 A command line interface to score cells for centrioles.
