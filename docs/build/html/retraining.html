@@ -2,9 +2,12 @@
 <html class="no-js" lang="en" data-content_root="./">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="#" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Prediction" href="algorithms.html" /><link rel="prev" title="API" href="api.html" />
 
-    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 --><title>Search - CenFind 0.13.1 documentation</title><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+        <title>Retraining - CenFind 0.13.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
     
@@ -131,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -147,16 +150,16 @@
   </div>
   
   
-</a><form class="sidebar-search-container" method="get" action="#" role="search">
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="retraining.html">Retraining</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Retraining</a></li>
 <li class="toctree-l1"><a class="reference internal" href="algorithms.html">Prediction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citation.html">How to cite?</a></li>
 </ul>
@@ -186,31 +189,79 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          
-<noscript>
-<div class="admonition error">
-  <p class="admonition-title">Error</p>
-  <p>
-    Please activate JavaScript to enable the search functionality.
-  </p>
-</div>
-</noscript>
-
-<div id="search-results"></div>
+          <section id="retraining">
+<h1>Retraining<a class="headerlink" href="#retraining" title="Link to this heading">#</a></h1>
+<section id="evaluating-the-quality-of-the-model-on-a-new-dataset">
+<h2>Evaluating the quality of the model on a new dataset<a class="headerlink" href="#evaluating-the-quality-of-the-model-on-a-new-dataset" title="Link to this heading">#</a></h2>
+<p>The initial model M is fitted using a set of five representative datasets, hereafter referred to as the standard
+datasets (DS1-5).
+If your type of data deviates too much from the standard dataset, M may perform less well.</p>
+<p>Specifically, when setting out to score a new dataset, you may be faced with one of three situations, as reflected by
+the corresponding F1 score (i.e., 2TP/2TP+FN+FP, TP: true positive, FP: false positive; FN: false negative):
+(1) the initial model (M) performs well on the new dataset (0.9 ≤ F1 ≤ 1); in this case, model M is used;
+(2) model M performs significantly worse on the new dataset (0.5 ≤ F1 &lt; 0.9); in this case, you may want to consider
+retraining the model (see below);
+(3) the model does not work at all (0 ≤ F1 &lt; 0.5); such a low F1-value probably means that the features of the data set
+are too distant from the original representative data set to warrant retraining starting from M.</p>
+<p>Before retraining a model (2), verify once more the quality of the data, which needs to be sufficiently good in terms of
+signal over noise to enable efficient learning.
+If this is not the case, it is evident that the model will not be able to learn well.
+If you, as a human being, cannot tell the difference between a real focus and a stray spot using a single channel at
+hand (i.e., not looking at other channels), the same will hold for the model.</p>
+<p>To retrain the model, you first must annotate the dataset, divide it randomly into training and test sets (90 % versus 10 % of the data, respectively).
+Next, the model is trained with the 90 % set, thus generating a new model, M*.
+Last, you will evaluate the gain of performance on the new dataset, as well as the potential loss of performance on the standard datasets.</p>
+</section>
+<section id="detailed-training-procedure">
+<h2>Detailed training procedure<a class="headerlink" href="#detailed-training-procedure" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Split the dataset into training (90%) and test (10%) sets, each containing one field of view and the channel to use.
+This helps trace back issues during the training and renders the model fitting reproducible.</p></li>
+<li><p>Label all the images present in training and test sets using Labelbox. To upload the images, please create the vignettes first and then upload them once you have a project set up.</p></li>
+<li><p>Save all foci coordinates (x, y), origin at top-left, present in one field of view as one text file under
+/path/to/dataset/annotation/centrioles/ with the naming scheme &lt;dataset_name&gt;_max_C&lt;channel_index&gt;.txt.</p></li>
+<li><p>Evaluate the newly annotated dataset using the model M by computing the F1 score.</p></li>
+<li><p>If the performance is poor (i.e., F1 score &lt; 0.9), fit a new model instance, M*, with the standard dataset plus the
+new dataset (90% in each case).</p></li>
+<li><p>Test performance of model M* on the new data set; hopefully the F1 score will now be ≥ 0.9 (if not: consider
+increasing size of annotated data).</p></li>
+<li><p>Test performance of model M* on the standard datasets; if performance of F1* ≥ F1, then save M* as the new M (
+otherwise keep M* as a separate model for the new type of data set).</p></li>
+</ol>
+</section>
+</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="algorithms.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Prediction</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="api.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">API</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -229,8 +280,28 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Retraining</a><ul>
+<li><a class="reference internal" href="#evaluating-the-quality-of-the-model-on-a-new-dataset">Evaluating the quality of the model on a new dataset</a></li>
+<li><a class="reference internal" href="#detailed-training-procedure">Detailed training procedure</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -239,8 +310,5 @@
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=32e29ea5"></script>
-    
-<script src="_static/searchtools.js"></script>
-<script src="_static/language_data.js"></script>
-<script src="searchindex.js"></script></body>
+    </body>
 </html>

@@ -27,6 +27,12 @@ def is_tif(instance, attribute, value):
 
 @define
 class Field:
+    """
+    Represent a Field and is responsible to return its name and to load the referenced image.
+
+    :param: path
+    """
+
     path: Path = field(validator=[validators.instance_of(Path), path_exists, is_tif])
 
     @property
@@ -39,7 +45,7 @@ class Field:
     @property
     def data(self) -> np.ndarray:
         """
-        Load the data into a numpy array
+        Load the data at path and return it as a numpy array using `tifffile.imread`
         """
         return tf.imread(str(self.path))
 
@@ -47,7 +53,11 @@ class Field:
 @define
 class Dataset:
     """
-    Represent a dataset structure
+    Represent a Dataset folder.
+
+    It is responsible for setting the subdirectories.
+    It also provides a setup method to create the necessary subdirectories.
+
     """
     path: Path = field(validator=[
         validators.instance_of(Path),
@@ -86,7 +96,14 @@ class Dataset:
     def assignment(self):
         return self.predictions / 'assignment'
 
-    def setup(self):
+    def setup(self) -> None:
+        """
+        Create the subdirectories inside the Dataset path.
+        It does not overwrite existing subdirectories.
+        For reference, it creates visualisation, statistics, predictions,
+        nuclei, centrioles, cilia and assignment.
+        """
+
         self.visualisation.mkdir(exist_ok=True)
         self.statistics.mkdir(exist_ok=True)
         self.predictions.mkdir(exist_ok=True)
@@ -98,11 +115,16 @@ class Dataset:
     @property
     def fields(self) -> List[Field]:
         """
-        Return a list of Fields found in projections.
+        Return the list of Fields found in projections.
+        It filters file names that end with `.tif` and that do not start with a period.
+        It raises a ValueError if there is no file in the directory.
         """
         path = self.path / 'projections'
+
         result = [Field(path) for path in path.iterdir() if
                   (path.suffix == '.tif') and not path.name.startswith('.')]
+
         if len(result) == 0:
             raise ValueError(f'No field found in {path}')
+
         return result

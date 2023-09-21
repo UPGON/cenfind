@@ -1,4 +1,4 @@
-![alt text](cenfind.png)
+![alt text](logos/cenfind_logo_full_dark.png)
 # CenFind
 
 A command line interface to score cells for centrioles.
@@ -15,24 +15,11 @@ Specifically, it orchestrates:
 You can read more on it here: Bürgy, L., Weigert, M., Hatzopoulos, G. et al. CenFind: a deep-learning pipeline for efficient centriole detection in microscopy datasets. BMC Bioinformatics 24, 120 (2023). https://doi.org/10.1186/s12859-023-05214-2
 
 ## Installation
-
-1. Install python via pyenv
-2. Download and set up 3.9.5 as local version
-3. Set up Python interpreter
-
+1. Install cenfind from PyPI inside a virtual environment using 
 ```shell
-pyenv local 3.9.5
-pyenv global 3.9.5
+pip install cenfind
 ```
-
-4. Create a virtual environment for CenFind
-
-```shell
-python -m venv venv-cenfind
-source venv-cenfind/bin/activate
-```
-
-5. Check that `cenfind` is correctly installed by running:
+1. Check that `cenfind` is correctly installed by running:
 
 ```shell
 cenfind --help

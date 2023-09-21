@@ -2,9 +2,12 @@
 <html class="no-js" lang="en" data-content_root="./">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="#" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="How to cite?" href="citation.html" /><link rel="prev" title="Retraining" href="retraining.html" />
 
-    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 --><title>Search - CenFind 0.13.1 documentation</title><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+        <title>Prediction - CenFind 0.13.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
     
@@ -131,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -147,17 +150,17 @@
   </div>
   
   
-</a><form class="sidebar-search-container" method="get" action="#" role="search">
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
+  <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="retraining.html">Retraining</a></li>
-<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Prediction</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Prediction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citation.html">How to cite?</a></li>
 </ul>
 
@@ -186,31 +189,56 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          
-<noscript>
-<div class="admonition error">
-  <p class="admonition-title">Error</p>
-  <p>
-    Please activate JavaScript to enable the search functionality.
-  </p>
-</div>
-</noscript>
-
-<div id="search-results"></div>
+          <section id="prediction">
+<h1>Prediction<a class="headerlink" href="#prediction" title="Link to this heading">#</a></h1>
+<section id="centriole-predictions-with-spotnet">
+<h2>Centriole predictions with SpotNet<a class="headerlink" href="#centriole-predictions-with-spotnet" title="Link to this heading">#</a></h2>
+<p>Cenfind saves a TSV file for each field of view with the detected centrioles and the channel used as well as the maximum intensity at the position.</p>
+</section>
+<section id="nuclei-predictions-with-stardist">
+<h2>Nuclei predictions with StarDist<a class="headerlink" href="#nuclei-predictions-with-stardist" title="Link to this heading">#</a></h2>
+<p>Cenfind saves a JSON file for each field of view with the detected nuclei.
+Each nucleus contour is saved as an entry in the JSON together with the channel index, the position (row, col) the summed intensity, the surface area, whether the nucleus is fully in the field of view.</p>
+</section>
+<section id="assignment-with-or-tools">
+<h2>Assignment with OR-Tools<a class="headerlink" href="#assignment-with-or-tools" title="Link to this heading">#</a></h2>
+<p>Combinatorial optimization</p>
+<p>Cenfind saves the assignment matrix in the assignment folder.</p>
+<p>This matrix is NxC where the row indices correspond to nucleus ID and the column indices to the centriole ID. It describes which centrioles are assigned to which nucleus. One can compute the number of centrioles by cell by summing over the columns and to retrieve the nucleus ID of every centriole assigned by looking up the row number of the entry for a given centriole.</p>
+</section>
+</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="citation.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">How to cite?</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="retraining.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Retraining</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -229,8 +257,29 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Prediction</a><ul>
+<li><a class="reference internal" href="#centriole-predictions-with-spotnet">Centriole predictions with SpotNet</a></li>
+<li><a class="reference internal" href="#nuclei-predictions-with-stardist">Nuclei predictions with StarDist</a></li>
+<li><a class="reference internal" href="#assignment-with-or-tools">Assignment with OR-Tools</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -239,8 +288,5 @@
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=32e29ea5"></script>
-    
-<script src="_static/searchtools.js"></script>
-<script src="_static/language_data.js"></script>
-<script src="searchindex.js"></script></body>
+    </body>
 </html>
