@@ -30,7 +30,4 @@ tests/dataset_test/visualisations
 *.indd
 *.docx
 *.out
-*.tif
-*.tsv
-*.csv
 *.log
