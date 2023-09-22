@@ -10,9 +10,6 @@ Cenfind: Automatic cell scoring for centrioles
 
 .. image:: cenfind_workflow.png
 
-.. note::
-   This project is under active development.
-
 This documentation explains what is Cenfind, how to install it and apply it on your dataset.
 It also describes how to interpret and use the output of the pipeline.
 Then it showcases typical applications.
@@ -20,6 +17,9 @@ For more advanced usage, it explains how to train a custom model if the dataset 
 Finally, it explains the architecture of the API.
 
 Check out the :doc:`usage` section for further information including how to :ref:`install <installation>` the pipeline.
+
+.. warning::
+   The project and its documentation are under active development.
 
 Contents
 --------
