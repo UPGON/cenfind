@@ -53,6 +53,9 @@ class Centriole:
 
 @define
 class Nucleus:
+    """
+    Represent a Nucleus with a contour.
+    """
     field: Field
     channel: int
     contour: np.ndarray
@@ -87,14 +90,6 @@ class Nucleus:
     def full_in_field(self) -> bool:
         """
         Check if a contour is fully visible.
-        Parameters
-        ----------
-        nucleus
-        image_shape
-        fraction
-
-        Returns
-        -------
 
         """
         h, w = self.field.data.shape[-2:]
@@ -107,6 +102,11 @@ class Nucleus:
         return False
 
     def as_dict(self) -> dict:
+        """
+        Convert a Contour as a dict object for serialisation.
+        :return:
+        """
+
         result = {
             "channel": self.channel,
             "pos_r": self.centre[0],
