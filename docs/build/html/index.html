@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -158,9 +158,12 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inference.html">Prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="retraining.html">Retraining</a></li>
-<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">How to contribute?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citation.html">How to cite?</a></li>
 </ul>
 
@@ -189,28 +192,62 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <section id="cenfind">
-<h1>Cenfind<a class="headerlink" href="#cenfind" title="Link to this heading">#</a></h1>
+          <section id="cenfind-automatic-cell-scoring-for-centrioles">
+<h1>Cenfind: Automatic cell scoring for centrioles<a class="headerlink" href="#cenfind-automatic-cell-scoring-for-centrioles" title="Link to this heading">#</a></h1>
 <p><strong>Cenfind</strong> is a pipeline that automates centriole detection and their assignment to nucleus. It combines two trained network that will locate centrioles from centriole marker channel.</p>
+<img alt="_images/cenfind_workflow.png" src="_images/cenfind_workflow.png" />
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This project is under active development.</p>
 </div>
+<p>This documentation explains what is Cenfind, how to install it and apply it on your dataset.
+It also describes how to interpret and use the output of the pipeline.
+Then it showcases typical applications.
+For more advanced usage, it explains how to train a custom model if the dataset is too divergent.
+Finally, it explains the architecture of the API.</p>
 <p>Check out the <a class="reference internal" href="usage.html"><span class="doc">Usage</span></a> section for further information including how to <a class="reference internal" href="usage.html#installation"><span class="std std-ref">install</span></a> the pipeline.</p>
+<section id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#basic-usage">Basic usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage.html#cilia">Cilia</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#summary-statistics">Summary statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage.html#running-cenfind-score-in-the-background">Running <cite>cenfind score</cite> in the background</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#running-cenfind-score-in-the-background">Running <code class="docutils literal notranslate"><span class="pre">cenfind</span> <span class="pre">score</span></code> in the background</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="inference.html">Prediction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#inputs">Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#centriole-predictions-with-spotnet">Centriole predictions with SpotNet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#nuclei-predictions-with-stardist">Nuclei predictions with StarDist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#assignment-with-or-tools">Assignment with OR-Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="statistics.html">Statistics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="statistics.html#scores">Scores</a></li>
+<li class="toctree-l2"><a class="reference internal" href="statistics.html#linking-centrioles-to-nuclei">Linking centrioles to nuclei</a></li>
+<li class="toctree-l2"><a class="reference internal" href="statistics.html#score-distribution">Score distribution</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="retraining.html">Retraining</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="retraining.html#evaluating-the-quality-of-the-model-on-a-new-dataset">Evaluating the quality of the model on a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="retraining.html#detailed-training-procedure">Detailed training procedure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#data-module">Data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#detection-module">Detection module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#measurement-module">Measurement module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#structure-module">Structure module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#visualisation-module">Visualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#serialisation-module">Serialisation module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
@@ -224,28 +261,15 @@
 <li class="toctree-l2"><a class="reference internal" href="api.html#module-cenfind.core.visualisation">Visualisation</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="retraining.html">Retraining</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="retraining.html#evaluating-the-quality-of-the-model-on-a-new-dataset">Evaluating the quality of the model on a new dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="retraining.html#detailed-training-procedure">Detailed training procedure</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Prediction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#centriole-predictions-with-spotnet">Centriole predictions with SpotNet</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#nuclei-predictions-with-stardist">Nuclei predictions with StarDist</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#assignment-with-or-tools">Assignment with OR-Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">How to contribute?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#new-models">New models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribute.html#bugs">Bugs</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="citation.html">How to cite?</a></li>
 </ul>
 </div>
 </section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">#</a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
 </section>
 
         </article>
@@ -281,8 +305,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Cenfind: Automatic cell scoring for centrioles</a><ul>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

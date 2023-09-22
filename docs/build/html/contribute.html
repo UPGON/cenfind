@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Prediction" href="inference.html" /><link rel="prev" title="Cenfind: Automatic cell scoring for centrioles" href="index.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="How to cite?" href="citation.html" /><link rel="prev" title="API" href="api.html" />
 
     <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>Usage - CenFind 0.13.1 documentation</title>
+        <title>How to contribute? - CenFind 0.13.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
@@ -157,13 +157,13 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="inference.html">Prediction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="retraining.html">Retraining</a></li>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contribute.html">How to contribute?</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">How to contribute?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citation.html">How to cite?</a></li>
 </ul>
 
@@ -198,49 +198,13 @@
           </label>
         </div>
         <article role="main">
-          <section id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">#</a></h1>
-<section id="installation">
-<span id="id1"></span><h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
-<p>To use Cenfind CLI, just install it from pip</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">% </span>pip<span class="w"> </span>install<span class="w"> </span>cenfind
-</pre></div>
-</div>
+          <section id="how-to-contribute">
+<h1>How to contribute?<a class="headerlink" href="#how-to-contribute" title="Link to this heading">#</a></h1>
+<section id="new-models">
+<h2>New models<a class="headerlink" href="#new-models" title="Link to this heading">#</a></h2>
 </section>
-<section id="basic-usage">
-<h2>Basic usage<a class="headerlink" href="#basic-usage" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">cenfind</span></code> assumes a fixed folder structure.
-Specifically, it expects the max-projection to be under the <code class="docutils literal notranslate"><span class="pre">projections</span></code> folder.
-Each file in projections is a z-max projected field of view (referred to as field, in the following) containing 4
-channels (0, 1, 2, 3). The channel 0 usually contains the nuclei and the channels 1-3 contains centriolar markers.</p>
-<ol class="arabic simple">
-<li><p>Run <code class="docutils literal notranslate"><span class="pre">score</span></code> and indicate the path to the dataset directory, the path to the model (<a class="reference external" href="https://figshare.com/articles/software/Cenfind_model_weights/21724421">https://figshare.com/articles/software/Cenfind_model_weights/21724421</a>) followed by the index of the nuclei channel (-n) and the channels to score (-c).</p></li>
-</ol>
-<p>In the following example</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>cenfind<span class="w"> </span>score<span class="w"> </span>/path/to/dataset<span class="w"> </span>/path/to/model/<span class="w"> </span>-n<span class="w"> </span><span class="m">0</span><span class="w"> </span>-c<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="m">3</span>
-</pre></div>
-</div>
-<ol class="arabic simple" start="2">
-<li><p>Check that the predictions are satisfactory by looking at the folders <code class="docutils literal notranslate"><span class="pre">visualisations/</span></code> and <code class="docutils literal notranslate"><span class="pre">statistics/</span></code></p></li>
-</ol>
-<div class="versionadded">
-<p><span class="versionmodified added">New in version 0.13.0: </span>The outputs can be linked together depending on the applications. Detailed explanation are there <a class="reference internal" href="inference.html"><span class="doc">Prediction</span></a>.</p>
-</div>
-</section>
-<section id="summary-statistics">
-<h2>Summary statistics<a class="headerlink" href="#summary-statistics" title="Link to this heading">#</a></h2>
-<p>Besides the raw inference data (centriole position and intensity information, nuclei contours and geometry information), the statistics folder contains precomputed information about the distribution of centriole number (statistics.tsv), TSV files for pairs of assigned centrioles their nucleus if possible. If the cilia are analysed, a TSV file containing the fraction of ciliated cells is saved as well. You can read more about statistics here <a class="reference internal" href="statistics.html"><span class="doc">Statistics</span></a>.</p>
-</section>
-<section id="running-cenfind-score-in-the-background">
-<h2>Running <code class="docutils literal notranslate"><span class="pre">cenfind</span> <span class="pre">score</span></code> in the background<a class="headerlink" href="#running-cenfind-score-in-the-background" title="Link to this heading">#</a></h2>
-<p>When you exit the shell, running programs receive the SIGHUP, which aborts them. This is undesirable if you need to
-close your shell for some reason. Fortunately, you can make your program ignore this signal by prepending the program
-with the <code class="docutils literal notranslate"><span class="pre">nohup</span></code> command. Moreover, if you want to run your program in the background, you can append the ampersand <code class="docutils literal notranslate"><span class="pre">&amp;</span></code>.
-In practice, run <code class="docutils literal notranslate"><span class="pre">nohup</span> <span class="pre">cenfind</span> <span class="pre">score</span> <span class="pre">...</span> <span class="pre">&amp;</span></code> instead of <code class="docutils literal notranslate"><span class="pre">cenfind</span> <span class="pre">score</span> <span class="pre">...</span></code>.</p>
-<p>The output will be written to the file <code class="docutils literal notranslate"><span class="pre">nohup.out</span></code> and you can peek the progress by running <code class="docutils literal notranslate"><span class="pre">tail</span> <span class="pre">-F</span> <span class="pre">nohup.out</span></code>, the
-flag <code class="docutils literal notranslate"><span class="pre">-F</span></code> will refresh the screen as the file is being written. Enter Ctrl-C to exit the tail program.</p>
-<p>If you want to kill the program score, run  <code class="docutils literal notranslate"><span class="pre">jobs</span></code> and then run <code class="docutils literal notranslate"><span class="pre">kill</span> <span class="pre">&lt;jobid&gt;</span></code>. If you see no jobs, check the
-log <code class="docutils literal notranslate"><span class="pre">nohup.out</span></code>; it can be done or the program may have crashed, and you can check the error there.</p>
+<section id="bugs">
+<h2>Bugs<a class="headerlink" href="#bugs" title="Link to this heading">#</a></h2>
 </section>
 </section>
 
@@ -249,23 +213,23 @@ log <code class="docutils literal notranslate"><span class="pre">nohup.out</span
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="inference.html">
+          <a class="next-page" href="citation.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Prediction</div>
+                <div class="title">How to cite?</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="index.html">
+          <a class="prev-page" href="api.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Home</div>
+                <div class="title">API</div>
                 
               </div>
             </a>
@@ -299,11 +263,9 @@ log <code class="docutils literal notranslate"><span class="pre">nohup.out</span
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Usage</a><ul>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#basic-usage">Basic usage</a></li>
-<li><a class="reference internal" href="#summary-statistics">Summary statistics</a></li>
-<li><a class="reference internal" href="#running-cenfind-score-in-the-background">Running <code class="docutils literal notranslate"><span class="pre">cenfind</span> <span class="pre">score</span></code> in the background</a></li>
+<li><a class="reference internal" href="#">How to contribute?</a><ul>
+<li><a class="reference internal" href="#new-models">New models</a></li>
+<li><a class="reference internal" href="#bugs">Bugs</a></li>
 </ul>
 </li>
 </ul>

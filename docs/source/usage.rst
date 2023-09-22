@@ -23,6 +23,7 @@ channels (0, 1, 2, 3). The channel 0 usually contains the nuclei and the channel
 1. Run ``score`` and indicate the path to the dataset directory, the path to the model (https://figshare.com/articles/software/Cenfind_model_weights/21724421) followed by the index of the nuclei channel (-n) and the channels to score (-c).
 
 In the following example
+
 .. code-block:: shell
 
     cenfind score /path/to/dataset /path/to/model/ -n 0 -c 1 2 3
@@ -30,22 +31,16 @@ In the following example
 2. Check that the predictions are satisfactory by looking at the folders ``visualisations/`` and ``statistics/``
 
 .. versionadded:: 0.13.0
-    In version 0.13, we operated a shift in what cenfind-score outputs. Now, there are modular outputs that can be linked together depending on the applications. In the following section, each output is explained.
+    The outputs can be linked together depending on the applications. Detailed explanation are there :doc:`inference`.
 
-
-
-Cilia
------
-
-If specified by the user at the command line prompt, the cilia can be analysed in the given channel. In such cases, the folder called cilia will contain TSV files similar in structure to the one from centrioles.
 
 Summary statistics
 ------------------
 
-The statistics folder contains precomputed information about the distribution of centriole number (statistics.tsv), TSV files for pairs of assigned centrioles their nucleus if possible. If the cilia are analysed, a TSV file containing the fraction of ciliated cells is saved as well.
+Besides the raw inference data (centriole position and intensity information, nuclei contours and geometry information), the statistics folder contains precomputed information about the distribution of centriole number (statistics.tsv), TSV files for pairs of assigned centrioles their nucleus if possible. If the cilia are analysed, a TSV file containing the fraction of ciliated cells is saved as well. You can read more about statistics here :doc:`statistics`.
 
-Running `cenfind score` in the background
------------------------------------------
+Running ``cenfind score`` in the background
+-------------------------------------------
 
 When you exit the shell, running programs receive the SIGHUP, which aborts them. This is undesirable if you need to
 close your shell for some reason. Fortunately, you can make your program ignore this signal by prepending the program

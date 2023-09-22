@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="How to cite?" href="citation.html" /><link rel="prev" title="Retraining" href="retraining.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Retraining" href="retraining.html" /><link rel="prev" title="Prediction" href="inference.html" />
 
     <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>Prediction - CenFind 0.13.1 documentation</title>
+        <title>Statistics - CenFind 0.13.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
@@ -158,9 +158,12 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inference.html">Prediction</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="retraining.html">Retraining</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">How to contribute?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citation.html">How to cite?</a></li>
 </ul>
 
@@ -195,22 +198,19 @@
           </label>
         </div>
         <article role="main">
-          <section id="prediction">
-<h1>Prediction<a class="headerlink" href="#prediction" title="Link to this heading">#</a></h1>
-<section id="centriole-predictions-with-spotnet">
-<h2>Centriole predictions with SpotNet<a class="headerlink" href="#centriole-predictions-with-spotnet" title="Link to this heading">#</a></h2>
-<p>Cenfind saves a TSV file for each field of view with the detected centrioles and the channel used as well as the maximum intensity at the position.</p>
+          <section id="statistics">
+<h1>Statistics<a class="headerlink" href="#statistics" title="Link to this heading">#</a></h1>
+<section id="scores">
+<h2>Scores<a class="headerlink" href="#scores" title="Link to this heading">#</a></h2>
+<p>From the assignment matrix, the scores for each nucleus can be obtained.</p>
 </section>
-<section id="nuclei-predictions-with-stardist">
-<h2>Nuclei predictions with StarDist<a class="headerlink" href="#nuclei-predictions-with-stardist" title="Link to this heading">#</a></h2>
-<p>Cenfind saves a JSON file for each field of view with the detected nuclei.
-Each nucleus contour is saved as an entry in the JSON together with the channel index, the position (row, col) the summed intensity, the surface area, whether the nucleus is fully in the field of view.</p>
+<section id="linking-centrioles-to-nuclei">
+<h2>Linking centrioles to nuclei<a class="headerlink" href="#linking-centrioles-to-nuclei" title="Link to this heading">#</a></h2>
+<p>Conversely, one can obtain the identity of the nucleus by looking up the index of the nucleus.</p>
 </section>
-<section id="assignment-with-or-tools">
-<h2>Assignment with OR-Tools<a class="headerlink" href="#assignment-with-or-tools" title="Link to this heading">#</a></h2>
-<p>Combinatorial optimization</p>
-<p>Cenfind saves the assignment matrix in the assignment folder.</p>
-<p>This matrix is NxC where the row indices correspond to nucleus ID and the column indices to the centriole ID. It describes which centrioles are assigned to which nucleus. One can compute the number of centrioles by cell by summing over the columns and to retrieve the nucleus ID of every centriole assigned by looking up the row number of the entry for a given centriole.</p>
+<section id="score-distribution">
+<h2>Score distribution<a class="headerlink" href="#score-distribution" title="Link to this heading">#</a></h2>
+<p>The scores for each dataset can be summarised with a histogram.</p>
 </section>
 </section>
 
@@ -219,23 +219,23 @@ Each nucleus contour is saved as an entry in the JSON together with the channel 
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="citation.html">
+          <a class="next-page" href="retraining.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">How to cite?</div>
+                <div class="title">Retraining</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="retraining.html">
+          <a class="prev-page" href="inference.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Retraining</div>
+                <div class="title">Prediction</div>
                 
               </div>
             </a>
@@ -269,10 +269,10 @@ Each nucleus contour is saved as an entry in the JSON together with the channel 
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Prediction</a><ul>
-<li><a class="reference internal" href="#centriole-predictions-with-spotnet">Centriole predictions with SpotNet</a></li>
-<li><a class="reference internal" href="#nuclei-predictions-with-stardist">Nuclei predictions with StarDist</a></li>
-<li><a class="reference internal" href="#assignment-with-or-tools">Assignment with OR-Tools</a></li>
+<li><a class="reference internal" href="#">Statistics</a><ul>
+<li><a class="reference internal" href="#scores">Scores</a></li>
+<li><a class="reference internal" href="#linking-centrioles-to-nuclei">Linking centrioles to nuclei</a></li>
+<li><a class="reference internal" href="#score-distribution">Score distribution</a></li>
 </ul>
 </li>
 </ul>

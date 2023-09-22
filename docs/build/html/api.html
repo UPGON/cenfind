@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Retraining" href="retraining.html" /><link rel="prev" title="Usage" href="usage.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="How to contribute?" href="contribute.html" /><link rel="prev" title="Architecture" href="architecture.html" />
 
     <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>API - CenFind 0.13.1 documentation</title>
@@ -158,9 +158,12 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inference.html">Prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="retraining.html">Retraining</a></li>
-<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">How to contribute?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citation.html">How to cite?</a></li>
 </ul>
 
@@ -257,6 +260,25 @@ nuclei, centrioles, cilia and assignment.</p>
 <dd><p>Represent a centriole as a 2d point associated with a Field and a channel index.</p>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="cenfind.core.structures.Nucleus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cenfind.core.structures.</span></span><span class="sig-name descname"><span class="pre">Nucleus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contour</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cenfind.core.structures.Nucleus" title="Link to this definition">#</a></dt>
+<dd><p>Represent a Nucleus with a contour.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cenfind.core.structures.Nucleus.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cenfind.core.structures.Nucleus.as_dict" title="Link to this definition">#</a></dt>
+<dd><p>Convert a Contour as a dict object for serialisation.
+:return:</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cenfind.core.structures.Nucleus.full_in_field">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">full_in_field</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#cenfind.core.structures.Nucleus.full_in_field" title="Link to this definition">#</a></dt>
+<dd><p>Check if a contour is fully visible.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-cenfind.core.detectors">
 <span id="detectors"></span><h2>Detectors<a class="headerlink" href="#module-cenfind.core.detectors" title="Link to this heading">#</a></h2>
@@ -274,7 +296,7 @@ nuclei, centrioles, cilia and assignment.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cenfind.core.detectors.extract_nuclei">
-<span class="sig-prename descclassname"><span class="pre">cenfind.core.detectors.</span></span><span class="sig-name descname"><span class="pre">extract_nuclei</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StarDist2D</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Nucleus</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cenfind.core.detectors.extract_nuclei" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cenfind.core.detectors.</span></span><span class="sig-name descname"><span class="pre">extract_nuclei</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StarDist2D</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cenfind.core.structures.Nucleus" title="cenfind.core.structures.Nucleus"><span class="pre">Nucleus</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cenfind.core.detectors.extract_nuclei" title="Link to this definition">#</a></dt>
 <dd><p>Extract the nuclei from the field.
 :param field:
 :param channel:
@@ -306,7 +328,7 @@ is_full</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cenfind.core.measure.signed_distance">
-<span class="sig-prename descclassname"><span class="pre">cenfind.core.measure.</span></span><span class="sig-name descname"><span class="pre">signed_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">focus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cenfind.core.structures.Centriole" title="cenfind.core.structures.Centriole"><span class="pre">Centriole</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">nucleus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Nucleus</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cenfind.core.measure.signed_distance" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cenfind.core.measure.</span></span><span class="sig-name descname"><span class="pre">signed_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">focus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cenfind.core.structures.Centriole" title="cenfind.core.structures.Centriole"><span class="pre">Centriole</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">nucleus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cenfind.core.structures.Nucleus" title="cenfind.core.structures.Nucleus"><span class="pre">Nucleus</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cenfind.core.measure.signed_distance" title="Link to this definition">#</a></dt>
 <dd><p>Wrapper for the opencv PolygonTest</p>
 </dd></dl>
 
@@ -351,7 +373,7 @@ is_full</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cenfind.core.visualisation.draw_contour">
-<span class="sig-prename descclassname"><span class="pre">cenfind.core.visualisation.</span></span><span class="sig-name descname"><span class="pre">draw_contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nucleus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Nucleus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">255,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cenfind.core.visualisation.draw_contour" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cenfind.core.visualisation.</span></span><span class="sig-name descname"><span class="pre">draw_contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nucleus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cenfind.core.structures.Nucleus" title="cenfind.core.structures.Nucleus"><span class="pre">Nucleus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">255,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cenfind.core.visualisation.draw_contour" title="Link to this definition">#</a></dt>
 <dd><p>Draw a contour from a Nucleus object on an image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -423,7 +445,7 @@ is_full</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cenfind.core.visualisation.visualisation">
-<span class="sig-prename descclassname"><span class="pre">cenfind.core.visualisation.</span></span><span class="sig-name descname"><span class="pre">visualisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centrioles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cenfind.core.structures.Centriole" title="cenfind.core.structures.Centriole"><span class="pre">Centriole</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nuclei</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Nucleus</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cenfind.core.structures.Centriole" title="cenfind.core.structures.Centriole"><span class="pre">Centriole</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Nucleus</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#cenfind.core.visualisation.visualisation" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cenfind.core.visualisation.</span></span><span class="sig-name descname"><span class="pre">visualisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centrioles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cenfind.core.structures.Centriole" title="cenfind.core.structures.Centriole"><span class="pre">Centriole</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nuclei</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cenfind.core.structures.Nucleus" title="cenfind.core.structures.Nucleus"><span class="pre">Nucleus</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cenfind.core.structures.Centriole" title="cenfind.core.structures.Centriole"><span class="pre">Centriole</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#cenfind.core.structures.Nucleus" title="cenfind.core.structures.Nucleus"><span class="pre">Nucleus</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#cenfind.core.visualisation.visualisation" title="Link to this definition">#</a></dt>
 <dd><p>Build a visualisation image to assess the quality of the result.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -448,23 +470,23 @@ is_full</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="retraining.html">
+          <a class="next-page" href="contribute.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Retraining</div>
+                <div class="title">How to contribute?</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="usage.html">
+          <a class="prev-page" href="architecture.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Usage</div>
+                <div class="title">Architecture</div>
                 
               </div>
             </a>
@@ -502,6 +524,11 @@ is_full</p>
 <li><a class="reference internal" href="#data">Data</a></li>
 <li><a class="reference internal" href="#structures">Structures</a><ul>
 <li><a class="reference internal" href="#cenfind.core.structures.Centriole"><code class="docutils literal notranslate"><span class="pre">Centriole</span></code></a></li>
+<li><a class="reference internal" href="#cenfind.core.structures.Nucleus"><code class="docutils literal notranslate"><span class="pre">Nucleus</span></code></a><ul>
+<li><a class="reference internal" href="#cenfind.core.structures.Nucleus.as_dict"><code class="docutils literal notranslate"><span class="pre">Nucleus.as_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cenfind.core.structures.Nucleus.full_in_field"><code class="docutils literal notranslate"><span class="pre">Nucleus.full_in_field</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-cenfind.core.detectors">Detectors</a><ul>
