@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Cenfind: Automatic cell scoring for centrioles
-==============================================
+Automatic cell scoring for centrioles
+=====================================
 
 **Cenfind** is a pipeline that automates centriole detection and their assignment to nucleus. It combines two trained network that will locate centrioles from centriole marker channel.
 

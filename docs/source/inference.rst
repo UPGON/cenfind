@@ -5,13 +5,12 @@ Prediction
 Inputs
 ------
 
-The input data should be TIF images with a pixel size of about 100 nm. This constraint is due to the canonical model used in SpotNet and in StarDist. The data consists of a set of field of view containing at least one nucleus channel and at least one centriole marker channel. The field of view should be projected along the depth (z-axis) and saved under a directory called projections/ under the dataset directory. The file name serves as the key for the rest of the analysis.
+The input data should be TIF images with a pixel size of about 100 nm. This constraint is due to the canonical model used in SpotNet and in StarDist. The data consists of a set of fields of view containing at least one nucleus channel and at least one centriole marker channel. The field of view should be max-projected along the depth (z-axis) and saved under a directory called projections/ under the dataset directory. The file name serves as the key for the rest of the analysis.
 
 Centriole predictions with SpotNet
 ----------------------------------
 
-Cenfind uses in the background the multi-scale U-Net neural network SpotNet. This accepts a single channel max projection and infer the location of all centrioles present in the field of view.
-The position (row-major) of each detected centrioles is saved along with the channel used and the intensity of the signal at that position.
+Cenfind uses in the background the multi-scale U-Net neural network SpotNet, which accepts a single channel max projection and predict the position of the centrioles in the field of view.
 Cenfind saves a TSV file for each field of view with the position of the detected centrioles and the channel used as well as the maximum intensity at the position.
 
 .. csv-table:: Snippet of a centriole file
@@ -74,12 +73,14 @@ Each nucleus contour is saved as an entry in the JSON together with the channel 
 Assignment with OR-Tools
 ------------------------
 The detected centrioles are then assigned to the nearest nucleus provided that they lie within the set vicinity (default: 50 px).
-It computes an assignment table using the linear solver from the Google OR-Tools package, which extend the linear assignment to multiple jobs per agent.
-Cenfind saves the assignment matrix in the directory assignment.
+The assigner computes an assignment table using the linear solver from the Google OR-Tools package, which extend the linear assignment to multiple jobs per agent.
+Cenfind then saves this assignment matrix in the directory assignment.
 
 Below is an example of a full assignment matrix for one field of view:
 
 .. include:: assignment.txt
     :literal:
 
-This NxC matrix contains row indices for nucleus ID and column indices for the centriole indices. It describes which centrioles are assigned to which nucleus. One can compute the number of centrioles by cell by summing over the columns and to retrieve the nucleus ID of every centriole assigned by looking up the row number of the entry for a given centriole.
+This NxC matrix contains row indices for nucleus ID and column indices for the centriole indices.
+It describes which centrioles are assigned to which nucleus.
+One can compute the number of centrioles by cell by summing over the columns and then by looking up the row number of the entry for a given centriole.

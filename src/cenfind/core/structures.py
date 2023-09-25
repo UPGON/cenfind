@@ -13,21 +13,48 @@ logger = get_logger(__name__)
 @define
 class Centriole:
     """
-    Represent a centriole as a 2d point associated with a Field and a channel index.
+    Represents a centriole as a 2d point associated with a Field and a channel index.
+
+    The parent attributes is used to ensure that neighbouring centrioles are assigned to the
+    same nucleus.
+
+    Attributes:
+        field: Field used for centriole detection.
+        channel: Channel used for centriole detection.
+        centre: Coordinates (row major) of the detected centriole.
+        index: Index of centriole.
+        label: String label
+        parent: Parent centriole used for tying neighbouring centrioles into a centrosome.
     """
     field: Field
     channel: int
     centre: Tuple[int, int]
     index: int = 0
     label: str = ""
-    parent: 'Centriole' = None
+    parent: "Centriole" = None
 
     @property
     def centre_xy(self) -> Tuple[int, int]:
+        """
+        Represent a row-major point as an XY point.
+        Returns:
+
+        """
         y, x = self.centre
+
         return x, y
 
     def intensity(self, image: np.ndarray, k: int = 0, channel: int = None) -> int:
+        """
+        Computes the intensity of the focus within the k-pixel neighbourhood on the image provided.
+        Args:
+            image: The image for signal extraction.
+            k: Pixel (radius) neighbourhood for signal extraction
+            channel: Channel to use for signal extraction.
+
+        Returns:
+
+        """
         r, c = self.centre
         max_r, max_c = image.shape[-2:]
 
@@ -38,8 +65,10 @@ class Centriole:
 
         if image.ndim < 3:
             return int(np.sum(image[r_start:r_stop, c_start:c_stop]))
+
         if channel is None:
-            raise ValueError('Channel must be supplied when image has 3 dimensions')
+            raise ValueError("Channel must be supplied when image has 3 dimensions")
+
         return int(np.sum(image[channel, r_start:r_stop, c_start:c_stop]))
 
     def as_dict(self) -> dict:
@@ -54,7 +83,14 @@ class Centriole:
 @define
 class Nucleus:
     """
-    Represent a Nucleus with a contour.
+    Represents a Nucleus with a contour.
+
+    Attributes:
+        field: Field of view
+        channel: Channel used for nucleus segmentation
+        contour: Coordinates of the Nucleus contour.
+        index: Index of the nucleus.
+        label: Label of the Nucleus
     """
     field: Field
     channel: int
@@ -64,22 +100,33 @@ class Nucleus:
 
     @property
     def centre(self) -> Tuple[int, int]:
+        """
+        Centroid of the Nucleus as row-major.
+        """
         moments = cv2.moments(self.contour)
         centre_x = int(moments["m10"] / (moments["m00"] + 1e-5))
         centre_y = int(moments["m01"] / (moments["m00"] + 1e-5))
+
         return int(centre_y), int(centre_x)
 
     @property
     def centre_xy(self) -> Tuple[int, int]:
+        """
+        XY representation of the centre of the contour
+        Returns:
+
+        """
         y, x = self.centre
+
         return int(x), int(y)
 
     @property
     def intensity(self) -> int:
         _data = self.field.data[self.channel, ...]
         mask = np.zeros_like(_data)
-        cv2.drawContours(mask, [self.contour], 0, 255, -1)
+        cv2.drawContours(mask, [self.contour], 0, (255,), -1)
         masked = cv2.bitwise_and(_data, mask)
+
         return int(np.sum(masked))
 
     @property
@@ -89,7 +136,9 @@ class Nucleus:
     @property
     def full_in_field(self) -> bool:
         """
-        Check if a contour is fully visible.
+        Checks if a contour is fully visible.
+
+        Specifically, it checks whether its centre is within the 5-% margin of the image.
 
         """
         h, w = self.field.data.shape[-2:]
@@ -97,14 +146,18 @@ class Nucleus:
         pad_lower = int(fraction * h)
         pad_upper = h - pad_lower
         centroid = self.centre
+
         if all([pad_lower < c < pad_upper for c in centroid]):
             return True
+
         return False
 
     def as_dict(self) -> dict:
         """
-        Convert a Contour as a dict object for serialisation.
-        :return:
+        Converts a Contour into a dictionary for serialisation.
+
+        Returns: Dictionary with keys: channel, pos_r, pos_c, intensity, surface area, is_nucleus_full, contour.
+
         """
 
         result = {
@@ -116,4 +169,5 @@ class Nucleus:
             "is_nucleus_full": self.full_in_field,
             "contour": self.contour.tolist()
         }
+
         return result

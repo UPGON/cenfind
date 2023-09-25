@@ -4,6 +4,8 @@ API
 Data
 ----
 
+Manage the two level of the file system, that is, the Dataset class to set up the subdirectories and the Field class that loads the image and specify how to operate on it.
+
 .. automodule:: cenfind.core.data
     :members:
     :noindex:
@@ -11,7 +13,7 @@ Data
 Structures
 ----------
 
-These objects are representation of the different organelles to be detected.
+These objects represent the different organelles to be detected.
 
 .. automodule:: cenfind.core.structures
     :members:
@@ -19,17 +21,14 @@ These objects are representation of the different organelles to be detected.
 Detectors
 ---------
 
+Top level functions to detect specific organelles.
+
 .. automodule:: cenfind.core.detectors
-    :members:
-
-Logging
--------
-
-.. automodule:: cenfind.core.log
     :members:
 
 Measure
 -------
+Measurement modules to analyse and combine the different objects detected.
 
 .. automodule:: cenfind.core.measure
     :members:
@@ -37,17 +36,23 @@ Measure
 Serialisers
 -----------
 
+Top level functions to write results to the file system.
+
 .. automodule:: cenfind.core.serialise
     :members:
 
 Statistics
 ----------
 
+Top level functions to derive summary statistics from the results.
+
 .. automodule:: cenfind.core.statistics
     :members:
 
 Visualisation
 -------------
+
+Top level functions to draw detected objects on a variety of background images.
 
 .. automodule:: cenfind.core.visualisation
     :members:

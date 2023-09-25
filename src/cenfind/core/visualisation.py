@@ -14,44 +14,45 @@ logger = get_logger(__name__)
 
 def resize_image(image: np.ndarray, factor: int = 256) -> np.ndarray:
     """
-    Resize the image for nuclei segmentation by StarDist
+    Resizes the image for nuclei segmentation by StarDist
 
-    :param image: a single channel image (H x W)
-    :param factor: the target dimension
+    Args:
+        image: a single channel image (H x W)
+        factor: the target dimension
 
-    :return the image resized
+    Returns: Resized image
+
     """
+
     height, width = image.shape
     shrinkage_factor = int(height // factor)
     height_scaled = int(height // shrinkage_factor)
     width_scaled = int(width // shrinkage_factor)
-    data_resized = cv2.resize(
-        image,
-        dsize=(height_scaled, width_scaled),
-        fx=1,
-        fy=1,
-        interpolation=cv2.INTER_NEAREST,
-    )
+    data_resized = cv2.resize(image,
+                              dsize=(height_scaled, width_scaled),
+                              fx=1, fy=1, interpolation=cv2.INTER_NEAREST,
+                              )
+
     return data_resized
 
 
 def draw_point(image: np.ndarray, point: Centriole,
-               color: tuple[int, int, int] = (0, 255, 0),
-               annotation: bool = True,
-               marker_type: int = cv2.MARKER_SQUARE,
-               marker_size: int = 8,
+               color: tuple[int, int, int] = (0, 255, 0), annotation: bool = True,
+               marker_type: int = cv2.MARKER_SQUARE, marker_size: int = 8,
                ):
     """
-    Draw a Point like object.
+    Draws a point object on an image.
 
-    :param image:
-    :param point:
-    :param color:
-    :param annotation:
-    :param marker_type:
-    :param marker_size:
+    Args:
+        image: Image to draw the point on.
+        point: The point to draw
+        color: The color to use (default: Green)
+        annotation: whether to add text.
+        marker_type: Marker type for point (default: square)
+        marker_size: Marker size (default: 8 px)
 
-    :return:
+    Returns: Annotated image.
+
     """
     r, c = point.centre
     offset_col = int(0.01 * image.shape[1])
@@ -74,32 +75,40 @@ def draw_point(image: np.ndarray, point: Centriole,
 
 def draw_foci(image: np.ndarray, foci: list[Centriole], radius=2) -> np.ndarray:
     """
-    Draw foci as disks of given radius.
+    Draws foci as disks of given radius.
 
-    :param image: the channel for the dimension extraction
-    :param foci: the list of foci
-    :param radius: the radius of foci
+    Used to group centrioles into centrosomes.
 
-    :return the mask with foci
+    Args:
+        image: Image to draw foci on
+        foci: List of centrioles to draw.
+        radius: Radius of the centriole as disk
+
+    Returns: The mask image
+
     """
+
     mask = np.zeros(image.shape, dtype="uint8")
     for f in foci:
         rr, cc = disk(f.centre, radius, shape=image.shape[-2:])
         mask[rr, cc] = 250
+
     return mask
 
 
 def draw_contour(image: np.ndarray, nucleus: Nucleus,
                  color: tuple[int, int, int] = (0, 255, 0), annotation: bool = True, thickness: int = 2):
     """
-    Draw a contour from a Nucleus object on an image.
+    Draws a contour from a Nucleus object on an image.
 
-    :param image:
-    :param nucleus:
-    :param color:
-    :param annotation:
-    :param thickness:
-    :return:
+    Args:
+        image: Image to draw on the contour
+        nucleus: Contour to draw
+        color: colour as tuple
+        annotation: if True, add text to object
+        thickness: Thickness of the contour line
+
+    Returns: the masked image.
 
     """
     r, c = nucleus.centre
@@ -120,32 +129,47 @@ def draw_contour(image: np.ndarray, nucleus: Nucleus,
     return image
 
 
-def _color_channel(data: np.ndarray, color: tuple[int, int, int], out_range: str) -> np.ndarray:
+def _color_channel(image: np.ndarray, color: tuple[int, int, int], out_range: str) -> np.ndarray:
     """
-    Create a coloured version of a channel image
+    Creates a coloured version of a channel image
+
+    Args:
+        image: Image to convert
+        color: Color to use (B, G, R)
+        out_range: Depth, e.g., 'uint8'
+
+    Returns:
+
+    """
+    """
 
     :param data: the data to use
     :param color: the color as a tuple (B, G, R)
     :param out_range:
     :return:
     """
-    data = rescale_intensity(data, out_range=out_range)
+    data = rescale_intensity(image, out_range=out_range)
     b = np.multiply(data, color[0], casting="unsafe")
     g = np.multiply(data, color[1], casting="unsafe")
     r = np.multiply(data, color[2], casting="unsafe")
     res = cv2.merge([b, g, r])
+
     return res
 
 
 def create_vignette(field: Field, marker_index: int, nuclei_index: int) -> np.ndarray:
     """
-    Normalise all markers and represent them as blue and highlight the channel in green.
+    Normalises all markers and represent them as blue and highlight the channel in green.
 
-    :param field:
-    :param nuclei_index:
-    :param marker_index:
-    :return:
+    Args:
+        field: Field to use
+        marker_index: Channel for th marker
+        nuclei_index: Channel
+
+    Returns:
+
     """
+
     layer_nuclei = field.data[nuclei_index, ...]
     layer_marker = field.data[marker_index, ...]
 
@@ -172,13 +196,16 @@ def visualisation(background: np.ndarray,
                   assigned: List[Tuple[Centriole, Nucleus]] = None,
                   ) -> np.ndarray:
     """
-    Build a visualisation image to assess the quality of the result.
+    Builds a visualisation image to assess the quality of the result.
 
-    :param background:
-    :param centrioles:
-    :param nuclei:
-    :param assigned:
-    :return:
+    Args:
+        background: The image to draw on.
+        centrioles: Centrioles to be drawn.
+        nuclei: Nuclei to be drawn.
+        assigned: Arrows to draw between centrioles and nuclei.
+
+    Returns: Annotated image
+
     """
     for centriole in centrioles:
         background = draw_point(background, centriole, annotation=False)

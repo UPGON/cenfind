@@ -15,22 +15,25 @@ def path_exists(instance, attribute, value):
 
 
 def has_projections(instance, attribute, value):
-    projections = value / 'projections'
+    projections = value / "projections"
     if not projections.is_dir():
         raise FileNotFoundError(f"Invalid path for Projections: ({value}).")
 
 
 def is_tif(instance, attribute, value):
-    if value.suffix != '.tif':
-        raise ValueError(f'Not a tif file ({value})')
+    if value.suffix != ".tif":
+        raise ValueError(f"Not a tif file ({value})")
 
 
 @define
 class Field:
     """
-    Represent a Field and is responsible to return its name and to load the referenced image.
+    Represents a Field
 
-    :param: path
+    It is responsible for returning the field's name and to load the corresponding image.
+
+    Attributes:
+        path: path to the image file
     """
 
     path: Path = field(validator=[validators.instance_of(Path), path_exists, is_tif])
@@ -38,14 +41,14 @@ class Field:
     @property
     def name(self) -> str:
         """
-        Return the field name as a string without the extension
+        Extracts the field name as a string without the extension.
         """
         return self.path.stem
 
     @property
     def data(self) -> np.ndarray:
         """
-        Load the data at path and return it as a numpy array using `tifffile.imread`
+        Loads data from path as a numpy array using `tifffile.imread`.
         """
         return tf.imread(str(self.path))
 
@@ -53,11 +56,12 @@ class Field:
 @define
 class Dataset:
     """
-    Represent a Dataset folder.
+    Represents a Dataset folder.
 
-    It is responsible for setting the subdirectories.
-    It also provides a setup method to create the necessary subdirectories.
+    It iterates over the fields and provides a setup method to create the necessary subdirectories.
 
+    Attributes:
+       path: Path to the dataset folder.
     """
     path: Path = field(validator=[
         validators.instance_of(Path),
@@ -66,42 +70,41 @@ class Dataset:
 
     @property
     def logs(self):
-        return self.path / 'logs'
+        return self.path / "logs"
 
     @property
     def predictions(self):
-        return self.path / 'predictions'
+        return self.path / "predictions"
 
     @property
     def visualisation(self):
-        return self.path / 'visualisation'
+        return self.path / "visualisation"
 
     @property
     def statistics(self):
-        return self.path / 'statistics'
+        return self.path / "statistics"
 
     @property
     def nuclei(self):
-        return self.predictions / 'nuclei'
+        return self.predictions / "nuclei"
 
     @property
     def centrioles(self):
-        return self.predictions / 'centrioles'
+        return self.predictions / "centrioles"
 
     @property
     def cilia(self):
-        return self.predictions / 'cilia'
+        return self.predictions / "cilia"
 
     @property
     def assignment(self):
-        return self.predictions / 'assignment'
+        return self.predictions / "assignment"
 
     def setup(self) -> None:
         """
-        Create the subdirectories inside the Dataset path.
-        It does not overwrite existing subdirectories.
-        For reference, it creates visualisation, statistics, predictions,
-        nuclei, centrioles, cilia and assignment.
+        Creates the subdirectories inside the Dataset path if not existing.
+        The directories visualisation, statistics, predictions,
+        nuclei, centrioles, cilia and assignment are created.
         """
 
         self.visualisation.mkdir(exist_ok=True)
@@ -115,16 +118,16 @@ class Dataset:
     @property
     def fields(self) -> List[Field]:
         """
-        Return the list of Fields found in projections.
-        It filters file names that end with `.tif` and that do not start with a period.
-        It raises a ValueError if there is no file in the directory.
+        Collects all Fields found in `projections` into a list and raises a ValueError if no TIF file.
         """
-        path = self.path / 'projections'
+        path = self.path / "projections"
 
-        result = [Field(path) for path in path.iterdir() if
-                  (path.suffix == '.tif') and not path.name.startswith('.')]
+        result = []
+        for path in path.iterdir():
+            if (path.suffix == '.tif') and not path.name.startswith("."):
+                result.append(Field(path))
 
         if len(result) == 0:
-            raise ValueError(f'No field found in {path}')
+            raise ValueError(f"No field found in {path}")
 
         return result

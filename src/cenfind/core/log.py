@@ -19,7 +19,7 @@ def get_null_handler():
 
 
 def get_file_handler(file):
-    file_handler = TimedRotatingFileHandler(file, when='midnight')
+    file_handler = TimedRotatingFileHandler(file, when="midnight")
     file_handler.setFormatter(FORMATTER)
     return file_handler
 

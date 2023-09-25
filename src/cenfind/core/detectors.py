@@ -26,21 +26,22 @@ np.random.seed(1)
 tf.random.set_seed(2)
 tf.get_logger().setLevel(logging.ERROR)
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 logger = get_logger(__name__)
 
 
-def extract_foci(field: Field, channel: int, foci_model_file: Path, prob_threshold=0.5, min_distance=2, ) -> List[
-    Centriole]:
+def extract_foci(field: Field, channel: int, foci_model_file: Path,
+                 prob_threshold=0.5, min_distance=2, ) -> List[Centriole]:
     """
-    Detect centrioles in Field as row, col, row major
-    :param field:
-    :param foci_model_file:
-    :param channel:
-    :param prob_threshold:
-    :param min_distance:
-    :return:
+    Detects centrioles in Field as (row, col) position.
+
+    :param field: Field of view to search for centrioles.
+    :param foci_model_file: SpotNet trained model file.
+    :param channel: Channel to use in the field.
+    :param prob_threshold: Probability threshold used for the cutoff (default: 0.5).
+    :param min_distance: Minimal distance between two centrioles (default: 2 pixels).
+    :return: List of centriole objects.
     """
     logger.info("Processing %s / %d" % (field.name, channel))
     data = field.data[channel, ...]
@@ -60,10 +61,9 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path, prob_thresho
             data, prob_thresh=prob_threshold, min_distance=min_distance, verbose=False
         )
 
-    foci = [
-        Centriole(field=field, channel=channel, centre=(r, c), index=f_id, label='Centriole') for f_id, (r, c) in
-        enumerate(points_preds.tolist())
-    ]
+    foci = []
+    for f_id, (r, c) in enumerate(points_preds.tolist()):
+        foci.append(Centriole(field=field, channel=channel, centre=(r, c), index=f_id, label="Centriole"))
 
     centrosomes_mask = np.zeros(data.shape, dtype="uint8")
     centrosomes_mask = draw_foci(centrosomes_mask, foci, radius=min_distance * 2)
@@ -85,12 +85,13 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path, prob_thresho
 
 def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List[Nucleus]:
     """
-    Extract the nuclei from the field.
-    :param field:
-    :param channel:
-    :param model:
+    Extracts the nuclei from the field.
 
-    :return: List of Contours.
+    :param field: Field of view to search for nuclei.
+    :param channel: Channel to use in the field.
+    :param model: Model instance of StarDist.
+
+    :return: List of Nuclei.
 
     """
     if model is None:
@@ -130,10 +131,20 @@ def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List
 
 
 def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -> List[Centriole]:
-    data = field.data[channel, ...]
-    resc = rescale_intensity(data, out_range='uint8')
+    """
+    Extracts the cilia using the Hessian.
 
-    h_elems = hessian_matrix(resc, sigma=sigma, order='rc')
+    :param field: Field of view to search for nuclei.
+    :param channel: Channel to use in the field.
+    :param sigma: Scale for the blob detection.
+    :param eccentricity: Sphericity of the blobs to be detected.
+    :param area: Filter area to use.
+    :return: List of cilia Point objects.
+    """
+    data = field.data[channel, ...]
+    resc = rescale_intensity(data, out_range="uint8")
+
+    h_elems = hessian_matrix(resc, sigma=sigma, order="rc")
     _, minima_ridges = hessian_matrix_eigvals(h_elems)
     threshold = threshold_otsu(minima_ridges)
 
@@ -148,6 +159,6 @@ def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -
     for prop in props:
         if prop.eccentricity > eccentricity and prop.area > area:
             r, c = prop.centroid
-            result.append(Centriole(field=field, channel=channel, centre=(int(r), int(c)), label='Cilium'))
+            result.append(Centriole(field=field, channel=channel, centre=(int(r), int(c)), label="Cilium"))
 
     return result

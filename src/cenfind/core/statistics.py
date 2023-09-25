@@ -12,13 +12,15 @@ logger = get_logger(__name__)
 
 def frequency(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Count the absolute frequency of number of centriole per well or per field
-    :param df: Df containing the number of centriole per nuclei
-    :return: Df with absolute frequencies.
+    Counts the absolute frequency of number of centriole per field.
 
-    Parameters
-    ----------
-    scored
+    The bins are 0, 1, 2, 3, 4, +.
+
+    Args:
+        df: Dataframe with the number of centriole per nuclei
+
+    Returns: Dataframe with absolute frequencies
+
     """
     cuts = [0, 1, 2, 3, 4, 5, np.inf]
     labels = "0 1 2 3 4 +".split(" ")
@@ -36,9 +38,21 @@ def frequency(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def proportion_cilia(field: Field, cilia: List[Centriole], nuclei: List[Nucleus], channel_cilia: int) -> pd.DataFrame:
+    """
+    Computes the proportion of ciliated cells in one field of view.
+
+    Args:
+        field: The field of view analysed.
+        cilia: List of detected cilia.
+        nuclei: List of detected nuclei.
+        channel_cilia: Channel used for cilia detection.
+
+    Returns: Dataframe with field | channel cilia | n_nuclei | n_cilia | p_ciliated columns.
+
+    """
     proportions = []
     ciliated = len(cilia) / len(nuclei)
-    proportions.append({'field': field.name,
+    proportions.append({"field": field.name,
                         "channel_cilia": channel_cilia,
                         "n_nuclei": len(nuclei),
                         "n_cilia": len(cilia),

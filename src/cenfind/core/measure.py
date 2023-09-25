@@ -14,21 +14,21 @@ logger = get_logger(__name__)
 
 def flag(is_full: bool) -> tuple:
     """
-    Helper function to change colour of contour.
-    Parameters
-    ----------
-    is_full
+    Sets the colour of contour depending on whether it is full (green) or not (red).
 
-    Returns
-    -------
-
+    :param is_full:
+    :return: Whether inside or outside
     """
     return (0, 255, 0) if is_full else (0, 0, 255)
 
 
 def signed_distance(focus: Centriole, nucleus: Nucleus) -> float:
     """
-    Wrapper for the opencv PolygonTest
+    Wrapper for the opencv PolygonTest.
+
+    :param focus: The point to test.
+    :param nucleus: Reference nucleus.
+    :return: Distance in pixel.
     """
 
     result = cv2.pointPolygonTest(nucleus.contour, focus.centre_xy, measureDist=True)
@@ -37,12 +37,31 @@ def signed_distance(focus: Centriole, nucleus: Nucleus) -> float:
 
 @define
 class Assigner:
+    """
+    Computes, saves and manipulates the assignment matrix.
+
+    Attributes:
+        centrioles: List of centrioles.
+        nuclei: List of nuclei.
+        vicinity: Threshold distance to assign centrioles to nuclei.
+        assignment: Numpy matrix that is filled by self._compute.
+    """
+
     centrioles: List[Centriole]
     nuclei: List[Nucleus]
     vicinity: float = 0
     assignment: np.ndarray = None
 
     def _compute(self, vicinity: float = 0) -> np.ndarray:
+        """
+        Computes the assignment using the Google OR-Tool solver
+        for the linear assignment with multiple tasks.
+        Args:
+            vicinity: Threshold distance to assign centrioles to nuclei.
+
+        Returns: Assignment matrix (Nuclei x Centrioles)
+
+        """
         num_nuclei = len(self.nuclei)
         num_centrioles = len(self.centrioles)
 
@@ -82,6 +101,16 @@ class Assigner:
         return result
 
     def score_nuclei(self, field_name: str, channel: int) -> pd.DataFrame:
+        """
+        Scores nuclei for centrioles by summing over the columns of the assignment matrix.
+
+        Args:
+            field_name: Field name used for the result table
+            channel: Channel used for the result table.
+
+        Returns: DataFrame with the field name and the channel used as index and the nucleus id, the score.
+
+        """
         if self.assignment is None:
             self.assignment = self._compute(self.vicinity)
 
@@ -89,13 +118,21 @@ class Assigner:
         result = list(zip(self.nuclei, result))
 
         result = pd.DataFrame(list((n.index, s) for n, s in result))
-        result.columns = ['nucleus', 'score']
+        result.columns = ["nucleus", "score"]
         result["field"] = field_name
         result["channel"] = channel
         result = result.set_index(["field", "channel"])
         return result
 
     def assign_centrioles(self) -> List[Tuple[int, int]]:
+        """
+        Assigns centrioles by looking up the nucleus id of the assignment matrix.
+
+        If the centriole is not assigned, it is flagged with -1.
+
+        Returns: List of tuples (Centriole ID, Nucleus ID)
+
+        """
         if self.assignment is None:
             self.assignment = self._compute(self.vicinity)
 
