@@ -23,6 +23,9 @@ tests/dataset_test/visualisations
 !models/archives/master_20221123/
 /src/centrosome_analysis/
 
+docs/build
+docs/source/generated
+
 *.idlk
 *.pt
 *.ckpt

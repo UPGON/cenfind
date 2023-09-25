@@ -1,6 +1,7 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'src', 'cenfind')))
+sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
+
 
 project = 'CenFind'
 copyright = '2023, Leo Burgy'

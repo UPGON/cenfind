@@ -32,5 +32,6 @@ Contents
    statistics
    retraining
    architecture
+   api
    contribute
    citation
