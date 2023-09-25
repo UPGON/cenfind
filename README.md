@@ -1,4 +1,4 @@
-![alt text](logos/cenfind_logo_full_dark.png)
+![alt text](figures/logos/cenfind_logo_full_dark.png)
 
 # CenFind
 
