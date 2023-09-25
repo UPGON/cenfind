@@ -17,7 +17,7 @@ extensions = [
 ]
 
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = ['generated/*']
 
 html_theme = 'furo'
 html_static_path = []
