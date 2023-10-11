@@ -23,6 +23,7 @@ ortools = "9.4.1874"
 csbdeep = "^0.7.3"
 tensorflow = { version = "2.9.0", markers = "sys_platform == 'win32' or sys_platform == 'linux'" }
 tensorflow-macos = { version = "2.9.0", platform = "darwin" }
+tensorflow-metal = { version = "0.5.0", platform = "darwin" }
 numba = "0.56.4"
 llvmlite = "0.39.1"
 protobuf = "3.19.6"
