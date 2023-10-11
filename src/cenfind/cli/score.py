@@ -117,7 +117,8 @@ def run(args):
     for (field, channel), data in results.items():
         save_points(dataset.centrioles / f"{field}_C{channel}.tsv", data['centrioles'])
         save_assigned(dataset.assignment / f"{field}_C{channel}_matrix.txt", data['assignment'])
-        save_assigned_centrioles(dataset.statistics / f"{field}_C{channel}_assigned.tsv", data['centrioles_nuclei'])
+        if data['centrioles_nuclei']:
+            save_assigned_centrioles(dataset.statistics / f"{field}_C{channel}_assigned.tsv", data['centrioles_nuclei'])
         save_visualisation(dataset.visualisation / f"{field}_C{channel}.png", data['visualisation'])
 
     scores_all = pd.concat([v['scores'] for v in results.values()])
@@ -130,11 +131,11 @@ def run(args):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(dataset=Path('data/dataset_test'),
+    args = argparse.Namespace(dataset=Path('data/cilia'),
                               model=Path('models/master'),
                               channel_nuclei=0,
-                              channel_centrioles=[1, 2],
-                              channel_cilia=3,
+                              channel_centrioles=[1],
+                              channel_cilia=2,
                               vicinity=50,
                               cpu=False,
                               )

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 
 import cv2
 import numpy as np
@@ -193,7 +193,7 @@ def create_vignette(field: Field, marker_index: int, nuclei_index: int) -> np.nd
 def visualisation(background: np.ndarray,
                   centrioles: List[Centriole],
                   nuclei: List[Nucleus],
-                  assigned: List[Tuple[Centriole, Nucleus]] = None,
+                  assigned: np.ndarray = None,
                   ) -> np.ndarray:
     """
     Builds a visualisation image to assess the quality of the result.
@@ -209,9 +209,14 @@ def visualisation(background: np.ndarray,
     """
     for centriole in centrioles:
         background = draw_point(background, centriole, annotation=False)
+
     for nucleus in nuclei:
         background = draw_contour(background, nucleus, annotation=False)
+
     if assigned is None:
+        return background
+
+    if not centrioles or not nuclei:
         return background
 
     it = np.nditer(assigned, flags=['multi_index'])
@@ -221,8 +226,6 @@ def visualisation(background: np.ndarray,
         n, c = it.multi_index
         nucleus = nuclei[n]
         centriole = centrioles[c]
-        background = draw_contour(background, nucleus, annotation=False)
-        background = draw_point(background, centriole, annotation=False)
         cv2.arrowedLine(background, tuple(reversed(centriole.centre)), tuple(reversed(nucleus.centre)),
                         color=(0, 255, 0), thickness=2)
 
