@@ -77,7 +77,7 @@ def save_contours(dst: Path, nuclei: List[Nucleus]) -> None:
        Returns:
     """
     with open(dst, "w") as file:
-        json.dump({nucleus.index: nucleus.as_dict() for nucleus in nuclei}, file)
+        json.dump({"nuclei": {nucleus.index: nucleus.as_dict() for nucleus in nuclei}}, file)
         logger.info("Writing contours to %s" % str(dst))
 
 
