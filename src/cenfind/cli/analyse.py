@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 def main():
     sns.set_theme()
-    working_dir = Path('/Users/buergy/Downloads/RPE1wt_CEP63+CETN2+PCNT_1')
+    working_dir = Path('/Users/buergy/Downloads/IF_2022_09_07_U2OS_WTasync')
     # Concatenate the predictions and keep identity of field of view
     files = Path(working_dir / 'predictions/centrioles').glob('*.tsv')
     dfs = list()
@@ -45,6 +45,10 @@ def main():
     sns.scatterplot(data=df, x='surface_area', y='intensity', ax=ax)
     sns.rugplot(data=df, x='surface_area', y='intensity', ax=ax)
     f.savefig(working_dir / 'visualisation/test3.png')
+
+    f, ax = plt.subplots(figsize=(6.5, 6.5))
+    sns.histplot(data=df, x='intensity', ax=ax, kde=True)
+    f.savefig(working_dir / 'visualisation/test4.png')
 
     print(df)
 

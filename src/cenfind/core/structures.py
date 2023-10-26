@@ -124,8 +124,10 @@ class Nucleus:
     def intensity(self) -> int:
         _data = self.field.data[self.channel, ...]
         mask = np.zeros_like(_data)
-        cv2.drawContours(mask, [self.contour], 0, (255,), -1)
-        masked = cv2.bitwise_and(_data, mask)
+        cv2.drawContours(mask, [self.contour], 0, (1,), -1)
+        mask = mask > 0
+        masked = _data.copy()
+        masked[~mask] = 0
 
         return int(np.sum(masked))
 
