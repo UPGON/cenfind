@@ -137,6 +137,7 @@ class Assigner:
             self.assignment = self._compute(self.vicinity)
 
         result = []
+
         for c, centriole in enumerate(self.assignment.T):
             centriole_index = self.centrioles[c].index
             if centriole.max() == 0:

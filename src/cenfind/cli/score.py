@@ -77,6 +77,8 @@ def run(args):
 
         nuclei = extract_nuclei(field, args.channel_nuclei)
         save_contours(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.json", nuclei)
+        if len(nuclei) == 0:
+            continue
 
         pbar_dict = {"nuclei": len(nuclei)}
         if args.channel_centrioles is not None:
@@ -109,7 +111,7 @@ def run(args):
             ciliated_container.append(record)
 
             save_points(dataset.cilia / f"{field.name}_C{channel}.tsv",
-                      ciliae)
+                        ciliae)
 
             pbar_dict["cilia"] = len(ciliae)
             pbar.set_postfix(pbar_dict)
@@ -131,11 +133,11 @@ def run(args):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(dataset=Path('data/cilia'),
+    args = argparse.Namespace(dataset=Path('/Users/buergy/Desktop/gg_test'),
                               model=Path('models/master'),
-                              channel_nuclei=0,
-                              channel_centrioles=[1],
-                              channel_cilia=2,
+                              channel_nuclei=2,
+                              channel_centrioles=[0, 1],
+                              channel_cilia=None,
                               vicinity=50,
                               cpu=False,
                               )
