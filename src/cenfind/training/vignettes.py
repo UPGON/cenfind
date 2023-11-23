@@ -41,7 +41,9 @@ def register_parser(parent_subparsers):
 
 
 def run(args):
-    dataset = Dataset(args.dataset, projection_suffix=args.projection_suffix)
+    dataset = Dataset(args.dataset)
+    path_vignettes = dataset.path / "vignettes"
+    path_vignettes.mkdir(exist_ok=True)
 
     pbar = tqdm(dataset.fields)
     for field in pbar:
@@ -49,16 +51,16 @@ def run(args):
             pbar.set_description(f"{field.name}: {channel_id}")
             vignette = create_vignette(field, channel_id, args.channel_nuclei)
             dst = (
-                    dataset.vignettes
+                    dataset.path / "vignettes"
                     / f"{field.name}{args.projection_suffix}_C{channel_id}.png"
             )
             cv2.imwrite(str(dst), vignette)
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(dataset=Path('data/dataset_test'),
-                              model=Path('models/master'),
+    args = argparse.Namespace(dataset=Path('/Users/buergy/Downloads/george_ds'),
                               channel_nuclei=0,
-                              channel_centrioles=[1, 2],
-                              projection_suffix='_max')
+                              channel_centrioles=[1, 2, 3],
+                              projection_suffix='_max'
+                              )
     run(args)
