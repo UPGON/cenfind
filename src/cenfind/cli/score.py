@@ -123,6 +123,9 @@ def run(args):
             save_assigned_centrioles(dataset.statistics / f"{field}_C{channel}_assigned.tsv", data['centrioles_nuclei'])
         save_visualisation(dataset.visualisation / f"{field}_C{channel}.png", data['visualisation'])
 
+    if not results:
+        raise ValueError("Nothing was detected in the dataset %s." % dataset.path)
+
     scores_all = pd.concat([v['scores'] for v in results.values()])
     binned = frequency(scores_all)
     binned.to_csv(dataset.statistics / "statistics.tsv", sep="\t", index=True)
