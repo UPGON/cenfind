@@ -18,6 +18,8 @@ from cenfind.core.serialise import (
 from cenfind.core.statistics import proportion_cilia, frequency
 from cenfind.core.visualisation import visualisation, create_vignette
 
+from cenfind.core.log import get_logger
+
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
@@ -68,12 +70,21 @@ def run(args):
     dataset = Dataset(args.dataset)
     dataset.setup()
 
+    logger = get_logger(__name__, file=dataset.logs / "history.log")
     pbar = tqdm(dataset.fields)
 
     ciliated_container = []
     results = {}
+    logger.info("Start the scoring")
+    logger.info("Model used: %s" % args.model)
+    logger.info("Centriole channels: %s" % args.channel_centrioles)
+    logger.info("Nuclei channel: %s" % args.channel_nuclei)
     for field in pbar:
         pbar.set_description(f"{field.name}")
+
+        if field.data.ndim != 3:
+            logger.warning("Image (%s) is not in CXY format (Actual shape: %s)" % (field.name, field.data.shape))
+            continue
 
         nuclei = extract_nuclei(field, args.channel_nuclei)
         save_contours(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.json", nuclei)
@@ -83,6 +94,8 @@ def run(args):
         pbar_dict = {"nuclei": len(nuclei)}
         if args.channel_centrioles is not None:
             for channel in args.channel_centrioles:
+                if channel > field.data.shape[0]:
+                    logger.warning("Channel %s is beyond the channel span (%s) (Field shape: %s). It has been dismissed" % (channel, field.data.shape[0], field.shape))
                 pbar_dict["channel"] = channel
 
                 centrioles = extract_foci(field=field, channel=channel, foci_model_file=args.model)

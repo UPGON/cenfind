@@ -1,9 +1,9 @@
 import logging
 import sys
-from logging.handlers import TimedRotatingFileHandler
+from logging import FileHandler
 from pathlib import Path
 
-FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
+FORMATTER = logging.Formatter("(%(asctime)s) — %(name)s — [%(levelname)s]: %(message)s")
 
 
 def get_console_handler():
@@ -19,7 +19,7 @@ def get_null_handler():
 
 
 def get_file_handler(file):
-    file_handler = TimedRotatingFileHandler(file, when="midnight")
+    file_handler = FileHandler(file)
     file_handler.setFormatter(FORMATTER)
     return file_handler
 

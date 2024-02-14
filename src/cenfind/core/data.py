@@ -115,6 +115,7 @@ class Dataset:
         nuclei, centrioles, cilia and assignment are created.
         """
 
+        self.logs.mkdir(exist_ok=True)
         self.visualisation.mkdir(exist_ok=True)
         self.statistics.mkdir(exist_ok=True)
         self.predictions.mkdir(exist_ok=True)

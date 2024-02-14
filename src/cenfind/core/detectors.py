@@ -99,7 +99,12 @@ def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
             model = StarDist2D.from_pretrained("2D_versatile_fluo")
 
-    data = field.data[channel, ...]
+    if field.data.ndim == 2:
+        data = field.data
+    elif field.data.ndim == 3:
+        data = field.data[channel, ...]
+    else:
+        raise ValueError("Bad data shape: %s; Ensure that the image is CXY" % field.data.shape)
 
     data_resized = resize_image(data)
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
