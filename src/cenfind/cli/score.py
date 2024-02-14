@@ -54,7 +54,6 @@ def register_parser(parent_subparsers):
     )
     parser.add_argument(
         "--vicinity",
-        "-v",
         type=int,
         default=50,
         help="Distance threshold in pixel (default: 50 px)",
