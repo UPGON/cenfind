@@ -73,8 +73,16 @@ class Dataset:
         return self.path / "logs"
 
     @property
+    def projections(self):
+        return self.path / "projections"
+
+    @property
     def predictions(self):
         return self.path / "predictions"
+
+    @property
+    def annotations(self):
+        return self.path / "annotations"
 
     @property
     def visualisation(self):
@@ -110,6 +118,7 @@ class Dataset:
         self.visualisation.mkdir(exist_ok=True)
         self.statistics.mkdir(exist_ok=True)
         self.predictions.mkdir(exist_ok=True)
+        self.annotations.mkdir(exist_ok=True)
         self.nuclei.mkdir(exist_ok=True)
         self.centrioles.mkdir(exist_ok=True)
         self.cilia.mkdir(exist_ok=True)
@@ -120,14 +129,13 @@ class Dataset:
         """
         Collects all Fields found in `projections` into a list and raises a ValueError if no TIF file.
         """
-        path = self.path / "projections"
 
         result = []
-        for path in path.iterdir():
+        for path in self.projections.iterdir():
             if (path.suffix == '.tif') and not path.name.startswith("."):
                 result.append(Field(path))
 
         if len(result) == 0:
-            raise ValueError(f"No field found in {path}")
+            raise ValueError(f"No field found in {self.projections}")
 
         return result

@@ -133,10 +133,10 @@ def run(args):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(dataset=Path('/Users/buergy/Desktop/gg_test'),
+    args = argparse.Namespace(dataset=Path('data/problematic'),
                               model=Path('models/master'),
-                              channel_nuclei=2,
-                              channel_centrioles=[0, 1],
+                              channel_nuclei=0,
+                              channel_centrioles=[1, 2, 3],
                               channel_cilia=None,
                               vicinity=50,
                               cpu=False,
