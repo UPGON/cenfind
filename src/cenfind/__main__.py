@@ -1,8 +1,11 @@
-import sys
+import logging
 import os
+import sys
+
 import cenfind
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 
 
 def main():

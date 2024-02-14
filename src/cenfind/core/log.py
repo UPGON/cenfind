@@ -30,11 +30,11 @@ def get_logger(logger_name, console=None, file=None):
     logger.addHandler(get_null_handler())
     if console:
         logger.addHandler(get_console_handler())
-    if file:
-        logger.addHandler(get_file_handler(file))
-
-    # with this pattern, it's rarely necessary to propagate the error up to parent
-    logger.propagate = False
+    # if file:
+    #     logger.addHandler(get_file_handler(file))
+    #
+    # # with this pattern, it's rarely necessary to propagate the error up to parent
+    # logger.propagate = False
     return logger
 
 

@@ -28,7 +28,7 @@ tf.get_logger().setLevel(logging.ERROR)
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def extract_foci(field: Field, channel: int, foci_model_file: Path,
@@ -44,6 +44,8 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path,
     :return: List of centriole objects.
     """
     logger.info("Processing %s / %d" % (field.name, channel))
+    if field.data.ndim != 3:
+        raise ValueError("Bad data shape: %s; Ensure that the image is CXY" % field.data.shape)
     data = field.data[channel, ...]
 
     @functools.lru_cache(maxsize=None)
@@ -130,7 +132,7 @@ def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List
         nucleus = Nucleus(field=field, channel=channel, contour=contour[0], label="Nucleus", index=nucleus_index - 1)
         nuclei.append(nucleus)
 
-    logger.info("(%s), channel %s: foci: %s" % (field.name, channel, len(nuclei)))
+    logger.info("Nuclei extraction (channel %s) in %s: %s" % (channel, field.name, len(nuclei)))
 
     return nuclei
 
@@ -157,13 +159,12 @@ def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -
     labels = measure.label(mask)
     props = measure.regionprops(labels, mask)
 
-    if not props:
-        logger.warning("No cilium (channel: %s) has been detected in %s" % (channel, field.name))
-
     result = []
     for prop in props:
         if prop.eccentricity > eccentricity and prop.area > area:
             r, c = prop.centroid
             result.append(Centriole(field=field, channel=channel, centre=(int(r), int(c)), label="Cilium"))
+
+    logger.info("Cilium extraction (channel %s) in %s: %s" % (channel, field.name, len(result)))
 
     return result

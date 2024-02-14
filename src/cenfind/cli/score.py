@@ -1,8 +1,11 @@
 import argparse
+import logging
 import os
+import sys
 from pathlib import Path
 
 import pandas as pd
+import tensorflow as tf
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
@@ -18,7 +21,8 @@ from cenfind.core.serialise import (
 from cenfind.core.statistics import proportion_cilia, frequency
 from cenfind.core.visualisation import visualisation, create_vignette
 
-from cenfind.core.log import get_logger
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def register_parser(parent_subparsers):
@@ -57,6 +61,7 @@ def register_parser(parent_subparsers):
     )
 
     parser.add_argument("--cpu", action="store_true", help="Only use the cpu")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Use logging instead of progress bar")
 
     return parser
 
@@ -64,42 +69,58 @@ def register_parser(parent_subparsers):
 def run(args):
     if (args.channel_centrioles is None) and (args.channel_cilia is None):
         raise ValueError("Please specify at least one channel to evaluate.")
-    if args.cpu:
-        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     dataset = Dataset(args.dataset)
     dataset.setup()
-
-    logger = get_logger(__name__, file=dataset.logs / "history.log")
-    pbar = tqdm(dataset.fields)
+    if args.verbose:
+        pbar = dataset.fields
+    else:
+        pbar = tqdm(dataset.fields)
+    logger.info("Num GPUs Available: %s" % len(tf.config.list_physical_devices('GPU')))
+    if args.cpu:
+        logger.info("Using only CPU")
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     ciliated_container = []
     results = {}
-    logger.info("Start the scoring")
-    logger.info("Model used: %s" % args.model)
-    logger.info("Centriole channels: %s" % args.channel_centrioles)
-    logger.info("Nuclei channel: %s" % args.channel_nuclei)
+
     for field in pbar:
-        pbar.set_description(f"{field.name}")
+        logger.info("Processing field %s" % field.name)
+        if not args.verbose:
+            pbar.set_description(f"{field.name}")
 
         if field.data.ndim != 3:
-            logger.warning("Image (%s) is not in CXY format (Actual shape: %s)" % (field.name, field.data.shape))
+            logger.error("Image (%s) is not in CXY format (Actual shape: %s)" % (field.name, field.data.shape))
             continue
+
+        channels_actual = set(range(field.data.shape[0]))
+
+        channel_centrioles = set(args.channel_centrioles)
+        if not channel_centrioles.issubset(channels_actual):
+            logger.warning(
+                "Channel %s is beyond the channel span (%s) (Field shape: %s). It has been dismissed" % (
+                    channel_centrioles.difference(channels_actual), list(range(field.data.shape[0])), field.data.shape))
+            channel_centrioles = list(channel_centrioles.intersection(channels_actual))
+        else:
+            channel_centrioles = list(channel_centrioles)
+
+        if args.channel_nuclei not in channels_actual:
+            logger.warning(
+                "channel index (%s) for nuclei not in channel span (%s)" % (args.channel_nuclei, channels_actual))
 
         nuclei = extract_nuclei(field, args.channel_nuclei)
-        save_contours(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.json", nuclei)
         if len(nuclei) == 0:
+            logger.warning("No nuclei in %s" % field.name)
             continue
+        save_contours(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.json", nuclei)
 
-        pbar_dict = {"nuclei": len(nuclei)}
-        if args.channel_centrioles is not None:
-            for channel in args.channel_centrioles:
-                if channel > field.data.shape[0]:
-                    logger.warning("Channel %s is beyond the channel span (%s) (Field shape: %s). It has been dismissed" % (channel, field.data.shape[0], field.shape))
-                pbar_dict["channel"] = channel
-
+        if not args.verbose:
+            pbar_dict = {"nuclei": len(nuclei)}
+        if channel_centrioles is not None:
+            for channel in channel_centrioles:
+                if not args.verbose:
+                    pbar_dict["channel"] = channel
                 centrioles = extract_foci(field=field, channel=channel, foci_model_file=args.model)
-
                 assignment = Assigner(centrioles, nuclei, vicinity=args.vicinity)
                 centrioles_nuclei = assignment.assign_centrioles()
                 scores = assignment.score_nuclei(field.name, channel)
@@ -114,8 +135,9 @@ def run(args):
                     'centrioles': centrioles,
                     'visualisation': vis}
 
-                pbar_dict[f"centrioles"] = len(centrioles)
-                pbar.set_postfix(pbar_dict)
+                if not args.verbose:
+                    pbar_dict[f"centrioles"] = len(centrioles)
+                    pbar.set_postfix(pbar_dict)
 
         if args.channel_cilia is not None:
             channel = args.channel_cilia
@@ -126,8 +148,9 @@ def run(args):
             save_points(dataset.cilia / f"{field.name}_C{channel}.tsv",
                         ciliae)
 
-            pbar_dict["cilia"] = len(ciliae)
-            pbar.set_postfix(pbar_dict)
+            if not args.verbose:
+                pbar_dict["cilia"] = len(ciliae)
+                pbar.set_postfix(pbar_dict)
 
     for (field, channel), data in results.items():
         save_points(dataset.centrioles / f"{field}_C{channel}.tsv", data['centrioles'])
@@ -152,9 +175,10 @@ if __name__ == "__main__":
     args = argparse.Namespace(dataset=Path('data/problematic'),
                               model=Path('models/master'),
                               channel_nuclei=0,
-                              channel_centrioles=[1, 2, 3],
+                              channel_centrioles=[1, 2, 3, 4],
                               channel_cilia=None,
                               vicinity=50,
-                              cpu=False,
+                              cpu=True,
+                              verbose=True
                               )
     run(args)
