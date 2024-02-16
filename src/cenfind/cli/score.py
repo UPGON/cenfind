@@ -132,6 +132,7 @@ def run(args):
                     'assignment': assignment.assignment,
                     'centrioles_nuclei': centrioles_nuclei,
                     'centrioles': centrioles,
+                    'nuclei': nuclei,
                     'visualisation': vis}
 
                 if not args.verbose:
@@ -171,10 +172,10 @@ def run(args):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(dataset=Path('data/problematic'),
+    args = argparse.Namespace(dataset=Path('data/dataset_test'),
                               model=Path('models/master'),
                               channel_nuclei=0,
-                              channel_centrioles=[1, 2, 3, 4],
+                              channel_centrioles=[1, 2, 3],
                               channel_cilia=None,
                               vicinity=50,
                               cpu=True,

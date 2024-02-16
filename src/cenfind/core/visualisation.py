@@ -211,7 +211,11 @@ def visualisation(background: np.ndarray,
         background = draw_point(background, centriole, annotation=False)
 
     for nucleus in nuclei:
-        background = draw_contour(background, nucleus, annotation=False)
+        if nucleus.full_in_field:
+            color = (0, 255, 0)
+        else:
+            color = (255, 0, 0)
+        background = draw_contour(background, nucleus, color=color, annotation=False)
 
     if assigned is None:
         return background

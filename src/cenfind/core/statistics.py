@@ -25,6 +25,8 @@ def frequency(df: pd.DataFrame) -> pd.DataFrame:
     cuts = [0, 1, 2, 3, 4, 5, np.inf]
     labels = "0 1 2 3 4 +".split(" ")
 
+    df = df.loc[df["full_in_field"]]
+
     result = pd.cut(df["score"], cuts, right=False, labels=labels,
                     include_lowest=True)
     result = result.groupby(["field", "channel"]).value_counts()

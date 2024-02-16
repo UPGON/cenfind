@@ -117,8 +117,8 @@ class Assigner:
         result = self.assignment.sum(axis=1)
         result = list(zip(self.nuclei, result))
 
-        result = pd.DataFrame(list((n.index, s) for n, s in result))
-        result.columns = ["nucleus", "score"]
+        result = pd.DataFrame(list((n.index, n.full_in_field, s) for n, s in result))
+        result.columns = ["nucleus", "full_in_field", "score"]
         result["field"] = field_name
         result["channel"] = channel
         result = result.set_index(["field", "channel"])
@@ -140,7 +140,7 @@ class Assigner:
 
         for c, centriole in enumerate(self.assignment.T):
             centriole_index = self.centrioles[c].index
-            if centriole.max() == 0:
+            if np.max(centriole) == 0:
                 result.append((centriole_index, -1))
             else:
                 nucleus_matrix_index = np.where(centriole == 1)[0][0]
