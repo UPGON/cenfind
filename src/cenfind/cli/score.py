@@ -21,7 +21,7 @@ from cenfind.core.serialise import (
 from cenfind.core.statistics import proportion_cilia, frequency
 from cenfind.core.visualisation import visualisation, create_vignette
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -30,7 +30,7 @@ def register_parser(parent_subparsers):
         "score", help="Score the projections given the channels"
     )
     parser.add_argument("dataset", type=Path, help="Path to the dataset")
-    parser.add_argument("model", type=Path, help="Absolute path to the model folder")
+    parser.add_argument("--model", type=Path, help="Absolute path to the model folder")
     parser.add_argument(
         "--channel_nuclei",
         "-n",
@@ -71,11 +71,14 @@ def run(args):
 
     dataset = Dataset(args.dataset)
     dataset.setup()
+
     if args.verbose:
         pbar = dataset.fields
     else:
         pbar = tqdm(dataset.fields)
+
     logger.info("Num GPUs Available: %s" % len(tf.config.list_physical_devices('GPU')))
+
     if args.cpu:
         logger.info("Using only CPU")
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -159,12 +162,13 @@ def run(args):
             save_assigned_centrioles(dataset.statistics / f"{field}_C{channel}_assigned.tsv", data['centrioles_nuclei'])
         save_visualisation(dataset.visualisation / f"{field}_C{channel}.png", data['visualisation'])
 
-    if not results:
-        raise ValueError("Nothing was detected in the dataset %s." % dataset.path)
+    if not results and args.channel_centrioles:
+        raise ValueError("No centriole was detected in the dataset %s." % dataset.path)
 
-    scores_all = pd.concat([v['scores'] for v in results.values()])
-    binned = frequency(scores_all)
-    binned.to_csv(dataset.statistics / "statistics.tsv", sep="\t", index=True)
+    if results:
+        scores_all = pd.concat([v['scores'] for v in results.values()])
+        binned = frequency(scores_all)
+        binned.to_csv(dataset.statistics / "statistics.tsv", sep="\t", index=True)
 
     if ciliated_container:
         ciliated_all = pd.concat(ciliated_container)
