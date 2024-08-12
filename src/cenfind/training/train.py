@@ -51,7 +51,6 @@ def load_pairs(
 
     with open(ds.path / f"{split}.txt", "r") as f:
         pairs = [l.strip("\n").split(",") for l in f.readlines()]
-
     for field, channel in pairs:
         data = tf.imread(ds.projections / f"{field}_max.tif")[int(channel), :, :]
         foci = np.loadtxt(ds.annotations / "centrioles" / f"{field}_max_C{channel}.txt", dtype=int, delimiter=",")
@@ -64,7 +63,7 @@ def load_pairs(
         else:
             mask = points_to_prob(
                 foci[:, [0, 1]], shape=image.shape, sigma=sigma
-            )  # because it works with x, y
+            )
 
         if transform is not None:
             transformed = transform(image=image, mask=mask)
@@ -85,7 +84,7 @@ def fetch_all_fields(datasets: list[Dataset]):
     all_test_y = []
 
     for ds in tqdm(datasets):
-        train_x, train_y = load_pairs(ds, split="train", transform=transforms)
+        train_x, train_y = load_pairs(ds, split="train")
         test_x, test_y = load_pairs(ds, split="test")
         all_train_x.append(train_x)
         all_train_y.append(train_y)
@@ -134,8 +133,13 @@ def run(args):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(datasets=[
-        Path("/Users/buergy/Dropbox/epfl/projects/cenfind/data/cenfind_datasets/RPE1p53+Cnone_CEP63+CETN2+PCNT_1")],
+    PATH_BASE = Path("/Users/buergy/Dropbox/epfl/projects/cenfind/data/cenfind_datasets/")
+    datasets = ["RPE1p53+Cnone_CEP63+CETN2+PCNT_1",
+                "RPE1wt_CEP63+CETN2+PCNT_1",
+                "RPE1wt_CEP152+GTU88+PCNT_1",
+                "RPE1wt_CP110+GTU88+PCNT_2",
+                "U2OS_CEP63+SAS6+PCNT_1"]
+    args = argparse.Namespace(datasets=[PATH_BASE / ds for ds in datasets],
                               model_path=Path("/Users/buergy/Dropbox/epfl/projects/cenfind/models/"),
                               epochs=100)
     run(args)
