@@ -17,7 +17,7 @@ from tensorflow.random import set_seed
 from tqdm import tqdm
 
 from cenfind.core.data import Dataset
-from cenfind.training.config import config_multiscale, transforms
+from cenfind.training.config import config_multiscale
 
 seed(1)
 set_seed(2)
@@ -37,6 +37,26 @@ def read_config(path):
     return Config(**config_dict)
 
 
+def load_foci(path) -> np.ndarray:
+    """
+    Load annotation file from text file given channel
+    loaded as row col, row major.
+    ! the text format is x, y; origin at top left;
+    :param channel:
+    :return:
+    """
+
+    try:
+        annotation = np.loadtxt(str(path), dtype=int, delimiter=",")
+        if len(annotation) == 0:
+            return annotation
+        else:
+            return annotation[:, [1, 0]]
+    except OSError:
+        logger.error(f"No annotation found for %s" % path, exc_info=True)
+        raise
+
+
 def load_pairs(
         ds: Dataset, split: str, sigma: float = 1.5, transform: alb.Compose = None
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -53,7 +73,7 @@ def load_pairs(
         pairs = [l.strip("\n").split(",") for l in f.readlines()]
     for field, channel in pairs:
         data = tf.imread(ds.projections / f"{field}_max.tif")[int(channel), :, :]
-        foci = np.loadtxt(ds.annotations / "centrioles" / f"{field}_max_C{channel}.txt", dtype=int, delimiter=",")
+        foci = load_foci(ds.annotations / "centrioles" / f"{field}_max_C{channel}.txt")
 
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
             image = normalize_fast2d(data)
@@ -61,9 +81,7 @@ def load_pairs(
         if len(foci) == 0:
             mask = np.zeros(image.shape, dtype="uint16")
         else:
-            mask = points_to_prob(
-                foci[:, [0, 1]], shape=image.shape, sigma=sigma
-            )
+            mask = points_to_prob(foci, shape=image.shape, sigma=sigma)
 
         if transform is not None:
             transformed = transform(image=image, mask=mask)
