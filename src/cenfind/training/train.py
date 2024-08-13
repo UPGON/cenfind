@@ -46,19 +46,11 @@ def load_foci(path) -> np.ndarray:
     :return:
     """
 
-    try:
-        annotation = np.loadtxt(str(path), dtype=int, delimiter=",")
-        if len(annotation) == 0:
-            return annotation
-        else:
-            return annotation[:, [1, 0]]
-    except OSError:
-        logger.error(f"No annotation found for %s" % path, exc_info=True)
-        raise
+    return np.loadtxt(str(path), dtype=int, delimiter=",")
 
 
 def load_pairs(
-        ds: Dataset, split: str, sigma: float = 1.5, transform: alb.Compose = None
+        ds: Dataset, split: str, sigma: float = 1.5, transforms: alb.Compose = None
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Load two arrays, the images and the foci masks
@@ -76,15 +68,15 @@ def load_pairs(
         foci = load_foci(ds.annotations / "centrioles" / f"{field}_max_C{channel}.txt")
 
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            image = normalize_fast2d(data)
+            image = normalize_fast2d(data, clip=True)
 
         if len(foci) == 0:
             mask = np.zeros(image.shape, dtype="uint16")
         else:
             mask = points_to_prob(foci, shape=image.shape, sigma=sigma)
 
-        if transform is not None:
-            transformed = transform(image=image, mask=mask)
+        if transforms is not None:
+            transformed = transforms(image=image, mask=mask)
             image = transformed["image"]
             mask = transformed["mask"]
 
@@ -94,7 +86,7 @@ def load_pairs(
     return np.stack(channels), np.stack(masks)
 
 
-def fetch_all_fields(datasets: list[Dataset]):
+def fetch_all_fields(datasets: list[Dataset], transforms: alb.Compose = None):
     all_train_x = []
     all_train_y = []
 
@@ -102,7 +94,7 @@ def fetch_all_fields(datasets: list[Dataset]):
     all_test_y = []
 
     for ds in tqdm(datasets):
-        train_x, train_y = load_pairs(ds, split="train")
+        train_x, train_y = load_pairs(ds, split="train", transforms=transforms)
         test_x, test_y = load_pairs(ds, split="test")
         all_train_x.append(train_x)
         all_train_y.append(train_y)
@@ -137,7 +129,8 @@ def run(args):
     all_train_x, all_train_y, all_test_x, all_test_y = fetch_all_fields(datasets)
     logger.debug("Loading %s" % (len(all_train_x)))
 
-    time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    time_stamp = "20240813"
     model_multiscale = SpotNet(
         config_multiscale, name=time_stamp, basedir=args.model_path
     )
