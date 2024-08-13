@@ -48,7 +48,7 @@ def run(args):
     dataset = Dataset(args.dataset)
     dataset.setup()
     logger = get_logger(__name__, console=1, file=dataset.logs / "cenfind.log")
-    if not any(dataset.path_annotations_centrioles.iterdir()):
+    if not any((dataset.annotations / "centrioles").iterdir()):
         logger.error(
             f"The dataset {dataset.path.name} has no annotation. You can run `cenfind predict` instead"
         )
@@ -66,8 +66,9 @@ def run(args):
     from cenfind.core.detectors import extract_foci, extract_nuclei
 
     perfs = []
-    pairs = dataset.splits()
-    for field, channel in pairs["test"]:
+    with open(dataset.path / f"test.txt", "r") as f:
+        pairs = [l.strip("\n").split(",") for l in f.readlines()]
+    for field, channel in pairs:
         annotation = field.annotation(channel)
         predictions = extract_foci(field, channel, args.model, prob_threshold=args.threshold)
         nuclei = extract_nuclei(field, args.channel_nuclei)
