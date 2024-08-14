@@ -12,7 +12,7 @@ from cenfind.core.structures import Centriole, Nucleus
 logger = logging.getLogger(__name__)
 
 
-def flag(is_full: bool) -> tuple:
+def flag(is_full: bool) -> Tuple[int, int, int]:
     """
     Sets the colour of contour depending on whether it is full (green) or not (red).
 
