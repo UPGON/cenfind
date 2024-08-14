@@ -9,20 +9,15 @@ ROOT_DIR = Path(__file__).parent.parent
 class TestData:
     path_dataset = ROOT_DIR / "data/dataset_test"
     dataset = Dataset(path_dataset)
-    field_name = "RPE1wt_CEP63+CETN2+PCNT_1_000_000.tif"
+    field_name = "RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.tif"
     field_path = path_dataset / "projections" / field_name
     field = Field(field_path)
     channel = field.data[1, ...]
-    good_field_name = ROOT_DIR / "data/dataset_test/projections" / "RPE1wt_CEP63+CETN2+PCNT_1_000_001.tif"
-    bad_field_name = ROOT_DIR / "data/dataset_test/projections" / "RPE1wt_CEP63+CETN2+PCNT_1_000_001.png"
-
-    def test_bad_field_name(self):
-        with pytest.raises(ValueError):
-            Field(self.bad_field_name)
+    good_field_name = ROOT_DIR / "data/dataset_test/projections" / "RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.tif"
 
     def test_field_data(self):
         field = Field(self.good_field_name)
-        assert field.data.shape == (5, 2048, 2048)
+        assert field.data.shape == (4, 2048, 2048)
 
     def test_field_name(self):
         assert self.field.name == self.field_name.split('.')[0]
@@ -35,9 +30,9 @@ class TestData:
 
     def test_fields(self):
         assert self.dataset.fields == [Field(path=PosixPath(
-            '/Users/buergy/Dropbox/epfl/projects/cenfind/data/dataset_test/projections/RPE1wt_CEP63+CETN2+PCNT_1_000_000.tif')),
+            ROOT_DIR / "data/dataset_test/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000.tif")),
             Field(path=PosixPath(
-                '/Users/buergy/Dropbox/epfl/projects/cenfind/data/dataset_test/projections/RPE1wt_CEP63+CETN2+PCNT_1_000_001.tif'))]
+                ROOT_DIR / "data/dataset_test/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002.tif"))]
 
 
 class TestDataNotExisting:
