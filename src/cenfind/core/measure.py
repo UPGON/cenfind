@@ -6,10 +6,10 @@ import pandas as pd
 from attrs import define
 from ortools.linear_solver import pywraplp
 
-from cenfind.core.log import get_logger
+import logging
 from cenfind.core.structures import Centriole, Nucleus
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def flag(is_full: bool) -> tuple:

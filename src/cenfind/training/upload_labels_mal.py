@@ -20,9 +20,9 @@ from cenfind.training.helpers import (
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-foci_model = Path("models/master/")
+foci_model = Path("../../../models/archives/master/")
 
-path_dotenv = Path(".env")
+path_dotenv = Path("../../../.env")
 if not path_dotenv.exists():
     FileNotFoundError(path_dotenv.resolve())
 
@@ -84,6 +84,5 @@ def run(args):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(dataset=Path('data/dataset_test'),
-                              )
+    args = argparse.Namespace(dataset=Path('../../../data/dataset_test'))
     run(args)

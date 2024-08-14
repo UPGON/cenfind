@@ -1,15 +1,14 @@
 import json
+import logging
 from pathlib import Path
 from typing import List
 
 import numpy as np
 import pandas as pd
 import tifffile as tif
-
-from cenfind.core.log import get_logger
 from cenfind.core.structures import Centriole, Nucleus
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def save_assigned(dst: Path, assigned: np.ndarray) -> None:

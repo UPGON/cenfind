@@ -12,6 +12,15 @@ from cenfind.core.data import Dataset
 
 config = dotenv_values(".env")
 
+def register_parser(parent_subparsers):
+    parser = parent_subparsers.add_parser(
+        "uploadmal",
+        help="Upload MAL",
+    )
+    parser.add_argument("dataset", type=Path, help="Path to the dataset folder")
+    parser.add_argument("model", type=Path, help="Path to the model")
+
+    return parser
 
 def download_centrioles(label):
     """
@@ -76,10 +85,7 @@ def main():
 
         path_dataset = Path(f'data/{ds}')
         projection_suffix = ""
-        dataset = Dataset(
-            path_dataset, image_type=".tif", projection_suffix=projection_suffix
-        )
-
+        dataset = Dataset(path_dataset)
         external_name = label.data.external_id
         extension = external_name.split(".")[-1]
 
@@ -87,7 +93,7 @@ def main():
 
         if centrioles:
             annotation_name = re.sub(f".{extension}$", ".txt", external_name)
-            dst_centrioles = dataset.path_annotations_centrioles / annotation_name
+            dst_centrioles = dataset.annotations / "centrioles" / annotation_name
             try:
                 positions = download_centrioles(label)
                 np.savetxt(dst_centrioles, positions, delimiter=",", fmt="%u")
@@ -106,7 +112,7 @@ def main():
             mask_name = re.sub(
                 f"C\d\.{extension}$", f"{projection_suffix}_C0.tif", external_name
             )
-            dst_nuclei = dataset.path_annotations_cells / mask_name
+            dst_nuclei = dataset.annotations / "cells" / mask_name
             try:
                 mask = download_mask(label, "Nucleus")
                 tf.imwrite(dst_nuclei, mask)

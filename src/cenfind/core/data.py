@@ -1,12 +1,11 @@
 from pathlib import Path
 from typing import List
+import logging
 
 import numpy as np
 import tifffile as tf
 from attrs import define, field, validators
-from cenfind.core.log import get_logger
-
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def path_exists(instance, attribute, value):

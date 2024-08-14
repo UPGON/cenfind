@@ -6,7 +6,7 @@ import pandas as pd
 PREFIX_LOCAL = Path("/Users/buergy/Dropbox/epfl/datasets")
 PREFIX_REMOTE = Path("/data1/centrioles/canonical")
 
-ROOT_DIR = Path("/home/buergy/projects/cenfind")
+ROOT_DIR = Path("/")
 datasets = [
     "RPE1wt_CEP63+CETN2+PCNT_1",
     "RPE1wt_CP110+GTU88+PCNT_2",

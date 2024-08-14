@@ -1,13 +1,13 @@
 from typing import Tuple
+import logging
 
 import cv2
 import numpy as np
 from attrs import define
 
 from cenfind.core.data import Field
-from cenfind.core.log import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @define

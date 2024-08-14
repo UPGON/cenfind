@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import cv2
@@ -6,10 +7,9 @@ from skimage.draw import disk
 from skimage.exposure import rescale_intensity
 
 from cenfind.core.data import Field
-from cenfind.core.log import get_logger
 from cenfind.core.structures import Centriole, Nucleus
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def resize_image(image: np.ndarray, factor: int = 256) -> np.ndarray:

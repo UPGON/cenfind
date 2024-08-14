@@ -1,14 +1,66 @@
 from typing import List
+import logging
 
 import numpy as np
 import pandas as pd
 
+from spotipy.utils import points_matching
+from types import SimpleNamespace
+
 from cenfind.core.data import Field
-from cenfind.core.log import get_logger
 from cenfind.core.structures import Centriole, Nucleus
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
+
+def evaluate(
+        field: Field,
+        channel: int,
+        annotation: np.ndarray,
+        predictions: List[Centriole],
+        tolerance: int,
+        threshold: float,
+) -> dict:
+    """
+    Compute the accuracy of the prediction on one field.
+    :param field:
+    :param channel:
+    :param annotation:
+    :param predictions:
+    :param tolerance:
+    :param threshold:
+    :return: dictionary of metrics for the field
+    """
+    _predictions = [f.centre_xy for f in predictions]
+    if all((len(_predictions), len(annotation))) > 0:
+        res = points_matching(annotation, _predictions, cutoff_distance=tolerance)
+    else:
+        logger.warning(
+            "threshold: %f; detected: %d; annotated: %d... Set precision and accuracy to zero"
+            % (threshold, len(_predictions), len(annotation))
+        )
+        res = SimpleNamespace()
+        res.precision = 0.0
+        res.recall = 0.0
+        res.f1 = 0.0
+        res.tp = (0,)
+        res.fp = (0,)
+        res.fn = 0
+    perf = {
+        "field": field.name,
+        "channel": channel,
+        "n_actual": len(annotation),
+        "n_preds": len(_predictions),
+        "threshold": threshold,
+        "tolerance": tolerance,
+        "tp": res.tp[0] if type(res.tp) == tuple else res.tp,
+        "fp": res.fp[0] if type(res.fp) == tuple else res.fp,
+        "fn": res.fn[0] if type(res.fn) == tuple else res.fn,
+        "precision": np.round(res.precision, 3),
+        "recall": np.round(res.recall, 3),
+        "f1": np.round(res.f1, 3),
+    }
+    return perf
 
 def frequency(df: pd.DataFrame) -> pd.DataFrame:
     """

@@ -20,6 +20,7 @@ def register_parser(parent_subparsers):
 
 
 def run(args):
+
     ds = Dataset(args.dataset)
 
     config = dotenv_values(args.env)
@@ -38,6 +39,6 @@ def run(args):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(dataset=Path('data/dataset_test'),
-                              env=Path('.env'))
+    args = argparse.Namespace(dataset=Path('../../../data/dataset_test'),
+                              env=Path('../../../.env'))
     run(args)

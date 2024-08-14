@@ -18,7 +18,6 @@ from spotipy.utils import normalize_fast2d
 from stardist.models import StarDist2D
 
 from cenfind.core.data import Field
-from cenfind.core.log import get_logger
 from cenfind.core.structures import Centriole, Nucleus
 from cenfind.core.visualisation import draw_foci, resize_image
 
