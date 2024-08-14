@@ -24,7 +24,7 @@ def load_foci(path) -> np.ndarray:
 
 
 def load_pairs(
-        ds: Dataset, split: str, sigma: float = 1.5, transforms: alb.Compose = None
+        ds: Dataset, split: str, sigma: float = 1.5, suffix=None, transforms: alb.Compose = None
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Load two arrays, the images and the foci masks
@@ -39,8 +39,8 @@ def load_pairs(
         pairs = [l.strip("\n").split(",") for l in f.readlines()]
 
     for field, channel in pairs:
-        data = tf.imread(ds.projections / f"{field}.tif")[int(channel), :, :]
-        foci = load_foci(ds.annotations / "centrioles" / f"{field}_C{channel}.txt")
+        data = tf.imread(ds.projections / f"{field}{suffix}.tif")[int(channel), :, :]
+        foci = load_foci(ds.annotations / "centrioles" / f"{field}{suffix}_C{channel}.txt")
 
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
             image = normalize_fast2d(data, clip=True)
@@ -73,8 +73,8 @@ def fetch_all_fields(datasets: list[Dataset], transforms: alb.Compose = None):
     all_test_y = []
 
     for ds in tqdm(datasets):
-        train_x, train_y = load_pairs(ds, split="train", transforms=transforms)
-        test_x, test_y = load_pairs(ds, split="test")
+        train_x, train_y = load_pairs(ds, split="train", suffix="_max", transforms=transforms)
+        test_x, test_y = load_pairs(ds, suffix="_max", split="test")
         all_train_x.append(train_x)
         all_train_y.append(train_y)
         all_test_x.append(test_x)

@@ -11,6 +11,7 @@ from tensorflow.random import set_seed
 from cenfind.core.data import Dataset
 from cenfind.core.loading import fetch_all_fields
 from cenfind.training.config import config_multiscale
+from cenfind.constants import datasets
 
 seed(1)
 set_seed(2)
@@ -66,7 +67,7 @@ def run(args):
 
 
 if __name__ == "__main__":
-    datasets = [Path("../../../data/RPE1wt_CEP63+CETN2+PCNT_1")]
+    datasets = [Path(f"/data1/centrioles/canonical/{ds}") for ds in datasets]
     args = argparse.Namespace(datasets=datasets,
                               model_path=Path("../../../models/"),
                               epochs=100)
