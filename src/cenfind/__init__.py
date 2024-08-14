@@ -1,11 +1,13 @@
 import argparse
 import importlib
+import logging
 from argparse import ArgumentDefaultsHelpFormatter
-
-from cenfind.core.log import get_logger
 
 commands = [
     "score",
+    "train",
+    "analyse",
+    "vignettes",
 ]
 
 COMMANDS = [importlib.import_module("cenfind.cli." + c) for c in commands]
@@ -51,7 +53,7 @@ def make_parser():
 def run(argv):
     args = make_parser().parse_args(argv)
 
-    logger = get_logger(__name__)
+    logger = logging.getLogger(__name__)
 
     try:
         return args.__command__.run(args)
