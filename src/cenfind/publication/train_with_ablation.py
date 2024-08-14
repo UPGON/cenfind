@@ -8,7 +8,7 @@ tf.random.set_seed(2)
 from datetime import datetime
 from spotipy.model import SpotNet
 from spotipy.model import Config
-from cenfind.publication.constants import PREFIX_REMOTE
+from cenfind.constants import PREFIX_REMOTE
 from cenfind.core.data import Dataset
 from cenfind.training.train import load_pairs, transforms
 

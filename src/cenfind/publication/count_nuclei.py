@@ -7,7 +7,7 @@ from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_nuclei
 from cenfind.core.measure import flag, full_in_field
 from cenfind.core.visualisation import draw_contour, create_vignette
-from cenfind.publication.constants import datasets, PREFIX_REMOTE
+from cenfind.constants import datasets, PREFIX_REMOTE
 
 config = dotenv_values('.env')
 

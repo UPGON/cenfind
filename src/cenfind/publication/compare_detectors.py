@@ -3,7 +3,7 @@ import pandas as pd
 
 from cenfind.core.data import Dataset
 from cenfind.core.visualisation import draw_foci
-from cenfind.publication.constants import datasets, PREFIX_REMOTE
+from cenfind.constants import datasets, PREFIX_REMOTE
 from cenfind.publication.detectors_other import log_skimage, simpleblob_cv2
 from cenfind.core.detectors import extract_foci
 

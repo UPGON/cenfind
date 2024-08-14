@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_nuclei
-from cenfind.publication.constants import datasets, PREFIX_REMOTE
+from cenfind.constants import datasets, PREFIX_REMOTE
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(asctime)s: %(message)s")
 
