@@ -1,7 +1,8 @@
 import pandas as pd
 from matplotlib import pyplot as plt
+from pathlib import Path
 
-from cenfind.constants import ROOT_DIR
+ROOT_DIR = Path("../../../")
 
 pd.options.display.max_columns = 50
 

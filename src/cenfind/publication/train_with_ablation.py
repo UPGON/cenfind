@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from numpy.random import seed
 
 seed(1)
@@ -8,10 +10,11 @@ tf.random.set_seed(2)
 from datetime import datetime
 from spotipy.model import SpotNet
 from spotipy.model import Config
-from cenfind.constants import PREFIX_REMOTE
 from cenfind.core.data import Dataset
-from cenfind.training.train import load_pairs, transforms
+from cenfind.core.loading import load_pairs
+from cenfind.training.config import transforms
 
+PREFIX_REMOTE = Path("/data1/centrioles/canonical/")
 config = Config(
     n_channel_in=1,
     backbone="unet",
@@ -32,11 +35,10 @@ config = Config(
 
 
 def main():
-    ds = Dataset(PREFIX_REMOTE / 'centrioles', projection_suffix='_max')
+    ds = Dataset(PREFIX_REMOTE / 'centrioles')
 
-    train_x, train_y = load_pairs(ds, split="train", transform=transforms, sigma=1.5)
-    validation_x, validation_y = load_pairs(ds, split="validation", sigma=5)
-    test_x, test_y = load_pairs(ds, split="test", sigma=1.5)
+    train_x, train_y = load_pairs(ds, split="train", transforms=transforms, sigma=1.5, suffix='_max')
+    test_x, test_y = load_pairs(ds, split="test", sigma=1.5, suffix='_max')
 
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 

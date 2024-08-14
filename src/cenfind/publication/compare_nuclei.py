@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -8,7 +9,9 @@ from tqdm import tqdm
 
 from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_nuclei
-from cenfind.constants import datasets, PREFIX_REMOTE
+from cenfind.constants import datasets
+
+PREFIX_REMOTE = Path("/data1/centrioles/canonical")
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(asctime)s: %(message)s")
 
@@ -23,13 +26,13 @@ def main():
         dataset = Dataset(path_dataset)
         for field in tqdm(dataset.fields):
             nuclei_mask = field.mask(0)
-            nuclei_preds = extract_nuclei(field=field, model=model_stardist, channel=0)
+            nuclei_preds = extract_nuclei(field=field, channel=0, model=model_stardist )
             nuclei_actual = extract_nuclei(field=field, annotation=nuclei_mask, channel=0)
             centres_preds = [c.centre for c in nuclei_preds]
             centres_actual = [c.centre for c in nuclei_actual]
             logging.info("Found %d nuclei instead of %d" % (len(centres_preds), len(centres_actual)))
-            preds = preds + [p.position for p in centres_preds]
-            actual = actual + [p.position for p in centres_actual]
+            preds = preds + centres_preds
+            actual = actual + centres_actual
         res = points_matching(preds, actual, cutoff_distance=50)
         accuracies.append({'DATASET': dataset.path.name,
                            'F1': np.round(res.f1, 3)})

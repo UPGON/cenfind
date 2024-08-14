@@ -1,9 +1,14 @@
 from datetime import datetime
+from pathlib import Path
+
 from spotipy.model import SpotNet
-from cenfind.training.config import config_unet
+
 from cenfind.cli.train import fetch_all_fields
-from cenfind.constants import PREFIX_REMOTE, datasets
+from cenfind.constants import datasets
 from cenfind.core.data import Dataset
+from cenfind.training.config import config_unet
+
+PREFIX_REMOTE = Path("/data1/centrioles/canonical/")
 
 
 def main():

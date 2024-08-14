@@ -1,4 +1,5 @@
 from typing import Tuple
+
 import cv2
 import numpy as np
 from skimage.exposure import rescale_intensity
@@ -6,7 +7,7 @@ from skimage.feature import blob_log
 from spotipy.utils import points_matching
 
 from cenfind.core.data import Field
-from cenfind.core.structures import Point
+from cenfind.core.structures import Centriole
 
 
 def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
@@ -15,7 +16,7 @@ def blob2point(keypoint: cv2.KeyPoint) -> tuple[int, ...]:
 
 
 def log_skimage(data: Field, channel: int, **kwargs) -> list:
-    data = data.channel(channel)
+    data = data.data[channel, :, :]
     data = rescale_intensity(data, out_range=(0, 1))
     foci = blob_log(data, min_sigma=1, max_sigma=2, num_sigma=10, threshold=0.1)
     res = [(int(r), int(c)) for r, c, _ in foci]
@@ -24,7 +25,7 @@ def log_skimage(data: Field, channel: int, **kwargs) -> list:
 
 
 def simpleblob_cv2(data: Field, channel: int, **kwargs) -> list:
-    data = data.channel(channel)
+    data = data.data[channel, :, :]
     foci = rescale_intensity(data, out_range="uint8")
     params = cv2.SimpleBlobDetector_Params()
 
@@ -45,15 +46,15 @@ def simpleblob_cv2(data: Field, channel: int, **kwargs) -> list:
 
 
 def run_detection(
-    method,
-    data: Field,
-    annotation: np.ndarray,
-    tolerance,
-    channel=None,
-    model_path=None,
-) -> Tuple[list[Point], float]:
+        method,
+        data: Field,
+        annotation: np.ndarray,
+        tolerance,
+        channel=None,
+        model_path=None,
+) -> Tuple[list[Centriole], float]:
     _foci = method(data, foci_model_file=model_path, channel=channel)
     res = points_matching(annotation, _foci, cutoff_distance=tolerance)
     f1 = np.round(res.f1, 3)
-    foci = [Point((r, c), label="Point") for r, c in _foci]
+    foci = [Centriole(field=data, centre=(r, c), channel=channel, label="Point") for r, c in _foci]
     return foci, f1

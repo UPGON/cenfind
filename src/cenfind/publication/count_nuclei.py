@@ -1,14 +1,17 @@
+from pathlib import Path
+
 import cv2
 import pandas as pd
 from dotenv import dotenv_values
 from tqdm import tqdm
 
+from cenfind.constants import datasets
 from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_nuclei
-from cenfind.core.measure import flag, full_in_field
+from cenfind.core.measure import flag
 from cenfind.core.visualisation import draw_contour, create_vignette
-from cenfind.constants import datasets, PREFIX_REMOTE
 
+PREFIX_REMOTE = Path("/data1/centrioles/canonical")
 config = dotenv_values('.env')
 
 pd.set_option('display.max_rows', None)
@@ -22,15 +25,14 @@ def main():
     for dataset in datasets:
         dataset = Dataset(PREFIX_REMOTE / dataset)
         for field in tqdm(dataset.fields):
-            mask = field.mask(0)
             nuclei = extract_nuclei(field, 0)
             vignette = create_vignette(field, 1, 0)
             for nucleus in nuclei:
                 centre = nucleus.centre
-                is_full = full_in_field(centre.centre, mask, .05)
+                is_full = nucleus.full_in_field
                 records.append({'dataset': dataset.path.name,
                                 'field': field.name,
-                                'centre': centre.centre,
+                                'centre': centre,
                                 'is_full': is_full})
                 draw_contour(vignette, nucleus, color=flag(is_full))
 

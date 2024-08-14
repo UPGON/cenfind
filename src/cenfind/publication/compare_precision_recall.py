@@ -1,10 +1,13 @@
+from pathlib import Path
+
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from cenfind.constants import ROOT_DIR
 from cenfind.constants import protein_positions
 
 pd.options.display.max_columns = 50
+
+ROOT_DIR = Path("../../../")
 
 
 def main():
