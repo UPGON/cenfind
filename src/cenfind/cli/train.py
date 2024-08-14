@@ -1,28 +1,20 @@
 import argparse
-import contextlib
 import json
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple
 
-import albumentations as alb
-import numpy as np
-import tifffile as tf
 from numpy.random import seed
 from spotipy.model import SpotNet, Config
-from spotipy.utils import points_to_prob, normalize_fast2d
 from tensorflow.random import set_seed
-from tqdm import tqdm
 
 from cenfind.core.data import Dataset
+from cenfind.core.loading import fetch_all_fields
 from cenfind.training.config import config_multiscale
 
 seed(1)
 set_seed(2)
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -37,88 +29,15 @@ def read_config(path):
     return Config(**config_dict)
 
 
-def load_foci(path) -> np.ndarray:
-    """
-    Load annotation file from text file given channel
-    loaded as row col, row major.
-    ! the text format is x, y; origin at top left;
-    :param channel:
-    :return:
-    """
-
-    return np.loadtxt(str(path), dtype=int, delimiter=",")
-
-
-def load_pairs(
-        ds: Dataset, split: str, sigma: float = 1.5, transforms: alb.Compose = None
-) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Load two arrays, the images and the foci masks
-    path: the path to the ds
-    split: either train or test
-    """
-
-    channels = []
-    masks = []
-
-    with open(ds.path / f"{split}.txt", "r") as f:
-        pairs = [l.strip("\n").split(",") for l in f.readlines()]
-    for field, channel in pairs:
-        data = tf.imread(ds.projections / f"{field}_max.tif")[int(channel), :, :]
-        foci = load_foci(ds.annotations / "centrioles" / f"{field}_max_C{channel}.txt")
-
-        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            image = normalize_fast2d(data, clip=True)
-
-        if len(foci) == 0:
-            mask = np.zeros(image.shape, dtype="uint16")
-        else:
-            mask = points_to_prob(foci, shape=image.shape, sigma=sigma)
-
-        if transforms is not None:
-            transformed = transforms(image=image, mask=mask)
-            image = transformed["image"]
-            mask = transformed["mask"]
-
-        channels.append(image)
-        masks.append(mask)
-
-    return np.stack(channels), np.stack(masks)
-
-
-def fetch_all_fields(datasets: list[Dataset], transforms: alb.Compose = None):
-    all_train_x = []
-    all_train_y = []
-
-    all_test_x = []
-    all_test_y = []
-
-    for ds in tqdm(datasets):
-        train_x, train_y = load_pairs(ds, split="train", transforms=transforms)
-        test_x, test_y = load_pairs(ds, split="test")
-        all_train_x.append(train_x)
-        all_train_y.append(train_y)
-        all_test_x.append(test_x)
-        all_test_y.append(test_y)
-
-    all_train_x = np.concatenate(all_train_x, axis=0)
-    all_train_y = np.concatenate(all_train_y, axis=0)
-
-    all_test_x = np.concatenate(all_test_x, axis=0)
-    all_test_y = np.concatenate(all_test_y, axis=0)
-
-    return all_train_x, all_train_y, all_test_x, all_test_y
-
-
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
         "train", help="Train a Spotnet model using the datasets"
     )
     parser.add_argument("datasets", type=Path, nargs="+", help="Path to the dataset")
     parser.add_argument(
-        "--model_path", type=Path, required=True, help="Path to the model fit"
+        "--model_path", type=Path, required=True, default=Path(".").resolve(), help="Path to the model fit"
     )
-    parser.add_argument("--epochs", type=int, required=True, help="Number of epochs")
+    parser.add_argument("--epochs", type=int, required=True, default=1, help="Number of epochs")
 
     return parser
 
@@ -129,8 +48,11 @@ def run(args):
     all_train_x, all_train_y, all_test_x, all_test_y = fetch_all_fields(datasets)
     logger.debug("Loading %s" % (len(all_train_x)))
 
-    # time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    time_stamp = "20240813"
+    if not args.model_path.exists():
+        logger.info("Creating model folder (%s)" % (str(args.model_path)))
+        args.model_path.mkdir()
+
+    time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     model_multiscale = SpotNet(
         config_multiscale, name=time_stamp, basedir=args.model_path
     )
@@ -144,13 +66,8 @@ def run(args):
 
 
 if __name__ == "__main__":
-    PATH_BASE = Path("/Users/buergy/Dropbox/epfl/projects/cenfind/data/cenfind_datasets/")
-    datasets = ["RPE1p53+Cnone_CEP63+CETN2+PCNT_1",
-                "RPE1wt_CEP63+CETN2+PCNT_1",
-                "RPE1wt_CEP152+GTU88+PCNT_1",
-                "RPE1wt_CP110+GTU88+PCNT_2",
-                "U2OS_CEP63+SAS6+PCNT_1"]
-    args = argparse.Namespace(datasets=[PATH_BASE / ds for ds in datasets],
-                              model_path=Path("/Users/buergy/Dropbox/epfl/projects/cenfind/models/"),
+    datasets = [Path("../../../data/RPE1wt_CEP63+CETN2+PCNT_1")]
+    args = argparse.Namespace(datasets=datasets,
+                              model_path=Path("../../../models/"),
                               epochs=100)
     run(args)

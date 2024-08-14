@@ -11,7 +11,7 @@ from cenfind.core.visualisation import create_vignette
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
         "vignettes",
-        help="VIGNETTE: create png version of channel+nuclei for annotation tool",
+        help="Create png versions of channel+nuclei for annotation tool",
     )
     parser.add_argument("dataset", type=Path, help="the path to the dataset")
     parser.add_argument(

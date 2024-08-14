@@ -9,7 +9,16 @@ from matplotlib import pyplot as plt
 from cenfind.core.data import Dataset
 logging.basicConfig(level=logging.ERROR)
 
-def main(args=None):
+def register_parser(parent_subparsers):
+    parser = parent_subparsers.add_parser(
+        "analyse",
+        help="Analyse predictions",
+    )
+    parser.add_argument("dataset", type=Path, help="Path to the dataset folder")
+
+    return parser
+
+def run(args):
 
     sns.set_theme()
     dataset = Dataset(args.dataset)
@@ -59,4 +68,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     args = argparse.Namespace(dataset=Path("../../../data/dataset_test"))
-    main(args)
+    run(args)

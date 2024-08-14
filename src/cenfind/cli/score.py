@@ -1,7 +1,6 @@
 import argparse
 import logging
 import os
-import sys
 from pathlib import Path
 
 import pandas as pd
@@ -21,7 +20,6 @@ from cenfind.core.serialise import (
 from cenfind.core.statistics import proportion_cilia, frequency
 from cenfind.core.visualisation import visualisation, create_vignette
 
-logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -176,13 +174,20 @@ def run(args):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(dataset=Path('data/dataset_test'),
-                              model=Path('models/master'),
+    import shutil
+    args = argparse.Namespace(dataset=Path('../../../data/dataset_test'),
+                              model=Path('../../../models/master'),
                               channel_nuclei=0,
                               channel_centrioles=[1, 2, 3],
                               channel_cilia=None,
                               vicinity=50,
-                              cpu=True,
-                              verbose=True
+                              cpu=False,
+                              verbose=False
                               )
+
+    for folder in ("logs", "predictions", "statistics", "vignettes", "visualisation"):
+        path = str(args.dataset / folder)
+        print(f"Deleting {path}")
+        shutil.rmtree(path)
+
     run(args)
