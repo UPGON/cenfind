@@ -1,14 +1,19 @@
 import sys
 import argparse
 from pathlib import Path
-
+import logging
+import numpy as np
 import pandas as pd
 import tifffile as tf
 
-from cenfind.core.data import Dataset
-from cenfind.core.visualisation import visualisation
-from cenfind.core.log import get_logger
+from cenfind.core.data import Dataset, Field
+from cenfind.core.loading import load_foci
+from cenfind.core.visualisation import visualisation, create_vignette
+from cenfind.core.statistics import evaluate
 
+ROOT_DIR = Path("../../../")
+
+logger = logging.getLogger(__name__)
 
 def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
@@ -47,7 +52,6 @@ def register_parser(parent_subparsers):
 def run(args):
     dataset = Dataset(args.dataset)
     dataset.setup()
-    logger = get_logger(__name__, console=1, file=dataset.logs / "cenfind.log")
     if not any((dataset.annotations / "centrioles").iterdir()):
         logger.error(
             f"The dataset {dataset.path.name} has no annotation. You can run `cenfind predict` instead"
@@ -62,22 +66,24 @@ def run(args):
     path_visualisation_model = dataset.visualisation / args.model.name
     path_visualisation_model.mkdir(exist_ok=True)
 
-    from cenfind.core.measure import evaluate
     from cenfind.core.detectors import extract_foci, extract_nuclei
 
     perfs = []
-    with open(dataset.path / f"test.txt", "r") as f:
+    with open(dataset.path / "test.txt", "r") as f:
         pairs = [l.strip("\n").split(",") for l in f.readlines()]
-    for field, channel in pairs:
-        annotation = field.annotation(channel)
+
+    for field_name, channel in pairs:
+        channel = int(channel)
+        field = Field(dataset.projections / f"{field_name}.tif")
+        annotation = load_foci(dataset.annotations / "centrioles" / f"{field.name}_C{channel}.txt")
         predictions = extract_foci(field, channel, args.model, prob_threshold=args.threshold)
         nuclei = extract_nuclei(field, args.channel_nuclei)
 
         for tol in tolerances:
             logger.info("Processing %s %s %s" % (field, channel, tol))
             perf = evaluate(field, channel, annotation, predictions, tol, threshold=args.threshold)
-            vis = visualisation(field=field, channel_centrioles=channel, nuclei=nuclei,
-                                channel_nuclei=args.channel_nuclei)
+            background = create_vignette(field, marker_index=channel, nuclei_index=args.channel_nuclei)
+            vis = visualisation(background=background, centrioles=predictions, nuclei=nuclei)
             tf.imwrite(path_visualisation_model / f"{field.name}_C{channel}_pred.png", vis)
             perfs.append(perf)
 
@@ -94,11 +100,11 @@ def run(args):
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(dataset=Path('data/dataset_test'),
-                              model=Path('models/master'),
+    args = argparse.Namespace(dataset=ROOT_DIR/ 'data/dataset_test',
+                              model=ROOT_DIR / 'models/master',
                               channel_nuclei=0,
                               tolerance=3,
                               threshold=.5,
-                              performances_file="out/perfs.txt"
+                              performances_file=ROOT_DIR / "out/perfs.txt"
                               )
     run(args)

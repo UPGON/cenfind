@@ -1,12 +1,7 @@
 import re
-from pathlib import Path
 
 import pandas as pd
 
-PREFIX_LOCAL = Path("/Users/buergy/Dropbox/epfl/datasets")
-PREFIX_REMOTE = Path("/data1/centrioles/canonical")
-
-ROOT_DIR = Path("/")
 datasets = [
     "RPE1wt_CEP63+CETN2+PCNT_1",
     "RPE1wt_CP110+GTU88+PCNT_2",
@@ -57,7 +52,7 @@ if __name__ == "__main__":
     protein_positions = pd.DataFrame().from_dict(protein_positions, orient="index")
     proteins_names = pd.DataFrame.from_dict(protein_names, orient="index")
 
-    datasets.to_csv("data/datasets.tsv", sep="\t")
-    protein_positions.to_csv("data/protein_positions.tsv", sep="\t")
-    proteins_names.to_csv("data/proteins_names.tsv", sep="\t")
-    cell_types.to_csv("data/cell_types.tsv", sep="\t")
+    datasets.to_csv("../../data/datasets.tsv", sep="\t")
+    protein_positions.to_csv("../../data/protein_positions.tsv", sep="\t")
+    proteins_names.to_csv("../../data/proteins_names.tsv", sep="\t")
+    cell_types.to_csv("../../data/cell_types.tsv", sep="\t")
