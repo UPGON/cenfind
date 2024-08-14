@@ -1,5 +1,5 @@
 import re
-
+from pathlib import Path
 import pandas as pd
 
 datasets = [
@@ -47,12 +47,14 @@ pattern_dataset = re.compile(
 UNITS = {"well", "field"}
 
 if __name__ == "__main__":
+    common_path = Path("../../data/database_cenfind/")
+
     datasets = pd.DataFrame(datasets)
     cell_types = pd.DataFrame().from_dict(celltype_names, orient="index")
     protein_positions = pd.DataFrame().from_dict(protein_positions, orient="index")
     proteins_names = pd.DataFrame.from_dict(protein_names, orient="index")
 
-    datasets.to_csv("../../data/datasets.tsv", sep="\t")
-    protein_positions.to_csv("../../data/protein_positions.tsv", sep="\t")
-    proteins_names.to_csv("../../data/proteins_names.tsv", sep="\t")
-    cell_types.to_csv("../../data/cell_types.tsv", sep="\t")
+    datasets.to_csv(common_path / "datasets.tsv", sep="\t")
+    protein_positions.to_csv(common_path / "protein_positions.tsv", sep="\t")
+    proteins_names.to_csv(common_path / "proteins_names.tsv", sep="\t")
+    cell_types.to_csv(common_path / "cell_types.tsv", sep="\t")
