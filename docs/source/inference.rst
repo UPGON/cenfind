@@ -5,7 +5,7 @@ Prediction
 Inputs
 ------
 
-The input data should be TIF images with a pixel size of about 100 nm. This constraint is due to the canonical model used in SpotNet and in StarDist. The data consists of a set of fields of view containing at least one nucleus channel and at least one centriole marker channel. The field of view should be max-projected along the depth (z-axis) and saved under a directory called projections/ under the dataset directory. The file name serves as the key for the rest of the analysis.
+The input data should be TIF images with a pixel size of about 100 nm. This constraint is due to the canonical model used in SpotNet and in StarDist. The data consists of a set of fields of view containing at least one nucleus channel and at least one centriole marker channel. The field of view should be max-projected along the depth (z-axis) and saved under a directory called ``projections/`` under the dataset directory. The file name serves as the key for the rest of the analysis.
 
 Centriole predictions with SpotNet
 ----------------------------------
