@@ -19,7 +19,7 @@ Finally, it explains the architecture of the API.
 Check out the :doc:`usage` section for further information including how to :ref:`install <installation>` the pipeline.
 
 .. warning::
-   The project and its documentation are under active development.
+   The project and its documentation are not anymore under active development. Please contact the lab https://www.epfl.ch/labs/gonczy-lab/lab-members/ for further information about potential development.
 
 Contents
 --------
