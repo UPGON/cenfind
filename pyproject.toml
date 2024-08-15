@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cenfind"
-version = "0.15.0"
+version = "0.15.1"
 description = "Score cells for centrioles in IF data"
 authors = ["Leo Burgy <leo.burgy@epfl.ch>"]
 repository = "https://github.com/UPGON/cenfind"
@@ -31,7 +31,6 @@ pandas = "^1.4.1"
 tqdm = "^4.62.3"
 albumentations = "^1.3.0"
 seaborn = "^0.13.0"
-furo = "^2024.8.6"
 
 [tool.poetry.scripts]
 cenfind = "cenfind.__main__:main"
@@ -43,8 +42,8 @@ pytomlpp = "^1.0.10"
 labelbox = { extras = ["data"], version = "^3.46.0" }
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "^7.2.6"
-sphinx-rtd-theme = "^1.3.0"
+sphinx = "^7.3.7"
+furo = "^2024.8.6"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "setuptools>=45", "setuptools_scm[toml]>=6.2"]
