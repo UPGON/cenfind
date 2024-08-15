@@ -8,6 +8,7 @@ build:
     post_create_environment:
       - pip install poetry
       - poetry config virtualenvs.create false
+      - pip install furo
     post_install:
       - poetry install --with docs
 
