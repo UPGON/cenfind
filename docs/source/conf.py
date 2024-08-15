@@ -19,7 +19,7 @@ extensions = [
 templates_path = ['_templates']
 exclude_patterns = ['generated/*']
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
 html_static_path = []
 html_logo = '../../figures/logos/cenfind_logo_full_dark.png'
