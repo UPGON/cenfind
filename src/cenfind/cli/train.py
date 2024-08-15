@@ -3,15 +3,15 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Tuple, List
 
 from numpy.random import seed
 from spotipy.model import SpotNet, Config
 from tensorflow.random import set_seed
 
-from cenfind.core.data import Dataset
+from cenfind.core.data import Dataset, Field
 from cenfind.core.loading import fetch_all_fields
 from cenfind.training.config import config_multiscale
-from cenfind.constants import datasets
 
 seed(1)
 set_seed(2)
@@ -35,6 +35,7 @@ def register_parser(parent_subparsers):
         "train", help="Train a Spotnet model using the datasets"
     )
     parser.add_argument("datasets", type=Path, nargs="+", help="Path to the dataset")
+    parser.add_argument("channels", type=int, nargs="+", help="the channel numbers to train on, e.g., 1 2 3")
     parser.add_argument(
         "--model_path", type=Path, required=True, default=Path(".").resolve(), help="Path to the model fit"
     )
@@ -43,10 +44,21 @@ def register_parser(parent_subparsers):
     return parser
 
 
-def run(args):
-    datasets = [Dataset(path) for path in args.datasets]
+def write_split(split: List[Tuple[Field, int]], dst: Path) -> None:
+    with open(dst, "w") as f:
+        for field, channel in split:
+            line = f"{field.name},{channel}\n"
+            f.write(line)
 
-    all_train_x, all_train_y, all_test_x, all_test_y = fetch_all_fields(datasets)
+
+def run(args):
+    dataset = Dataset(args.dataset)
+
+    train_split, test_split = dataset.split_pairs(channels=args.channels)
+    write_split(train_split, dataset.path / "train.txt")
+    write_split(test_split, dataset.path / "test.txt")
+
+    all_train_x, all_train_y, all_test_x, all_test_y = fetch_all_fields(dataset)
     logger.debug("Loading %s" % (len(all_train_x)))
 
     if not args.model_path.exists():
@@ -67,8 +79,8 @@ def run(args):
 
 
 if __name__ == "__main__":
-    datasets = [Path(f"/data1/centrioles/canonical/{ds}") for ds in datasets]
-    args = argparse.Namespace(datasets=datasets,
+    args = argparse.Namespace(dataset=Path("../../../data/RPE1wt_CEP63+CETN2+PCNT_1/"),
+                              channels=(1,2,3),
                               model_path=Path("../../../models/"),
                               epochs=100)
     run(args)

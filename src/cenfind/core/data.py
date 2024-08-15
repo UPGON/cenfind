@@ -1,10 +1,13 @@
-from pathlib import Path
-from typing import List
+import itertools
 import logging
+import random
+from pathlib import Path
+from typing import List, Tuple
 
 import numpy as np
 import tifffile as tf
 from attrs import define, field, validators
+
 logger = logging.getLogger(__name__)
 
 
@@ -139,3 +142,28 @@ class Dataset:
             raise ValueError(f"No field found in {self.projections}")
 
         return result
+
+    def split_pairs(self, channels: Tuple[int], p=0.9, seed=1993) -> tuple[list[Field], list[Field]]:
+        """
+        Split a list of pairs (field, channel).
+
+        Args:
+            channels: the channels to choose from
+            p: the train proportion, default to .9
+            seed: the seed to reproduce the splitting
+        Returns:
+            train_split, test_split
+        """
+        pairs = [(field, int(channel)) for field, channel in itertools.product(self.fields, channels)]
+        random.seed(seed)
+        size = len(pairs)
+        split_idx = int(p * size)
+        shuffled = random.sample(pairs, k=size)
+        split_test = shuffled[split_idx:]
+        split_train = shuffled[:split_idx]
+
+        return split_train, split_test
+
+    def choose_channel(self, fields: list[Field], channels: list[int]) -> list[tuple[Field, int]]:
+        """Pick a channel for each field."""
+        return [(field, int(channel)) for field, channel in itertools.product(fields, channels)]

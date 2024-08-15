@@ -6,7 +6,6 @@ import albumentations as alb
 import numpy as np
 import tifffile as tf
 from spotipy.utils import points_to_prob, normalize_fast2d
-from tqdm import tqdm
 
 from cenfind.core.data import Dataset
 
@@ -65,20 +64,19 @@ def load_pairs(
     return np.stack(channels), np.stack(masks)
 
 
-def fetch_all_fields(datasets: list[Dataset], transforms: alb.Compose = None):
+def fetch_all_fields(dataset: Dataset, transforms: alb.Compose = None):
     all_train_x = []
     all_train_y = []
 
     all_test_x = []
     all_test_y = []
 
-    for ds in tqdm(datasets):
-        train_x, train_y = load_pairs(ds, split="train", suffix="_max", transforms=transforms)
-        test_x, test_y = load_pairs(ds, suffix="_max", split="test")
-        all_train_x.append(train_x)
-        all_train_y.append(train_y)
-        all_test_x.append(test_x)
-        all_test_y.append(test_y)
+    train_x, train_y = load_pairs(dataset, split="train", suffix="_max", transforms=transforms)
+    test_x, test_y = load_pairs(dataset, suffix="_max", split="test")
+    all_train_x.append(train_x)
+    all_train_y.append(train_y)
+    all_test_x.append(test_x)
+    all_test_y.append(test_y)
 
     all_train_x = np.concatenate(all_train_x, axis=0)
     all_train_y = np.concatenate(all_train_y, axis=0)
