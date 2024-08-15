@@ -28,7 +28,7 @@ def register_parser(parent_subparsers):
         "score", help="Score the projections given the channels"
     )
     parser.add_argument("dataset", type=Path, help="Path to the dataset")
-    parser.add_argument("--model", type=Path, help="Absolute path to the model folder")
+    parser.add_argument("model", type=Path, help="Path to the model folder")
     parser.add_argument(
         "--channel_nuclei",
         "-n",
@@ -58,7 +58,6 @@ def register_parser(parent_subparsers):
     )
 
     parser.add_argument("--cpu", action="store_true", help="Only use the cpu")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Use logging instead of progress bar")
 
     return parser
 
@@ -70,10 +69,7 @@ def run(args):
     dataset = Dataset(args.dataset)
     dataset.setup()
 
-    if args.verbose:
-        pbar = dataset.fields
-    else:
-        pbar = tqdm(dataset.fields)
+    pbar = tqdm(dataset.fields)
 
     logger.info("Num GPUs Available: %s" % len(tf.config.list_physical_devices('GPU')))
 
@@ -86,8 +82,7 @@ def run(args):
 
     for field in pbar:
         logger.info("Processing field %s" % field.name)
-        if not args.verbose:
-            pbar.set_description(f"{field.name}")
+        pbar.set_description(f"{field.name}")
 
         if field.data.ndim != 3:
             logger.error("Image (%s) is not in CXY format (Actual shape: %s)" % (field.name, field.data.shape))
@@ -114,12 +109,10 @@ def run(args):
             continue
         save_contours(dataset.nuclei / f"{field.name}_C{args.channel_nuclei}.json", nuclei)
 
-        if not args.verbose:
-            pbar_dict = {"nuclei": len(nuclei)}
+        pbar_dict = {"nuclei": len(nuclei)}
         if channel_centrioles is not None:
             for channel in channel_centrioles:
-                if not args.verbose:
-                    pbar_dict["channel"] = channel
+                pbar_dict["channel"] = channel
                 centrioles = extract_foci(field=field, channel=channel, foci_model_file=args.model)
                 assignment = Assigner(centrioles, nuclei, vicinity=args.vicinity)
                 centrioles_nuclei = assignment.assign_centrioles()
@@ -136,9 +129,8 @@ def run(args):
                     'nuclei': nuclei,
                     'visualisation': vis}
 
-                if not args.verbose:
-                    pbar_dict[f"centrioles"] = len(centrioles)
-                    pbar.set_postfix(pbar_dict)
+                pbar_dict[f"centrioles"] = len(centrioles)
+                pbar.set_postfix(pbar_dict)
 
         if args.channel_cilia is not None:
             channel = args.channel_cilia
@@ -149,9 +141,8 @@ def run(args):
             save_points(dataset.cilia / f"{field.name}_C{channel}.tsv",
                         ciliae)
 
-            if not args.verbose:
-                pbar_dict["cilia"] = len(ciliae)
-                pbar.set_postfix(pbar_dict)
+            pbar_dict["cilia"] = len(ciliae)
+            pbar.set_postfix(pbar_dict)
 
     for (field, channel), data in results.items():
         save_points(dataset.centrioles / f"{field}_C{channel}.tsv", data['centrioles'])
@@ -176,18 +167,18 @@ def run(args):
 if __name__ == "__main__":
     import shutil
     args = argparse.Namespace(dataset=Path('../../../data/dataset_test'),
-                              model=Path('../../../models/master'),
+                              model=Path('../../../models/archives/master'),
                               channel_nuclei=0,
                               channel_centrioles=[1, 2, 3],
                               channel_cilia=None,
                               vicinity=50,
                               cpu=False,
-                              verbose=False
                               )
 
     for folder in ("logs", "predictions", "statistics", "vignettes", "visualisation"):
-        path = str(args.dataset / folder)
+        path = args.dataset / folder
         print(f"Deleting {path}")
-        shutil.rmtree(path)
+        if path.exists():
+            shutil.rmtree(path)
 
     run(args)
