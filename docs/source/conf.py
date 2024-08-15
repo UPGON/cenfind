@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
 project = 'CenFind'
 copyright = '2023, Leo Burgy'
 author = 'Leo Burgy'
-version = '0.15.0'
+version = '0.15.1'
 release = version
 
 extensions = [
