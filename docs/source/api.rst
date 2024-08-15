@@ -6,7 +6,7 @@ Data
 
 Manage the two level of the file system, that is, the Dataset class to set up the subdirectories and the Field class that loads the image and specify how to operate on it.
 
-.. automodule:: cenfind.core.data
+.. automodule:: src.cenfind.core.data
     :members:
     :noindex:
 
