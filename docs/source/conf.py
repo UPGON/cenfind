@@ -26,6 +26,6 @@ html_logo = '../../figures/logos/cenfind_logo_full_dark.png'
 html_favicon = '../../figures/logos/favicon.ico'
 html_theme_options = {
     "sidebar_hide_name": True,
-    "top_of_page_button": None,
+    # "top_of_page_button": None,
 }
 html_sidebars = {}

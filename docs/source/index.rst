@@ -31,7 +31,6 @@ Contents
    inference
    statistics
    retraining
-   architecture
    api
    contribute
    citation
