@@ -55,8 +55,3 @@ Training a new model
 --------------------
 
 To retrain a new model, you can simply run ``cenfind train`` and pass the dataset that contains the projections and the corresponding annotations (in annotations/centrioles/\*.txt), as well as the parent folder in which the model weights will be saved. You will also specify the number of epochs to train.
-
-Using spotiflow
----------------
-
-CenFind uses an old version of Spotiflow, namely Spotipy. We highly recommend to follow the instructions from Spotiflow (https://github.com/weigertlab/spotiflow/) to train a newer model and to adapt CenFind to process the output of Spotiflow.
