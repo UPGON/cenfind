@@ -1,14 +1,13 @@
 import os
 import sys
 from datetime import datetime
-from importlib.metadata import version
 sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
 
 
 project = 'CenFind'
 author = 'Leo Burgy'
 copyright = f'{datetime.now().year}, {author}'
-version = version("cenfind")
+version = "0.15.2"
 release = version
 
 extensions = [
