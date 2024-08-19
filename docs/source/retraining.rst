@@ -47,22 +47,6 @@ How to save annotation
 
 We recommend the tool Labelbox to annotate the dataset. In this respect, CenFind provides ``cenfind vignettes`` that creates 2-channel images ready for export to Labelbox. Specifically, each image will be saved as 8-bit PNG with a text label indicating the file name and the centriolar channel used. Moreover, the nuclei will appear in the background to help you discriminate real foci from stray spots. In a second step, you can load those vignettes in you Labelbox session and create a new project. Finally, when you are done with the annotation, you need to download the annotations and save them under annotations/centrioles/ in one file per field-channel pair with the file name as <field_name>_C<channel>.txt.
 
-.. code-block:: shell
-    usage: CENFIND vignettes [-h] --channel_nuclei CHANNEL_NUCLEI --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...] [--projection_suffix PROJECTION_SUFFIX] dataset
-
-    positional arguments:
-    dataset               the path to the dataset
-
-    optional arguments:
-    -h, --help            show this help message and exit
-    --channel_nuclei CHANNEL_NUCLEI, -n CHANNEL_NUCLEI
-                        the index of the nuclei (often, 0 or 3, first or last) (default: None)
-    --channel_centrioles CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...], -c CHANNEL_CENTRIOLES [CHANNEL_CENTRIOLES ...]
-                        the index of the channels (default: None)
-    --projection_suffix PROJECTION_SUFFIX, -s PROJECTION_SUFFIX
-                        the suffix indicating projection, e.g., `_max` or `_Projected`, empty if not specified (default: )
-
-
 Below is an example vignette with nuclei in blue and the centriolar channel in green:
 
 .. image:: RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_000_max_C1.png
@@ -70,19 +54,7 @@ Below is an example vignette with nuclei in blue and the centriolar channel in g
 Training a new model
 --------------------
 
-To retrain a new model, you can simply run ``cenfind train`` and pass the dataset that contains the projections and the corresponding annotations (in annotations/centrioles/*.txt), as well as the parent folder in which the model weights will be saved. You will also specify the number of epochs to train.
-
-.. code-block:: shell
-    usage: CENFIND train [-h] --model_path MODEL_PATH --epochs EPOCHS datasets [datasets ...]
-
-    positional arguments:
-      datasets              Path to the dataset
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      --model_path MODEL_PATH
-                            Path to the model fit (default: ./)
-      --epochs EPOCHS       Number of epochs (default: 1)
+To retrain a new model, you can simply run ``cenfind train`` and pass the dataset that contains the projections and the corresponding annotations (in annotations/centrioles/\*.txt), as well as the parent folder in which the model weights will be saved. You will also specify the number of epochs to train.
 
 Using spotiflow
 ---------------

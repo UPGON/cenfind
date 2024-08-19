@@ -1,12 +1,14 @@
 import os
 import sys
+from datetime import datetime
+from importlib.metadata import version
 sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
 
 
 project = 'CenFind'
-copyright = '2023, Leo Burgy'
 author = 'Leo Burgy'
-version = '0.15.1'
+copyright = f'{datetime.now().year}, {author}'
+version = version("cenfind")
 release = version
 
 extensions = [
@@ -26,6 +28,5 @@ html_logo = '../../figures/logos/cenfind_logo_full_dark.png'
 html_favicon = '../../figures/logos/favicon.ico'
 html_theme_options = {
     "sidebar_hide_name": True,
-    # "top_of_page_button": None,
 }
 html_sidebars = {}
