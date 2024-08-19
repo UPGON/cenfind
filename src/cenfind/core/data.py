@@ -143,7 +143,7 @@ class Dataset:
 
         return result
 
-    def split_pairs(self, channels: Tuple[int], p=0.9, seed=1993) -> tuple[list[Field], list[Field]]:
+    def split_pairs(self, channels: Tuple[int], p=0.9, seed=1993) -> tuple[list[tuple[Field, int]], list[tuple[Field, int]]]:
         """
         Split a list of pairs (field, channel).
 
@@ -154,13 +154,17 @@ class Dataset:
         Returns:
             train_split, test_split
         """
-        pairs = [(field, int(channel)) for field, channel in itertools.product(self.fields, channels)]
         random.seed(seed)
-        size = len(pairs)
+
+        size = len(self.fields)
         split_idx = int(p * size)
+        _channels = random.choices(channels, k=size)
+
+        pairs = [(field, int(channel)) for field, channel in zip(self.fields, _channels)]
+
         shuffled = random.sample(pairs, k=size)
-        split_test = shuffled[split_idx:]
         split_train = shuffled[:split_idx]
+        split_test = shuffled[split_idx:]
 
         return split_train, split_test
 

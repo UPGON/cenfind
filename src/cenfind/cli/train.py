@@ -11,7 +11,7 @@ from tensorflow.random import set_seed
 
 from cenfind.core.data import Dataset, Field
 from cenfind.core.loading import fetch_all_fields
-from cenfind.training.config import config_multiscale
+from cenfind.training.config import config_multiscale, transforms
 
 seed(1)
 set_seed(2)
@@ -54,11 +54,13 @@ def write_split(split: List[Tuple[Field, int]], dst: Path) -> None:
 def run(args):
     dataset = Dataset(args.dataset)
 
-    train_split, test_split = dataset.split_pairs(channels=args.channels)
-    write_split(train_split, dataset.path / "train.txt")
-    write_split(test_split, dataset.path / "test.txt")
+    split_train, split_test = dataset.split_pairs(channels=args.channels)
+    if not (dataset.path / "train.txt").exists():
+        write_split(split_train, dataset.path / "train.txt")
+    if not (dataset.path / "test.txt").exists():
+        write_split(split_test, dataset.path / "test.txt")
 
-    all_train_x, all_train_y, all_test_x, all_test_y = fetch_all_fields(dataset)
+    all_train_x, all_train_y, all_test_x, all_test_y = fetch_all_fields(dataset, transforms=transforms)
     logger.debug("Loading %s" % (len(all_train_x)))
 
     if not args.model_path.exists():
