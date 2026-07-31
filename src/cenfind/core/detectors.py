@@ -2,6 +2,9 @@ import contextlib
 import functools
 import logging
 import os
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 from pathlib import Path
 from typing import List
 
@@ -21,11 +24,7 @@ from cenfind.core.data import Field
 from cenfind.core.structures import Centriole, Nucleus
 from cenfind.core.visualisation import draw_foci, resize_image
 
-np.random.seed(1)
-tf.random.set_seed(2)
 tf.get_logger().setLevel(logging.ERROR)
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 logger = logging.getLogger(__name__)
 
