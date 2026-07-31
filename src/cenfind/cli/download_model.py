@@ -44,8 +44,8 @@ def _md5(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _download(url: str, destination: Path) -> None:
-    with urlopen(url) as response:
+def _download(url: str, destination: Path, timeout: float = 30) -> None:
+    with urlopen(url, timeout=timeout) as response:
         total = int(response.headers.get("Content-Length", 0))
         with open(destination, "wb") as out_file, tqdm(
             total=total, unit="B", unit_scale=True, desc="Downloading model"
@@ -56,6 +56,17 @@ def _download(url: str, destination: Path) -> None:
                     break
                 out_file.write(chunk)
                 pbar.update(len(chunk))
+
+
+def _extract_safely(archive: zipfile.ZipFile, destination: Path) -> None:
+    """Extracts archive into destination, rejecting members that would land
+    outside it (zip-slip: entries using `../` or an absolute path)."""
+    destination = destination.resolve()
+    for member in archive.namelist():
+        resolved = (destination / member).resolve()
+        if destination not in resolved.parents and resolved != destination:
+            raise ValueError(f"Refusing to extract unsafe path from archive: {member}")
+    archive.extractall(destination)
 
 
 def run(args):
@@ -81,7 +92,7 @@ def run(args):
         )
 
     with zipfile.ZipFile(archive_path) as zf:
-        zf.extractall(destination)
+        _extract_safely(zf, destination)
     archive_path.unlink()
 
     macosx_dir = destination / "__MACOSX"

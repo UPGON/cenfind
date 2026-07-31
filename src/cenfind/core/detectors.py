@@ -171,7 +171,10 @@ def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -
     data = field.data[channel, ...]
     resc = rescale_intensity(data, out_range="uint8")
 
-    h_elems = hessian_matrix(resc, sigma=sigma, order="rc")
+    # use_gaussian_derivatives pinned explicitly: newer scikit-image warns
+    # that its default will flip from False to True in a future release,
+    # which would silently change cilia-detection results.
+    h_elems = hessian_matrix(resc, sigma=sigma, order="rc", use_gaussian_derivatives=False)
     _, minima_ridges = hessian_matrix_eigvals(h_elems)
     threshold = threshold_otsu(minima_ridges)
 
