@@ -11,7 +11,11 @@ Specifically, it orchestrates the detection of centrioles, the detection of the 
 ```shell
 pip install cenfind
 ```
-2. You need to download it from https://figshare.com/articles/software/Cenfind_model_weights/21724421
+2. Download the model weights, either with the built-in helper:
+```shell
+cenfind download-model /path/to/model/
+```
+   or manually from https://figshare.com/articles/software/Cenfind_model_weights/21724421
 3. Collect all images in a project folder inside a projections folder (<project_name>/projection/).
 4. Run `score` with the path to the project, the path to the model, the index of the nuclei channel (usually 0 or 3),
    the channel to score:

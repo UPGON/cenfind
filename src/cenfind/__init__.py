@@ -8,6 +8,7 @@ commands = [
     "train",
     "analyse",
     "vignettes",
+    "download_model",
 ]
 
 COMMANDS = [importlib.import_module("cenfind.cli." + c) for c in commands]
