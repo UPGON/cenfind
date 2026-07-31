@@ -30,6 +30,24 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 logger = logging.getLogger(__name__)
 
 
+@functools.lru_cache(maxsize=None)
+def _load_foci_model(model_dir: str) -> SpotNet:
+    """
+    Loads (and caches) a SpotNet model from a directory.
+
+    Defined at module scope so the lru_cache persists across calls to
+    extract_foci: previously this was redefined inside extract_foci on every
+    call, which meant the model was reloaded from disk for every field/channel
+    instead of once per process.
+    """
+    path = Path(model_dir)
+    if not path.is_dir():
+        raise FileNotFoundError(f"{path} is not a directory")
+
+    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+        return SpotNet(None, name=path.name, basedir=str(path.parent))
+
+
 def extract_foci(field: Field, channel: int, foci_model_file: Path,
                  prob_threshold=0.5, min_distance=2, ) -> List[Centriole]:
     """
@@ -47,17 +65,10 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path,
         raise ValueError("Bad data shape: %s; Ensure that the image is CXY" % field.data.shape)
     data = field.data[channel, ...]
 
-    @functools.lru_cache(maxsize=None)
-    def get_model(model):
-        path = Path(model)
-        if not path.is_dir():
-            raise (FileNotFoundError(f"{path} is not a directory"))
-
-        return SpotNet(None, name=path.name, basedir=str(path.parent))
+    model = _load_foci_model(str(foci_model_file))
 
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         data = normalize_fast2d(data)
-        model = get_model(foci_model_file)
         _, points_preds = model.predict(
             data, prob_thresh=prob_threshold, min_distance=min_distance, verbose=False
         )
@@ -84,6 +95,19 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path,
     return foci
 
 
+@functools.lru_cache(maxsize=None)
+def _load_nuclei_model() -> StarDist2D:
+    """
+    Loads (and caches) the pretrained StarDist nuclei-segmentation model.
+
+    Cached at module scope for the same reason as _load_foci_model: without
+    it, every extract_nuclei(field, channel) call with no explicit model
+    (as in the score CLI loop) reloads the pretrained weights from disk.
+    """
+    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+        return StarDist2D.from_pretrained("2D_versatile_fluo")
+
+
 def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List[Nucleus]:
     """
     Extracts the nuclei from the field.
@@ -96,9 +120,7 @@ def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List
 
     """
     if model is None:
-        from stardist.models import StarDist2D
-        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            model = StarDist2D.from_pretrained("2D_versatile_fluo")
+        model = _load_nuclei_model()
 
     if field.data.ndim == 2:
         data = field.data
