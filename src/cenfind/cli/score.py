@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 from pathlib import Path
@@ -162,23 +161,3 @@ def run(args):
     if ciliated_container:
         ciliated_all = pd.concat(ciliated_container)
         ciliated_all.to_csv(dataset.statistics / "ciliated.tsv", sep="\t", index=True)
-
-
-if __name__ == "__main__":
-    import shutil
-    args = argparse.Namespace(dataset=Path('../../../data/dataset_test'),
-                              model=Path('../../../models/archives/master'),
-                              channel_nuclei=0,
-                              channel_centrioles=[1, 2, 3],
-                              channel_cilia=None,
-                              vicinity=50,
-                              cpu=False,
-                              )
-
-    for folder in ("logs", "predictions", "statistics", "vignettes", "visualisation"):
-        path = args.dataset / folder
-        print(f"Deleting {path}")
-        if path.exists():
-            shutil.rmtree(path)
-
-    run(args)
