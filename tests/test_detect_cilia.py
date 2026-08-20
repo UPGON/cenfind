@@ -1,11 +1,19 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from cenfind.core.data import Dataset
 from cenfind.core.detectors import extract_cilia
 
 ROOT_DIR = Path(__file__).parent.parent
+
+if not (ROOT_DIR / "data/cilia").exists():
+    pytest.skip(
+        "data/cilia fixture is not present (it is gitignored and not "
+        "distributed with the repo); skipping tests that depend on it",
+        allow_module_level=True,
+    )
 
 
 class TestDataCilia:

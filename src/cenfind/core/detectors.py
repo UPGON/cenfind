@@ -2,6 +2,9 @@ import contextlib
 import functools
 import logging
 import os
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 from pathlib import Path
 from typing import List
 
@@ -21,13 +24,27 @@ from cenfind.core.data import Field
 from cenfind.core.structures import Centriole, Nucleus
 from cenfind.core.visualisation import draw_foci, resize_image
 
-np.random.seed(1)
-tf.random.set_seed(2)
 tf.get_logger().setLevel(logging.ERROR)
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-
 logger = logging.getLogger(__name__)
+
+
+@functools.lru_cache(maxsize=None)
+def _load_foci_model(model_dir: str) -> SpotNet:
+    """
+    Loads (and caches) a SpotNet model from a directory.
+
+    Defined at module scope so the lru_cache persists across calls to
+    extract_foci: previously this was redefined inside extract_foci on every
+    call, which meant the model was reloaded from disk for every field/channel
+    instead of once per process.
+    """
+    path = Path(model_dir)
+    if not path.is_dir():
+        raise FileNotFoundError(f"{path} is not a directory")
+
+    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+        return SpotNet(None, name=path.name, basedir=str(path.parent))
 
 
 def extract_foci(field: Field, channel: int, foci_model_file: Path,
@@ -47,17 +64,10 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path,
         raise ValueError("Bad data shape: %s; Ensure that the image is CXY" % field.data.shape)
     data = field.data[channel, ...]
 
-    @functools.lru_cache(maxsize=None)
-    def get_model(model):
-        path = Path(model)
-        if not path.is_dir():
-            raise (FileNotFoundError(f"{path} is not a directory"))
-
-        return SpotNet(None, name=path.name, basedir=str(path.parent))
+    model = _load_foci_model(str(foci_model_file))
 
     with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
         data = normalize_fast2d(data)
-        model = get_model(foci_model_file)
         _, points_preds = model.predict(
             data, prob_thresh=prob_threshold, min_distance=min_distance, verbose=False
         )
@@ -84,6 +94,19 @@ def extract_foci(field: Field, channel: int, foci_model_file: Path,
     return foci
 
 
+@functools.lru_cache(maxsize=None)
+def _load_nuclei_model() -> StarDist2D:
+    """
+    Loads (and caches) the pretrained StarDist nuclei-segmentation model.
+
+    Cached at module scope for the same reason as _load_foci_model: without
+    it, every extract_nuclei(field, channel) call with no explicit model
+    (as in the score CLI loop) reloads the pretrained weights from disk.
+    """
+    with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
+        return StarDist2D.from_pretrained("2D_versatile_fluo")
+
+
 def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List[Nucleus]:
     """
     Extracts the nuclei from the field.
@@ -96,9 +119,7 @@ def extract_nuclei(field: Field, channel: int, model: StarDist2D = None) -> List
 
     """
     if model is None:
-        from stardist.models import StarDist2D
-        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            model = StarDist2D.from_pretrained("2D_versatile_fluo")
+        model = _load_nuclei_model()
 
     if field.data.ndim == 2:
         data = field.data
@@ -150,7 +171,10 @@ def extract_cilia(field: Field, channel, sigma=5.0, eccentricity=.9, area=200) -
     data = field.data[channel, ...]
     resc = rescale_intensity(data, out_range="uint8")
 
-    h_elems = hessian_matrix(resc, sigma=sigma, order="rc")
+    # use_gaussian_derivatives pinned explicitly: newer scikit-image warns
+    # that its default will flip from False to True in a future release,
+    # which would silently change cilia-detection results.
+    h_elems = hessian_matrix(resc, sigma=sigma, order="rc", use_gaussian_derivatives=False)
     _, minima_ridges = hessian_matrix_eigvals(h_elems)
     threshold = threshold_otsu(minima_ridges)
 

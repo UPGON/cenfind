@@ -5,6 +5,13 @@ from cenfind.core.data import Dataset, Field
 
 ROOT_DIR = Path(__file__).parent.parent
 
+if not (ROOT_DIR / "data/dataset_test").exists():
+    pytest.skip(
+        "data/dataset_test fixture is not present (it is gitignored and not "
+        "distributed with the repo); skipping tests that depend on it",
+        allow_module_level=True,
+    )
+
 
 class TestData:
     path_dataset = ROOT_DIR / "data/dataset_test"
