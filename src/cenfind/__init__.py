@@ -6,6 +6,7 @@ from argparse import ArgumentDefaultsHelpFormatter
 commands = [
     "score",
     "train",
+    "evaluate",
     "analyse",
     "vignettes",
     "download_model",
