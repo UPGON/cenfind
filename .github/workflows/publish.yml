@@ -53,5 +53,10 @@ jobs:
 
       - name: Build and publish with Poetry
         run: |
-          python -m poetry version $(git describe --tags --abbrev=0)
+          VERSION=$(python -m poetry version -s)
+          if curl -sf "https://pypi.org/pypi/cenfind/${VERSION}/json" > /dev/null; then
+            echo "cenfind ${VERSION} is already published on PyPI - nothing to do."
+            echo "To publish a new release, bump the version in pyproject.toml before merging to main."
+            exit 0
+          fi
           python -m poetry --build publish
