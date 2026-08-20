@@ -34,7 +34,7 @@ def register_parser(parent_subparsers):
     parser = parent_subparsers.add_parser(
         "train", help="Train a Spotnet model using the datasets"
     )
-    parser.add_argument("datasets", type=Path, nargs="+", help="Path to the dataset")
+    parser.add_argument("dataset", type=Path, help="Path to the dataset")
     parser.add_argument("channels", type=int, nargs="+", help="the channel numbers to train on, e.g., 1 2 3")
     parser.add_argument(
         "--model_path", type=Path, required=True, default=Path(".").resolve(), help="Path to the model fit"
